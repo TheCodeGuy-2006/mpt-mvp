@@ -3,9 +3,12 @@ import { kpis } from './src/calc.js'; // ensure script type=module or use inline
 
 async function loadProgrammes () {
   // 1. list files in /data
-  const listURL =
-    'https://api.github.com/repos/TheCodeGuy-2006/mpt-mvp/contents/data';
+  const listURL = 'https://api.github.com/repos/TheCodeGuy-2006/mpt-mvp/contents/data';
   const list = await fetch(listURL).then(r => r.json());
+if (!Array.isArray(list)) {
+  alert('Failed to fetch programme files. Check the API URL and repository permissions.');
+  return;
+}
 
   // 2. fetch each JSON file
   const rows = await Promise.all(
