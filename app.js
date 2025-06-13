@@ -1,4 +1,41 @@
-// ...existing code...
+
+import { kpis } from './src/calc.js';
+
+async function loadProgrammes() {
+  // 1. list files in /data
+  const listURL = './data/';
+  // For local dev, we list files manually (since no API)
+  const files = ['sample.json'];
+  // 2. fetch each JSON file
+  const rows = (await Promise.all(
+    files.map(item => fetch(listURL + item).then(r => r.json()))
+  )).flat();
+
+  // 3. Add KPIs to each row
+  rows.forEach(row => {
+    Object.assign(row, kpis(row.leads));
+  });
+
+  // 4. Initialise Tabulator
+  new Tabulator('#gridContainer', {
+    data: rows,
+    layout: 'fitColumns',
+    columns: [
+      { title: 'Programme', field: 'programme' },
+      { title: 'Leads', field: 'leads' },
+      { title: 'MQL', field: 'mql' },
+      { title: 'SQL', field: 'sql' },
+      { title: 'Opps', field: 'opps' },
+      { title: 'Pipeline', field: 'pipeline' }
+    ]
+  });
+}
+
+// Load grid when Programme Grid section is shown
+window.addEventListener('hashchange', () => {
+  if (location.hash === '#grid') loadProgrammes();
+});
+if (location.hash === '#grid') loadProgrammes();
 
 // Show the section whose ID matches the current hash
 function route() {
