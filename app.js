@@ -1,41 +1,73 @@
 
-import { kpis } from './src/calc.js';
+import { kpis } from './src/calc.js'; // ensure script type=module or use inline
 
-async function loadProgrammes() {
+async function loadProgrammes () {
   // 1. list files in /data
-  const listURL = './data/';
-  // For local dev, we list files manually (since no API)
-  const files = ['sample.json'];
+  const listURL =
+    'https://api.github.com/repos/<your-user>/mpt-mvp/contents/data';
+  const list = await fetch(listURL).then(r => r.json());
+
   // 2. fetch each JSON file
-  const rows = (await Promise.all(
-    files.map(item => fetch(listURL + item).then(r => r.json()))
-  )).flat();
+  const rows = await Promise.all(
+    list.map(item => fetch(item.download_url).then(r => r.json()))
+  );
 
-  // 3. Add KPIs to each row
-  rows.forEach(row => {
-    Object.assign(row, kpis(row.leads));
-  });
-
-  // 4. Initialise Tabulator
-  new Tabulator('#gridContainer', {
-    data: rows,
-    layout: 'fitColumns',
-    columns: [
-      { title: 'Programme', field: 'programme' },
-      { title: 'Leads', field: 'leads' },
-      { title: 'MQL', field: 'mql' },
-      { title: 'SQL', field: 'sql' },
-      { title: 'Opps', field: 'opps' },
-      { title: 'Pipeline', field: 'pipeline' }
-    ]
-  });
+  initGrid(rows);
 }
 
-// Load grid when Programme Grid section is shown
-window.addEventListener('hashchange', () => {
-  if (location.hash === '#grid') loadProgrammes();
-});
-if (location.hash === '#grid') loadProgrammes();
+function initGrid (rows) {
+  const table = new Tabulator('#gridContainer', {
+    data: rows,
+    reactiveData: true,
+    selectable: 1,
+    columns: [
+      { title: 'Program Type', field: 'programType', editor: 'input' },
+      { title: 'Forecasted Cost', field: 'forecastedCost', editor: 'number' },
+      {
+        title: 'Expected Leads',
+        field: 'expectedLeads',
+        editor: 'number',
+        cellEdited: cell => {
+          const r = cell.getRow();
+          Object.assign(r.getData(), kpis(cell.getValue()));
+          r.update(r.getData());
+          r.getData().__modified = true; // mark as dirty
+        }
+      },
+      { title: 'MQL', field: 'mqlForecast' },
+      { title: 'SQL', field: 'sqlForecast' },
+      { title: 'Opps', field: 'oppsForecast' },
+      { title: 'Pipeline', field: 'pipelineForecast' },
+      { title: 'Status', field: 'status',
+        editor: 'select', editorParams: { values: ['Planning','Shipped'] } },
+      { title: 'Region', field: 'region', editor: 'input' }
+    ]
+  });
+
+  // UI buttons
+  document.getElementById('addRow').onclick = () =>
+    table.addRow({
+      id: `program-${Date.now()}`,
+      status: 'Planning',
+      __modified: true
+    });
+
+  document.getElementById('delRow').onclick = () =>
+    table.getSelectedRows().forEach(r => r.delete());
+
+  document.getElementById('saveRows').onclick = () => {
+    table.getData()
+      .filter(r => r.__modified)
+      .forEach(r => {
+        delete r.__modified;
+        downloadJSON(`${r.id}.json`, r);
+      });
+    alert('JSON files downloaded – commit them in GitHub');
+  };
+}
+
+// run once the page loads
+if (location.hash === '#grid' || location.hash === '') loadProgrammes();
 
 // Show the section whose ID matches the current hash
 function route() {
