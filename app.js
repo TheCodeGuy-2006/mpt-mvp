@@ -72,6 +72,11 @@ function initGrid (rows) {
 // run once the page loads
 if (location.hash === '#grid' || location.hash === '') loadProgrammes();
 
+// Ensure grid and button handlers are set up every time user navigates to Programme Grid
+window.addEventListener('hashchange', () => {
+  if (location.hash === '#grid') loadProgrammes();
+});
+
 // Show the section whose ID matches the current hash
 function route() {
   const hash = location.hash || '#budget-setup';
