@@ -4,7 +4,7 @@ import { kpis } from './src/calc.js'; // ensure script type=module or use inline
 async function loadProgrammes () {
   // 1. list files in /data
   const listURL =
-    'https://api.github.com/repos/<your-user>/mpt-mvp/contents/data';
+    'https://api.github.com/repos/TheCodeGuy-2006/mpt-mvp/contents/data';
   const list = await fetch(listURL).then(r => r.json());
 
   // 2. fetch each JSON file
