@@ -1,3 +1,14 @@
+function downloadJSON(name, obj) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], {
+    type: 'application/json'
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 // Show the section whose ID matches the current hash
 function route() {
   const hash = location.hash || '#budget-setup';
