@@ -22,7 +22,7 @@ function initGrid (rows) {
   const table = new Tabulator('#gridContainer', {
     data: rows,
     reactiveData: true,
-    selectable: 1,
+    selectableRows: 1,
     columns: [
       { title: 'Program Type', field: 'programType', editor: 'input' },
       { title: 'Forecasted Cost', field: 'forecastedCost', editor: 'number' },
@@ -42,7 +42,7 @@ function initGrid (rows) {
       { title: 'Opps', field: 'oppsForecast' },
       { title: 'Pipeline', field: 'pipelineForecast' },
       { title: 'Status', field: 'status',
-        editor: 'select', editorParams: { values: ['Planning','Shipped'] } },
+        editor: 'list', editorParams: { values: ['Planning','Shipped'] } },
       { title: 'Region', field: 'region', editor: 'input' }
     ]
   });
