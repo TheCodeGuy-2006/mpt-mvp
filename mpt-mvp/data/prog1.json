@@ -1,0 +1,12 @@
+{
+  "id": "prog1",
+  "programType": "Webinar",
+  "forecastedCost": 10000,
+  "expectedLeads": 200,
+  "mqlForecast": 20,
+  "sqlForecast": 12,
+  "oppsForecast": 10,
+  "pipelineForecast": 500000,
+  "status": "Planning",
+  "region": "ANZ"
+}
