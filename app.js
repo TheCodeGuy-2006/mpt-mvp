@@ -59,13 +59,34 @@ function initGrid (rows) {
     table.getSelectedRows().forEach(r => r.delete());
 
   document.getElementById('saveRows').onclick = () => {
-    table.getData()
-      .filter(r => r.__modified)
-      .forEach(r => {
-        delete r.__modified;
-        downloadJSON(`${r.id}.json`, r);
+    const modified = table.getData().filter(r => r.__modified);
+    if (modified.length === 0) {
+      alert('No changes to save.');
+      return;
+    }
+    Promise.all(modified.map(r => {
+      const filename = `${r.id}.json`;
+      delete r.__modified;
+      return fetch('http://localhost:3000/save-programme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename,
+          content: r,
+          message: `Update ${filename} from web app`
+        })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (!result.success) throw new Error(result.error);
       });
-    alert('JSON files downloaded – commit them in GitHub');
+    }))
+    .then(() => {
+      alert('Saved to GitHub!');
+    })
+    .catch(err => {
+      alert('Failed to save: ' + err.message);
+    });
   };
 }
 
