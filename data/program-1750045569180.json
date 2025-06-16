@@ -1,0 +1,12 @@
+{
+  "id": "program-1750045569180",
+  "status": "Planning",
+  "programType": "asd",
+  "forecastedCost": 651,
+  "expectedLeads": 200,
+  "region": "asdfas",
+  "mql": 20,
+  "sql": 12,
+  "opps": 10,
+  "pipeline": 500000
+}
