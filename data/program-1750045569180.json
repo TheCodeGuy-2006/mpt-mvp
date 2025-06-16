@@ -5,8 +5,8 @@
   "forecastedCost": 651,
   "expectedLeads": 200,
   "region": "asdfas",
-  "mql": 20,
-  "sql": 12,
-  "opps": 10,
-  "pipeline": 500000
+  "mqlForecast": 20,
+  "sqlForecast": 12,
+  "oppsForecast": 10,
+  "pipelineForecast": 500000
 }
