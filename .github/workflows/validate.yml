@@ -1,0 +1,28 @@
+name: Validate and Lint
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci || npm install
+      - name: Prettier
+        run: npx prettier --check .
+      - name: ESLint
+        run: npx eslint .
+      - name: Jest
+        run: npx jest
+      - name: Validate Programmes (AJV)
+        run: |
+          npx ajv-cli validate -s schema/programme.schema.json -d 'data/*.json' --strict=false
+      - name: Budget Gate
+        run: node .github/workflows/budget-gate.js

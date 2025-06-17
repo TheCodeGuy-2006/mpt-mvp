@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "id", "campaignType", "strategicPillars", "revenuePlay", "fy", "quarter", "month", "region", "country", "owner", "description", "forecastedCost", "expectedLeads", "mqlForecast", "sqlForecast", "oppsForecast", "pipelineForecast", "status", "poRaised"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "campaignType": { "type": "string" },
+    "strategicPillars": { "type": "string" },
+    "revenuePlay": { "type": "string" },
+    "fy": { "type": "string" },
+    "quarter": { "type": "string" },
+    "month": { "type": "string" },
+    "region": { "type": "string" },
+    "country": { "type": "string" },
+    "owner": { "type": "string" },
+    "description": { "type": "string" },
+    "forecastedCost": { "type": "number" },
+    "expectedLeads": { "type": "number" },
+    "mqlForecast": { "type": "number" },
+    "sqlForecast": { "type": "number" },
+    "oppsForecast": { "type": "number" },
+    "pipelineForecast": { "type": "number" },
+    "status": { "type": "string" },
+    "poRaised": { "type": "string" },
+    "sfCampaignCode": { "type": "string" },
+    "issueLink": { "type": "string" },
+    "actualCost": { "type": "number" },
+    "actualLeads": { "type": "number" },
+    "actualMQLs": { "type": "number" }
+  }
+}
