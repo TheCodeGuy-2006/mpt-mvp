@@ -153,32 +153,32 @@ table#planTable td input[type="number"] {
   box-shadow: none !important;
 }
 #planningGrid {
-  min-width: 2400px;
+  min-width: 1200px;
   max-width: 99vw;
-  margin: 0 auto 48px auto;
+  margin: 0 auto 24px auto;
 }
 #view-planning {
-  max-width: 3200px;
-  padding: 128px 80px;
+  max-width: 1600px;
+  padding: 64px 40px;
 }
 #planningGrid .tabulator {
-  font-size: 3rem;
+  font-size: 1.5rem;
 }
 #planningGrid .tabulator-header,
 #planningGrid .tabulator-col {
-  font-size: 2.7rem;
-  padding: 48px 32px;
+  font-size: 1.35rem;
+  padding: 24px 16px;
 }
 #planningGrid .tabulator-cell {
-  font-size: 2.5rem;
-  padding: 48px 32px;
+  font-size: 1.25rem;
+  padding: 24px 16px;
 }
 #planningGrid .tabulator-row {
-  min-height: 112px;
+  min-height: 56px;
 }
 #planningGrid input, #planningGrid select {
-  font-size: 2.5rem;
-  padding: 28px 20px;
+  font-size: 1.25rem;
+  padding: 14px 10px;
 }
 @media (max-width: 700px) {
   section {

@@ -91,13 +91,39 @@ function initGrid (rows) {
 
 // PLANNING GRID
 function initPlanningGrid(rows) {
-  const campaignTypes = ['Webinar', 'Event', 'Digital', 'Content', 'Other'];
+  const programTypes = [
+    'In-Account Events (1:1)',
+    'Exec Engagement Programs',
+    'CxO Events (1:Few)',
+    'Localized Events',
+    'Localized Programs',
+    'Lunch & Learns and Workshops (1:Few)',
+    'Microsoft',
+    'Partners',
+    'Webinars',
+    '3P Sponsored Events',
+    'Flagship Events (Galaxy, Universe Recaps)',
+    'Targeted Paid Ads & Content Syndication',
+    'User Groups'
+  ];
+  const strategicPillars = [
+    'Account Growth and Product Adoption',
+    'Pipeline Acceleration & Executive Engagement',
+    'Brand Awareness & Top of Funnel Demand Generation',
+    'New Logo Acquisition'
+  ];
+  const names = [
+    'Shruti Narang',
+    'Beverly Leung',
+    'Giorgia Parham',
+    'Tomoko Tanaka'
+  ];
   const revenuePlays = ['New Business', 'Expansion', 'Retention'];
   const fyOptions = ['FY25', 'FY24', 'FY23'];
   const quarterOptions = ['Q1', 'Q2', 'Q3', 'Q4'];
   const monthOptions = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const regionOptions = ['ANZ', 'SAARC', 'EMEA', 'Americas'];
-  const statusOptions = ['Planning','Shipped'];
+  const statusOptions = ['Planning','On Track','Shipped','Cancelled'];
   const yesNo = ['Yes','No'];
 
   const table = new Tabulator('#planningGrid', {
@@ -106,12 +132,10 @@ function initPlanningGrid(rows) {
     selectableRows: 1,
     layout: 'fitColumns',
     columns: [
-      { title: 'Campaign Type', field: 'campaignType', editor: 'list', editorParams: { values: campaignTypes } },
-      { title: 'Strategic Pillar', field: 'strategicPillars', editor: 'input', editorParams: { elementAttributes: { placeholder: 'Comma separated' } } },
-      { title: 'Revenue Play', field: 'revenuePlay', editor: 'list', editorParams: { values: revenuePlays } },
-      { title: 'FY', field: 'fy', editor: 'list', editorParams: { values: fyOptions } },
+      { title: 'Program Type', field: 'programType', editor: 'list', editorParams: { values: programTypes } },
+      { title: 'Strategic Pillar', field: 'strategicPillars', editor: 'list', editorParams: { values: strategicPillars } },
+      { title: 'Name', field: 'owner', editor: 'list', editorParams: { values: names } },
       { title: 'Quarter', field: 'quarter', editor: 'list', editorParams: { values: quarterOptions } },
-      { title: 'Month', field: 'month', editor: 'list', editorParams: { values: monthOptions } },
       { title: 'Region', field: 'region', editor: 'list', editorParams: { values: regionOptions } },
       { title: 'Country', field: 'country', editor: 'input' },
       { title: 'Owner', field: 'owner', editor: 'input' },
@@ -128,9 +152,7 @@ function initPlanningGrid(rows) {
       { title: 'Opps', field: 'oppsForecast', editable: false },
       { title: 'Pipeline', field: 'pipelineForecast', editable: false },
       { title: 'Status', field: 'status', editor: 'list', editorParams: { values: statusOptions } },
-      { title: 'PO Raised', field: 'poRaised', editor: 'list', editorParams: { values: yesNo } },
-      { title: 'sfCampaignCode', field: 'sfCampaignCode', editor: 'input' },
-      { title: 'issueLink', field: 'issueLink', editor: 'input' },
+      { title: 'PO raised', field: 'poRaised', editor: 'list', editorParams: { values: yesNo } }
     ]
   });
   setupPlanningSave(table, rows);
