@@ -137,9 +137,6 @@ function initPlanningGrid(rows) {
       { title: 'Name', field: 'owner', editor: 'list', editorParams: { values: names } },
       { title: 'Quarter', field: 'quarter', editor: 'list', editorParams: { values: quarterOptions } },
       { title: 'Region', field: 'region', editor: 'list', editorParams: { values: regionOptions } },
-      { title: 'Country', field: 'country', editor: 'input' },
-      { title: 'Owner', field: 'owner', editor: 'input' },
-      { title: 'Description', field: 'description', editor: 'input' },
       { title: 'Forecasted Cost', field: 'forecastedCost', editor: 'number' },
       { title: 'Expected Leads', field: 'expectedLeads', editor: 'number', cellEdited: cell => {
         const r = cell.getRow();
