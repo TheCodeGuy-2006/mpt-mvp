@@ -1,8 +1,8 @@
 // Pure KPI helper
 export function kpis(leads = 0) {
-  const mql = Math.round(leads * 0.10);
+  const mql = Math.round(leads * 0.1);
   const sql = Math.round(leads * 0.06);
-  const opps = Math.round(sql * 0.80);
+  const opps = Math.round(sql * 0.8);
   const pipeline = opps * 50000;
   return { mql, sql, opps, pipeline };
 }
@@ -12,7 +12,7 @@ export function regionMetrics(rows, budgets) {
   // rows: array of programme objects
   // budgets: object { region: { assignedBudget } }
   const result = {};
-  rows.forEach(row => {
+  rows.forEach((row) => {
     const region = row.region || 'Unknown';
     if (!result[region]) result[region] = { plan: 0, forecast: 0, actuals: 0 };
     if (budgets[region]) result[region].plan = budgets[region].assignedBudget;
@@ -23,7 +23,7 @@ export function regionMetrics(rows, budgets) {
     }
   });
   // Calculate totals and variances
-  Object.keys(result).forEach(region => {
+  Object.keys(result).forEach((region) => {
     const r = result[region];
     r.forecast += r.actuals;
     r.varPlan = r.plan - r.forecast;

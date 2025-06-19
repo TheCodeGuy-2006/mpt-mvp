@@ -29,7 +29,9 @@ app.post('/save-programme', async (req, res) => {
   }
 
   // Prepare content (must be base64)
-  const base64Content = Buffer.from(JSON.stringify(content, null, 2)).toString('base64');
+  const base64Content = Buffer.from(
+    JSON.stringify(content, null, 2)
+  ).toString('base64');
 
   // Save to GitHub
   try {
@@ -48,4 +50,6 @@ app.post('/save-programme', async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log('Backend running on http://localhost:3000'));
+app.listen(3000, () =>
+  console.log('Backend running on http://localhost:3000')
+);
