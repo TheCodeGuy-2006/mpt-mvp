@@ -160,8 +160,95 @@ function initPlanningGrid(rows) {
       { title: 'PO raised', field: 'poRaised', editor: 'list', editorParams: { values: yesNo } }
     ]
   });
-  setupPlanningSave(table, rows);
-  setupPlanningDownload(table);
+
+  // Make gridButtons functional
+  const addBtn = document.getElementById('addRow');
+  if (addBtn) {
+    addBtn.onclick = () =>
+      table.addRow({
+        id: `program-${Date.now()}`,
+        status: 'Planning',
+        __modified: true,
+      });
+  }
+  const delBtn = document.getElementById('delRow');
+  if (delBtn) {
+    delBtn.onclick = () =>
+      table.getSelectedRows().forEach((r) => r.delete());
+  }
+  const saveBtn = document.getElementById('saveRows');
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      const modified = table.getData().filter((r) => r.__modified);
+      if (modified.length === 0) {
+        alert('No changes to save.');
+        return;
+      }
+      Promise.all(
+        modified.map((r) => {
+          const filename = `${r.id}.json`;
+          delete r.__modified;
+          return fetch('http://localhost:3000/save-programme', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename,
+              content: r,
+              message: `Update ${filename} from web app`,
+            }),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (!result.success) throw new Error(result.error);
+            });
+        })
+      )
+        .then(() => {
+          alert('Saved to GitHub!');
+        })
+        .catch((err) => {
+          alert('Failed to save: ' + err.message);
+        });
+    };
+  }
+
+  // FOOTER TOTALS
+  table.on('tableBuilt', () => {
+    updatePlanningFooter(table);
+  });
+  table.on('dataChanged', () => {
+    updatePlanningFooter(table);
+  });
+  table.on('rowAdded', (row) => {
+    updatePlanningFooter(table);
+  });
+  table.on('rowDeleted', (row) => {
+    updatePlanningFooter(table);
+  });
+  function updatePlanningFooter(table) {
+    const rows = table.getData();
+    const totalForecasted = rows.reduce((sum, row) => sum + (row.forecastedCost || 0), 0);
+    const totalExpectedLeads = rows.reduce((sum, row) => sum + (row.expectedLeads || 0), 0);
+    const totalMQL = rows.reduce((sum, row) => sum + (row.mqlForecast || 0), 0);
+    const totalSQL = rows.reduce((sum, row) => sum + (row.sqlForecast || 0), 0);
+    const totalOpps = rows.reduce((sum, row) => sum + (row.oppsForecast || 0), 0);
+    const totalPipeline = rows.reduce((sum, row) => sum + (row.pipelineForecast || 0), 0);
+    const totalsDiv = document.getElementById('planningTotals');
+    if (totalsDiv) {
+      totalsDiv.innerHTML = `
+        <table style="width:100%;margin-top:8px"><tr>
+          <td><b>Totals:</b></td>
+          <td><b>${totalForecasted.toFixed(2)}</b></td>
+          <td><b>${totalExpectedLeads}</b></td>
+          <td><b>${totalMQL}</b></td>
+          <td><b>${totalSQL}</b></td>
+          <td><b>${totalOpps}</b></td>
+          <td><b>${totalPipeline}</b></td>
+          <td></td>
+        </tr></table>
+      `;
+    }
+  }
 }
 
 // BUDGETS TABLE
