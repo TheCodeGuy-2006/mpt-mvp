@@ -22,7 +22,15 @@
     </a>
   </nav>
 
-  <section id="view-planning"><h2>Planning</h2><div id="planningGrid"></div></section>
+  <section id="view-planning">
+    <h2>Planning</h2>
+    <div id="planningGridButtons" style="display:flex;gap:12px;margin-bottom:18px;align-items:center;">
+      <button id="addPlanningRow">Add Row</button>
+      <button id="deletePlanningRow">Delete Row</button>
+      <button id="savePlanningRows">Save Changes</button>
+    </div>
+    <div id="planningGrid"></div>
+  </section>
   <section id="view-execution"><h2>Execution Tracking</h2><div id="executionGrid"></div></section>
   <section id="view-budgets"><h2>Budgets Dashboard</h2>
     <div id="budgetsTable"></div>
