@@ -1,4 +1,5 @@
-import { kpis } from './src/calc.js'; // ensure script type=module or use inline
+import { kpis } from './src/calc.js';
+import { regionMetrics } from './src/calc.js';
 
 async function loadProgrammes() {
   // 1. list files in /data
@@ -163,42 +164,6 @@ function initPlanningGrid(rows) {
   setupPlanningDownload(table);
 }
 
-// EXECUTION GRID
-function initExecutionGrid(rows) {
-  const statusOptions = ['Planning','Shipped'];
-  const yesNo = ['Yes','No'];
-  const table = new Tabulator('#executionGrid', {
-    data: rows,
-    reactiveData: true,
-    selectableRows: 1,
-    layout: 'fitColumns',
-    rowFormatter: function(row) {
-      // Visual indicator for shipped
-      if (row.getData().status === 'Shipped') {
-        row.getElement().style.background = '#e3f2fd';
-      } else {
-        row.getElement().style.background = '';
-      }
-    },
-    columns: [
-      { title: 'Campaign Type', field: 'campaignType' },
-      { title: 'Region', field: 'region' },
-      { title: 'Forecasted Cost', field: 'forecastedCost' },
-      { title: 'Actual Cost', field: 'actualCost', editor: 'number', cellEdited: cell => { cell.getRow().getData().__modified = true; } },
-      { title: 'Expected Leads', field: 'expectedLeads' },
-      { title: 'Actual Leads', field: 'actualLeads', editor: 'number', cellEdited: cell => { cell.getRow().getData().__modified = true; } },
-      { title: 'MQL', field: 'mqlForecast', editable: false },
-      { title: 'Actual MQLs', field: 'actualMQLs', editor: 'number', cellEdited: cell => { cell.getRow().getData().__modified = true; } },
-      { title: 'SQL', field: 'sqlForecast', editable: false },
-      { title: 'Opps', field: 'oppsForecast', editable: false },
-      { title: 'Pipeline', field: 'pipelineForecast', editable: false },
-      { title: 'Status', field: 'status', editor: 'list', editorParams: { values: statusOptions }, cellEdited: cell => { cell.getRow().getData().__modified = true; } },
-      { title: 'PO Raised', field: 'poRaised', editor: 'list', editorParams: { values: yesNo }, cellEdited: cell => { cell.getRow().getData().__modified = true; } },
-    ]
-  });
-  setupExecutionSave(table, rows);
-}
-
 // BUDGETS TABLE
 function initBudgetsTable(budgets) {
   const table = new Tabulator('#budgetsTable', {
@@ -306,55 +271,6 @@ async function loadBudgets() {
   return fetch('data/budgets.json').then(r => r.json());
 }
 
-// run once the page loads
-if (location.hash === '#grid' || location.hash === '') loadProgrammes();
-
-// Ensure grid and button handlers are set up every time user navigates to Programme Grid
-window.addEventListener('hashchange', () => {
-  if (location.hash === '#grid') loadProgrammes();
-});
-
-// Show the section whose ID matches the current hash
-function route() {
-  const hash = location.hash || '#budget-setup';
-  document.querySelectorAll('section').forEach(sec => {
-    const name = '#' + sec.id.replace('view-', '');
-    // Always show the budget setup section
-    if (sec.id === 'view-budget-setup') {
-      sec.style.display = 'block';
-    } else {
-      sec.style.display = (name === hash) ? 'block' : 'none';
-    }
-  });
-}
-
-window.addEventListener('hashchange', route);
-route(); // Initial call
-// Utility: Download JSON as file
-function downloadJSON(obj, filename) {
-  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-document.getElementById('savePlan').onclick = () => {
-  const rows = [...document.querySelectorAll('#planTable tbody tr')];
-  const budgets = {};
-  rows.forEach(row => {
-    const region = row.cells[0].innerText.trim();
-    const plan = Number(row.cells[1].querySelector('input').value || 0);
-    budgets[region] = { assignedBudget: plan };
-  });
-  downloadJSON(budgets, 'budgets.json');
-  alert('budgets.json downloaded – commit this file in GitHub');
-};
-
 // Save Changes for Planning Grid
 function setupPlanningSave(table, rows) {
   document.getElementById('saveRows').onclick = () => {
@@ -383,34 +299,12 @@ function setupPlanningDownload(table) {
     document.getElementById('view-planning').insertBefore(btn, document.getElementById('planningGrid'));
   }
   btn.onclick = () => {
-    const data = table.getData();
-    downloadJSON(data, 'planning-all.json');
-  };
-}
-
-// Save Changes for Execution Grid
-function setupExecutionSave(table, rows) {
-  // Add a Save button to the Execution view
-  let btn = document.getElementById('saveExecutionRows');
-  if (!btn) {
-    btn = document.createElement('button');
-    btn.id = 'saveExecutionRows';
-    btn.textContent = 'Save Changes';
-    btn.style.margin = '12px 0';
-    document.getElementById('view-execution').insertBefore(btn, document.getElementById('executionGrid'));
-  }
-  btn.onclick = () => {
-    const changed = table.getData().filter(r => r.__modified);
-    if (!changed.length) {
-      alert('No changes to save.');
+    if (!table || typeof table.getData !== 'function') {
+      alert('Planning table is not ready.');
       return;
     }
-    changed.forEach(row => {
-      const { id, ...data } = row;
-      downloadJSON(row, `data/${id || 'programme'}.json`);
-      row.__modified = false;
-    });
-    alert('Changed rows downloaded as JSON.');
+    const data = table.getData();
+    downloadJSON(data, 'planning-all.json');
   };
 }
 
@@ -450,24 +344,32 @@ function setupReportExport(table) {
 function showView(hash) {
   document.querySelectorAll('section').forEach(sec => sec.style.display = 'none');
   switch(hash) {
-    case '#planning':
-      document.getElementById('view-planning').style.display = 'block';
+    case '#planning': {
+      const el = document.getElementById('view-planning');
+      if (el) el.style.display = 'block';
       break;
-    case '#execution':
-      document.getElementById('view-execution').style.display = 'block';
+    }
+    case '#budgets': {
+      const el1 = document.getElementById('view-budgets');
+      const el2 = document.getElementById('view-budget-setup');
+      if (el1) el1.style.display = 'block';
+      if (el2) el2.style.display = 'block';
       break;
-    case '#budgets':
-      document.getElementById('view-budgets').style.display = 'block';
-      document.getElementById('view-budget-setup').style.display = 'block'; // Show budget plan table only in Budgets tab
+    }
+    case '#report': {
+      const el = document.getElementById('view-report');
+      if (el) el.style.display = 'block';
       break;
-    case '#report':
-      document.getElementById('view-report').style.display = 'block';
+    }
+    case '#github-sync': {
+      const el = document.getElementById('view-github-sync');
+      if (el) el.style.display = 'block';
       break;
-    case '#github-sync':
-      document.getElementById('view-github-sync').style.display = 'block';
-      break;
-    default:
-      document.getElementById('view-planning').style.display = 'block';
+    }
+    default: {
+      const el = document.getElementById('view-planning');
+      if (el) el.style.display = 'block';
+    }
   }
 }
 window.addEventListener('hashchange', () => showView(location.hash));
@@ -482,13 +384,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Convert budgets object to array for Tabulator
   const budgets = Object.entries(budgetsObj).map(([region, data]) => ({ region, ...data }));
   initPlanningGrid(rows);
-  initExecutionGrid(rows);
   initBudgetsTable(budgets);
   initReportGrid(rows);
   initGithubSync();
   setupPlanningSave(initPlanningGrid(rows), rows);
   setupBudgetsSave(initBudgetsTable(budgets));
-  setupExecutionSave(initExecutionGrid(rows), rows);
   setupReportExport(initReportGrid(rows));
   setupPlanningDownload(initPlanningGrid(rows));
 });

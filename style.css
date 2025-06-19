@@ -231,6 +231,11 @@ table#planTable td input[type='number'] {
   max-width: 300px;
 }
 
+.negative {
+  color: red;
+  font-weight: bold;
+}
+
 @media (max-width: 700px) {
   section {
     padding: 18px 4px;
