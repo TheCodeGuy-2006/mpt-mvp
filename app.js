@@ -152,6 +152,21 @@ function initPlanningGrid(rows) {
       { title: 'PO raised', field: 'poRaised', editor: 'list', editorParams: { values: yesNo } }
     ]
   });
+  // Wire up Add Row and Delete Row buttons for Planning grid
+  const addBtn = document.getElementById('addPlanningRow');
+  if (addBtn) {
+    addBtn.onclick = () =>
+      table.addRow({
+        id: `program-${Date.now()}`,
+        status: 'Planning',
+        __modified: true,
+      });
+  }
+  const delBtn = document.getElementById('deletePlanningRow');
+  if (delBtn) {
+    delBtn.onclick = () =>
+      table.getSelectedRows().forEach((r) => r.delete());
+  }
   setupPlanningSave(table, rows);
   setupPlanningDownload(table);
 }
@@ -350,7 +365,10 @@ document.getElementById('savePlan').onclick = () => {
 
 // Save Changes for Planning Grid
 function setupPlanningSave(table, rows) {
-  document.getElementById('saveRows').onclick = () => {
+  // Use the correct button ID from your HTML
+  const saveBtn = document.getElementById('savePlanningRows');
+  if (!saveBtn) return;
+  saveBtn.onclick = () => {
     const changed = table.getData().filter(r => r.__modified);
     if (!changed.length) {
       alert('No changes to save.');
