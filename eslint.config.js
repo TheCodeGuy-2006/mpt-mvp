@@ -20,7 +20,7 @@ export default [
     rules: {
       // Add custom rules here if needed
     },
-    plugins: [],
+    plugins: {}, // Fixed: plugins must be an object in flat config
     extends: ["eslint:recommended"],
   },
 ];
