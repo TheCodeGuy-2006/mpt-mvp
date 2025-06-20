@@ -721,4 +721,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   setupExecutionSave(initExecutionGrid(rows), rows);
   setupReportExport(initReportGrid(rows));
   setupPlanningDownload(initPlanningGrid(rows));
+
+  // Add handler for '+ Add Region' button in Annual Budget Plan
+  const addRegionBtn = document.getElementById("addRegionRow");
+  if (addRegionBtn) {
+    addRegionBtn.onclick = () => {
+      const tbody = document.querySelector("#planTable tbody");
+      const newRow = document.createElement("tr");
+      newRow.innerHTML = `
+        <td><input type="text" placeholder="Region name" /></td>
+        <td><input type="number" value="" /></td>
+      `;
+      tbody.appendChild(newRow);
+    };
+  }
 });

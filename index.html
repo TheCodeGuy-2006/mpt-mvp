@@ -77,16 +77,19 @@
         </thead>
         <tbody>
           <tr>
-            <td>ANZ</td>
+            <td><input type="text" value="ANZ" /></td>
             <td><input type="number" value="500000" /></td>
           </tr>
           <tr>
-            <td>SAARC</td>
+            <td><input type="text" value="SAARC" /></td>
             <td><input type="number" value="300000" /></td>
           </tr>
         </tbody>
       </table>
-      <button id="savePlan">Save Plan</button>
+      <div style="display: flex; gap: 12px; margin-top: 12px">
+        <button id="addRegionRow">+ Add Region</button>
+        <button id="savePlan">Save Plan</button>
+      </div>
     </section>
 
     <script type="module" src="app.js"></script>
