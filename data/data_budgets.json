@@ -1,0 +1,12 @@
+[
+  {
+    "region": "ANZ",
+    "assignedBudget": 500001,
+    "utilisation": "10000 / 500001"
+  },
+  {
+    "region": "SAARC",
+    "assignedBudget": 300000,
+    "utilisation": "15000 / 300000"
+  }
+]
