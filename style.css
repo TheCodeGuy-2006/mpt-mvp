@@ -1,7 +1,7 @@
 body {
   background: #f6faff;
   color: #1a237e;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
   margin: 0;
   min-height: 100vh;
 }
@@ -52,7 +52,8 @@ h2 {
   font-weight: 600;
   margin-top: 0;
 }
-#gridButtons button, #savePlan {
+#gridButtons button,
+#savePlan {
   background: #1976d2;
   color: #fff;
   border: none;
@@ -65,7 +66,8 @@ h2 {
   box-shadow: 0 1px 4px rgba(25, 118, 210, 0.08);
   transition: background 0.2s;
 }
-#gridButtons button:hover, #savePlan:hover {
+#gridButtons button:hover,
+#savePlan:hover {
   background: #1565c0;
 }
 #view-budget-setup {
@@ -90,7 +92,8 @@ table#planTable {
   overflow: hidden;
   box-shadow: 0 1px 6px rgba(25, 118, 210, 0.06);
 }
-table#planTable th, table#planTable td {
+table#planTable th,
+table#planTable td {
   border: none;
   padding: 22px 14px;
   text-align: left;
@@ -113,7 +116,7 @@ table#planTable td input[type="number"] {
 #gridContainer .tabulator {
   background: #f6faff;
   border-radius: 10px;
-  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.10);
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.1);
   border: 1.5px solid #90caf9;
   font-size: 1.13rem;
   margin: 0 auto 24px auto;
@@ -176,7 +179,8 @@ table#planTable td input[type="number"] {
 #planningGrid .tabulator-row {
   min-height: 36px;
 }
-#planningGrid input, #planningGrid select {
+#planningGrid input,
+#planningGrid select {
   font-size: 0.98rem;
   padding: 10px 6px;
 }

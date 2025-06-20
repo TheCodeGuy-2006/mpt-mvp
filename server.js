@@ -1,18 +1,18 @@
-const express = require('express');
-const axios = require('axios');
-const bodyParser = require('body-parser');
+const express = require("express");
+const axios = require("axios");
+const bodyParser = require("body-parser");
 
 const app = express();
 
-const cors = require('cors');
+const cors = require("cors");
 app.use(cors());
 app.use(bodyParser.json());
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // Set this in your environment
-const REPO_OWNER = 'TheCodeGuy-2006';
-const REPO_NAME = 'mpt-mvp';
+const REPO_OWNER = "TheCodeGuy-2006";
+const REPO_NAME = "mpt-mvp";
 
-app.post('/save-programme', async (req, res) => {
+app.post("/save-programme", async (req, res) => {
   const { filename, content, message } = req.body;
   const path = `data/${filename}`;
 
@@ -21,7 +21,7 @@ app.post('/save-programme', async (req, res) => {
   try {
     const { data } = await axios.get(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,
-      { headers: { Authorization: `token ${GITHUB_TOKEN}` } }
+      { headers: { Authorization: `token ${GITHUB_TOKEN}` } },
     );
     sha = data.sha;
   } catch (e) {
@@ -29,7 +29,9 @@ app.post('/save-programme', async (req, res) => {
   }
 
   // Prepare content (must be base64)
-  const base64Content = Buffer.from(JSON.stringify(content, null, 2)).toString('base64');
+  const base64Content = Buffer.from(JSON.stringify(content, null, 2)).toString(
+    "base64",
+  );
 
   // Save to GitHub
   try {
@@ -40,7 +42,7 @@ app.post('/save-programme', async (req, res) => {
         content: base64Content,
         sha: sha || undefined,
       },
-      { headers: { Authorization: `token ${GITHUB_TOKEN}` } }
+      { headers: { Authorization: `token ${GITHUB_TOKEN}` } },
     );
     res.json({ success: true });
   } catch (err) {
@@ -48,4 +50,4 @@ app.post('/save-programme', async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log('Backend running on http://localhost:3000'));
+app.listen(3000, () => console.log("Backend running on http://localhost:3000"));
