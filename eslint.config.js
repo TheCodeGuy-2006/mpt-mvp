@@ -11,16 +11,16 @@ export default [
         navigator: "readonly",
         alert: "readonly",
         fetch: "readonly",
-        Tabulator: "readonly"
-      }
+        Tabulator: "readonly",
+      },
     },
     linterOptions: {
-      reportUnusedDisableDirectives: true
+      reportUnusedDisableDirectives: true,
     },
     rules: {
       // Add custom rules here if needed
     },
     plugins: [],
-    extends: ["eslint:recommended"]
-  }
+    extends: ["eslint:recommended"],
+  },
 ];

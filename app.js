@@ -431,12 +431,12 @@ async function loadProgrammeData() {
     "prog1.json",
     "prog2.json",
     "program-1750045569180.json",
-    "data_program-1750391562323.json"
+    "data_program-1750391562323.json",
   ];
   // Filter out budgets.json and any non-program files if needed
-  const files = dataFiles.filter(f => f !== "budgets.json");
+  const files = dataFiles.filter((f) => f !== "budgets.json");
   const rows = await Promise.all(
-    files.map((f) => fetch(`data/${f}`).then((r) => r.json()))
+    files.map((f) => fetch(`data/${f}`).then((r) => r.json())),
   );
   // Always recalculate and fill in calculated fields for every row
   rows.forEach((row) => {
@@ -618,9 +618,15 @@ function setupBudgetsSave(table) {
                 import("./src/calc.js").then(({ regionMetrics }) => {
                   const budgetsObj = {};
                   data.forEach(
-                    (b) => (budgetsObj[b.region] = { assignedBudget: b.assignedBudget }),
+                    (b) =>
+                      (budgetsObj[b.region] = {
+                        assignedBudget: b.assignedBudget,
+                      }),
                   );
-                  const metrics = regionMetrics([prog1, prog2, prog3], budgetsObj);
+                  const metrics = regionMetrics(
+                    [prog1, prog2, prog3],
+                    budgetsObj,
+                  );
                   // Update utilisation in the object
                   data.forEach((row) => {
                     const region = row.region;
