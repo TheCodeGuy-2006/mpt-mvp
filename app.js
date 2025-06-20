@@ -433,6 +433,7 @@ async function loadProgrammeData() {
     "prog2.json",
     "program-1750045569180.json",
     "data_program-1750391562323.json",
+    "data_program-1750407243280.json",
   ];
   // Filter out budgets.json and any non-program files if needed
   const files = dataFiles.filter((f) => f !== "budgets.json");

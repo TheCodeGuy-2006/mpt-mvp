@@ -223,6 +223,30 @@ table#planTable td input[type="text"] {
 #addRegionRow:hover {
   background: #1565c0;
 }
+#planningGridButtons button {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.08);
+  transition: background 0.2s;
+}
+#planningGridButtons button:hover {
+  background: #1565c0;
+}
+#view-planning h2 {
+  font-size: 3.0rem;
+}
+#view-execution h2,
+#view-budgets h2,
+#view-report h2,
+#view-github-sync h2 {
+  font-size: 3.0rem;
+}
 @media (max-width: 700px) {
   section {
     padding: 18px 4px;
