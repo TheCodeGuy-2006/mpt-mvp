@@ -1,23 +1,25 @@
-import { kpis } from './src/calc.js'; // ensure script type=module or use inline
+import { kpis } from './src/calc.js';
+import { regionMetrics } from './src/calc.js';
 
-async function loadProgrammes () {
+async function loadProgrammes() {
   // 1. list files in /data
-  const listURL = 'https://api.github.com/repos/TheCodeGuy-2006/mpt-mvp/contents/data';
-  const list = await fetch(listURL).then(r => r.json());
-if (!Array.isArray(list)) {
-  alert('Failed to fetch programme files. Check the API URL and repository permissions.');
-  return;
-}
+  const listURL =
+    'https://api.github.com/repos/TheCodeGuy-2006/mpt-mvp/contents/data';
+  const list = await fetch(listURL).then((r) => r.json());
+  if (!Array.isArray(list)) {
+    alert('Failed to fetch programme files. Check the API URL and repository permissions.');
+    return;
+  }
 
   // 2. fetch each JSON file
   const rows = await Promise.all(
-    list.map(item => fetch(item.download_url).then(r => r.json()))
+    list.map((item) => fetch(item.download_url).then((r) => r.json()))
   );
 
   initGrid(rows);
 }
 
-function initGrid (rows) {
+function initGrid(rows) {
   const table = new Tabulator('#gridContainer', {
     data: rows,
     reactiveData: true,
@@ -29,21 +31,25 @@ function initGrid (rows) {
         title: 'Expected Leads',
         field: 'expectedLeads',
         editor: 'number',
-        cellEdited: cell => {
+        cellEdited: (cell) => {
           const r = cell.getRow();
           Object.assign(r.getData(), kpis(cell.getValue()));
           r.update(r.getData());
           r.getData().__modified = true; // mark as dirty
-        }
+        },
       },
       { title: 'MQL', field: 'mqlForecast' },
       { title: 'SQL', field: 'sqlForecast' },
       { title: 'Opps', field: 'oppsForecast' },
       { title: 'Pipeline', field: 'pipelineForecast' },
-      { title: 'Status', field: 'status',
-        editor: 'list', editorParams: { values: ['Planning','Shipped'] } },
-      { title: 'Region', field: 'region', editor: 'input' }
-    ]
+      {
+        title: 'Status',
+        field: 'status',
+        editor: 'list',
+        editorParams: { values: ['Planning', 'Shipped'] },
+      },
+      { title: 'Region', field: 'region', editor: 'input' },
+    ],
   });
 
   // UI buttons
@@ -51,41 +57,43 @@ function initGrid (rows) {
     table.addRow({
       id: `program-${Date.now()}`,
       status: 'Planning',
-      __modified: true
+      __modified: true,
     });
 
   document.getElementById('delRow').onclick = () =>
-    table.getSelectedRows().forEach(r => r.delete());
+    table.getSelectedRows().forEach((r) => r.delete());
 
   document.getElementById('saveRows').onclick = () => {
-    const modified = table.getData().filter(r => r.__modified);
+    const modified = table.getData().filter((r) => r.__modified);
     if (modified.length === 0) {
       alert('No changes to save.');
       return;
     }
-    Promise.all(modified.map(r => {
-      const filename = `${r.id}.json`;
-      delete r.__modified;
-      return fetch('http://localhost:3000/save-programme', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filename,
-          content: r,
-          message: `Update ${filename} from web app`
+    Promise.all(
+      modified.map((r) => {
+        const filename = `${r.id}.json`;
+        delete r.__modified;
+        return fetch('http://localhost:3000/save-programme', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename,
+            content: r,
+            message: `Update ${filename} from web app`,
+          }),
         })
+          .then((res) => res.json())
+          .then((result) => {
+            if (!result.success) throw new Error(result.error);
+          });
       })
-      .then(res => res.json())
-      .then(result => {
-        if (!result.success) throw new Error(result.error);
+    )
+      .then(() => {
+        alert('Saved to GitHub!');
+      })
+      .catch((err) => {
+        alert('Failed to save: ' + err.message);
       });
-    }))
-    .then(() => {
-      alert('Saved to GitHub!');
-    })
-    .catch(err => {
-      alert('Failed to save: ' + err.message);
-    });
   };
 }
 
@@ -152,44 +160,95 @@ function initPlanningGrid(rows) {
       { title: 'PO raised', field: 'poRaised', editor: 'list', editorParams: { values: yesNo } }
     ]
   });
-  setupPlanningSave(table, rows);
-  setupPlanningDownload(table);
-}
 
-// EXECUTION GRID
-function initExecutionGrid(rows) {
-  const statusOptions = ['Planning','Shipped'];
-  const yesNo = ['Yes','No'];
-  const table = new Tabulator('#executionGrid', {
-    data: rows,
-    reactiveData: true,
-    selectableRows: 1,
-    layout: 'fitColumns',
-    rowFormatter: function(row) {
-      // Visual indicator for shipped
-      if (row.getData().status === 'Shipped') {
-        row.getElement().style.background = '#e3f2fd';
-      } else {
-        row.getElement().style.background = '';
+  // Make gridButtons functional
+  const addBtn = document.getElementById('addRow');
+  if (addBtn) {
+    addBtn.onclick = () =>
+      table.addRow({
+        id: `program-${Date.now()}`,
+        status: 'Planning',
+        __modified: true,
+      });
+  }
+  const delBtn = document.getElementById('delRow');
+  if (delBtn) {
+    delBtn.onclick = () =>
+      table.getSelectedRows().forEach((r) => r.delete());
+  }
+  const saveBtn = document.getElementById('saveRows');
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      const modified = table.getData().filter((r) => r.__modified);
+      if (modified.length === 0) {
+        alert('No changes to save.');
+        return;
       }
-    },
-    columns: [
-      { title: 'Campaign Type', field: 'campaignType' },
-      { title: 'Region', field: 'region' },
-      { title: 'Forecasted Cost', field: 'forecastedCost' },
-      { title: 'Actual Cost', field: 'actualCost', editor: 'number', cellEdited: cell => { cell.getRow().getData().__modified = true; } },
-      { title: 'Expected Leads', field: 'expectedLeads' },
-      { title: 'Actual Leads', field: 'actualLeads', editor: 'number', cellEdited: cell => { cell.getRow().getData().__modified = true; } },
-      { title: 'MQL', field: 'mqlForecast', editable: false },
-      { title: 'Actual MQLs', field: 'actualMQLs', editor: 'number', cellEdited: cell => { cell.getRow().getData().__modified = true; } },
-      { title: 'SQL', field: 'sqlForecast', editable: false },
-      { title: 'Opps', field: 'oppsForecast', editable: false },
-      { title: 'Pipeline', field: 'pipelineForecast', editable: false },
-      { title: 'Status', field: 'status', editor: 'list', editorParams: { values: statusOptions }, cellEdited: cell => { cell.getRow().getData().__modified = true; } },
-      { title: 'PO Raised', field: 'poRaised', editor: 'list', editorParams: { values: yesNo }, cellEdited: cell => { cell.getRow().getData().__modified = true; } },
-    ]
+      Promise.all(
+        modified.map((r) => {
+          const filename = `${r.id}.json`;
+          delete r.__modified;
+          return fetch('http://localhost:3000/save-programme', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename,
+              content: r,
+              message: `Update ${filename} from web app`,
+            }),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (!result.success) throw new Error(result.error);
+            });
+        })
+      )
+        .then(() => {
+          alert('Saved to GitHub!');
+        })
+        .catch((err) => {
+          alert('Failed to save: ' + err.message);
+        });
+    };
+  }
+
+  // FOOTER TOTALS
+  table.on('tableBuilt', () => {
+    updatePlanningFooter(table);
   });
-  setupExecutionSave(table, rows);
+  table.on('dataChanged', () => {
+    updatePlanningFooter(table);
+  });
+  table.on('rowAdded', (row) => {
+    updatePlanningFooter(table);
+  });
+  table.on('rowDeleted', (row) => {
+    updatePlanningFooter(table);
+  });
+  function updatePlanningFooter(table) {
+    const rows = table.getData();
+    const totalForecasted = rows.reduce((sum, row) => sum + (row.forecastedCost || 0), 0);
+    const totalExpectedLeads = rows.reduce((sum, row) => sum + (row.expectedLeads || 0), 0);
+    const totalMQL = rows.reduce((sum, row) => sum + (row.mqlForecast || 0), 0);
+    const totalSQL = rows.reduce((sum, row) => sum + (row.sqlForecast || 0), 0);
+    const totalOpps = rows.reduce((sum, row) => sum + (row.oppsForecast || 0), 0);
+    const totalPipeline = rows.reduce((sum, row) => sum + (row.pipelineForecast || 0), 0);
+    const totalsDiv = document.getElementById('planningTotals');
+    if (totalsDiv) {
+      totalsDiv.innerHTML = `
+        <table style="width:100%;margin-top:8px"><tr>
+          <td><b>Totals:</b></td>
+          <td><b>${totalForecasted.toFixed(2)}</b></td>
+          <td><b>${totalExpectedLeads}</b></td>
+          <td><b>${totalMQL}</b></td>
+          <td><b>${totalSQL}</b></td>
+          <td><b>${totalOpps}</b></td>
+          <td><b>${totalPipeline}</b></td>
+          <td></td>
+        </tr></table>
+      `;
+    }
+  }
 }
 
 // BUDGETS TABLE
@@ -299,55 +358,6 @@ async function loadBudgets() {
   return fetch('data/budgets.json').then(r => r.json());
 }
 
-// run once the page loads
-if (location.hash === '#grid' || location.hash === '') loadProgrammes();
-
-// Ensure grid and button handlers are set up every time user navigates to Programme Grid
-window.addEventListener('hashchange', () => {
-  if (location.hash === '#grid') loadProgrammes();
-});
-
-// Show the section whose ID matches the current hash
-function route() {
-  const hash = location.hash || '#budget-setup';
-  document.querySelectorAll('section').forEach(sec => {
-    const name = '#' + sec.id.replace('view-', '');
-    // Always show the budget setup section
-    if (sec.id === 'view-budget-setup') {
-      sec.style.display = 'block';
-    } else {
-      sec.style.display = (name === hash) ? 'block' : 'none';
-    }
-  });
-}
-
-window.addEventListener('hashchange', route);
-route(); // Initial call
-// Utility: Download JSON as file
-function downloadJSON(obj, filename) {
-  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-document.getElementById('savePlan').onclick = () => {
-  const rows = [...document.querySelectorAll('#planTable tbody tr')];
-  const budgets = {};
-  rows.forEach(row => {
-    const region = row.cells[0].innerText.trim();
-    const plan = Number(row.cells[1].querySelector('input').value || 0);
-    budgets[region] = { assignedBudget: plan };
-  });
-  downloadJSON(budgets, 'budgets.json');
-  alert('budgets.json downloaded – commit this file in GitHub');
-};
-
 // Save Changes for Planning Grid
 function setupPlanningSave(table, rows) {
   document.getElementById('saveRows').onclick = () => {
@@ -376,34 +386,12 @@ function setupPlanningDownload(table) {
     document.getElementById('view-planning').insertBefore(btn, document.getElementById('planningGrid'));
   }
   btn.onclick = () => {
-    const data = table.getData();
-    downloadJSON(data, 'planning-all.json');
-  };
-}
-
-// Save Changes for Execution Grid
-function setupExecutionSave(table, rows) {
-  // Add a Save button to the Execution view
-  let btn = document.getElementById('saveExecutionRows');
-  if (!btn) {
-    btn = document.createElement('button');
-    btn.id = 'saveExecutionRows';
-    btn.textContent = 'Save Changes';
-    btn.style.margin = '12px 0';
-    document.getElementById('view-execution').insertBefore(btn, document.getElementById('executionGrid'));
-  }
-  btn.onclick = () => {
-    const changed = table.getData().filter(r => r.__modified);
-    if (!changed.length) {
-      alert('No changes to save.');
+    if (!table || typeof table.getData !== 'function') {
+      alert('Planning table is not ready.');
       return;
     }
-    changed.forEach(row => {
-      const { id, ...data } = row;
-      downloadJSON(row, `data/${id || 'programme'}.json`);
-      row.__modified = false;
-    });
-    alert('Changed rows downloaded as JSON.');
+    const data = table.getData();
+    downloadJSON(data, 'planning-all.json');
   };
 }
 
@@ -443,24 +431,32 @@ function setupReportExport(table) {
 function showView(hash) {
   document.querySelectorAll('section').forEach(sec => sec.style.display = 'none');
   switch(hash) {
-    case '#planning':
-      document.getElementById('view-planning').style.display = 'block';
+    case '#planning': {
+      const el = document.getElementById('view-planning');
+      if (el) el.style.display = 'block';
       break;
-    case '#execution':
-      document.getElementById('view-execution').style.display = 'block';
+    }
+    case '#budgets': {
+      const el1 = document.getElementById('view-budgets');
+      const el2 = document.getElementById('view-budget-setup');
+      if (el1) el1.style.display = 'block';
+      if (el2) el2.style.display = 'block';
       break;
-    case '#budgets':
-      document.getElementById('view-budgets').style.display = 'block';
-      document.getElementById('view-budget-setup').style.display = 'block'; // Show budget plan table only in Budgets tab
+    }
+    case '#report': {
+      const el = document.getElementById('view-report');
+      if (el) el.style.display = 'block';
       break;
-    case '#report':
-      document.getElementById('view-report').style.display = 'block';
+    }
+    case '#github-sync': {
+      const el = document.getElementById('view-github-sync');
+      if (el) el.style.display = 'block';
       break;
-    case '#github-sync':
-      document.getElementById('view-github-sync').style.display = 'block';
-      break;
-    default:
-      document.getElementById('view-planning').style.display = 'block';
+    }
+    default: {
+      const el = document.getElementById('view-planning');
+      if (el) el.style.display = 'block';
+    }
   }
 }
 window.addEventListener('hashchange', () => showView(location.hash));
@@ -475,13 +471,39 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Convert budgets object to array for Tabulator
   const budgets = Object.entries(budgetsObj).map(([region, data]) => ({ region, ...data }));
   initPlanningGrid(rows);
-  initExecutionGrid(rows);
   initBudgetsTable(budgets);
   initReportGrid(rows);
   initGithubSync();
   setupPlanningSave(initPlanningGrid(rows), rows);
   setupBudgetsSave(initBudgetsTable(budgets));
-  setupExecutionSave(initExecutionGrid(rows), rows);
   setupReportExport(initReportGrid(rows));
   setupPlanningDownload(initPlanningGrid(rows));
+});
+
+// Add row to Annual Budget Plan table
+window.addEventListener('DOMContentLoaded', () => {
+  const addBudgetRowBtn = document.getElementById('addBudgetRow');
+  if (addBudgetRowBtn) {
+    addBudgetRowBtn.onclick = () => {
+      const tbody = document.querySelector('#planTable tbody');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        // Region cell (editable, styled)
+        const tdRegion = document.createElement('td');
+        tdRegion.contentEditable = 'true';
+        tdRegion.className = 'modern-region-cell';
+        tdRegion.innerText = '';
+        // Budget cell (input, styled)
+        const tdBudget = document.createElement('td');
+        const inputBudget = document.createElement('input');
+        inputBudget.type = 'number';
+        inputBudget.placeholder = 'Budget';
+        inputBudget.className = 'modern-budget-input';
+        tdBudget.appendChild(inputBudget);
+        tr.appendChild(tdRegion);
+        tr.appendChild(tdBudget);
+        tbody.appendChild(tr);
+      }
+    };
+  }
 });

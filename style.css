@@ -5,6 +5,7 @@ body {
   margin: 0;
   min-height: 100vh;
 }
+
 nav {
   display: flex;
   justify-content: flex-end;
@@ -14,6 +15,7 @@ nav {
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
   position: relative;
 }
+
 nav a {
   color: #fff;
   text-decoration: none;
@@ -22,9 +24,11 @@ nav a {
   font-size: 1.08rem;
   transition: color 0.2s;
 }
+
 nav a:hover {
   color: #90caf9;
 }
+
 .github-logo {
   position: absolute;
   right: 24px;
@@ -36,9 +40,11 @@ nav a:hover {
   cursor: pointer;
   transition: fill 0.2s;
 }
+
 .github-logo:hover {
   fill: #90caf9;
 }
+
 section {
   padding: 32px 24px;
   background: #fff;
@@ -47,12 +53,15 @@ section {
   margin: 32px auto 0 auto;
   max-width: 900px;
 }
+
 h2 {
   color: #1976d2;
   font-weight: 600;
   margin-top: 0;
 }
-#gridButtons button, #savePlan {
+
+#gridButtons button,
+#savePlan {
   background: #1976d2;
   color: #fff;
   border: none;
@@ -65,18 +74,23 @@ h2 {
   box-shadow: 0 1px 4px rgba(25, 118, 210, 0.08);
   transition: background 0.2s;
 }
-#gridButtons button:hover, #savePlan:hover {
+
+#gridButtons button:hover,
+#savePlan:hover {
   background: #1565c0;
 }
+
 #view-budget-setup {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 #view-budget-setup button#savePlan {
   display: block;
   margin: 18px auto 0 auto;
 }
+
 table#planTable {
   width: 580px;
   margin-left: auto;
@@ -90,17 +104,21 @@ table#planTable {
   overflow: hidden;
   box-shadow: 0 1px 6px rgba(25, 118, 210, 0.06);
 }
-table#planTable th, table#planTable td {
+
+table#planTable th,
+table#planTable td {
   border: none;
   padding: 22px 14px;
   text-align: left;
 }
+
 table#planTable th {
   background: #1976d2;
   color: #fff;
   font-weight: 600;
 }
-table#planTable td input[type="number"] {
+
+table#planTable td input[type='number'] {
   width: 100%;
   padding: 6px 8px;
   border: 1px solid #90caf9;
@@ -109,77 +127,94 @@ table#planTable td input[type="number"] {
   color: #1a237e;
   font-size: 1rem;
 }
+
 /* Programme Grid Table Styling */
 #gridContainer .tabulator {
   background: #f6faff;
   border-radius: 10px;
-  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.10);
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.1);
   border: 1.5px solid #90caf9;
   font-size: 1.13rem;
   margin: 0 auto 24px auto;
   overflow: hidden;
 }
+
 #gridContainer .tabulator-header {
   background: #1976d2;
   color: #fff;
   font-weight: 600;
   border-bottom: 2px solid #90caf9;
 }
+
 #gridContainer .tabulator-col {
   background: #1976d2;
   color: #fff;
   font-weight: 500;
   border-right: 1px solid #90caf9;
 }
+
 #gridContainer .tabulator-row {
   background: #fff;
   border-bottom: 1px solid #e3eafc;
   transition: background 0.2s;
 }
+
 #gridContainer .tabulator-row.tabulator-selected {
   background: #e3f2fd;
 }
+
 #gridContainer .tabulator-row:hover {
   background: #e3f2fd;
 }
+
 #gridContainer .tabulator-cell {
   border-right: 1px solid #e3eafc;
   padding: 14px 10px;
 }
+
 #gridContainer .tabulator-footer {
   background: #f6faff !important;
   color: transparent !important;
   border-top: none !important;
   box-shadow: none !important;
 }
+
 #planningGrid {
   min-width: 1200px;
   max-width: 99vw;
   margin: 0 auto 24px auto;
 }
+
 #view-planning {
   max-width: 1600px;
   padding: 64px 40px;
 }
+
 #planningGrid .tabulator {
   font-size: 1.05rem;
 }
+
 #planningGrid .tabulator-header,
 #planningGrid .tabulator-col {
   font-size: 1rem;
   padding: 14px 8px;
 }
+
 #planningGrid .tabulator-cell {
   font-size: 0.98rem;
   padding: 14px 8px;
 }
+
 #planningGrid .tabulator-row {
   min-height: 36px;
 }
-#planningGrid input, #planningGrid select {
+
+#planningGrid input,
+#planningGrid select {
   font-size: 0.98rem;
   padding: 10px 6px;
 }
+
 /* Ensure full column titles are visible in Tabulator headers */
 #planningGrid .tabulator-col .tabulator-col-title {
   white-space: normal !important;
@@ -190,21 +225,114 @@ table#planTable td input[type="number"] {
   line-height: 1.3;
   padding: 0 4px;
 }
+
 #planningGrid .tabulator-col {
   min-width: 110px;
   max-width: 300px;
 }
+
+.negative {
+  color: red;
+  font-weight: bold;
+}
+
+#addBudgetRow {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: background 0.2s, color 0.2s;
+}
+
+#addBudgetRow:hover {
+  background: #1565c0;
+  color: #e3f2fd;
+}
+
+#planTable td[contenteditable="true"] {
+  background: #e3f2fd;
+  border-radius: 4px;
+  outline: none;
+  min-width: 90px;
+  padding: 6px 10px;
+  color: #1976d2;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+#planTable td[contenteditable="true"]:focus {
+  background: #bbdefb;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
+}
+
+#planTable input[type="number"] {
+  background: #f6faff;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: #1976d2;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+#planTable input[type="number"]:focus {
+  border: 1.5px solid #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
+}
+
+#planTable td.modern-region-cell {
+  background: #e3f2fd;
+  border-radius: 4px;
+  outline: none;
+  min-width: 90px;
+  padding: 6px 10px;
+  color: #1976d2;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+#planTable td.modern-region-cell:focus {
+  background: #bbdefb;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
+}
+
+#planTable input.modern-budget-input[type="number"] {
+  background: #f6faff;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: #1976d2;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+#planTable input.modern-budget-input[type="number"]:focus {
+  border: 1.5px solid #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
+}
+
 @media (max-width: 700px) {
   section {
     padding: 18px 4px;
     margin: 18px 0 0 0;
     max-width: 100vw;
   }
+
   nav {
     flex-direction: column;
     align-items: flex-end;
     padding: 12px 8px;
   }
+
   .github-logo {
     right: 8px;
   }
