@@ -479,3 +479,31 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupReportExport(initReportGrid(rows));
   setupPlanningDownload(initPlanningGrid(rows));
 });
+
+// Add row to Annual Budget Plan table
+window.addEventListener('DOMContentLoaded', () => {
+  const addBudgetRowBtn = document.getElementById('addBudgetRow');
+  if (addBudgetRowBtn) {
+    addBudgetRowBtn.onclick = () => {
+      const tbody = document.querySelector('#planTable tbody');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        // Region cell (editable, styled)
+        const tdRegion = document.createElement('td');
+        tdRegion.contentEditable = 'true';
+        tdRegion.className = 'modern-region-cell';
+        tdRegion.innerText = '';
+        // Budget cell (input, styled)
+        const tdBudget = document.createElement('td');
+        const inputBudget = document.createElement('input');
+        inputBudget.type = 'number';
+        inputBudget.placeholder = 'Budget';
+        inputBudget.className = 'modern-budget-input';
+        tdBudget.appendChild(inputBudget);
+        tr.appendChild(tdRegion);
+        tr.appendChild(tdBudget);
+        tbody.appendChild(tr);
+      }
+    };
+  }
+});

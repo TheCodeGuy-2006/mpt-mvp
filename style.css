@@ -236,6 +236,90 @@ table#planTable td input[type='number'] {
   font-weight: bold;
 }
 
+#addBudgetRow {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: background 0.2s, color 0.2s;
+}
+
+#addBudgetRow:hover {
+  background: #1565c0;
+  color: #e3f2fd;
+}
+
+#planTable td[contenteditable="true"] {
+  background: #e3f2fd;
+  border-radius: 4px;
+  outline: none;
+  min-width: 90px;
+  padding: 6px 10px;
+  color: #1976d2;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+#planTable td[contenteditable="true"]:focus {
+  background: #bbdefb;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
+}
+
+#planTable input[type="number"] {
+  background: #f6faff;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: #1976d2;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+#planTable input[type="number"]:focus {
+  border: 1.5px solid #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
+}
+
+#planTable td.modern-region-cell {
+  background: #e3f2fd;
+  border-radius: 4px;
+  outline: none;
+  min-width: 90px;
+  padding: 6px 10px;
+  color: #1976d2;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+#planTable td.modern-region-cell:focus {
+  background: #bbdefb;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
+}
+
+#planTable input.modern-budget-input[type="number"] {
+  background: #f6faff;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: #1976d2;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+#planTable input.modern-budget-input[type="number"]:focus {
+  border: 1.5px solid #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
+}
+
 @media (max-width: 700px) {
   section {
     padding: 18px 4px;
