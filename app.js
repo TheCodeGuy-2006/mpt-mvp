@@ -17,6 +17,13 @@ async function loadProgrammes() {
     list.map((item) => fetch(item.download_url).then((r) => r.json())),
   );
 
+  // Ensure all rows have calculated fields before rendering
+  rows.forEach((row) => {
+    if (typeof row.expectedLeads === "number") {
+      Object.assign(row, kpis(row.expectedLeads));
+    }
+  });
+
   initGrid(rows);
 }
 
@@ -57,19 +64,7 @@ function initGrid(rows) {
   document.getElementById("addRow").onclick = () =>
     table.addRow({
       id: `program-${Date.now()}`,
-      programType: "",
-      strategicPillars: "",
-      owner: "",
-      quarter: "",
-      region: "",
-      forecastedCost: 0,
-      expectedLeads: 0,
-      mqlForecast: 0,
-      sqlForecast: 0,
-      oppsForecast: 0,
-      pipelineForecast: 0,
       status: "Planning",
-      poRaised: "",
       __modified: true,
     });
 
@@ -232,19 +227,7 @@ function initPlanningGrid(rows) {
     addBtn.onclick = () =>
       table.addRow({
         id: `program-${Date.now()}`,
-        programType: "",
-        strategicPillars: "",
-        owner: "",
-        quarter: "",
-        region: "",
-        forecastedCost: 0,
-        expectedLeads: 0,
-        mqlForecast: 0,
-        sqlForecast: 0,
-        oppsForecast: 0,
-        pipelineForecast: 0,
         status: "Planning",
-        poRaised: "",
         __modified: true,
       });
   }
@@ -515,6 +498,26 @@ function setupPlanningSave(table, rows) {
   const saveBtn = document.getElementById("savePlanningRows");
   if (!saveBtn) return;
   saveBtn.onclick = () => {
+    // Recalculate KPIs for all rows before saving
+    const allRows = table.getData();
+    allRows.forEach((row) => {
+      if (typeof row.expectedLeads === "number") {
+        const kpiVals = kpis(row.expectedLeads);
+        let changed = false;
+        [
+          "mqlForecast",
+          "sqlForecast",
+          "oppsForecast",
+          "pipelineForecast",
+        ].forEach((field) => {
+          if (row[field] !== kpiVals[field]) {
+            row[field] = kpiVals[field];
+            changed = true;
+          }
+        });
+        if (changed) row.__modified = true;
+      }
+    });
     const changed = table.getData().filter((r) => r.__modified);
     if (!changed.length) {
       alert("No changes to save.");
@@ -589,8 +592,44 @@ function setupBudgetsSave(table) {
         notes: row.notes,
       };
     });
-    downloadJSON(obj, "data/budgets.json");
-    alert("Budgets downloaded as JSON.");
+    // Recalculate utilisation before saving
+    fetch("data/prog1.json")
+      .then((r) => r.json())
+      .then((prog1) => {
+        fetch("data/prog2.json")
+          .then((r) => r.json())
+          .then((prog2) => {
+            fetch("data/program-1750045569180.json")
+              .then((r) => r.json())
+              .then((prog3) => {
+                import("./src/calc.js").then(({ regionMetrics }) => {
+                  const budgetsObj = {};
+                  data.forEach(
+                    (b) => (budgetsObj[b.region] = { assignedBudget: b.assignedBudget }),
+                  );
+                  const metrics = regionMetrics([prog1, prog2, prog3], budgetsObj);
+                  // Update utilisation in the object
+                  data.forEach((row) => {
+                    const region = row.region;
+                    if (metrics[region]) {
+                      row.utilisation = `${metrics[region].forecast} / ${metrics[region].plan}`;
+                    }
+                  });
+                  // Save with updated utilisation
+                  downloadJSON(
+                    data.map((row) => ({
+                      region: row.region,
+                      assignedBudget: row.assignedBudget,
+                      notes: row.notes,
+                      utilisation: row.utilisation,
+                    })),
+                    "data/budgets.json",
+                  );
+                  alert("Budgets downloaded as JSON.");
+                });
+              });
+          });
+      });
   };
 }
 
