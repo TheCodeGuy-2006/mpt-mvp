@@ -372,6 +372,7 @@ function initBudgetsTable(budgets) {
         });
     });
   setupBudgetsSave(table);
+  return table;
 }
 
 // REPORT GRID
@@ -712,11 +713,11 @@ window.addEventListener("DOMContentLoaded", async () => {
   }));
   initPlanningGrid(rows);
   initExecutionGrid(rows);
-  initBudgetsTable(budgets);
+  const budgetsTable = initBudgetsTable(budgets);
   initReportGrid(rows);
   initGithubSync();
   setupPlanningSave(initPlanningGrid(rows), rows);
-  setupBudgetsSave(initBudgetsTable(budgets));
+  setupBudgetsSave(budgetsTable); // Use the returned table instance
   setupExecutionSave(initExecutionGrid(rows), rows);
   setupReportExport(initReportGrid(rows));
   setupPlanningDownload(initPlanningGrid(rows));
