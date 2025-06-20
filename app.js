@@ -424,17 +424,30 @@ function initGithubSync() {
   `;
 }
 
-// Load data from JSON files (static for GitHub Pages)
+// Utility: Dynamically load all JSON files in /data (except budgets)
 async function loadProgrammeData() {
-  // In a static site, fetch local JSON files
-  const files = [
-    "data/prog1.json",
-    "data/prog2.json",
-    "data/program-1750045569180.json",
+  // List all files in /data directory
+  const dataFiles = [
+    "prog1.json",
+    "prog2.json",
+    "program-1750045569180.json",
+    "data_program-1750391562323.json"
   ];
+  // Filter out budgets.json and any non-program files if needed
+  const files = dataFiles.filter(f => f !== "budgets.json");
   const rows = await Promise.all(
-    files.map((f) => fetch(f).then((r) => r.json())),
+    files.map((f) => fetch(`data/${f}`).then((r) => r.json()))
   );
+  // Always recalculate and fill in calculated fields for every row
+  rows.forEach((row) => {
+    if (typeof row.expectedLeads === "number") {
+      const kpiVals = kpis(row.expectedLeads);
+      row.mqlForecast = kpiVals.mql;
+      row.sqlForecast = kpiVals.sql;
+      row.oppsForecast = kpiVals.opps;
+      row.pipelineForecast = kpiVals.pipeline;
+    }
+  });
   return rows;
 }
 async function loadBudgets() {
