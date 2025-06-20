@@ -57,7 +57,19 @@ function initGrid(rows) {
   document.getElementById("addRow").onclick = () =>
     table.addRow({
       id: `program-${Date.now()}`,
+      programType: "",
+      strategicPillars: "",
+      owner: "",
+      quarter: "",
+      region: "",
+      forecastedCost: 0,
+      expectedLeads: 0,
+      mqlForecast: 0,
+      sqlForecast: 0,
+      oppsForecast: 0,
+      pipelineForecast: 0,
       status: "Planning",
+      poRaised: "",
       __modified: true,
     });
 
@@ -220,7 +232,19 @@ function initPlanningGrid(rows) {
     addBtn.onclick = () =>
       table.addRow({
         id: `program-${Date.now()}`,
+        programType: "",
+        strategicPillars: "",
+        owner: "",
+        quarter: "",
+        region: "",
+        forecastedCost: 0,
+        expectedLeads: 0,
+        mqlForecast: 0,
+        sqlForecast: 0,
+        oppsForecast: 0,
+        pipelineForecast: 0,
         status: "Planning",
+        poRaised: "",
         __modified: true,
       });
   }
@@ -406,12 +430,14 @@ function initReportGrid(rows) {
 // GITHUB SYNC PLACEHOLDER
 function initGithubSync() {
   document.getElementById("githubSync").innerHTML = `
-    <p>Configure your GitHub repo and branch for JSON sync. (Coming soon!)</p>
-    <label>Repo: <input type="text" id="repoName" placeholder="user/repo"></label><br>
-    <label>Branch: <input type="text" id="branchName" placeholder="main"></label><br>
-    <label>PAT: <input type="password" id="pat" placeholder="Personal Access Token"></label><br>
-    <button id="syncBtn">Sync Now</button>
-    <button id="zipExportBtn">Export ZIP</button>
+    <form id="githubSyncForm" onsubmit="return false;">
+      <p>Configure your GitHub repo and branch for JSON sync. (Coming soon!)</p>
+      <label>Repo: <input type="text" id="repoName" placeholder="user/repo" autocomplete="off"></label><br>
+      <label>Branch: <input type="text" id="branchName" placeholder="main" autocomplete="off"></label><br>
+      <label>PAT: <input type="password" id="pat" placeholder="Personal Access Token" autocomplete="current-password"></label><br>
+      <button id="syncBtn">Sync Now</button>
+      <button id="zipExportBtn">Export ZIP</button>
+    </form>
   `;
 }
 
