@@ -1,5 +1,8 @@
+import js from "@eslint/js";
+
 // ESLint configuration migrated from .eslintrc.json for ESLint v9+
 export default [
+  js.configs.recommended,
   {
     files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}", "!node_modules"],
     languageOptions: {
@@ -20,7 +23,6 @@ export default [
     rules: {
       // Add custom rules here if needed
     },
-    plugins: {}, // Fixed: plugins must be an object in flat config
-    extends: ["eslint:recommended"],
+    plugins: {}, // plugins must be an object in flat config
   },
 ];
