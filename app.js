@@ -704,24 +704,48 @@ window.addEventListener("DOMContentLoaded", () => showView(location.hash));
 // Example: Load and initialize all views on DOMContentLoaded
 window.addEventListener("DOMContentLoaded", async () => {
   showView(location.hash);
-  // Load real data
-  const rows = await loadProgrammeData();
-  const budgetsObj = await loadBudgets();
+  // Show loading indicator
+  const mainSection = document.querySelector("section#view-planning");
+  const loadingDiv = document.createElement("div");
+  loadingDiv.id = "loadingIndicator";
+  loadingDiv.textContent = "Loading...";
+  loadingDiv.style.fontSize = "2rem";
+  loadingDiv.style.textAlign = "center";
+  mainSection.prepend(loadingDiv);
+
+  // Load all data in parallel
+  let rows = [];
+  let budgetsObj = {};
+  try {
+    [rows, budgetsObj] = await Promise.all([
+      loadProgrammeData().catch(() => []),
+      loadBudgets().catch(() => ({})),
+    ]);
+  } catch (e) {
+    // fallback in case of unexpected error
+    rows = [];
+    budgetsObj = {};
+  }
+  // Remove loading indicator
+  loadingDiv.remove();
+
   // Convert budgets object to array for Tabulator
   const budgets = Object.entries(budgetsObj).map(([region, data]) => ({
     region,
     ...data,
   }));
-  initPlanningGrid(rows);
-  initExecutionGrid(rows);
+
+  // Initialize all grids/tables only once
+  const planningTable = initPlanningGrid(rows);
+  const executionTable = initExecutionGrid(rows);
   const budgetsTable = initBudgetsTable(budgets);
   initReportGrid(rows);
   initGithubSync();
-  setupPlanningSave(initPlanningGrid(rows), rows);
-  setupBudgetsSave(budgetsTable); // Use the returned table instance
-  setupExecutionSave(initExecutionGrid(rows), rows);
-  setupReportExport(initReportGrid(rows));
-  setupPlanningDownload(initPlanningGrid(rows));
+  setupPlanningSave(planningTable, rows);
+  setupBudgetsSave(budgetsTable);
+  setupExecutionSave(executionTable, rows);
+  setupReportExport(document.getElementById("reportGrid"));
+  setupPlanningDownload(planningTable);
 
   // Add handler for '+ Add Region' button in Annual Budget Plan
   const addRegionBtn = document.getElementById("addRegionRow");
