@@ -239,13 +239,13 @@ table#planTable td input[type="text"] {
   background: #1565c0;
 }
 #view-planning h2 {
-  font-size: 3.0rem;
+  font-size: 3rem;
 }
 #view-execution h2,
 #view-budgets h2,
 #view-report h2,
 #view-github-sync h2 {
-  font-size: 3.0rem;
+  font-size: 3rem;
 }
 @media (max-width: 700px) {
   section {

@@ -325,10 +325,7 @@ function initBudgetsTable(budgets) {
       {
         title: "Utilisation",
         field: "utilisation",
-        mutator: (value, data) => {
-          // Will be filled in below
-          return value;
-        },
+        mutator: (value, data) => value,
         formatter: (cell) => {
           const val = cell.getValue();
           return val !== undefined ? val : "";
@@ -336,41 +333,48 @@ function initBudgetsTable(budgets) {
       },
     ],
   });
-  // Calculate utilisation and alert if needed
-  fetch("data/prog1.json")
+  // Dynamically find all program files in /data (except budgets)
+  fetch("https://api.github.com/repos/TheCodeGuy-2006/mpt-mvp/contents/data")
     .then((r) => r.json())
-    .then((prog1) => {
-      fetch("data/prog2.json")
-        .then((r) => r.json())
-        .then((prog2) => {
-          fetch("data/program-1750045569180.json")
-            .then((r) => r.json())
-            .then((prog3) => {
-              const rows = [prog1, prog2, prog3];
-              import("./src/calc.js").then(({ regionMetrics }) => {
-                const budgetsObj = {};
-                budgets.forEach(
-                  (b) =>
-                    (budgetsObj[b.region] = {
-                      assignedBudget: b.assignedBudget,
-                    }),
-                );
-                const metrics = regionMetrics(rows, budgetsObj);
-                table.getRows().forEach((row) => {
-                  const region = row.getData().region;
-                  if (metrics[region]) {
-                    row.update({
-                      utilisation: `${metrics[region].forecast} / ${metrics[region].plan}`,
-                    });
-                    if (metrics[region].forecast > metrics[region].plan) {
-                      row.getElement().style.background = "#ffebee";
-                      row.getElement().style.color = "#b71c1c";
-                    }
-                  }
-                });
-              });
+    .then((list) => {
+      const programFiles = Array.isArray(list)
+        ? list
+            .map((item) => item.name)
+            .filter((name) => name.endsWith(".json") && !name.includes("budgets"))
+        : [];
+      return Promise.all(
+        programFiles.map(async (f) => {
+          try {
+            const r = await fetch(`data/${f}`);
+            if (!r.ok) return null;
+            return await r.json();
+          } catch {
+            return null;
+          }
+        }),
+      );
+    })
+    .then((programs) => {
+      const rows = programs.filter(Boolean);
+      import("./src/calc.js").then(({ regionMetrics }) => {
+        const budgetsObj = {};
+        budgets.forEach(
+          (b) => (budgetsObj[b.region] = { assignedBudget: b.assignedBudget }),
+        );
+        const metrics = regionMetrics(rows, budgetsObj);
+        table.getRows().forEach((row) => {
+          const region = row.getData().region;
+          if (metrics[region]) {
+            row.update({
+              utilisation: `${metrics[region].forecast} / ${metrics[region].plan}`,
             });
+            if (metrics[region].forecast > metrics[region].plan) {
+              row.getElement().style.background = "#ffebee";
+              row.getElement().style.color = "#b71c1c";
+            }
+          }
         });
+      });
     });
   setupBudgetsSave(table);
   return table;
@@ -428,7 +432,6 @@ function initGithubSync() {
 
 // Utility: Dynamically load all JSON files in /data (except budgets)
 async function loadProgrammeData() {
-  // Try to fetch the list of files in /data using the GitHub API (works for GitHub Pages and local dev with CORS)
   let fileList = [];
   try {
     const listURL =
@@ -449,11 +452,13 @@ async function loadProgrammeData() {
       "data_program-1750407243280.json",
     ].filter((name) => !name.includes("budgets"));
   }
-  // Fetch all present files in parallel
+  // Fetch all present files in parallel, handle missing files gracefully
   const rows = await Promise.all(
     fileList.map(async (f) => {
       try {
-        return await fetch(`data/${f}`).then((r) => r.json());
+        const r = await fetch(`data/${f}`);
+        if (!r.ok) return null; // skip missing files
+        return await r.json();
       } catch {
         return null;
       }
@@ -487,14 +492,16 @@ window.addEventListener("hashchange", () => {
 
 // Show the section whose ID matches the current hash
 function route() {
-  const hash = location.hash || "#budget-setup";
+  const hash = location.hash || "#planning";
   document.querySelectorAll("section").forEach((sec) => {
     const name = "#" + sec.id.replace("view-", "");
-    // Always show the budget setup section
-    if (sec.id === "view-budget-setup") {
+    // Show both Budgets Dashboard and Annual Budget Plan for Budgets tab
+    if (hash === "#budgets" && (sec.id === "view-budgets" || sec.id === "view-budget-setup")) {
+      sec.style.display = "block";
+    } else if (name === hash) {
       sec.style.display = "block";
     } else {
-      sec.style.display = name === hash ? "block" : "none";
+      sec.style.display = "none";
     }
   });
 }
@@ -520,9 +527,13 @@ document.getElementById("savePlan").onclick = () => {
   const rows = [...document.querySelectorAll("#planTable tbody tr")];
   const budgets = {};
   rows.forEach((row) => {
-    const region = row.cells[0].innerText.trim();
-    const plan = Number(row.cells[1].querySelector("input").value || 0);
-    budgets[region] = { assignedBudget: plan };
+    const regionInput = row.cells[0].querySelector("input");
+    const planInput = row.cells[1].querySelector("input");
+    const region = regionInput ? regionInput.value.trim() : row.cells[0].innerText.trim();
+    const plan = planInput ? Number(planInput.value || 0) : Number(row.cells[1].innerText || 0);
+    if (region) {
+      budgets[region] = { assignedBudget: plan };
+    }
   });
   downloadJSON(budgets, "budgets.json");
   alert("budgets.json downloaded – commit this file in GitHub");
@@ -614,64 +625,75 @@ function setupExecutionSave(table, rows) {
   };
 }
 
-// Save Plan for Budgets Table
+// Save Plan for Budgets Table (robust, dynamic program file list)
 function setupBudgetsSave(table) {
   const btn = document.getElementById("savePlan");
   if (!btn) return;
   btn.onclick = () => {
-    const data = table.getData();
-    // Convert array back to object by region
-    const obj = {};
-    data.forEach((row) => {
-      obj[row.region] = {
-        assignedBudget: row.assignedBudget,
-        notes: row.notes,
-      };
-    });
-    // Recalculate utilisation before saving
-    fetch("data/prog1.json")
-      .then((r) => r.json())
-      .then((prog1) => {
-        fetch("data/prog2.json")
-          .then((r) => r.json())
-          .then((prog2) => {
-            fetch("data/program-1750045569180.json")
-              .then((r) => r.json())
-              .then((prog3) => {
-                import("./src/calc.js").then(({ regionMetrics }) => {
-                  const budgetsObj = {};
-                  data.forEach(
-                    (b) =>
-                      (budgetsObj[b.region] = {
-                        assignedBudget: b.assignedBudget,
-                      }),
-                  );
-                  const metrics = regionMetrics(
-                    [prog1, prog2, prog3],
-                    budgetsObj,
-                  );
-                  // Update utilisation in the object
-                  data.forEach((row) => {
-                    const region = row.region;
-                    if (metrics[region]) {
-                      row.utilisation = `${metrics[region].forecast} / ${metrics[region].plan}`;
-                    }
-                  });
-                  // Save with updated utilisation
-                  downloadJSON(
-                    data.map((row) => ({
-                      region: row.region,
-                      assignedBudget: row.assignedBudget,
-                      notes: row.notes,
-                      utilisation: row.utilisation,
-                    })),
-                    "data/budgets.json",
-                  );
-                  alert("Budgets downloaded as JSON.");
-                });
-              });
-          });
+    // Commit any active edits before saving
+    if (table.getEditedCells().length > 0) {
+      table.getEditedCells().forEach(cell => cell.cancelEdit()); // commitEdit() is not in Tabulator, so blur/cancel
+    }
+    // Small delay to ensure edits are committed
+    setTimeout(() => {
+      const data = table.getData();
+      // Convert array back to object by region
+      const obj = {};
+      data.forEach((row) => {
+        obj[row.region] = {
+          assignedBudget: row.assignedBudget,
+          notes: row.notes,
+        };
       });
+      // Dynamically find all program files in /data (except budgets)
+      fetch("https://api.github.com/repos/TheCodeGuy-2006/mpt-mvp/contents/data")
+        .then((r) => r.json())
+        .then((list) => {
+          const programFiles = Array.isArray(list)
+            ? list
+                .map((item) => item.name)
+                .filter((name) => name.endsWith(".json") && !name.includes("budgets"))
+            : [];
+          return Promise.all(
+            programFiles.map(async (f) => {
+              try {
+                const r = await fetch(`data/${f}`);
+                if (!r.ok) return null;
+                return await r.json();
+              } catch {
+                return null;
+              }
+            }),
+          );
+        })
+        .then((programs) => {
+          const rows = programs.filter(Boolean);
+          import("./src/calc.js").then(({ regionMetrics }) => {
+            const budgetsObj = {};
+            data.forEach(
+              (b) => (budgetsObj[b.region] = { assignedBudget: b.assignedBudget }),
+            );
+            const metrics = regionMetrics(rows, budgetsObj);
+            data.forEach((row) => {
+              const region = row.region;
+              if (metrics[region]) {
+                row.utilisation = `${metrics[region].forecast} / ${metrics[region].plan}`;
+              }
+            });
+            // Save with updated utilisation
+            downloadJSON(
+              data.map((row) => ({
+                region: row.region,
+                assignedBudget: row.assignedBudget,
+                notes: row.notes,
+                utilisation: row.utilisation,
+              })),
+              "data/budgets.json",
+            );
+            alert("Budgets downloaded as JSON.");
+          });
+        });
+    }, 100); // 100ms delay to ensure edits are committed
   };
 }
 
@@ -684,6 +706,7 @@ function setupReportExport(table) {
     btn.id = "exportReportCSV";
     btn.textContent = "Export to CSV";
     btn.style.margin = "12px 0";
+    btn.style.margin = "12px 0";
     document
       .getElementById("view-report")
       .insertBefore(btn, document.getElementById("reportGrid"));
@@ -693,38 +716,9 @@ function setupReportExport(table) {
   };
 }
 
-// Hash router to show/hide views
-function showView(hash) {
-  document
-    .querySelectorAll("section")
-    .forEach((sec) => (sec.style.display = "none"));
-  switch (hash) {
-    case "#planning":
-      document.getElementById("view-planning").style.display = "block";
-      break;
-    case "#execution":
-      document.getElementById("view-execution").style.display = "block";
-      break;
-    case "#budgets":
-      document.getElementById("view-budgets").style.display = "block";
-      document.getElementById("view-budget-setup").style.display = "block"; // Show budget plan table only in Budgets tab
-      break;
-    case "#report":
-      document.getElementById("view-report").style.display = "block";
-      break;
-    case "#github-sync":
-      document.getElementById("view-github-sync").style.display = "block";
-      break;
-    default:
-      document.getElementById("view-planning").style.display = "block";
-  }
-}
-window.addEventListener("hashchange", () => showView(location.hash));
-window.addEventListener("DOMContentLoaded", () => showView(location.hash));
-
-// Example: Load and initialize all views on DOMContentLoaded
+// Restore the DOMContentLoaded handler to load data and initialize all grids/tables after the page loads, so all info and tables are visible again.
 window.addEventListener("DOMContentLoaded", async () => {
-  showView(location.hash);
+  route(); // Ensure correct tab is shown on load
   // Show loading indicator
   const mainSection = document.querySelector("section#view-planning");
   const loadingDiv = document.createElement("div");
@@ -732,7 +726,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   loadingDiv.textContent = "Loading...";
   loadingDiv.style.fontSize = "2rem";
   loadingDiv.style.textAlign = "center";
-  mainSection.prepend(loadingDiv);
+  mainSection && mainSection.prepend(loadingDiv);
 
   // Load all data in parallel
   let rows = [];
@@ -743,12 +737,10 @@ window.addEventListener("DOMContentLoaded", async () => {
       loadBudgets().catch(() => ({})),
     ]);
   } catch (e) {
-    // fallback in case of unexpected error
     rows = [];
     budgetsObj = {};
   }
-  // Remove loading indicator
-  loadingDiv.remove();
+  loadingDiv && loadingDiv.remove();
 
   // Convert budgets object to array for Tabulator
   const budgets = Object.entries(budgetsObj).map(([region, data]) => ({
