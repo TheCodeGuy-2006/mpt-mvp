@@ -340,7 +340,9 @@ function initBudgetsTable(budgets) {
       const programFiles = Array.isArray(list)
         ? list
             .map((item) => item.name)
-            .filter((name) => name.endsWith(".json") && !name.includes("budgets"))
+            .filter(
+              (name) => name.endsWith(".json") && !name.includes("budgets"),
+            )
         : [];
       return Promise.all(
         programFiles.map(async (f) => {
@@ -496,7 +498,10 @@ function route() {
   document.querySelectorAll("section").forEach((sec) => {
     const name = "#" + sec.id.replace("view-", "");
     // Show both Budgets Dashboard and Annual Budget Plan for Budgets tab
-    if (hash === "#budgets" && (sec.id === "view-budgets" || sec.id === "view-budget-setup")) {
+    if (
+      hash === "#budgets" &&
+      (sec.id === "view-budgets" || sec.id === "view-budget-setup")
+    ) {
       sec.style.display = "block";
     } else if (name === hash) {
       sec.style.display = "block";
@@ -533,8 +538,12 @@ window.addEventListener("DOMContentLoaded", () => {
       rows.forEach((row) => {
         const regionInput = row.cells[0].querySelector("input");
         const planInput = row.cells[1].querySelector("input");
-        const region = regionInput ? regionInput.value.trim() : row.cells[0].innerText.trim();
-        const plan = planInput ? Number(planInput.value || 0) : Number(row.cells[1].innerText || 0);
+        const region = regionInput
+          ? regionInput.value.trim()
+          : row.cells[0].innerText.trim();
+        const plan = planInput
+          ? Number(planInput.value || 0)
+          : Number(row.cells[1].innerText || 0);
         if (region) {
           budgets[region] = { assignedBudget: plan };
         }
@@ -553,8 +562,12 @@ window.addEventListener("DOMContentLoaded", () => {
       rows.forEach((row) => {
         const regionInput = row.cells[0].querySelector("input");
         const planInput = row.cells[1].querySelector("input");
-        const region = regionInput ? regionInput.value.trim() : row.cells[0].innerText.trim();
-        const plan = planInput ? Number(planInput.value || 0) : Number(row.cells[1].innerText || 0);
+        const region = regionInput
+          ? regionInput.value.trim()
+          : row.cells[0].innerText.trim();
+        const plan = planInput
+          ? Number(planInput.value || 0)
+          : Number(row.cells[1].innerText || 0);
         if (region) {
           budgets[region] = { assignedBudget: plan };
         }
@@ -667,7 +680,7 @@ function setupBudgetsSave(table) {
   btn.onclick = () => {
     // Commit any active edits before saving
     if (table.getEditedCells().length > 0) {
-      table.getEditedCells().forEach(cell => cell.cancelEdit()); // commitEdit() is not in Tabulator, so blur/cancel
+      table.getEditedCells().forEach((cell) => cell.cancelEdit()); // commitEdit() is not in Tabulator, so blur/cancel
     }
     // Small delay to ensure edits are committed
     setTimeout(() => {
@@ -681,13 +694,17 @@ function setupBudgetsSave(table) {
         };
       });
       // Dynamically find all program files in /data (except budgets)
-      fetch("https://api.github.com/repos/TheCodeGuy-2006/mpt-mvp/contents/data")
+      fetch(
+        "https://api.github.com/repos/TheCodeGuy-2006/mpt-mvp/contents/data",
+      )
         .then((r) => r.json())
         .then((list) => {
           const programFiles = Array.isArray(list)
             ? list
                 .map((item) => item.name)
-                .filter((name) => name.endsWith(".json") && !name.includes("budgets"))
+                .filter(
+                  (name) => name.endsWith(".json") && !name.includes("budgets"),
+                )
             : [];
           return Promise.all(
             programFiles.map(async (f) => {
@@ -706,7 +723,8 @@ function setupBudgetsSave(table) {
           import("./src/calc.js").then(({ regionMetrics }) => {
             const budgetsObj = {};
             data.forEach(
-              (b) => (budgetsObj[b.region] = { assignedBudget: b.assignedBudget }),
+              (b) =>
+                (budgetsObj[b.region] = { assignedBudget: b.assignedBudget }),
             );
             const metrics = regionMetrics(rows, budgetsObj);
             data.forEach((row) => {
@@ -760,7 +778,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     "#budgets",
     "#report",
     "#github-sync",
-    "#budget-setup"
+    "#budget-setup",
   ];
   if (!validTabs.includes(location.hash)) {
     location.hash = "#planning";

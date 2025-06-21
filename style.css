@@ -70,6 +70,30 @@ h2 {
 #savePlan:hover {
   background: #1565c0;
 }
+#saveAnnualBudget,
+#saveBudgetDashboard {
+  background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 28px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  margin: 0 8px;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s,
+    transform 0.1s;
+}
+#saveAnnualBudget:hover,
+#saveBudgetDashboard:hover {
+  background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.16);
+  transform: translateY(-2px) scale(1.03);
+}
 #view-budget-setup {
   display: flex;
   flex-direction: column;
