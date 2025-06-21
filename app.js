@@ -237,6 +237,7 @@ function initPlanningGrid(rows) {
   }
   setupPlanningSave(table, rows);
   setupPlanningDownload(table);
+  return table;
 }
 
 // EXECUTION GRID
@@ -427,21 +428,41 @@ function initGithubSync() {
 
 // Utility: Dynamically load all JSON files in /data (except budgets)
 async function loadProgrammeData() {
-  // List all files in /data directory
-  const dataFiles = [
-    "prog1.json",
-    "prog2.json",
-    "program-1750045569180.json",
-    "data_program-1750391562323.json",
-    "data_program-1750407243280.json",
-  ];
-  // Filter out budgets.json and any non-program files if needed
-  const files = dataFiles.filter((f) => f !== "budgets.json");
+  // Try to fetch the list of files in /data using the GitHub API (works for GitHub Pages and local dev with CORS)
+  let fileList = [];
+  try {
+    const listURL =
+      "https://api.github.com/repos/TheCodeGuy-2006/mpt-mvp/contents/data";
+    const list = await fetch(listURL).then((r) => r.json());
+    if (Array.isArray(list)) {
+      fileList = list
+        .map((item) => item.name)
+        .filter((name) => name.endsWith(".json") && !name.includes("budgets"));
+    }
+  } catch (e) {
+    // fallback: try to use a static list if API fails
+    fileList = [
+      "prog1.json",
+      "prog2.json",
+      "program-1750045569180.json",
+      "data_program-1750391562323.json",
+      "data_program-1750407243280.json",
+    ].filter((name) => !name.includes("budgets"));
+  }
+  // Fetch all present files in parallel
   const rows = await Promise.all(
-    files.map((f) => fetch(`data/${f}`).then((r) => r.json())),
+    fileList.map(async (f) => {
+      try {
+        return await fetch(`data/${f}`).then((r) => r.json());
+      } catch {
+        return null;
+      }
+    }),
   );
+  // Filter out failed/missing files
+  const validRows = rows.filter(Boolean);
   // Always recalculate and fill in calculated fields for every row
-  rows.forEach((row) => {
+  validRows.forEach((row) => {
     if (typeof row.expectedLeads === "number") {
       const kpiVals = kpis(row.expectedLeads);
       row.mqlForecast = kpiVals.mql;
@@ -450,7 +471,7 @@ async function loadProgrammeData() {
       row.pipelineForecast = kpiVals.pipeline;
     }
   });
-  return rows;
+  return validRows;
 }
 async function loadBudgets() {
   return fetch("data/budgets.json").then((r) => r.json());
