@@ -1,8 +1,11 @@
 {
   "ANZ": {
-    "assignedBudget": 500001
+    "assignedBudget": 500000
   },
   "SAARC": {
     "assignedBudget": 300000
+  },
+  "BANKAI": {
+    "assignedBudget": 100000
   }
 }

@@ -523,21 +523,56 @@ function downloadJSON(obj, filename) {
   URL.revokeObjectURL(url);
 }
 
-document.getElementById("savePlan").onclick = () => {
-  const rows = [...document.querySelectorAll("#planTable tbody tr")];
-  const budgets = {};
-  rows.forEach((row) => {
-    const regionInput = row.cells[0].querySelector("input");
-    const planInput = row.cells[1].querySelector("input");
-    const region = regionInput ? regionInput.value.trim() : row.cells[0].innerText.trim();
-    const plan = planInput ? Number(planInput.value || 0) : Number(row.cells[1].innerText || 0);
-    if (region) {
-      budgets[region] = { assignedBudget: plan };
-    }
-  });
-  downloadJSON(budgets, "budgets.json");
-  alert("budgets.json downloaded – commit this file in GitHub");
-};
+window.addEventListener("DOMContentLoaded", () => {
+  // Add handler for 'Save Plan' button in Annual Budget Plan
+  const savePlanBtn = document.getElementById("savePlan");
+  if (savePlanBtn) {
+    savePlanBtn.onclick = () => {
+      const rows = [...document.querySelectorAll("#planTable tbody tr")];
+      const budgets = {};
+      rows.forEach((row) => {
+        const regionInput = row.cells[0].querySelector("input");
+        const planInput = row.cells[1].querySelector("input");
+        const region = regionInput ? regionInput.value.trim() : row.cells[0].innerText.trim();
+        const plan = planInput ? Number(planInput.value || 0) : Number(row.cells[1].innerText || 0);
+        if (region) {
+          budgets[region] = { assignedBudget: plan };
+        }
+      });
+      downloadJSON(budgets, "budgets.json");
+      alert("budgets.json downloaded – commit this file in GitHub");
+    };
+  }
+
+  // Add handler for 'Save Annual Budget' button in Annual Budget Plan
+  const saveAnnualBtn = document.getElementById("saveAnnualBudget");
+  if (saveAnnualBtn) {
+    saveAnnualBtn.onclick = () => {
+      const rows = [...document.querySelectorAll("#planTable tbody tr")];
+      const budgets = {};
+      rows.forEach((row) => {
+        const regionInput = row.cells[0].querySelector("input");
+        const planInput = row.cells[1].querySelector("input");
+        const region = regionInput ? regionInput.value.trim() : row.cells[0].innerText.trim();
+        const plan = planInput ? Number(planInput.value || 0) : Number(row.cells[1].innerText || 0);
+        if (region) {
+          budgets[region] = { assignedBudget: plan };
+        }
+      });
+      downloadJSON(budgets, "budgets.json");
+      alert("budgets.json downloaded – commit this file in GitHub");
+    };
+  }
+
+  // Add handler for 'Save Budget Dashboard' button in Budgets Dashboard
+  const saveDashboardBtn = document.getElementById("saveBudgetDashboard");
+  if (saveDashboardBtn) {
+    saveDashboardBtn.onclick = () => {
+      // You can add the correct logic for the dashboard table here if needed
+      alert("Save Budget Dashboard clicked. Implement logic as needed.");
+    };
+  }
+});
 
 // Save Changes for Planning Grid
 function setupPlanningSave(table, rows) {
@@ -718,7 +753,19 @@ function setupReportExport(table) {
 
 // Restore the DOMContentLoaded handler to load data and initialize all grids/tables after the page loads, so all info and tables are visible again.
 window.addEventListener("DOMContentLoaded", async () => {
-  route(); // Ensure correct tab is shown on load
+  // Ensure hash is set to a valid tab on load
+  const validTabs = [
+    "#planning",
+    "#execution",
+    "#budgets",
+    "#report",
+    "#github-sync",
+    "#budget-setup"
+  ];
+  if (!validTabs.includes(location.hash)) {
+    location.hash = "#planning";
+  }
+
   // Show loading indicator
   const mainSection = document.querySelector("section#view-planning");
   const loadingDiv = document.createElement("div");
@@ -773,4 +820,25 @@ window.addEventListener("DOMContentLoaded", async () => {
       tbody.appendChild(newRow);
     };
   }
+
+  // Populate Annual Budget Plan table from budgets.json
+  try {
+    const planTableBody = document.querySelector("#planTable tbody");
+    if (planTableBody && budgets.length > 0) {
+      planTableBody.innerHTML = "";
+      budgets.forEach((row) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input type="text" value="${row.region}" /></td>
+          <td><input type="number" value="${row.assignedBudget ?? 0}" /></td>
+        `;
+        planTableBody.appendChild(tr);
+      });
+    }
+  } catch (e) {
+    // fallback: do nothing if error
+  }
+
+  // Ensure correct tab is shown after all tables are initialized
+  route();
 });
