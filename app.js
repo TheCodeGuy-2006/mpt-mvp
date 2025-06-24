@@ -117,41 +117,17 @@ function initPlanningGrid(rows) {
         },
         headerSort: false
       },
-      {
-        title: "Program Type",
-        field: "programType",
-        editor: "list",
-        editorParams: { values: programTypes },
-      },
-      {
-        title: "Strategic Pillar",
-        field: "strategicPillars",
-        editor: "list",
-        editorParams: { values: strategicPillars },
-      },
-      {
-        title: "Name",
-        field: "owner",
-        editor: "list",
-        editorParams: { values: names },
-      },
-      {
-        title: "Quarter",
-        field: "quarter",
-        editor: "list",
-        editorParams: { values: quarterOptions },
-      },
-      {
-        title: "Region",
-        field: "region",
-        editor: "list",
-        editorParams: { values: regionOptions },
-      },
-      { title: "Forecasted Cost", field: "forecastedCost", editor: "number" },
+      { title: "Program Type", field: "programType", editor: "list", editorParams: { values: programTypes }, width: 200 },
+      { title: "Strategic Pillar", field: "strategicPillars", editor: "list", editorParams: { values: strategicPillars }, width: 220 },
+      { title: "Name", field: "owner", editor: "list", editorParams: { values: names }, width: 140 },
+      { title: "Quarter", field: "quarter", editor: "list", editorParams: { values: quarterOptions }, width: 120 },
+      { title: "Region", field: "region", editor: "list", editorParams: { values: regionOptions }, width: 120 },
+      { title: "Forecasted Cost", field: "forecastedCost", editor: "number", width: 140 },
       {
         title: "Expected Leads",
         field: "expectedLeads",
         editor: "number",
+        width: 150,
         cellEdited: (cell) => {
           const r = cell.getRow();
           const kpiVals = kpis(cell.getValue());
@@ -164,16 +140,16 @@ function initPlanningGrid(rows) {
           r.getData().__modified = true;
         },
       },
-      { title: "MQL", field: "mqlForecast", editable: false },
-      { title: "SQL", field: "sqlForecast", editable: false },
-      { title: "Opps", field: "oppsForecast", editable: false },
-      { title: "Pipeline", field: "pipelineForecast", editable: false },
-      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions } },
-      { title: "PO raised", field: "poRaised", editor: "list", editorParams: { values: yesNo } },
+      { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
+      { title: "SQL", field: "sqlForecast", editable: false, width: 90 },
+      { title: "Opps", field: "oppsForecast", editable: false, width: 90 },
+      { title: "Pipeline", field: "pipelineForecast", editable: false, width: 120 },
+      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, width: 120 },
+      { title: "PO raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, width: 110 },
       { title: "Description", field: "description", editor: "input", width: 180 },
-      { title: "Campaign Name", field: "campaignName", editor: "input", width: 150 },
+      { title: "Campaign Name", field: "campaignName", editor: "input", width: 160 },
       { title: "Revenue Play", field: "revenuePlay", editor: "list", editorParams: { values: revenuePlays }, width: 140 },
-      { title: "Country", field: "country", editor: "list", editorParams: { values: ["Australia", "New Zealand", "India", "Bangladesh", "Pakistan", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Other"] }, width: 120 },
+      { title: "Country", field: "country", editor: "list", editorParams: { values: ["Australia", "New Zealand", "India", "Bangladesh", "Pakistan", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Other"] }, width: 130 },
       {
         title: "",
         field: "delete",

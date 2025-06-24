@@ -46,8 +46,8 @@ section {
   border-radius: 12px;
   box-shadow: 0 2px 16px rgba(25, 118, 210, 0.07);
   margin: 32px auto 0 auto;
-  max-width: 900px;
-  overflow: visible !important;
+  max-width: 1600px;
+  width: 95vw;
 }
 h2 {
   color: #1976d2;
@@ -304,6 +304,12 @@ table#planTable td input[type="text"] {
 }
 #planningGridButtons button:hover {
   background: #1565c0;
+}
+#view-planning {
+  width: 100vw;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 0 24px 0;
 }
 #view-planning h2 {
   font-size: 3rem;
