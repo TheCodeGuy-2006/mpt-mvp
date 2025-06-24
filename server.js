@@ -1,10 +1,11 @@
-const express = require("express");
-const axios = require("axios");
-const bodyParser = require("body-parser");
+import express from "express";
+import axios from "axios";
+import bodyParser from "body-parser";
+import cors from "cors";
+import { Buffer } from "buffer";
 
 const app = express();
 
-const cors = require("cors");
 app.use(cors());
 app.use(bodyParser.json());
 
