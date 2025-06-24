@@ -18,7 +18,11 @@
     "mql": 23,
     "sql": 14,
     "opps": 11,
-    "pipeline": 550000
+    "pipeline": 550000,
+    "description": "Yo this is a save check",
+    "campaignName": "Yo mama",
+    "revenuePlay": "New Business",
+    "country": "New Zealand"
   },
   {
     "id": "program-1750407243280",
@@ -78,16 +82,6 @@
     "__modified": true
   },
   {
-    "id": "program-1750735859408",
-    "status": "Planning",
-    "__modified": true
-  },
-  {
-    "id": "program-1750735859565",
-    "status": "Planning",
-    "__modified": true
-  },
-  {
     "id": "program-1750735859719",
     "status": "Planning",
     "__modified": true
@@ -99,16 +93,6 @@
   },
   {
     "id": "program-1750735859994",
-    "status": "Planning",
-    "__modified": true
-  },
-  {
-    "id": "program-1750735860172",
-    "status": "Planning",
-    "__modified": true
-  },
-  {
-    "id": "program-1750735860315",
     "status": "Planning",
     "__modified": true
   }

@@ -38,11 +38,16 @@
           gap: 12px;
           margin-bottom: 18px;
           align-items: center;
+          justify-content: space-between;
         "
       >
-        <button id="addPlanningRow">Add Row</button>
-        <button id="deletePlanningRow">Delete Row</button>
-        <button id="savePlanningRows">Save Changes</button>
+        <div style="display: flex; gap: 12px; align-items: center">
+          <button id="addPlanningRow">Add Row</button>
+          <button id="deletePlanningRow">Delete Row</button>
+          <button id="importCSVBtn">Import CSV</button>
+          <input type="file" id="csvFileInput" accept=".csv" style="display:none" />
+        </div>
+        <button id="savePlanningRows" class="save-large">Save Changes</button>
       </div>
       <div id="planningGrid"></div>
     </section>

@@ -99,11 +99,11 @@ function initPlanningGrid(rows) {
     selectableRows: 1,
     layout: "fitColumns",
     columns: [
+      // Select row button (circle)
       {
         title: "",
         field: "select",
         formatter: function(cell) {
-          // Show a circle, filled if selected
           const row = cell.getRow();
           const selected = row.getElement().classList.contains("row-selected");
           return `<span class="select-circle" style="display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid #888;background:${selected ? '#1976d2' : 'transparent'};cursor:pointer;"></span>`;
@@ -113,22 +113,42 @@ function initPlanningGrid(rows) {
         cellClick: function(e, cell) {
           const row = cell.getRow();
           row.getElement().classList.toggle("row-selected");
-          cell.getTable().redraw(true); // update circle fill
+          cell.getTable().redraw(true);
         },
         headerSort: false
       },
+      { title: "Campaign Name", field: "campaignName", editor: "input", width: 160 },
       { title: "Program Type", field: "programType", editor: "list", editorParams: { values: programTypes }, width: 200 },
       { title: "Strategic Pillar", field: "strategicPillars", editor: "list", editorParams: { values: strategicPillars }, width: 220 },
-      { title: "Name", field: "owner", editor: "list", editorParams: { values: names }, width: 140 },
+      { title: "Description", field: "description", editor: "input", width: 180,
+        cellMouseOver: function(e, cell) {
+          if (!cell.getElement().classList.contains('tabulator-editing')) {
+            let tooltip = document.createElement('div');
+            tooltip.className = 'desc-tooltip';
+            tooltip.innerText = cell.getValue();
+            tooltip.setAttribute('data-tooltip-for', cell.getRow().getPosition() + '-' + cell.getField());
+            document.body.appendChild(tooltip);
+            const rect = cell.getElement().getBoundingClientRect();
+            tooltip.style.left = (rect.left + window.scrollX + 10) + 'px';
+            tooltip.style.top = (rect.top + window.scrollY + 30) + 'px';
+          }
+        },
+        cellMouseOut: function(e, cell) {
+          const tooltips = document.querySelectorAll('.desc-tooltip');
+          tooltips.forEach(t => t.remove());
+        },
+        cellEditing: function(cell) {
+          const selector = '.desc-tooltip[data-tooltip-for="' + cell.getRow().getPosition() + '-' + cell.getField() + '"]';
+          const tooltips = document.querySelectorAll(selector);
+          tooltips.forEach(t => t.remove());
+        }
+      },
+      { title: "Owner", field: "owner", editor: "list", editorParams: { values: names }, width: 140 },
       { title: "Quarter", field: "quarter", editor: "list", editorParams: { values: quarterOptions }, width: 120 },
       { title: "Region", field: "region", editor: "list", editorParams: { values: regionOptions }, width: 120 },
+      { title: "Country", field: "country", editor: "list", editorParams: { values: ["Australia", "New Zealand", "India", "Bangladesh", "Pakistan", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Other"] }, width: 130 },
       { title: "Forecasted Cost", field: "forecastedCost", editor: "number", width: 140 },
-      {
-        title: "Expected Leads",
-        field: "expectedLeads",
-        editor: "number",
-        width: 150,
-        cellEdited: (cell) => {
+      { title: "Expected Leads", field: "expectedLeads", editor: "number", width: 150, cellEdited: (cell) => {
           const r = cell.getRow();
           const kpiVals = kpis(cell.getValue());
           r.update({
@@ -144,12 +164,10 @@ function initPlanningGrid(rows) {
       { title: "SQL", field: "sqlForecast", editable: false, width: 90 },
       { title: "Opps", field: "oppsForecast", editable: false, width: 90 },
       { title: "Pipeline", field: "pipelineForecast", editable: false, width: 120 },
+      { title: "Revenue Play", field: "revenuePlay", editor: "list", editorParams: { values: revenuePlays }, width: 140 },
       { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, width: 120 },
       { title: "PO raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, width: 110 },
-      { title: "Description", field: "description", editor: "input", width: 180 },
-      { title: "Campaign Name", field: "campaignName", editor: "input", width: 160 },
-      { title: "Revenue Play", field: "revenuePlay", editor: "list", editorParams: { values: revenuePlays }, width: 140 },
-      { title: "Country", field: "country", editor: "list", editorParams: { values: ["Australia", "New Zealand", "India", "Bangladesh", "Pakistan", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Other"] }, width: 130 },
+      // Bin icon (delete)
       {
         title: "",
         field: "delete",
@@ -687,4 +705,25 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
   // Always call route() after everything is ready
   setTimeout(route, 0);
+});
+
+// CSV Import functionality
+document.getElementById('importCSVBtn').addEventListener('click', () => {
+  document.getElementById('csvFileInput').click();
+});
+
+document.getElementById('csvFileInput').addEventListener('change', function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    const csv = event.target.result;
+    // Use Tabulator's built-in CSV parser
+    const rows = Tabulator.prototype.modules.download.parseCSV(csv);
+    // Optionally: map CSV headers to your table fields here if needed
+    if (planningTableInstance) {
+      planningTableInstance.setData(rows);
+    }
+  };
+  reader.readAsText(file);
 });
