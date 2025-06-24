@@ -6,7 +6,7 @@
     "programType": "In-Account Events (1:1)",
     "strategicPillars": "Account Growth and Product Adoption",
     "owner": "Beverly Leung",
-    "quarter": "Q1",
+    "quarter": "Q1 August",
     "region": "SAARC",
     "forecastedCost": 234,
     "expectedLeads": 234,
@@ -43,7 +43,7 @@
   },
   {
     "id": "program-1750045569180",
-    "programType": "asd",
+    "programType": "Lunch & Learns and Workshops (1:Few)",
     "strategicPillars": "Account Growth and Product Adoption",
     "owner": "Beverly Leung",
     "quarter": "Q1",
@@ -63,41 +63,53 @@
     "__modified": true
   },
   {
-    "id": "program-1750727737462",
+    "id": "program-1750730992239",
     "status": "Planning",
-    "__modified": true,
-    "programType": "In-Account Events (1:1)",
-    "strategicPillars": "Pipeline Acceleration & Executive Engagement",
-    "owner": "Giorgia Parham",
-    "quarter": "Q2",
-    "region": "ANZ",
-    "forecastedCost": 20000,
-    "expectedLeads": 2323,
-    "mqlForecast": 232,
-    "sqlForecast": 139,
-    "oppsForecast": 111,
-    "pipelineForecast": 5550000,
-    "poRaised": "Yes",
-    "mql": 232,
-    "sql": 139,
-    "opps": 111,
-    "pipeline": 5550000
+    "__modified": true
   },
   {
-    "id": "program-1750727912965",
-    "status": "Cancelled",
-    "__modified": true,
-    "programType": "Localized Programs",
-    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
-    "owner": "Shruti Narang",
-    "quarter": "Q2",
-    "region": "ANZ",
-    "forecastedCost": 100234,
-    "expectedLeads": 100,
-    "mqlForecast": 10,
-    "sqlForecast": 6,
-    "oppsForecast": 5,
-    "pipelineForecast": 250000,
-    "poRaised": "Yes"
+    "id": "program-1750735859090",
+    "status": "Planning",
+    "__modified": true
+  },
+  {
+    "id": "program-1750735859245",
+    "status": "Planning",
+    "__modified": true
+  },
+  {
+    "id": "program-1750735859408",
+    "status": "Planning",
+    "__modified": true
+  },
+  {
+    "id": "program-1750735859565",
+    "status": "Planning",
+    "__modified": true
+  },
+  {
+    "id": "program-1750735859719",
+    "status": "Planning",
+    "__modified": true
+  },
+  {
+    "id": "program-1750735859864",
+    "status": "Planning",
+    "__modified": true
+  },
+  {
+    "id": "program-1750735859994",
+    "status": "Planning",
+    "__modified": true
+  },
+  {
+    "id": "program-1750735860172",
+    "status": "Planning",
+    "__modified": true
+  },
+  {
+    "id": "program-1750735860315",
+    "status": "Planning",
+    "__modified": true
   }
 ]

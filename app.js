@@ -31,7 +31,20 @@ const names = [
 ];
 const revenuePlays = ["New Business", "Expansion", "Retention"];
 const fyOptions = ["FY25", "FY24", "FY23"];
-const quarterOptions = ["Q1", "Q2", "Q3", "Q4"];
+const quarterOptions = [
+  "Q1 July",
+  "Q1 August",
+  "Q1 September",
+  "Q2 October",
+  "Q2 November",
+  "Q2 December",
+  "Q3 January",
+  "Q3 February",
+  "Q3 March",
+  "Q4 April",
+  "Q4 May",
+  "Q4 June"
+];
 const monthOptions = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
@@ -155,18 +168,12 @@ function initPlanningGrid(rows) {
       { title: "SQL", field: "sqlForecast", editable: false },
       { title: "Opps", field: "oppsForecast", editable: false },
       { title: "Pipeline", field: "pipelineForecast", editable: false },
-      {
-        title: "Status",
-        field: "status",
-        editor: "list",
-        editorParams: { values: statusOptions },
-      },
-      {
-        title: "PO raised",
-        field: "poRaised",
-        editor: "list",
-        editorParams: { values: yesNo },
-      },
+      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions } },
+      { title: "PO raised", field: "poRaised", editor: "list", editorParams: { values: yesNo } },
+      { title: "Description", field: "description", editor: "input", width: 180 },
+      { title: "Campaign Name", field: "campaignName", editor: "input", width: 150 },
+      { title: "Revenue Play", field: "revenuePlay", editor: "list", editorParams: { values: revenuePlays }, width: 140 },
+      { title: "Country", field: "country", editor: "list", editorParams: { values: ["Australia", "New Zealand", "India", "Bangladesh", "Pakistan", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Other"] }, width: 120 },
       {
         title: "",
         field: "delete",
