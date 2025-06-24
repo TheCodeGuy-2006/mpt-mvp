@@ -118,8 +118,8 @@ function initPlanningGrid(rows) {
         headerSort: false
       },
       { title: "Campaign Name", field: "campaignName", editor: "input", width: 160 },
-      { title: "Program Type", field: "programType", editor: "list", editorParams: { values: programTypes }, width: 200, headerFilter: "select", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(programTypes.map(v => [v, v])) } } },
-      { title: "Strategic Pillar", field: "strategicPillars", editor: "list", editorParams: { values: strategicPillars }, width: 220, headerFilter: "select", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(strategicPillars.map(v => [v, v])) } } },
+      { title: "Program Type", field: "programType", editor: "list", editorParams: { values: programTypes }, width: 200, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(programTypes.map(v => [v, v])) } } },
+      { title: "Strategic Pillar", field: "strategicPillars", editor: "list", editorParams: { values: strategicPillars }, width: 220, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(strategicPillars.map(v => [v, v])) } } },
       { title: "Description", field: "description", editor: "input", width: 180,
         cellMouseOver: function(e, cell) {
           if (!cell.getElement().classList.contains('tabulator-editing')) {
@@ -143,11 +143,63 @@ function initPlanningGrid(rows) {
           tooltips.forEach(t => t.remove());
         }
       },
-      { title: "Owner", field: "owner", editor: "list", editorParams: { values: names }, width: 140, headerFilter: "select", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(names.map(v => [v, v])) } } },
-      { title: "Quarter", field: "quarter", editor: "list", editorParams: { values: quarterOptions }, width: 120, headerFilter: "select", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(quarterOptions.map(v => [v, v])) } } },
-      { title: "Region", field: "region", editor: "list", editorParams: { values: regionOptions }, width: 120, headerFilter: "select", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(regionOptions.map(v => [v, v])) } } },
-      { title: "Country", field: "country", editor: "list", editorParams: { values: ["Australia", "New Zealand", "India", "Bangladesh", "Pakistan", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Other"] }, width: 130, headerFilter: "select", headerFilterParams: { values: {"":"(Clear Filter)", "Australia":"Australia", "New Zealand":"New Zealand", "India":"India", "Bangladesh":"Bangladesh", "Pakistan":"Pakistan", "Sri Lanka":"Sri Lanka", "Nepal":"Nepal", "Bhutan":"Bhutan", "Maldives":"Maldives", "Other":"Other" } } },
-      { title: "Forecasted Cost", field: "forecastedCost", editor: "number", width: 140 },
+      { title: "Owner", field: "owner", editor: "list", editorParams: { values: names }, width: 140, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(names.map(v => [v, v])) } } },
+      { title: "Quarter", field: "quarter", editor: "list", editorParams: { values: quarterOptions }, width: 120, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(quarterOptions.map(v => [v, v])) } } },
+      { title: "Region", field: "region", editor: "list", editorParams: { values: regionOptions }, width: 120, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(regionOptions.map(v => [v, v])) } } },
+      { title: "Country", field: "country", editor: "list", editorParams: { values: ["Australia", "New Zealand", "India", "Bangladesh", "Pakistan", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Other"] }, width: 130, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", "Australia":"Australia", "New Zealand":"New Zealand", "India":"India", "Bangladesh":"Bangladesh", "Pakistan":"Pakistan", "Sri Lanka":"Sri Lanka", "Nepal":"Nepal", "Bhutan":"Bhutan", "Maldives":"Maldives", "Other":"Other" } } },
+      { title: "Forecasted Cost", field: "forecastedCost", editor: "number", width: 200,
+        headerFilter: function(cell, onRendered, success, cancel, editorParams){
+          var container = document.createElement("div");
+          container.style.display = "flex";
+          container.style.flexDirection = "column";
+          container.style.alignItems = "stretch";
+          var row1 = document.createElement("div");
+          row1.style.display = "flex";
+          row1.style.flexDirection = "row";
+          row1.style.alignItems = "center";
+          var min = document.createElement("input");
+          min.type = "number";
+          min.placeholder = "Min";
+          min.style.width = "60px";
+          min.style.marginRight = "4px";
+          var max = document.createElement("input");
+          max.type = "number";
+          max.placeholder = "Max";
+          max.style.width = "60px";
+          row1.appendChild(min);
+          row1.appendChild(document.createTextNode(" - "));
+          row1.appendChild(max);
+          var clearBtn = document.createElement("button");
+          clearBtn.textContent = "Clear";
+          clearBtn.style.marginTop = "4px";
+          clearBtn.style.padding = "2px 10px";
+          clearBtn.style.fontSize = "0.95em";
+          clearBtn.onclick = function(e) {
+            min.value = "";
+            max.value = "";
+            success({min: "", max: ""});
+          };
+          function updateFilter() {
+            success({min: min.value, max: max.value});
+          }
+          min.addEventListener('input', updateFilter);
+          min.addEventListener('change', updateFilter);
+          max.addEventListener('input', updateFilter);
+          max.addEventListener('change', updateFilter);
+          container.appendChild(row1);
+          container.appendChild(clearBtn);
+          return container;
+        },
+        headerFilterFunc: function(headerValue, rowValue){
+          let min = (headerValue && headerValue.min !== undefined && headerValue.min !== "") ? parseFloat(headerValue.min) : null;
+          let max = (headerValue && headerValue.max !== undefined && headerValue.max !== "") ? parseFloat(headerValue.max) : null;
+          let value = (rowValue !== undefined && rowValue !== null && rowValue !== "") ? parseFloat(rowValue) : null;
+          if (value === null || isNaN(value)) return false;
+          if (min !== null && value < min) return false;
+          if (max !== null && value > max) return false;
+          return true;
+        }
+      },
       { title: "Expected Leads", field: "expectedLeads", editor: "number", width: 150, cellEdited: (cell) => {
           const r = cell.getRow();
           const kpiVals = kpis(cell.getValue());
@@ -164,9 +216,9 @@ function initPlanningGrid(rows) {
       { title: "SQL", field: "sqlForecast", editable: false, width: 90 },
       { title: "Opps", field: "oppsForecast", editable: false, width: 90 },
       { title: "Pipeline", field: "pipelineForecast", editable: false, width: 120 },
-      { title: "Revenue Play", field: "revenuePlay", editor: "list", editorParams: { values: revenuePlays }, width: 140, headerFilter: "select", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(revenuePlays.map(v => [v, v])) } } },
-      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, width: 120, headerFilter: "select", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(statusOptions.map(v => [v, v])) } } },
-      { title: "PO raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, width: 110, headerFilter: "select", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(yesNo.map(v => [v, v])) } } },
+      { title: "Revenue Play", field: "revenuePlay", editor: "list", editorParams: { values: revenuePlays }, width: 140, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(revenuePlays.map(v => [v, v])) } } },
+      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, width: 120, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(statusOptions.map(v => [v, v])) } } },
+      { title: "PO raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, width: 110, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(yesNo.map(v => [v, v])) } } },
       // Bin icon (delete)
       {
         title: "",
