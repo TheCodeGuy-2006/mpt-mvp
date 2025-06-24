@@ -11,10 +11,10 @@
     "forecastedCost": 234,
     "expectedLeads": 234,
     "poRaised": "Yes",
-    "mql": 23,
-    "sql": 14,
-    "opps": 11,
-    "pipeline": 550000
+    "mqlForecast": 23,
+    "sqlForecast": 14,
+    "oppsForecast": 11,
+    "pipelineForecast": 550000
   },
   {
     "id": "program-1750407243280",
@@ -28,10 +28,10 @@
     "forecastedCost": 33330,
     "expectedLeads": 333,
     "poRaised": "Yes",
-    "mql": 33,
-    "sql": 20,
-    "opps": 16,
-    "pipeline": 800000
+    "mqlForecast": 33,
+    "sqlForecast": 20,
+    "oppsForecast": 16,
+    "pipelineForecast": 800000
   },
   {
     "id": "program-1750045569180",

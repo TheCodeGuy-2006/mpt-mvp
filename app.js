@@ -123,8 +123,13 @@ function initPlanningGrid(rows) {
         editor: "number",
         cellEdited: (cell) => {
           const r = cell.getRow();
-          Object.assign(r.getData(), kpis(cell.getValue()));
-          r.update(r.getData());
+          const kpiVals = kpis(cell.getValue());
+          r.update({
+            mqlForecast: kpiVals.mql,
+            sqlForecast: kpiVals.sql,
+            oppsForecast: kpiVals.opps,
+            pipelineForecast: kpiVals.pipeline,
+          });
           r.getData().__modified = true;
         },
       },
