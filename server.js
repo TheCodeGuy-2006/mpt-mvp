@@ -3,6 +3,8 @@ import axios from "axios";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { Buffer } from "buffer";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 
@@ -49,6 +51,18 @@ app.post("/save-programme", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.post("/save-planning", (req, res) => {
+  const planningData = req.body.content;
+  const filePath = path.join(process.cwd(), "data", "planning.json");
+  fs.writeFile(filePath, JSON.stringify(planningData, null, 2), (err) => {
+    if (err) {
+      console.error("Failed to write planning.json:", err);
+      return res.status(500).json({ success: false, error: err.message });
+    }
+    res.json({ success: true });
+  });
 });
 
 app.listen(3000, () => console.log("Backend running on http://localhost:3000"));

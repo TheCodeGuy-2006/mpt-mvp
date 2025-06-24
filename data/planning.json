@@ -14,7 +14,11 @@
     "mqlForecast": 23,
     "sqlForecast": 14,
     "oppsForecast": 11,
-    "pipelineForecast": 550000
+    "pipelineForecast": 550000,
+    "mql": 23,
+    "sql": 14,
+    "opps": 11,
+    "pipeline": 550000
   },
   {
     "id": "program-1750407243280",
@@ -31,18 +35,52 @@
     "mqlForecast": 33,
     "sqlForecast": 20,
     "oppsForecast": 16,
-    "pipelineForecast": 800000
+    "pipelineForecast": 800000,
+    "mql": 33,
+    "sql": 20,
+    "opps": 16,
+    "pipeline": 800000
   },
   {
     "id": "program-1750045569180",
     "programType": "asd",
     "strategicPillars": "Account Growth and Product Adoption",
     "owner": "Beverly Leung",
-    "quarter": "",
-    "region": "asdfas",
-    "forecastedCost": 651,
-    "expectedLeads": 200,
+    "quarter": "Q1",
+    "region": "SAARC",
+    "forecastedCost": 6510,
+    "expectedLeads": 2001,
     "status": "Planning",
-    "poRaised": "No"
+    "poRaised": "No",
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "mqlForecast": 200,
+    "sqlForecast": 120,
+    "oppsForecast": 96,
+    "pipelineForecast": 4800000,
+    "__modified": true
+  },
+  {
+    "id": "program-1750727737462",
+    "status": "Planning",
+    "__modified": true,
+    "programType": "In-Account Events (1:1)",
+    "strategicPillars": "Pipeline Acceleration & Executive Engagement",
+    "owner": "Giorgia Parham",
+    "quarter": "Q2",
+    "region": "ANZ",
+    "forecastedCost": 20000,
+    "expectedLeads": 2323,
+    "mqlForecast": 232,
+    "sqlForecast": 139,
+    "oppsForecast": 111,
+    "pipelineForecast": 5550000,
+    "poRaised": "Yes",
+    "mql": 232,
+    "sql": 139,
+    "opps": 111,
+    "pipeline": 5550000
   }
 ]

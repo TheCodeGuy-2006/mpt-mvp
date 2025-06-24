@@ -419,10 +419,24 @@ function setupPlanningSave(table, rows) {
         if (changed) row.__modified = true;
       }
     });
-    // Save all planning data to planning.json
+    // Save all planning data to planning.json via backend API
     const data = table.getData();
-    downloadJSON(data, "data/planning.json");
-    alert("Planning data downloaded as planning.json. Commit this file in GitHub.");
+    fetch("http://localhost:3000/save-planning", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: data }),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.success) {
+          alert("Planning data saved to backend!");
+        } else {
+          alert("Failed to save: " + (result.error || "Unknown error"));
+        }
+      })
+      .catch((err) => {
+        alert("Failed to save: " + err.message);
+      });
   };
 }
 
