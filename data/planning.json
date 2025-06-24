@@ -52,10 +52,10 @@
     "expectedLeads": 2001,
     "status": "Planning",
     "poRaised": "No",
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 200,
+    "sql": 120,
+    "opps": 96,
+    "pipeline": 4800000,
     "mqlForecast": 200,
     "sqlForecast": 120,
     "oppsForecast": 96,
@@ -82,5 +82,22 @@
     "sql": 139,
     "opps": 111,
     "pipeline": 5550000
+  },
+  {
+    "id": "program-1750727912965",
+    "status": "Cancelled",
+    "__modified": true,
+    "programType": "Localized Programs",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "owner": "Shruti Narang",
+    "quarter": "Q2",
+    "region": "ANZ",
+    "forecastedCost": 100234,
+    "expectedLeads": 100,
+    "mqlForecast": 10,
+    "sqlForecast": 6,
+    "oppsForecast": 5,
+    "pipelineForecast": 250000,
+    "poRaised": "Yes"
   }
 ]

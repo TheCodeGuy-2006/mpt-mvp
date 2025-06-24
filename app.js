@@ -87,6 +87,24 @@ function initPlanningGrid(rows) {
     layout: "fitColumns",
     columns: [
       {
+        title: "",
+        field: "select",
+        formatter: function(cell) {
+          // Show a circle, filled if selected
+          const row = cell.getRow();
+          const selected = row.getElement().classList.contains("row-selected");
+          return `<span class="select-circle" style="display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid #888;background:${selected ? '#1976d2' : 'transparent'};cursor:pointer;"></span>`;
+        },
+        width: 40,
+        hozAlign: "center",
+        cellClick: function(e, cell) {
+          const row = cell.getRow();
+          row.getElement().classList.toggle("row-selected");
+          cell.getTable().redraw(true); // update circle fill
+        },
+        headerSort: false
+      },
+      {
         title: "Program Type",
         field: "programType",
         editor: "list",
@@ -149,6 +167,19 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: yesNo },
       },
+      {
+        title: "",
+        field: "delete",
+        formatter: function() {
+          return '<button class="delete-row-btn" title="Delete"><span style="font-size:1.2em; color:#b71c1c;">🗑️</span></button>';
+        },
+        width: 50,
+        hozAlign: "center",
+        cellClick: function(e, cell) {
+          cell.getRow().delete();
+        },
+        headerSort: false
+      },
     ],
   });
   // Wire up Add Row and Delete Row buttons for Planning grid
@@ -167,9 +198,20 @@ function initPlanningGrid(rows) {
   const delBtn = document.getElementById("deletePlanningRow");
   console.log("deletePlanningRow button:", delBtn);
   if (delBtn) {
+    delBtn.textContent = "Delete Highlighted Rows";
     delBtn.onclick = () => {
       console.log("Delete Planning Row button clicked");
-      planningTableInstance.getSelectedRows().forEach((r) => r.delete());
+      const rows = planningTableInstance.getRows();
+      let deleted = 0;
+      rows.forEach((row) => {
+        if (row.getElement().classList.contains("row-selected")) {
+          row.delete();
+          deleted++;
+        }
+      });
+      if (deleted === 0) {
+        alert("No rows selected for deletion.");
+      }
     };
   }
   setupPlanningSave(planningTableInstance, rows);
