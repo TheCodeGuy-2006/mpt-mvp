@@ -248,7 +248,7 @@ function initPlanningGrid(rows) {
         }
       },
       { title: "Revenue Play", field: "revenuePlay", editor: "list", editorParams: { values: revenuePlays }, width: 140, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(revenuePlays.map(v => [v, v])) } } },
-      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, width: 120, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(statusOptions.map(v => [v, v])) } } },
+      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, cellEdited: (cell) => { cell.getRow().getData().__modified = true; } },
       { title: "PO raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, width: 110, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(yesNo.map(v => [v, v])) } } },
       // Bin icon (delete)
       {
@@ -333,8 +333,8 @@ function initExecutionGrid(rows) {
           <div style="font-size:0.98em;color:#1a237e;white-space:pre-line;">${data.description || ""}</div>
         `;
       } },
-      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, cellEdited: (cell) => { cell.getRow().getData().__modified = true; }, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(statusOptions.map(v => [v, v])) } } },
-      { title: "PO Raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, cellEdited: (cell) => { cell.getRow().getData().__modified = true; }, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(yesNo.map(v => [v, v])) } } },
+      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, cellEdited: (cell) => { cell.getRow().getData().__modified = true; } },
+      { title: "PO Raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, cellEdited: (cell) => { cell.getRow().getData().__modified = true; } },
       { title: "Forecasted Cost", field: "forecastedCost", editor: false, formatter: function(cell) {
         const v = cell.getValue();
         if (v === null || v === undefined || v === "") return "";
@@ -861,7 +861,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   // Initialize all grids/tables only once
   const planningTable = initPlanningGrid(rows);
   const executionTable = initExecutionGrid(rows);
-  window.executionTableInstance = executionTable;
   const budgetsTable = initBudgetsTable(budgets, rows); // pass rows to budgets table
   initReportGrid(rows);
   initGithubSync();
