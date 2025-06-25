@@ -21,7 +21,8 @@
     "mql": 8,
     "sql": 5,
     "opps": 4,
-    "pipeline": 200000
+    "pipeline": 200000,
+    "actualCost": 13000
   },
   {
     "campaignName": "Exec Roundtable",

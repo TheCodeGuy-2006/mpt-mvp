@@ -333,11 +333,22 @@ function initExecutionGrid(rows) {
           <div style="font-size:0.98em;color:#1a237e;white-space:pre-line;">${data.description || ""}</div>
         `;
       } },
-      { title: "Forecasted Cost", field: "forecastedCost" },
+      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, cellEdited: (cell) => { cell.getRow().getData().__modified = true; }, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(statusOptions.map(v => [v, v])) } } },
+      { title: "PO Raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, cellEdited: (cell) => { cell.getRow().getData().__modified = true; }, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(yesNo.map(v => [v, v])) } } },
+      { title: "Forecasted Cost", field: "forecastedCost", editor: false, formatter: function(cell) {
+        const v = cell.getValue();
+        if (v === null || v === undefined || v === "") return "";
+        return "$" + Number(v).toLocaleString();
+      } },
       {
         title: "Actual Cost",
         field: "actualCost",
         editor: "number",
+        formatter: function(cell) {
+          const v = cell.getValue();
+          if (v === null || v === undefined || v === "") return "";
+          return "$" + Number(v).toLocaleString();
+        },
         cellEdited: (cell) => {
           cell.getRow().getData().__modified = true;
         },
@@ -362,32 +373,15 @@ function initExecutionGrid(rows) {
       },
       { title: "SQL", field: "sqlForecast", editable: false },
       { title: "Opps", field: "oppsForecast", editable: false },
-      { title: "Pipeline", field: "pipelineForecast", editable: false },
-      {
-        title: "Status",
-        field: "status",
-        editor: "list",
-        editorParams: { values: statusOptions },
-        cellEdited: (cell) => {
-          cell.getRow().getData().__modified = true;
-        },
-        headerFilter: "list",
-        headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(statusOptions.map(v => [v, v])) } }
-      },
-      {
-        title: "PO Raised",
-        field: "poRaised",
-        editor: "list",
-        editorParams: { values: yesNo },
-        cellEdited: (cell) => {
-          cell.getRow().getData().__modified = true;
-        },
-        headerFilter: "list",
-        headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(yesNo.map(v => [v, v])) } }
-      },
+      { title: "Pipeline", field: "pipelineForecast", editable: false, formatter: function(cell) {
+        const v = cell.getValue();
+        if (v === null || v === undefined || v === "") return "";
+        return "$" + Number(v).toLocaleString();
+      } },
     ],
   });
   setupExecutionSave(table, rows);
+  return table;
 }
 
 // BUDGETS TABLE
@@ -672,17 +666,33 @@ function setupExecutionSave(table, rows) {
   if (!btn) {
     btn = document.createElement("button");
     btn.id = "saveExecutionRows";
-    btn.textContent = "Save Changes";
+    btn.textContent = "Save";
     btn.style.margin = "12px 0";
     document
       .getElementById("view-execution")
       .insertBefore(btn, document.getElementById("executionGrid"));
+  } else {
+    btn.textContent = "Save";
   }
   btn.onclick = () => {
-    // Save all execution data to planning.json (same as planning)
+    // Save all execution data to planning.json via backend API (same as planning)
     const data = table.getData();
-    downloadJSON(data, "data/planning.json");
-    alert("Execution data downloaded as planning.json. Commit this file in GitHub.");
+    fetch("http://localhost:3000/save-planning", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: data }),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.success) {
+          alert("Execution data saved to backend!");
+        } else {
+          alert("Failed to save: " + (result.error || "Unknown error"));
+        }
+      })
+      .catch((err) => {
+        alert("Failed to save: " + err.message);
+      });
   };
 }
 
@@ -851,6 +861,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   // Initialize all grids/tables only once
   const planningTable = initPlanningGrid(rows);
   const executionTable = initExecutionGrid(rows);
+  window.executionTableInstance = executionTable;
   const budgetsTable = initBudgetsTable(budgets, rows); // pass rows to budgets table
   initReportGrid(rows);
   initGithubSync();
@@ -967,15 +978,27 @@ function csvToObj(csv) {
   });
 }
 
-// Add region filter button below the execution tracking title
+// Add region, status, and PO Raised filter buttons below the execution tracking title
 const execRegionFilterDiv = document.createElement('div');
 execRegionFilterDiv.id = 'execRegionFilterDiv';
 execRegionFilterDiv.style.margin = '0 0 16px 0';
+execRegionFilterDiv.style.display = 'flex';
+execRegionFilterDiv.style.gap = '18px';
 execRegionFilterDiv.innerHTML = `
   <label for="execRegionFilter" style="font-weight:500;margin-right:8px;">Filter by Region:</label>
   <select id="execRegionFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #90caf9;font-size:1rem;">
     <option value="">(All Regions)</option>
     ${regionOptions.map(r => `<option value="${r}">${r}</option>`).join('')}
+  </select>
+  <label for="execStatusFilter" style="font-weight:500;margin-left:18px;margin-right:8px;">Status:</label>
+  <select id="execStatusFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #90caf9;font-size:1rem;">
+    <option value="">(All Statuses)</option>
+    ${statusOptions.map(s => `<option value="${s}">${s}</option>`).join('')}
+  </select>
+  <label for="execPOFilter" style="font-weight:500;margin-left:18px;margin-right:8px;">PO Raised:</label>
+  <select id="execPOFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #90caf9;font-size:1rem;">
+    <option value="">(All)</option>
+    ${yesNo.map(v => `<option value="${v}">${v}</option>`).join('')}
   </select>
 `;
 const execGridSection = document.getElementById('view-execution');
@@ -988,13 +1011,19 @@ if (execGridSection) {
   }
 }
 
-// Add region filter logic for execution grid
-const execRegionFilter = document.getElementById('execRegionFilter');
-if (execRegionFilter && window.executionTableInstance) {
-  execRegionFilter.addEventListener('change', function() {
-    const val = this.value;
-    window.executionTableInstance.setFilter(function(row) {
-      return !val || row.getData().region === val;
-    });
-  });
+// Add filter logic for execution grid
+function updateExecFilters() {
+  const regionVal = document.getElementById('execRegionFilter').value;
+  const statusVal = document.getElementById('execStatusFilter').value;
+  const poVal = document.getElementById('execPOFilter').value;
+  if (window.executionTableInstance) {
+    window.executionTableInstance.setFilter([
+      regionVal ? { field: 'region', type: '=', value: regionVal } : null,
+      statusVal ? { field: 'status', type: '=', value: statusVal } : null,
+      poVal ? { field: 'poRaised', type: '=', value: poVal } : null,
+    ].filter(Boolean));
+  }
 }
+['execRegionFilter', 'execStatusFilter', 'execPOFilter'].forEach(id => {
+  document.getElementById(id).addEventListener('change', updateExecFilters);
+});
