@@ -896,6 +896,23 @@ document.getElementById('csvFileInput').addEventListener('change', function (e) 
       rows = csvToObj(csv);
     }
     // Optionally: map CSV headers to your table fields here if needed
+    // Before adding, update calculated fields for each row
+    rows.forEach(row => {
+      // Special logic for In-Account Events (1:1): no leads, pipeline = 20x forecasted cost
+      if (row.programType === "In-Account Events (1:1)") {
+        row.expectedLeads = 0;
+        row.mqlForecast = 0;
+        row.sqlForecast = 0;
+        row.oppsForecast = 0;
+        row.pipelineForecast = row.forecastedCost ? Number(row.forecastedCost) * 20 : 0;
+      } else if (typeof row.expectedLeads === "number" || (!isNaN(row.expectedLeads) && row.expectedLeads !== undefined && row.expectedLeads !== "")) {
+        const kpiVals = kpis(Number(row.expectedLeads));
+        row.mqlForecast = kpiVals.mql;
+        row.sqlForecast = kpiVals.sql;
+        row.oppsForecast = kpiVals.opps;
+        row.pipelineForecast = kpiVals.pipeline;
+      }
+    });
     if (planningTableInstance) {
       planningTableInstance.addData(rows);
     }
