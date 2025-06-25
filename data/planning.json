@@ -43,7 +43,8 @@
     "mql": 33,
     "sql": 20,
     "opps": 16,
-    "pipeline": 800000
+    "pipeline": 800000,
+    "campaignName": "Halberto"
   },
   {
     "id": "program-1750045569180",
@@ -64,7 +65,8 @@
     "sqlForecast": 120,
     "oppsForecast": 96,
     "pipelineForecast": 4800000,
-    "__modified": true
+    "__modified": true,
+    "campaignName": "streaming cool"
   },
   {
     "id": "program-1750730992239",

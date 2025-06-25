@@ -127,7 +127,7 @@ function initPlanningGrid(rows) {
         },
         headerSort: false
       },
-      { title: "Campaign Name", field: "campaignName", editor: "input", width: 160 },
+      { title: "Campaign Name", field: "campaignName", editor: "input", width: 160, headerFilter: "input", headerFilterPlaceholder: "Search..." },
       { title: "Program Type", field: "programType", editor: "list", editorParams: { values: programTypes }, width: 200, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(programTypes.map(v => [v, v])) } } },
       { title: "Strategic Pillar", field: "strategicPillars", editor: "list", editorParams: { values: strategicPillars }, width: 220, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(strategicPillars.map(v => [v, v])) } } },
       { title: "Description", field: "description", editor: "input", width: 180,
