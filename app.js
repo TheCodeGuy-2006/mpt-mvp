@@ -48,7 +48,17 @@ const quarterOptions = [
 const monthOptions = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
-const regionOptions = ["ANZ", "SAARC", "EMEA", "Americas"];
+const regionOptions = [
+  "North APAC",
+  "South APAC",
+  "SAARC",
+  "Digital Motions",
+  "X APAC Non English",
+  "X APAC English",
+  "ANZ",
+  "ASEAN",
+  "GCR"
+];
 const statusOptions = ["Planning", "On Track", "Shipped", "Cancelled"];
 const yesNo = ["Yes", "No"];
 
@@ -146,8 +156,23 @@ function initPlanningGrid(rows) {
       { title: "Owner", field: "owner", editor: "list", editorParams: { values: names }, width: 140, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(names.map(v => [v, v])) } } },
       { title: "Quarter", field: "quarter", editor: "list", editorParams: { values: quarterOptions }, width: 120, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(quarterOptions.map(v => [v, v])) } } },
       { title: "Region", field: "region", editor: "list", editorParams: { values: regionOptions }, width: 120, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(regionOptions.map(v => [v, v])) } } },
-      { title: "Country", field: "country", editor: "list", editorParams: { values: ["Australia", "New Zealand", "India", "Bangladesh", "Pakistan", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Other"] }, width: 130, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", "Australia":"Australia", "New Zealand":"New Zealand", "India":"India", "Bangladesh":"Bangladesh", "Pakistan":"Pakistan", "Sri Lanka":"Sri Lanka", "Nepal":"Nepal", "Bhutan":"Bhutan", "Maldives":"Maldives", "Other":"Other" } } },
+      { title: "Country", field: "country", editor: "list", editorParams: {
+        values: getAllCountries()
+      }, width: 130, headerFilter: "list", headerFilterParams: {
+        values: (function() {
+          const allCountries = getAllCountries();
+          const obj = {"":"(Clear Filter)"};
+          allCountries.forEach(v => { obj[v] = v; });
+          return obj;
+        })()
+      }
+    },
       { title: "Forecasted Cost", field: "forecastedCost", editor: "number", width: 200,
+        formatter: function(cell) {
+          const v = cell.getValue();
+          if (v === null || v === undefined || v === "") return "";
+          return "$" + Number(v).toLocaleString();
+        },
         headerFilter: function(cell, onRendered, success, cancel, editorParams){
           var container = document.createElement("div");
           container.style.display = "flex";
@@ -215,7 +240,13 @@ function initPlanningGrid(rows) {
       { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
       { title: "SQL", field: "sqlForecast", editable: false, width: 90 },
       { title: "Opps", field: "oppsForecast", editable: false, width: 90 },
-      { title: "Pipeline", field: "pipelineForecast", editable: false, width: 120 },
+      { title: "Pipeline", field: "pipelineForecast", editable: false, width: 120,
+        formatter: function(cell) {
+          const v = cell.getValue();
+          if (v === null || v === undefined || v === "") return "";
+          return "$" + Number(v).toLocaleString();
+        }
+      },
       { title: "Revenue Play", field: "revenuePlay", editor: "list", editorParams: { values: revenuePlays }, width: 140, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(revenuePlays.map(v => [v, v])) } } },
       { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, width: 120, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(statusOptions.map(v => [v, v])) } } },
       { title: "PO raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, width: 110, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(yesNo.map(v => [v, v])) } } },
@@ -438,6 +469,93 @@ function initGithubSync() {
     </form>
   `;
 }
+
+// Country options by region (partial mapping)
+const countryOptionsByRegion = {
+  "ASEAN": [
+    "Brunei Darussalam",
+    "Cambodia",
+    "Indonesia",
+    "Lao People's Democratic Republic",
+    "Malaysia",
+    "Myanmar",
+    "Philippines",
+    "Singapore",
+    "Thailand",
+    "Vietnam"
+  ],
+  "ANZ": [
+    "Australia",
+    "New Zealand"
+  ],
+  "GCR": [
+    "China",
+    "Hong Kong",
+    "Taiwan"
+  ],
+  "South APAC": [
+    "Brunei Darussalam",
+    "Cambodia",
+    "Indonesia",
+    "Lao People's Democratic Republic",
+    "Malaysia",
+    "Myanmar",
+    "Philippines",
+    "Singapore",
+    "Thailand",
+    "Vietnam",
+    "Australia",
+    "New Zealand",
+    "China",
+    "Hong Kong",
+    "Taiwan"
+  ],
+  "North APAC": [
+    "Japan",
+    "South Korea"
+  ],
+  "SAARC": [
+    "Afghanistan",
+    "Bangladesh",
+    "Bhutan",
+    "India",
+    "Maldives",
+    "Nepal",
+    "Pakistan",
+    "Sri Lanka"
+  ],
+  // ...other regions to be filled in as provided...
+};
+
+// Ensure all country dropdowns have at least an empty option if no region is selected
+Object.keys(countryOptionsByRegion).forEach(region => {
+  if (!Array.isArray(countryOptionsByRegion[region]) || countryOptionsByRegion[region].length === 0) {
+    countryOptionsByRegion[region] = [""];
+  }
+});
+
+// Utility: Get all unique countries from all regions
+function getAllCountries() {
+  const all = [];
+  Object.values(countryOptionsByRegion).forEach(arr => {
+    if (Array.isArray(arr)) all.push(...arr);
+  });
+  // Remove duplicates
+  return Array.from(new Set(all));
+}
+
+// Patch: For now, allow all countries for any region (as array, not object)
+function getCountryOptionsForRegion(region) {
+  const allCountries = getAllCountries();
+  if (allCountries.length > 0) {
+    return allCountries;
+  }
+  return ["(No countries available)"];
+}
+
+// Patch: Debug country dropdown
+window.debugCountryOptions = countryOptionsByRegion;
+window.debugGetCountryOptionsForRegion = getCountryOptionsForRegion;
 
 // Utility: Dynamically load all JSON files in /data (except budgets)
 async function loadProgrammeData() {
