@@ -17,7 +17,11 @@
     "sqlForecast": 5,
     "oppsForecast": 4,
     "pipelineForecast": 200000,
-    "__modified": true
+    "__modified": true,
+    "mql": 8,
+    "sql": 5,
+    "opps": 4,
+    "pipeline": 200000
   },
   {
     "campaignName": "Exec Roundtable",
@@ -29,7 +33,7 @@
     "region": "GCR",
     "country": "China",
     "forecastedCost": 30000,
-    "expectedLeads": 100,
+    "expectedLeads": 102,
     "revenuePlay": "Retention",
     "status": "Shipped",
     "poRaised": "No",
@@ -37,7 +41,11 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "__modified": true
+    "__modified": true,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000
   },
   {
     "campaignName": "Digital Bootcamp",
@@ -57,6 +65,10 @@
     "sqlForecast": 4,
     "oppsForecast": 3,
     "pipelineForecast": 150000,
-    "__modified": true
+    "__modified": true,
+    "mql": 6,
+    "sql": 4,
+    "opps": 3,
+    "pipeline": 150000
   }
 ]

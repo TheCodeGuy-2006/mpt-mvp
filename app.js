@@ -321,8 +321,18 @@ function initExecutionGrid(rows) {
       }
     },
     columns: [
-      { title: "Campaign Type", field: "campaignType" },
-      { title: "Region", field: "region" },
+      { title: "Campaign Name", field: "campaignName", editor: false, width: 160 },
+      { title: "Details", field: "details", width: 240, editable: false, formatter: function(cell) {
+        const data = cell.getRow().getData();
+        // Render region and owner as button-like spans, then description below
+        return `
+          <div style="display:flex;gap:6px;margin-bottom:6px;">
+            <span style="background:#1976d2;color:#fff;padding:2px 10px;border-radius:12px;font-size:0.95em;display:inline-block;">${data.region || ""}</span>
+            <span style="background:#90caf9;color:#1a237e;padding:2px 10px;border-radius:12px;font-size:0.95em;display:inline-block;">${data.owner || ""}</span>
+          </div>
+          <div style="font-size:0.98em;color:#1a237e;white-space:pre-line;">${data.description || ""}</div>
+        `;
+      } },
       { title: "Forecasted Cost", field: "forecastedCost" },
       {
         title: "Actual Cost",
@@ -361,6 +371,8 @@ function initExecutionGrid(rows) {
         cellEdited: (cell) => {
           cell.getRow().getData().__modified = true;
         },
+        headerFilter: "list",
+        headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(statusOptions.map(v => [v, v])) } }
       },
       {
         title: "PO Raised",
@@ -370,6 +382,8 @@ function initExecutionGrid(rows) {
         cellEdited: (cell) => {
           cell.getRow().getData().__modified = true;
         },
+        headerFilter: "list",
+        headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(yesNo.map(v => [v, v])) } }
       },
     ],
   });
@@ -734,6 +748,23 @@ function setupReportExport(table) {
   };
 }
 
+// --- LIVE SYNC LOGIC ---
+function syncGridsOnEdit(sourceTable, targetTable) {
+  sourceTable.on("cellEdited", function(cell) {
+    const rowData = cell.getRow().getData();
+    // Find the matching row in the target table by unique id (use 'id' or 'campaignName' as fallback)
+    let match;
+    if (rowData.id) {
+      match = targetTable.getRows().find(r => r.getData().id === rowData.id);
+    } else {
+      match = targetTable.getRows().find(r => r.getData().campaignName === rowData.campaignName);
+    }
+    if (match) {
+      match.update({ ...rowData });
+    }
+  });
+}
+
 // run once the page loads
 if (location.hash === "#grid" || location.hash === "") loadProgrammes();
 
@@ -875,6 +906,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
   // Always call route() after everything is ready
   setTimeout(route, 0);
+
+  // After both tables are initialized:
+  syncGridsOnEdit(planningTable, executionTable);
+  syncGridsOnEdit(executionTable, planningTable);
 });
 
 // CSV Import functionality
@@ -929,5 +964,37 @@ function csvToObj(csv) {
     const obj = {};
     headers.forEach((h, i) => obj[h] = values[i]);
     return obj;
+  });
+}
+
+// Add region filter button below the execution tracking title
+const execRegionFilterDiv = document.createElement('div');
+execRegionFilterDiv.id = 'execRegionFilterDiv';
+execRegionFilterDiv.style.margin = '0 0 16px 0';
+execRegionFilterDiv.innerHTML = `
+  <label for="execRegionFilter" style="font-weight:500;margin-right:8px;">Filter by Region:</label>
+  <select id="execRegionFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #90caf9;font-size:1rem;">
+    <option value="">(All Regions)</option>
+    ${regionOptions.map(r => `<option value="${r}">${r}</option>`).join('')}
+  </select>
+`;
+const execGridSection = document.getElementById('view-execution');
+if (execGridSection) {
+  const h2 = execGridSection.querySelector('h2');
+  if (h2 && execGridSection.contains(h2)) {
+    h2.insertAdjacentElement('afterend', execRegionFilterDiv);
+  } else {
+    execGridSection.insertBefore(execRegionFilterDiv, execGridSection.firstChild);
+  }
+}
+
+// Add region filter logic for execution grid
+const execRegionFilter = document.getElementById('execRegionFilter');
+if (execRegionFilter && window.executionTableInstance) {
+  execRegionFilter.addEventListener('change', function() {
+    const val = this.value;
+    window.executionTableInstance.setFilter(function(row) {
+      return !val || row.getData().region === val;
+    });
   });
 }
