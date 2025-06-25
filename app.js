@@ -888,12 +888,29 @@ document.getElementById('csvFileInput').addEventListener('change', function (e) 
   const reader = new FileReader();
   reader.onload = function (event) {
     const csv = event.target.result;
-    // Use Tabulator's built-in CSV parser
-    const rows = Tabulator.prototype.modules.download.parseCSV(csv);
+    // Use Tabulator's built-in CSV parser if available, else fallback
+    let rows;
+    if (Tabulator.prototype.parseCSV) {
+      rows = Tabulator.prototype.parseCSV(csv);
+    } else {
+      rows = csvToObj(csv);
+    }
     // Optionally: map CSV headers to your table fields here if needed
     if (planningTableInstance) {
-      planningTableInstance.setData(rows);
+      planningTableInstance.addData(rows);
     }
   };
   reader.readAsText(file);
 });
+
+// Simple CSV to object parser (fallback)
+function csvToObj(csv) {
+  const lines = csv.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  return lines.slice(1).map(line => {
+    const values = line.split(',').map(v => v.replace(/^"|"$/g, '').trim());
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = values[i]);
+    return obj;
+  });
+}
