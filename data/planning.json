@@ -46,7 +46,8 @@
     "mql": 10,
     "sql": 6,
     "opps": 5,
-    "pipeline": 250000
+    "pipeline": 250000,
+    "actualCost": 200000
   },
   {
     "campaignName": "Digital Bootcamp",

@@ -4,5 +4,11 @@
   },
   "SAARC": {
     "assignedBudget": 300000
+  },
+  "GCR": {
+    "assignedBudget": 400000
+  },
+  "South APAC": {
+    "assignedBudget": 150000
   }
 }
