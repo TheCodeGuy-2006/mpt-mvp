@@ -1041,6 +1041,14 @@ function route() {
           console.log("Forced redraw of planning grid");
         }, 0);
       }
+      // If showing execution, force redraw
+      if (name === "#execution" && window.executionTableInstance) {
+        setTimeout(() => {
+          window.executionTableInstance.redraw(true);
+          window.executionTableInstance.setData(window.executionTableInstance.getData());
+          console.log("Forced redraw of execution grid");
+        }, 0);
+      }
     } else {
       sec.style.display = "none";
     }
@@ -1180,6 +1188,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     "#execution",
     "#budgets",
     "#report",
+    "#roi",
     "#github-sync",
     "#budget-setup",
   ];
@@ -1699,10 +1708,44 @@ if (saveAnnualBudgetBtn) {
           alert("Failed to save: " + err.message);
         });
     }
-    setTimeout(renderBudgetsRegionCharts, 200);
   });
 }
 
+// ROI Total Spend Calculation
+function updateRoiTotalSpend() {
+  let total = 0;
+  // Try to get all rows from executionTableInstance
+  if (window.executionTableInstance) {
+    const data = window.executionTableInstance.getData();
+    total = data.reduce((sum, row) => {
+      let val = row.actualCost;
+      if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(val)) sum += Number(val);
+      return sum;
+    }, 0);
+  }
+  const el = document.getElementById("roiTotalSpendValue");
+  if (el) {
+    el.textContent = "$" + total.toLocaleString();
+  }
+}
+
+// Update ROI spend box on tab switch and after execution grid edits
+window.addEventListener("hashchange", () => {
+  if (location.hash === "#roi") updateRoiTotalSpend();
+});
+if (window.executionTableInstance) {
+  window.executionTableInstance.on("dataChanged", updateRoiTotalSpend);
+  window.executionTableInstance.on("cellEdited", updateRoiTotalSpend);
+}
+// Also update after DOMContentLoaded
+window.addEventListener("DOMContentLoaded", () => {
+  setTimeout(updateRoiTotalSpend, 500);
+  if (window.executionTableInstance) {
+    window.executionTableInstance.on("dataChanged", updateRoiTotalSpend);
+    window.executionTableInstance.on("cellEdited", updateRoiTotalSpend);
+  }
+});
 // Re-add missing setupPlanningDownload function
 function setupPlanningDownload(table) {
   let btn = document.getElementById("downloadPlanningAll");
