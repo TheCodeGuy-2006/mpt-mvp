@@ -71,5 +71,11 @@
     "sql": 4,
     "opps": 3,
     "pipeline": 150000
+  },
+  {
+    "id": "program-1750842418400",
+    "status": "Planning",
+    "__modified": true,
+    "strategicPillars": "Account Growth and Product Adoption"
   }
 ]

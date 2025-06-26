@@ -1026,3 +1026,210 @@ function updateExecFilters() {
 ['execRegionFilter', 'execStatusFilter', 'execPOFilter'].forEach(id => {
   document.getElementById(id).addEventListener('change', updateExecFilters);
 });
+
+// Add Chart.js for bar graph rendering
+if (!window.Chart) {
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+  script.onload = renderBudgetsBarChart;
+  document.head.appendChild(script);
+} else {
+  renderBudgetsBarChart();
+}
+
+function renderBudgetsBarChart() {
+  const ctx = document.getElementById('budgetsBarChart');
+  if (!ctx) return;
+  // Get budgets data from the table or from the budgets object
+  let budgetsData = [];
+  if (window.budgetsTableInstance) {
+    budgetsData = window.budgetsTableInstance.getData();
+  } else if (window.budgetsObj) {
+    budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({ region, ...data }));
+  }
+  if (!budgetsData || budgetsData.length === 0) return;
+  // Prepare data for chart
+  const labels = budgetsData.map(row => row.region || row.Region || '');
+  const values = budgetsData.map(row => Number(row.assignedBudget || row.AssignedBudget || 0));
+  // Destroy previous chart if exists
+  if (window.budgetsBarChartInstance) {
+    window.budgetsBarChartInstance.destroy();
+  }
+  window.budgetsBarChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Assigned Budget (USD)',
+        data: values,
+        backgroundColor: '#1976d2',
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Dollars (USD)' },
+          ticks: { callback: v => '$' + v.toLocaleString() }
+        },
+        x: {
+          title: { display: true, text: 'Region/Budget' }
+        }
+      }
+    }
+  });
+}
+// After budgets table is initialized, render the chart
+const origInitBudgetsTable = initBudgetsTable;
+initBudgetsTable = function(budgets, rows) {
+  const table = origInitBudgetsTable(budgets, rows);
+  window.budgetsTableInstance = table;
+  setTimeout(renderBudgetsBarChart, 200);
+  table.on('dataChanged', renderBudgetsBarChart);
+  return table;
+};
+
+// Render region charts for budgets
+function renderBudgetsRegionCharts() {
+  const container = document.getElementById('budgetsChartsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  // Get budgets data
+  let budgetsData = [];
+  if (window.budgetsTableInstance) {
+    budgetsData = window.budgetsTableInstance.getData();
+  } else if (window.budgetsObj) {
+    budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({ region, ...data }));
+  }
+  // Get planning data (for forecasted/actual cost)
+  let planningRows = [];
+  if (window.planningTableInstance) {
+    planningRows = window.planningTableInstance.getData();
+  } else if (window.planningRows) {
+    planningRows = window.planningRows;
+  }
+  // Get all unique regions from budgets and planning
+  const allRegions = Array.from(new Set([
+    ...budgetsData.map(b => b.region),
+    ...planningRows.map(r => r.region)
+  ])).filter(Boolean);
+  // For each region, create a chart
+  allRegions.forEach(region => {
+    // Assigned budget
+    const budgetObj = budgetsData.find(b => b.region === region);
+    const assignedBudget = budgetObj && budgetObj.assignedBudget ? Number(budgetObj.assignedBudget) : 0;
+    // Forecasted cost: sum of forecastedCost for this region
+    const regionForecasts = planningRows
+      .filter(r => r.region === region && typeof r.forecastedCost === 'number');
+    const forecastedCost = regionForecasts.reduce((sum, r) => sum + r.forecastedCost, 0);
+    // Actual cost: sum of actualCost for this region
+    const actualCost = planningRows
+      .filter(r => r.region === region && typeof r.actualCost === 'number')
+      .reduce((sum, r) => sum + r.actualCost, 0);
+    // Prepare forecasted cost breakdown
+    let forecastBreakdown = '';
+    if (regionForecasts.length > 1) {
+      forecastBreakdown = '<div style="font-size:0.98em;margin-top:8px;text-align:left;">';
+      forecastBreakdown += '<b>Forecasted Cost Breakdown:</b><br>';
+      regionForecasts.forEach(r => {
+        forecastBreakdown += `${r.campaignName ? r.campaignName : '(Unnamed)'}: $${Number(r.forecastedCost).toLocaleString()}<br>`;
+      });
+      forecastBreakdown += '</div>';
+    }
+    // Create chart canvas
+    const chartDiv = document.createElement('div');
+    chartDiv.style.width = '300px';
+    chartDiv.style.height = 'auto';
+    chartDiv.style.background = '#fff';
+    chartDiv.style.borderRadius = '12px';
+    chartDiv.style.boxShadow = '0 2px 12px rgba(25,118,210,0.08)';
+    chartDiv.style.padding = '18px 12px 8px 12px';
+    chartDiv.style.display = 'flex';
+    chartDiv.style.flexDirection = 'column';
+    chartDiv.style.alignItems = 'center';
+    chartDiv.innerHTML = `<h3 style="font-size:1.18rem;margin:0 0 12px 0;color:#1976d2;">${region}</h3><canvas id="chart-${region}"></canvas>${forecastBreakdown}`;
+    container.appendChild(chartDiv);
+    // Render chart
+    setTimeout(() => {
+      const ctx = chartDiv.querySelector('canvas');
+      if (!ctx) return;
+      if (ctx.chartInstance) ctx.chartInstance.destroy();
+      ctx.chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Assigned', 'Forecasted', 'Actual'],
+          datasets: [{
+            label: 'USD',
+            data: [assignedBudget, forecastedCost, actualCost],
+            backgroundColor: ['#1976d2', '#42a5f5', '#66bb6a'],
+            borderRadius: 8,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: false,
+          plugins: {
+            legend: { display: false },
+            title: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Dollars (USD)' },
+              ticks: { callback: v => '$' + v.toLocaleString() }
+            },
+            x: {
+              title: { display: false }
+            }
+          }
+        }
+      });
+    }, 0);
+  });
+}
+// After budgets table is initialized, render the region charts
+const origInitBudgetsTable2 = initBudgetsTable;
+initBudgetsTable = function(budgets, rows) {
+  const table = origInitBudgetsTable2(budgets, rows);
+  window.budgetsTableInstance = table;
+  setTimeout(renderBudgetsRegionCharts, 200);
+  table.on('dataChanged', renderBudgetsRegionCharts);
+  return table;
+};
+// Also render on planning table data change
+const origInitPlanningGrid2 = initPlanningGrid;
+initPlanningGrid = function(rows) {
+  const table = origInitPlanningGrid2(rows);
+  window.planningTableInstance = table;
+  window.planningRows = rows;
+  table.on('dataChanged', renderBudgetsRegionCharts);
+  setTimeout(renderBudgetsRegionCharts, 200);
+  return table;
+};
+
+// Sync Annual Budget Plan edits to budgets table and charts
+const saveAnnualBudgetBtn = document.getElementById('saveAnnualBudget');
+if (saveAnnualBudgetBtn) {
+  saveAnnualBudgetBtn.addEventListener('click', () => {
+    const planTableBody = document.querySelector('#planTable tbody');
+    if (!planTableBody) return;
+    const rows = Array.from(planTableBody.querySelectorAll('tr'));
+    const budgets = rows.map(tr => {
+      const tds = tr.querySelectorAll('td');
+      const region = tds[0]?.querySelector('input')?.value?.trim() || '';
+      const assignedBudget = Number(tds[1]?.querySelector('input')?.value) || 0;
+      return region ? { region, assignedBudget } : null;
+    }).filter(Boolean);
+    if (window.budgetsTableInstance) {
+      window.budgetsTableInstance.replaceData(budgets);
+    }
+    setTimeout(renderBudgetsRegionCharts, 200);
+  });
+}

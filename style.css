@@ -426,6 +426,17 @@ table#planTable td input[type="text"] {
 }
 #executionGrid .tabulator-row {
   min-height: 36px;
+  height: auto;
+  max-height: none;
+}
+#executionGrid .tabulator-row:first-child {
+  min-height: 56px !important;
+  height: 62px !important;
+  max-height: 70px !important;
+}
+#executionGrid .tabulator-row:first-child .tabulator-cell {
+  padding-top: 22px !important;
+  padding-bottom: 22px !important;
 }
 #executionGrid input,
 #executionGrid select {
