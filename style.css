@@ -582,3 +582,23 @@ table#planTable td input[type="text"] {
     right: 8px;
   }
 }
+#executionGrid .tabulator-header .tabulator-col {
+  min-width: 140px;
+  white-space: nowrap;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 1.08rem;
+}
+#executionGrid .tabulator-header {
+  /* Remove forced min-height/height to prevent overlap */
+  min-height: unset !important;
+  height: unset !important;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  z-index: 2;
+}
+#executionGrid .tabulator-col-content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

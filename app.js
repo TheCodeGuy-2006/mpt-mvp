@@ -911,7 +911,7 @@ function setupBudgetsSave(table) {
     document.getElementById("view-budgets").appendChild(btn);
   }
   btn.onclick = () => {
-    // Save all budgets data to budgets.json
+    // Save all budgets data to budgets.json via backend
     const data = table.getData();
     // Convert array back to object by region
     const obj = {};
@@ -922,90 +922,75 @@ function setupBudgetsSave(table) {
         utilisation: row.utilisation,
       };
     });
-    downloadJSON(obj, "data/budgets.json");
-    alert(
-      "Budgets data downloaded as budgets.json. Commit this file in GitHub.",
-    );
+    fetch("http://localhost:3000/save-budgets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: obj }),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.success) {
+          alert("Budgets data saved to backend!");
+        } else {
+          alert("Failed to save: " + (result.error || "Unknown error"));
+        }
+      })
+      .catch((err) => {
+        alert("Failed to save: " + err.message);
+      });
   };
 }
 
-function setupPlanningDownload(table) {
-  let btn = document.getElementById("downloadPlanningAll");
-  if (!btn) {
-    btn = document.createElement("button");
-    btn.id = "downloadPlanningAll";
-    btn.textContent = "Download All as JSON";
-    btn.style.margin = "12px 0 12px 12px";
-    document
-      .getElementById("view-planning")
-      .insertBefore(btn, document.getElementById("planningGrid"));
-  }
-  btn.onclick = () => {
-    const data = table.getData();
-    downloadJSON(data, "planning-all.json");
-  };
-}
-
-function setupReportExport(table) {
-  // Add an Export CSV button to the Report view
-  let btn = document.getElementById("exportReportCSV");
-  if (!btn) {
-    btn = document.createElement("button");
-    btn.id = "exportReportCSV";
-    btn.textContent = "Export to CSV";
-    btn.style.margin = "12px 0";
-    document
-      .getElementById("view-report")
-      .insertBefore(btn, document.getElementById("reportGrid"));
-  }
-  btn.onclick = () => {
-    table.download("csv", "report.csv");
-  };
-}
-
-// Download hidden budgets table as CSV
-const downloadBudgetsInfoBtn = document.getElementById(
-  "downloadBudgetsInfoCSV",
-);
-if (downloadBudgetsInfoBtn) {
-  downloadBudgetsInfoBtn.addEventListener("click", () => {
-    let budgetsData = [];
+// Patch: Update annual budget plan save logic to POST to /save-budgets for backend integration. Also ensure budgets dashboard and execution/planning grids use backend save endpoints.
+function setupAnnualBudgetSave() {
+  const saveBtn = document.getElementById("saveAnnualBudget");
+  if (!saveBtn) return;
+  saveBtn.onclick = () => {
+    const planTableBody = document.querySelector("#planTable tbody");
+    if (!planTableBody) return;
+    const rows = Array.from(planTableBody.querySelectorAll("tr"));
+    const budgets = rows
+      .map((tr) => {
+        const tds = tr.querySelectorAll("td");
+        const region = tds[0]?.querySelector("input")?.value?.trim() || "";
+        let assignedBudgetRaw = tds[1]?.querySelector("input")?.value || "0";
+        // Remove $ and commas for parsing
+        assignedBudgetRaw = assignedBudgetRaw.replace(/[^\d.]/g, "");
+        const assignedBudget = Number(assignedBudgetRaw) || 0;
+        return region ? { region, assignedBudget } : null;
+      })
+      .filter(Boolean);
     if (window.budgetsTableInstance) {
-      budgetsData = window.budgetsTableInstance.getData();
-    } else if (window.budgetsObj) {
-      budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({
-        region,
-        ...data,
-      }));
+      window.budgetsTableInstance.replaceData(budgets);
+      // Also save to backend
+      const data = window.budgetsTableInstance.getData();
+      const obj = {};
+      data.forEach((row) => {
+        obj[row.region] = {
+          assignedBudget: row.assignedBudget,
+          notes: row.notes,
+          utilisation: row.utilisation,
+        };
+      });
+      fetch("http://localhost:3000/save-budgets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: obj }),
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success) {
+            alert("Budgets data saved to backend!");
+          } else {
+            alert("Failed to save: " + (result.error || "Unknown error"));
+          }
+        })
+        .catch((err) => {
+          alert("Failed to save: " + err.message);
+        });
     }
-    if (!budgetsData || budgetsData.length === 0) {
-      alert("No budgets data available to export.");
-      return;
-    }
-    // Prepare CSV with all columns
-    const headers = ["Region", "Assigned Budget", "Notes", "Utilisation"];
-    const csvRows = [headers.join(",")];
-    budgetsData.forEach((row) => {
-      csvRows.push(
-        [
-          `"${row.region ?? ""}"`,
-          `"${row.assignedBudget ?? ""}"`,
-          `"${row.notes ?? ""}"`,
-          `"${row.utilisation ?? ""}"`,
-        ].join(","),
-      );
-    });
-    const csvContent = csvRows.join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "download info.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  });
+    setTimeout(renderBudgetsRegionCharts, 200);
+  };
 }
 
 // --- LIVE SYNC LOGIC ---
@@ -1109,8 +1094,11 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize all grids/tables only once
   const planningTable = initPlanningGrid(rows);
+  window.planningTableInstance = planningTable;
   const executionTable = initExecutionGrid(rows);
+  window.executionTableInstance = executionTable;
   const budgetsTable = initBudgetsTable(budgets, rows); // pass rows to budgets table
+  window.budgetsTableInstance = budgetsTable;
   initReportGrid(rows);
   initGithubSync();
   setupPlanningSave(planningTable, rows);
@@ -1134,6 +1122,20 @@ window.addEventListener("DOMContentLoaded", async () => {
         newRow.remove();
       };
       tbody.appendChild(newRow);
+      const input = newRow.querySelector('input[type="number"]');
+      if (input) {
+        input.type = 'text';
+        input.classList.add('plan-usd-input');
+        input.addEventListener('blur', function() {
+          let val = input.value.replace(/[^\d.]/g, '');
+          val = val ? Number(val) : 0;
+          input.value = `$${val.toLocaleString()}`;
+        });
+        input.addEventListener('focus', function() {
+          let val = input.value.replace(/[^\d.]/g, '');
+          input.value = val;
+        });
+      }
     };
   }
 
@@ -1146,13 +1148,25 @@ window.addEventListener("DOMContentLoaded", async () => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><input type="text" value="${row.region}" /></td>
-          <td><input type="number" value="${row.assignedBudget ?? 0}" /></td>
+          <td><input type="text" class="plan-usd-input" value="$${Number(row.assignedBudget ?? 0).toLocaleString()}" /></td>
           <td><button class="plan-delete-btn" title="Delete"><span style="font-size:1.2em;color:#b71c1c;">🗑️</span></button></td>
         `;
         // Add delete handler
         tr.querySelector(".plan-delete-btn").onclick = function () {
           tr.remove();
         };
+        // Format input on blur/change
+        const input = tr.querySelector('.plan-usd-input');
+        input.addEventListener('blur', function() {
+          let val = input.value.replace(/[^\d.]/g, '');
+          val = val ? Number(val) : 0;
+          input.value = `$${val.toLocaleString()}`;
+        });
+        input.addEventListener('focus', function() {
+          // Remove formatting for editing
+          let val = input.value.replace(/[^\d.]/g, '');
+          input.value = val;
+        });
         planTableBody.appendChild(tr);
       });
     }
@@ -1408,7 +1422,17 @@ function renderBudgetsRegionCharts() {
     ]),
   ).filter(Boolean);
   // For each region, create a chart
-  allRegions.forEach((region) => {
+  let rowDiv = null;
+  allRegions.forEach((region, idx) => {
+    if (idx % 4 === 0) {
+      rowDiv = document.createElement('div');
+      rowDiv.className = 'budgets-graph-row';
+      rowDiv.style.display = 'flex';
+      rowDiv.style.flexDirection = 'row';
+      rowDiv.style.gap = '24px';
+      rowDiv.style.marginBottom = '24px';
+      container.appendChild(rowDiv);
+    }
     // Assigned budget
     const budgetObj = budgetsData.find((b) => b.region === region);
     const assignedBudget =
@@ -1468,7 +1492,7 @@ function renderBudgetsRegionCharts() {
     fullscreenBtn.style.padding = "2px 6px";
     fullscreenBtn.style.zIndex = "2";
     chartDiv.appendChild(fullscreenBtn);
-    container.appendChild(chartDiv);
+    rowDiv.appendChild(chartDiv);
     // Render chart in normal box
     setTimeout(() => {
       const ctx = chartDiv.querySelector("canvas");
@@ -1639,14 +1663,76 @@ if (saveAnnualBudgetBtn) {
       .map((tr) => {
         const tds = tr.querySelectorAll("td");
         const region = tds[0]?.querySelector("input")?.value?.trim() || "";
-        const assignedBudget =
-          Number(tds[1]?.querySelector("input")?.value) || 0;
+        let assignedBudgetRaw = tds[1]?.querySelector("input")?.value || "0";
+        // Remove $ and commas for parsing
+        assignedBudgetRaw = assignedBudgetRaw.replace(/[^\d.]/g, "");
+        const assignedBudget = Number(assignedBudgetRaw) || 0;
         return region ? { region, assignedBudget } : null;
       })
       .filter(Boolean);
     if (window.budgetsTableInstance) {
       window.budgetsTableInstance.replaceData(budgets);
+      // Also save to backend
+      const data = window.budgetsTableInstance.getData();
+      const obj = {};
+      data.forEach((row) => {
+        obj[row.region] = {
+          assignedBudget: row.assignedBudget,
+          notes: row.notes,
+          utilisation: row.utilisation,
+        };
+      });
+      fetch("http://localhost:3000/save-budgets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: obj }),
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success) {
+            alert("Budgets data saved to backend!");
+          } else {
+            alert("Failed to save: " + (result.error || "Unknown error"));
+          }
+        })
+        .catch((err) => {
+          alert("Failed to save: " + err.message);
+        });
     }
     setTimeout(renderBudgetsRegionCharts, 200);
   });
+}
+
+// Re-add missing setupPlanningDownload function
+function setupPlanningDownload(table) {
+  let btn = document.getElementById("downloadPlanningAll");
+  if (!btn) {
+    btn = document.createElement("button");
+    btn.id = "downloadPlanningAll";
+    btn.textContent = "Download All as JSON";
+    btn.style.margin = "12px 0 12px 12px";
+    document.getElementById("view-planning").insertBefore(btn, document.getElementById("planningGrid"));
+  }
+  btn.onclick = () => {
+    const data = table.getData();
+    downloadJSON(data, "planning-all.json");
+  };
+}
+
+// Report export setup
+function setupReportExport(table) {
+  // Add an Export CSV button to the Report view
+  let btn = document.getElementById("exportReportCSV");
+  if (!btn) {
+    btn = document.createElement("button");
+    btn.id = "exportReportCSV";
+    btn.textContent = "Export to CSV";
+    btn.style.margin = "12px 0";
+    document.getElementById("view-report").insertBefore(btn, document.getElementById("reportGrid"));
+  }
+  btn.onclick = () => {
+    if (table && typeof table.download === 'function') {
+      table.download("csv", "report.csv");
+    }
+  };
 }

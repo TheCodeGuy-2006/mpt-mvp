@@ -65,4 +65,16 @@ app.post("/save-planning", (req, res) => {
   });
 });
 
+app.post("/save-budgets", (req, res) => {
+  const budgetsData = req.body.content;
+  const filePath = path.join(process.cwd(), "data", "budgets.json");
+  fs.writeFile(filePath, JSON.stringify(budgetsData, null, 2), (err) => {
+    if (err) {
+      console.error("Failed to write budgets.json:", err);
+      return res.status(500).json({ success: false, error: err.message });
+    }
+    res.json({ success: true });
+  });
+});
+
 app.listen(3000, () => console.log("Backend running on http://localhost:3000"));
