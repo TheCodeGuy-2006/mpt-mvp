@@ -328,18 +328,27 @@ table#planTable td input[type="text"] {
   background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
   color: #fff;
   border: none;
-  box-shadow: 0 4px 18px rgba(25, 118, 210, 0.13), 0 1.5px 6px rgba(66, 165, 245, 0.08);
+  box-shadow:
+    0 4px 18px rgba(25, 118, 210, 0.13),
+    0 1.5px 6px rgba(66, 165, 245, 0.08);
   letter-spacing: 0.03em;
-  transition: background 0.22s, transform 0.18s, box-shadow 0.18s;
+  transition:
+    background 0.22s,
+    transform 0.18s,
+    box-shadow 0.18s;
   outline: none;
 }
-#savePlanningRows.save-large:hover, #savePlanningRows.save-large:focus {
+#savePlanningRows.save-large:hover,
+#savePlanningRows.save-large:focus {
   background: linear-gradient(90deg, #2196f3 60%, #64b5f6 100%);
   color: #fff;
   transform: scale(1.045);
-  box-shadow: 0 6px 24px rgba(33, 150, 243, 0.18), 0 2px 8px rgba(66, 165, 245, 0.13);
+  box-shadow:
+    0 6px 24px rgba(33, 150, 243, 0.18),
+    0 2px 8px rgba(66, 165, 245, 0.13);
 }
-#saveExecutionRows.save-large, #saveExecutionRows {
+#saveExecutionRows.save-large,
+#saveExecutionRows {
   font-size: 1.18rem;
   padding: 12px 36px;
   font-weight: 700;
@@ -347,17 +356,27 @@ table#planTable td input[type="text"] {
   background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
   color: #fff;
   border: none;
-  box-shadow: 0 4px 18px rgba(25, 118, 210, 0.13), 0 1.5px 6px rgba(66, 165, 245, 0.08);
+  box-shadow:
+    0 4px 18px rgba(25, 118, 210, 0.13),
+    0 1.5px 6px rgba(66, 165, 245, 0.08);
   letter-spacing: 0.03em;
-  transition: background 0.22s, transform 0.18s, box-shadow 0.18s;
+  transition:
+    background 0.22s,
+    transform 0.18s,
+    box-shadow 0.18s;
   outline: none;
   margin-bottom: 18px;
 }
-#saveExecutionRows.save-large:hover, #saveExecutionRows:hover, #saveExecutionRows.save-large:focus, #saveExecutionRows:focus {
+#saveExecutionRows.save-large:hover,
+#saveExecutionRows:hover,
+#saveExecutionRows.save-large:focus,
+#saveExecutionRows:focus {
   background: linear-gradient(90deg, #2196f3 60%, #64b5f6 100%);
   color: #fff;
   transform: scale(1.045);
-  box-shadow: 0 6px 24px rgba(33, 150, 243, 0.18), 0 2px 8px rgba(66, 165, 245, 0.13);
+  box-shadow:
+    0 6px 24px rgba(33, 150, 243, 0.18),
+    0 2px 8px rgba(66, 165, 245, 0.13);
 }
 .desc-tooltip {
   position: absolute;
@@ -523,7 +542,7 @@ table#planTable td input[type="text"] {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(20,30,60,0.92);
+  background: rgba(20, 30, 60, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;

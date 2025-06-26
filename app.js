@@ -43,10 +43,21 @@ const quarterOptions = [
   "Q3 March",
   "Q4 April",
   "Q4 May",
-  "Q4 June"
+  "Q4 June",
 ];
 const monthOptions = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 const regionOptions = [
   "North APAC",
@@ -57,7 +68,7 @@ const regionOptions = [
   "X APAC English",
   "ANZ",
   "ASEAN",
-  "GCR"
+  "GCR",
 ];
 const statusOptions = ["Planning", "On Track", "Shipped", "Cancelled"];
 const yesNo = ["Yes", "No"];
@@ -66,7 +77,12 @@ const yesNo = ["Yes", "No"];
 async function loadPlanning() {
   try {
     const r = await fetch("data/planning.json");
-    console.log("Fetching data/planning.json, status:", r.status, r.statusText, r.url);
+    console.log(
+      "Fetching data/planning.json, status:",
+      r.status,
+      r.statusText,
+      r.url,
+    );
     if (!r.ok) throw new Error("Failed to fetch planning.json");
     const rows = await r.json();
     console.log("Loaded planning.json rows:", rows);
@@ -113,67 +129,170 @@ function initPlanningGrid(rows) {
       {
         title: "",
         field: "select",
-        formatter: function(cell) {
+        formatter: function (cell) {
           const row = cell.getRow();
           const selected = row.getElement().classList.contains("row-selected");
-          return `<span class="select-circle" style="display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid #888;background:${selected ? '#1976d2' : 'transparent'};cursor:pointer;"></span>`;
+          return `<span class="select-circle" style="display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid #888;background:${selected ? "#1976d2" : "transparent"};cursor:pointer;"></span>`;
         },
         width: 40,
         hozAlign: "center",
-        cellClick: function(e, cell) {
+        cellClick: function (e, cell) {
           const row = cell.getRow();
           row.getElement().classList.toggle("row-selected");
           cell.getTable().redraw(true);
         },
-        headerSort: false
+        headerSort: false,
       },
-      { title: "Campaign Name", field: "campaignName", editor: "input", width: 160, headerFilter: "input", headerFilterPlaceholder: "Search..." },
-      { title: "Program Type", field: "programType", editor: "list", editorParams: { values: programTypes }, width: 200, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(programTypes.map(v => [v, v])) } } },
-      { title: "Strategic Pillar", field: "strategicPillars", editor: "list", editorParams: { values: strategicPillars }, width: 220, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(strategicPillars.map(v => [v, v])) } } },
-      { title: "Description", field: "description", editor: "input", width: 180,
-        cellMouseOver: function(e, cell) {
-          if (!cell.getElement().classList.contains('tabulator-editing')) {
-            let tooltip = document.createElement('div');
-            tooltip.className = 'desc-tooltip';
+      {
+        title: "Campaign Name",
+        field: "campaignName",
+        editor: "input",
+        width: 160,
+        headerFilter: "input",
+        headerFilterPlaceholder: "Search...",
+      },
+      {
+        title: "Program Type",
+        field: "programType",
+        editor: "list",
+        editorParams: { values: programTypes },
+        width: 200,
+        headerFilter: "list",
+        headerFilterParams: {
+          values: {
+            "": "(Clear Filter)",
+            ...Object.fromEntries(programTypes.map((v) => [v, v])),
+          },
+        },
+      },
+      {
+        title: "Strategic Pillar",
+        field: "strategicPillars",
+        editor: "list",
+        editorParams: { values: strategicPillars },
+        width: 220,
+        headerFilter: "list",
+        headerFilterParams: {
+          values: {
+            "": "(Clear Filter)",
+            ...Object.fromEntries(strategicPillars.map((v) => [v, v])),
+          },
+        },
+      },
+      {
+        title: "Description",
+        field: "description",
+        editor: "input",
+        width: 180,
+        cellMouseOver: function (e, cell) {
+          if (!cell.getElement().classList.contains("tabulator-editing")) {
+            let tooltip = document.createElement("div");
+            tooltip.className = "desc-tooltip";
             tooltip.innerText = cell.getValue();
-            tooltip.setAttribute('data-tooltip-for', cell.getRow().getPosition() + '-' + cell.getField());
+            tooltip.setAttribute(
+              "data-tooltip-for",
+              cell.getRow().getPosition() + "-" + cell.getField(),
+            );
             document.body.appendChild(tooltip);
             const rect = cell.getElement().getBoundingClientRect();
-            tooltip.style.left = (rect.left + window.scrollX + 10) + 'px';
-            tooltip.style.top = (rect.top + window.scrollY + 30) + 'px';
+            tooltip.style.left = rect.left + window.scrollX + 10 + "px";
+            tooltip.style.top = rect.top + window.scrollY + 30 + "px";
           }
         },
-        cellMouseOut: function(e, cell) {
-          const tooltips = document.querySelectorAll('.desc-tooltip');
-          tooltips.forEach(t => t.remove());
+        cellMouseOut: function (e, cell) {
+          const tooltips = document.querySelectorAll(".desc-tooltip");
+          tooltips.forEach((t) => t.remove());
         },
-        cellEditing: function(cell) {
-          const selector = '.desc-tooltip[data-tooltip-for="' + cell.getRow().getPosition() + '-' + cell.getField() + '"]';
+        cellEditing: function (cell) {
+          const selector =
+            '.desc-tooltip[data-tooltip-for="' +
+            cell.getRow().getPosition() +
+            "-" +
+            cell.getField() +
+            '"]';
           const tooltips = document.querySelectorAll(selector);
-          tooltips.forEach(t => t.remove());
-        }
+          tooltips.forEach((t) => t.remove());
+        },
       },
-      { title: "Owner", field: "owner", editor: "list", editorParams: { values: names }, width: 140, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(names.map(v => [v, v])) } } },
-      { title: "Quarter", field: "quarter", editor: "list", editorParams: { values: quarterOptions }, width: 120, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(quarterOptions.map(v => [v, v])) } } },
-      { title: "Region", field: "region", editor: "list", editorParams: { values: regionOptions }, width: 120, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(regionOptions.map(v => [v, v])) } } },
-      { title: "Country", field: "country", editor: "list", editorParams: {
-        values: getAllCountries()
-      }, width: 130, headerFilter: "list", headerFilterParams: {
-        values: (function() {
-          const allCountries = getAllCountries();
-          const obj = {"":"(Clear Filter)"};
-          allCountries.forEach(v => { obj[v] = v; });
-          return obj;
-        })()
-      }
-    },
-      { title: "Forecasted Cost", field: "forecastedCost", editor: "number", width: 200,
-        formatter: function(cell) {
+      {
+        title: "Owner",
+        field: "owner",
+        editor: "list",
+        editorParams: { values: names },
+        width: 140,
+        headerFilter: "list",
+        headerFilterParams: {
+          values: {
+            "": "(Clear Filter)",
+            ...Object.fromEntries(names.map((v) => [v, v])),
+          },
+        },
+      },
+      {
+        title: "Quarter",
+        field: "quarter",
+        editor: "list",
+        editorParams: { values: quarterOptions },
+        width: 120,
+        headerFilter: "list",
+        headerFilterParams: {
+          values: {
+            "": "(Clear Filter)",
+            ...Object.fromEntries(quarterOptions.map((v) => [v, v])),
+          },
+        },
+      },
+      {
+        title: "Region",
+        field: "region",
+        editor: "list",
+        editorParams: { values: regionOptions },
+        width: 120,
+        headerFilter: "list",
+        headerFilterParams: {
+          values: {
+            "": "(Clear Filter)",
+            ...Object.fromEntries(regionOptions.map((v) => [v, v])),
+          },
+        },
+      },
+      {
+        title: "Country",
+        field: "country",
+        editor: "list",
+        editorParams: {
+          values: getAllCountries(),
+        },
+        width: 130,
+        headerFilter: "list",
+        headerFilterParams: {
+          values: (function () {
+            const allCountries = getAllCountries();
+            const obj = { "": "(Clear Filter)" };
+            allCountries.forEach((v) => {
+              obj[v] = v;
+            });
+            return obj;
+          })(),
+        },
+      },
+      {
+        title: "Forecasted Cost",
+        field: "forecastedCost",
+        editor: "number",
+        width: 200,
+        formatter: function (cell) {
           const v = cell.getValue();
           if (v === null || v === undefined || v === "") return "";
           return "$" + Number(v).toLocaleString();
         },
-        headerFilter: function(cell, onRendered, success, cancel, editorParams){
+        headerFilter: function (
+          cell,
+          onRendered,
+          success,
+          cancel,
+          editorParams,
+        ) {
           var container = document.createElement("div");
           container.style.display = "flex";
           container.style.flexDirection = "column";
@@ -199,33 +318,51 @@ function initPlanningGrid(rows) {
           clearBtn.style.marginTop = "4px";
           clearBtn.style.padding = "2px 10px";
           clearBtn.style.fontSize = "0.95em";
-          clearBtn.onclick = function(e) {
+          clearBtn.onclick = function (e) {
             min.value = "";
             max.value = "";
-            success({min: "", max: ""});
+            success({ min: "", max: "" });
           };
           function updateFilter() {
-            success({min: min.value, max: max.value});
+            success({ min: min.value, max: max.value });
           }
-          min.addEventListener('input', updateFilter);
-          min.addEventListener('change', updateFilter);
-          max.addEventListener('input', updateFilter);
-          max.addEventListener('change', updateFilter);
+          min.addEventListener("input", updateFilter);
+          min.addEventListener("change", updateFilter);
+          max.addEventListener("input", updateFilter);
+          max.addEventListener("change", updateFilter);
           container.appendChild(row1);
           container.appendChild(clearBtn);
           return container;
         },
-        headerFilterFunc: function(headerValue, rowValue){
-          let min = (headerValue && headerValue.min !== undefined && headerValue.min !== "") ? parseFloat(headerValue.min) : null;
-          let max = (headerValue && headerValue.max !== undefined && headerValue.max !== "") ? parseFloat(headerValue.max) : null;
-          let value = (rowValue !== undefined && rowValue !== null && rowValue !== "") ? parseFloat(rowValue) : null;
+        headerFilterFunc: function (headerValue, rowValue) {
+          let min =
+            headerValue &&
+            headerValue.min !== undefined &&
+            headerValue.min !== ""
+              ? parseFloat(headerValue.min)
+              : null;
+          let max =
+            headerValue &&
+            headerValue.max !== undefined &&
+            headerValue.max !== ""
+              ? parseFloat(headerValue.max)
+              : null;
+          let value =
+            rowValue !== undefined && rowValue !== null && rowValue !== ""
+              ? parseFloat(rowValue)
+              : null;
           if (value === null || isNaN(value)) return false;
           if (min !== null && value < min) return false;
           if (max !== null && value > max) return false;
           return true;
-        }
+        },
       },
-      { title: "Expected Leads", field: "expectedLeads", editor: "number", width: 150, cellEdited: (cell) => {
+      {
+        title: "Expected Leads",
+        field: "expectedLeads",
+        editor: "number",
+        width: 150,
+        cellEdited: (cell) => {
           const r = cell.getRow();
           const kpiVals = kpis(cell.getValue());
           r.update({
@@ -240,29 +377,67 @@ function initPlanningGrid(rows) {
       { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
       { title: "SQL", field: "sqlForecast", editable: false, width: 90 },
       { title: "Opps", field: "oppsForecast", editable: false, width: 90 },
-      { title: "Pipeline", field: "pipelineForecast", editable: false, width: 120,
-        formatter: function(cell) {
+      {
+        title: "Pipeline",
+        field: "pipelineForecast",
+        editable: false,
+        width: 120,
+        formatter: function (cell) {
           const v = cell.getValue();
           if (v === null || v === undefined || v === "") return "";
           return "$" + Number(v).toLocaleString();
-        }
+        },
       },
-      { title: "Revenue Play", field: "revenuePlay", editor: "list", editorParams: { values: revenuePlays }, width: 140, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(revenuePlays.map(v => [v, v])) } } },
-      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, cellEdited: (cell) => { cell.getRow().getData().__modified = true; } },
-      { title: "PO raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, width: 110, headerFilter: "list", headerFilterParams: { values: {"":"(Clear Filter)", ...Object.fromEntries(yesNo.map(v => [v, v])) } } },
+      {
+        title: "Revenue Play",
+        field: "revenuePlay",
+        editor: "list",
+        editorParams: { values: revenuePlays },
+        width: 140,
+        headerFilter: "list",
+        headerFilterParams: {
+          values: {
+            "": "(Clear Filter)",
+            ...Object.fromEntries(revenuePlays.map((v) => [v, v])),
+          },
+        },
+      },
+      {
+        title: "Status",
+        field: "status",
+        editor: "list",
+        editorParams: { values: statusOptions },
+        cellEdited: (cell) => {
+          cell.getRow().getData().__modified = true;
+        },
+      },
+      {
+        title: "PO raised",
+        field: "poRaised",
+        editor: "list",
+        editorParams: { values: yesNo },
+        width: 110,
+        headerFilter: "list",
+        headerFilterParams: {
+          values: {
+            "": "(Clear Filter)",
+            ...Object.fromEntries(yesNo.map((v) => [v, v])),
+          },
+        },
+      },
       // Bin icon (delete)
       {
         title: "",
         field: "delete",
-        formatter: function() {
+        formatter: function () {
           return '<button class="delete-row-btn" title="Delete"><span style="font-size:1.2em; color:#b71c1c;">🗑️</span></button>';
         },
         width: 50,
         hozAlign: "center",
-        cellClick: function(e, cell) {
+        cellClick: function (e, cell) {
           cell.getRow().delete();
         },
-        headerSort: false
+        headerSort: false,
       },
     ],
   });
@@ -321,30 +496,62 @@ function initExecutionGrid(rows) {
       }
     },
     columns: [
-      { title: "Campaign Name", field: "campaignName", editor: false, width: 160 },
-      { title: "Details", field: "details", width: 240, editable: false, formatter: function(cell) {
-        const data = cell.getRow().getData();
-        // Render region and owner as button-like spans, then description below
-        return `
+      {
+        title: "Campaign Name",
+        field: "campaignName",
+        editor: false,
+        width: 160,
+      },
+      {
+        title: "Details",
+        field: "details",
+        width: 240,
+        editable: false,
+        formatter: function (cell) {
+          const data = cell.getRow().getData();
+          // Render region and owner as button-like spans, then description below
+          return `
           <div style="display:flex;gap:6px;margin-bottom:6px;">
             <span style="background:#1976d2;color:#fff;padding:2px 10px;border-radius:12px;font-size:0.95em;display:inline-block;">${data.region || ""}</span>
             <span style="background:#90caf9;color:#1a237e;padding:2px 10px;border-radius:12px;font-size:0.95em;display:inline-block;">${data.owner || ""}</span>
           </div>
           <div style="font-size:0.98em;color:#1a237e;white-space:pre-line;">${data.description || ""}</div>
         `;
-      } },
-      { title: "Status", field: "status", editor: "list", editorParams: { values: statusOptions }, cellEdited: (cell) => { cell.getRow().getData().__modified = true; } },
-      { title: "PO Raised", field: "poRaised", editor: "list", editorParams: { values: yesNo }, cellEdited: (cell) => { cell.getRow().getData().__modified = true; } },
-      { title: "Forecasted Cost", field: "forecastedCost", editor: false, formatter: function(cell) {
-        const v = cell.getValue();
-        if (v === null || v === undefined || v === "") return "";
-        return "$" + Number(v).toLocaleString();
-      } },
+        },
+      },
+      {
+        title: "Status",
+        field: "status",
+        editor: "list",
+        editorParams: { values: statusOptions },
+        cellEdited: (cell) => {
+          cell.getRow().getData().__modified = true;
+        },
+      },
+      {
+        title: "PO Raised",
+        field: "poRaised",
+        editor: "list",
+        editorParams: { values: yesNo },
+        cellEdited: (cell) => {
+          cell.getRow().getData().__modified = true;
+        },
+      },
+      {
+        title: "Forecasted Cost",
+        field: "forecastedCost",
+        editor: false,
+        formatter: function (cell) {
+          const v = cell.getValue();
+          if (v === null || v === undefined || v === "") return "";
+          return "$" + Number(v).toLocaleString();
+        },
+      },
       {
         title: "Actual Cost",
         field: "actualCost",
         editor: "number",
-        formatter: function(cell) {
+        formatter: function (cell) {
           const v = cell.getValue();
           if (v === null || v === undefined || v === "") return "";
           return "$" + Number(v).toLocaleString();
@@ -373,11 +580,16 @@ function initExecutionGrid(rows) {
       },
       { title: "SQL", field: "sqlForecast", editable: false },
       { title: "Opps", field: "oppsForecast", editable: false },
-      { title: "Pipeline", field: "pipelineForecast", editable: false, formatter: function(cell) {
-        const v = cell.getValue();
-        if (v === null || v === undefined || v === "") return "";
-        return "$" + Number(v).toLocaleString();
-      } },
+      {
+        title: "Pipeline",
+        field: "pipelineForecast",
+        editable: false,
+        formatter: function (cell) {
+          const v = cell.getValue();
+          if (v === null || v === undefined || v === "") return "";
+          return "$" + Number(v).toLocaleString();
+        },
+      },
     ],
   });
   setupExecutionSave(table, rows);
@@ -408,7 +620,7 @@ function initBudgetsTable(budgets, rows) {
   import("./src/calc.js").then(({ regionMetrics }) => {
     const budgetsObj = {};
     budgets.forEach(
-      (b) => (budgetsObj[b.region] = { assignedBudget: b.assignedBudget })
+      (b) => (budgetsObj[b.region] = { assignedBudget: b.assignedBudget }),
     );
     const metrics = regionMetrics(rows, budgetsObj);
     table.getRows().forEach((row) => {
@@ -480,7 +692,7 @@ function initGithubSync() {
 
 // Country options by region (partial mapping)
 const countryOptionsByRegion = {
-  "ASEAN": [
+  ASEAN: [
     "Brunei Darussalam",
     "Cambodia",
     "Indonesia",
@@ -490,17 +702,10 @@ const countryOptionsByRegion = {
     "Philippines",
     "Singapore",
     "Thailand",
-    "Vietnam"
+    "Vietnam",
   ],
-  "ANZ": [
-    "Australia",
-    "New Zealand"
-  ],
-  "GCR": [
-    "China",
-    "Hong Kong",
-    "Taiwan"
-  ],
+  ANZ: ["Australia", "New Zealand"],
+  GCR: ["China", "Hong Kong", "Taiwan"],
   "South APAC": [
     "Brunei Darussalam",
     "Cambodia",
@@ -516,13 +721,10 @@ const countryOptionsByRegion = {
     "New Zealand",
     "China",
     "Hong Kong",
-    "Taiwan"
+    "Taiwan",
   ],
-  "North APAC": [
-    "Japan",
-    "South Korea"
-  ],
-  "SAARC": [
+  "North APAC": ["Japan", "South Korea"],
+  SAARC: [
     "Afghanistan",
     "Bangladesh",
     "Bhutan",
@@ -530,14 +732,17 @@ const countryOptionsByRegion = {
     "Maldives",
     "Nepal",
     "Pakistan",
-    "Sri Lanka"
+    "Sri Lanka",
   ],
   // ...other regions to be filled in as provided...
 };
 
 // Ensure all country dropdowns have at least an empty option if no region is selected
-Object.keys(countryOptionsByRegion).forEach(region => {
-  if (!Array.isArray(countryOptionsByRegion[region]) || countryOptionsByRegion[region].length === 0) {
+Object.keys(countryOptionsByRegion).forEach((region) => {
+  if (
+    !Array.isArray(countryOptionsByRegion[region]) ||
+    countryOptionsByRegion[region].length === 0
+  ) {
     countryOptionsByRegion[region] = [""];
   }
 });
@@ -545,7 +750,7 @@ Object.keys(countryOptionsByRegion).forEach(region => {
 // Utility: Get all unique countries from all regions
 function getAllCountries() {
   const all = [];
-  Object.values(countryOptionsByRegion).forEach(arr => {
+  Object.values(countryOptionsByRegion).forEach((arr) => {
     if (Array.isArray(arr)) all.push(...arr);
   });
   // Remove duplicates
@@ -703,9 +908,7 @@ function setupBudgetsSave(table) {
     btn.id = "saveBudgetDashboard";
     btn.textContent = "Save Budget Dashboard";
     btn.style.margin = "12px 0";
-    document
-      .getElementById("view-budgets")
-      .appendChild(btn);
+    document.getElementById("view-budgets").appendChild(btn);
   }
   btn.onclick = () => {
     // Save all budgets data to budgets.json
@@ -720,7 +923,9 @@ function setupBudgetsSave(table) {
       };
     });
     downloadJSON(obj, "data/budgets.json");
-    alert("Budgets data downloaded as budgets.json. Commit this file in GitHub.");
+    alert(
+      "Budgets data downloaded as budgets.json. Commit this file in GitHub.",
+    );
   };
 }
 
@@ -759,36 +964,43 @@ function setupReportExport(table) {
 }
 
 // Download hidden budgets table as CSV
-const downloadBudgetsInfoBtn = document.getElementById('downloadBudgetsInfoCSV');
+const downloadBudgetsInfoBtn = document.getElementById(
+  "downloadBudgetsInfoCSV",
+);
 if (downloadBudgetsInfoBtn) {
-  downloadBudgetsInfoBtn.addEventListener('click', () => {
+  downloadBudgetsInfoBtn.addEventListener("click", () => {
     let budgetsData = [];
     if (window.budgetsTableInstance) {
       budgetsData = window.budgetsTableInstance.getData();
     } else if (window.budgetsObj) {
-      budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({ region, ...data }));
+      budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({
+        region,
+        ...data,
+      }));
     }
     if (!budgetsData || budgetsData.length === 0) {
-      alert('No budgets data available to export.');
+      alert("No budgets data available to export.");
       return;
     }
     // Prepare CSV with all columns
     const headers = ["Region", "Assigned Budget", "Notes", "Utilisation"];
     const csvRows = [headers.join(",")];
-    budgetsData.forEach(row => {
-      csvRows.push([
-        `"${row.region ?? ''}"`,
-        `"${row.assignedBudget ?? ''}"`,
-        `"${row.notes ?? ''}"`,
-        `"${row.utilisation ?? ''}"`
-      ].join(","));
+    budgetsData.forEach((row) => {
+      csvRows.push(
+        [
+          `"${row.region ?? ""}"`,
+          `"${row.assignedBudget ?? ""}"`,
+          `"${row.notes ?? ""}"`,
+          `"${row.utilisation ?? ""}"`,
+        ].join(","),
+      );
     });
     const csvContent = csvRows.join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'download info.csv';
+    a.download = "download info.csv";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -798,14 +1010,16 @@ if (downloadBudgetsInfoBtn) {
 
 // --- LIVE SYNC LOGIC ---
 function syncGridsOnEdit(sourceTable, targetTable) {
-  sourceTable.on("cellEdited", function(cell) {
+  sourceTable.on("cellEdited", function (cell) {
     const rowData = cell.getRow().getData();
     // Find the matching row in the target table by unique id (use 'id' or 'campaignName' as fallback)
     let match;
     if (rowData.id) {
-      match = targetTable.getRows().find(r => r.getData().id === rowData.id);
+      match = targetTable.getRows().find((r) => r.getData().id === rowData.id);
     } else {
-      match = targetTable.getRows().find(r => r.getData().campaignName === rowData.campaignName);
+      match = targetTable
+        .getRows()
+        .find((r) => r.getData().campaignName === rowData.campaignName);
     }
     if (match) {
       match.update({ ...rowData });
@@ -880,10 +1094,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   let rows = [];
   let budgetsObj = {};
   try {
-    [rows, budgetsObj] = await Promise.all([
-      loadPlanning(),
-      loadBudgets(),
-    ]);
+    [rows, budgetsObj] = await Promise.all([loadPlanning(), loadBudgets()]);
   } catch (e) {
     rows = [];
     budgetsObj = {};
@@ -919,7 +1130,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         <td><input type="number" value="" /></td>
         <td><button class="plan-delete-btn" title="Delete"><span style="font-size:1.2em;color:#b71c1c;">🗑️</span></button></td>
       `;
-      newRow.querySelector('.plan-delete-btn').onclick = function() {
+      newRow.querySelector(".plan-delete-btn").onclick = function () {
         newRow.remove();
       };
       tbody.appendChild(newRow);
@@ -939,7 +1150,7 @@ window.addEventListener("DOMContentLoaded", async () => {
           <td><button class="plan-delete-btn" title="Delete"><span style="font-size:1.2em;color:#b71c1c;">🗑️</span></button></td>
         `;
         // Add delete handler
-        tr.querySelector('.plan-delete-btn').onclick = function() {
+        tr.querySelector(".plan-delete-btn").onclick = function () {
           tr.remove();
         };
         planTableBody.appendChild(tr);
@@ -970,114 +1181,130 @@ window.addEventListener("DOMContentLoaded", async () => {
 });
 
 // CSV Import functionality
-document.getElementById('importCSVBtn').addEventListener('click', () => {
-  document.getElementById('csvFileInput').click();
+document.getElementById("importCSVBtn").addEventListener("click", () => {
+  document.getElementById("csvFileInput").click();
 });
 
-document.getElementById('csvFileInput').addEventListener('change', function (e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function (event) {
-    const csv = event.target.result;
-    // Use Tabulator's built-in CSV parser if available, else fallback
-    let rows;
-    if (Tabulator.prototype.parseCSV) {
-      rows = Tabulator.prototype.parseCSV(csv);
-    } else {
-      rows = csvToObj(csv);
-    }
-    // Optionally: map CSV headers to your table fields here if needed
-    // Before adding, update calculated fields for each row
-    rows.forEach(row => {
-      // Special logic for In-Account Events (1:1): no leads, pipeline = 20x forecasted cost
-      if (row.programType === "In-Account Events (1:1)") {
-        row.expectedLeads = 0;
-        row.mqlForecast = 0;
-        row.sqlForecast = 0;
-        row.oppsForecast = 0;
-        row.pipelineForecast = row.forecastedCost ? Number(row.forecastedCost) * 20 : 0;
-      } else if (typeof row.expectedLeads === "number" || (!isNaN(row.expectedLeads) && row.expectedLeads !== undefined && row.expectedLeads !== "")) {
-        const kpiVals = kpis(Number(row.expectedLeads));
-        row.mqlForecast = kpiVals.mql;
-        row.sqlForecast = kpiVals.sql;
-        row.oppsForecast = kpiVals.opps;
-        row.pipelineForecast = kpiVals.pipeline;
+document
+  .getElementById("csvFileInput")
+  .addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      const csv = event.target.result;
+      // Use Tabulator's built-in CSV parser if available, else fallback
+      let rows;
+      if (Tabulator.prototype.parseCSV) {
+        rows = Tabulator.prototype.parseCSV(csv);
+      } else {
+        rows = csvToObj(csv);
       }
-    });
-    if (planningTableInstance) {
-      planningTableInstance.addData(rows);
-    }
-  };
-  reader.readAsText(file);
-});
+      // Optionally: map CSV headers to your table fields here if needed
+      // Before adding, update calculated fields for each row
+      rows.forEach((row) => {
+        // Special logic for In-Account Events (1:1): no leads, pipeline = 20x forecasted cost
+        if (row.programType === "In-Account Events (1:1)") {
+          row.expectedLeads = 0;
+          row.mqlForecast = 0;
+          row.sqlForecast = 0;
+          row.oppsForecast = 0;
+          row.pipelineForecast = row.forecastedCost
+            ? Number(row.forecastedCost) * 20
+            : 0;
+        } else if (
+          typeof row.expectedLeads === "number" ||
+          (!isNaN(row.expectedLeads) &&
+            row.expectedLeads !== undefined &&
+            row.expectedLeads !== "")
+        ) {
+          const kpiVals = kpis(Number(row.expectedLeads));
+          row.mqlForecast = kpiVals.mql;
+          row.sqlForecast = kpiVals.sql;
+          row.oppsForecast = kpiVals.opps;
+          row.pipelineForecast = kpiVals.pipeline;
+        }
+      });
+      if (planningTableInstance) {
+        planningTableInstance.addData(rows);
+      }
+    };
+    reader.readAsText(file);
+  });
 
 // Simple CSV to object parser (fallback)
 function csvToObj(csv) {
-  const lines = csv.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
-  return lines.slice(1).map(line => {
-    const values = line.split(',').map(v => v.replace(/^"|"$/g, '').trim());
+  const lines = csv.trim().split("\n");
+  const headers = lines[0]
+    .split(",")
+    .map((h) => h.replace(/^"|"$/g, "").trim());
+  return lines.slice(1).map((line) => {
+    const values = line.split(",").map((v) => v.replace(/^"|"$/g, "").trim());
     const obj = {};
-    headers.forEach((h, i) => obj[h] = values[i]);
+    headers.forEach((h, i) => (obj[h] = values[i]));
     return obj;
   });
 }
 
 // Add region, status, and PO Raised filter buttons below the execution tracking title
-const execRegionFilterDiv = document.createElement('div');
-execRegionFilterDiv.id = 'execRegionFilterDiv';
-execRegionFilterDiv.style.margin = '0 0 16px 0';
-execRegionFilterDiv.style.display = 'flex';
-execRegionFilterDiv.style.gap = '18px';
+const execRegionFilterDiv = document.createElement("div");
+execRegionFilterDiv.id = "execRegionFilterDiv";
+execRegionFilterDiv.style.margin = "0 0 16px 0";
+execRegionFilterDiv.style.display = "flex";
+execRegionFilterDiv.style.gap = "18px";
 execRegionFilterDiv.innerHTML = `
   <label for="execRegionFilter" style="font-weight:500;margin-right:8px;">Filter by Region:</label>
   <select id="execRegionFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #90caf9;font-size:1rem;">
     <option value="">(All Regions)</option>
-    ${regionOptions.map(r => `<option value="${r}">${r}</option>`).join('')}
+    ${regionOptions.map((r) => `<option value="${r}">${r}</option>`).join("")}
   </select>
   <label for="execStatusFilter" style="font-weight:500;margin-left:18px;margin-right:8px;">Status:</label>
   <select id="execStatusFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #90caf9;font-size:1rem;">
     <option value="">(All Statuses)</option>
-    ${statusOptions.map(s => `<option value="${s}">${s}</option>`).join('')}
+    ${statusOptions.map((s) => `<option value="${s}">${s}</option>`).join("")}
   </select>
   <label for="execPOFilter" style="font-weight:500;margin-left:18px;margin-right:8px;">PO Raised:</label>
   <select id="execPOFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #90caf9;font-size:1rem;">
     <option value="">(All)</option>
-    ${yesNo.map(v => `<option value="${v}">${v}</option>`).join('')}
+    ${yesNo.map((v) => `<option value="${v}">${v}</option>`).join("")}
   </select>
 `;
-const execGridSection = document.getElementById('view-execution');
+const execGridSection = document.getElementById("view-execution");
 if (execGridSection) {
-  const h2 = execGridSection.querySelector('h2');
+  const h2 = execGridSection.querySelector("h2");
   if (h2 && execGridSection.contains(h2)) {
-    h2.insertAdjacentElement('afterend', execRegionFilterDiv);
+    h2.insertAdjacentElement("afterend", execRegionFilterDiv);
   } else {
-    execGridSection.insertBefore(execRegionFilterDiv, execGridSection.firstChild);
+    execGridSection.insertBefore(
+      execRegionFilterDiv,
+      execGridSection.firstChild,
+    );
   }
 }
 
 // Add filter logic for execution grid
 function updateExecFilters() {
-  const regionVal = document.getElementById('execRegionFilter').value;
-  const statusVal = document.getElementById('execStatusFilter').value;
-  const poVal = document.getElementById('execPOFilter').value;
+  const regionVal = document.getElementById("execRegionFilter").value;
+  const statusVal = document.getElementById("execStatusFilter").value;
+  const poVal = document.getElementById("execPOFilter").value;
   if (window.executionTableInstance) {
-    window.executionTableInstance.setFilter([
-      regionVal ? { field: 'region', type: '=', value: regionVal } : null,
-      statusVal ? { field: 'status', type: '=', value: statusVal } : null,
-      poVal ? { field: 'poRaised', type: '=', value: poVal } : null,
-    ].filter(Boolean));
+    window.executionTableInstance.setFilter(
+      [
+        regionVal ? { field: "region", type: "=", value: regionVal } : null,
+        statusVal ? { field: "status", type: "=", value: statusVal } : null,
+        poVal ? { field: "poRaised", type: "=", value: poVal } : null,
+      ].filter(Boolean),
+    );
   }
 }
-['execRegionFilter', 'execStatusFilter', 'execPOFilter'].forEach(id => {
-  document.getElementById(id).addEventListener('change', updateExecFilters);
+["execRegionFilter", "execStatusFilter", "execPOFilter"].forEach((id) => {
+  document.getElementById(id).addEventListener("change", updateExecFilters);
 });
 
 // Add Chart.js for bar graph rendering
 if (!window.Chart) {
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+  const script = document.createElement("script");
+  script.src = "https://cdn.jsdelivr.net/npm/chart.js";
   script.onload = renderBudgetsBarChart;
   document.head.appendChild(script);
 } else {
@@ -1085,76 +1312,86 @@ if (!window.Chart) {
 }
 
 function renderBudgetsBarChart() {
-  const ctx = document.getElementById('budgetsBarChart');
+  const ctx = document.getElementById("budgetsBarChart");
   if (!ctx) return;
   // Get budgets data from the table or from the budgets object
   let budgetsData = [];
   if (window.budgetsTableInstance) {
     budgetsData = window.budgetsTableInstance.getData();
   } else if (window.budgetsObj) {
-    budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({ region, ...data }));
+    budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({
+      region,
+      ...data,
+    }));
   }
   if (!budgetsData || budgetsData.length === 0) return;
   // Prepare data for chart
-  const labels = budgetsData.map(row => row.region || row.Region || '');
-  const values = budgetsData.map(row => Number(row.assignedBudget || row.AssignedBudget || 0));
+  const labels = budgetsData.map((row) => row.region || row.Region || "");
+  const values = budgetsData.map((row) =>
+    Number(row.assignedBudget || row.AssignedBudget || 0),
+  );
   // Destroy previous chart if exists
   if (window.budgetsBarChartInstance) {
     window.budgetsBarChartInstance.destroy();
   }
   window.budgetsBarChartInstance = new Chart(ctx, {
-    type: 'bar',
+    type: "bar",
     data: {
       labels: labels,
-      datasets: [{
-        label: 'Assigned Budget (USD)',
-        data: values,
-        backgroundColor: '#1976d2',
-        borderRadius: 8,
-        borderSkipped: false,
-      }]
+      datasets: [
+        {
+          label: "Assigned Budget (USD)",
+          data: values,
+          backgroundColor: "#1976d2",
+          borderRadius: 8,
+          borderSkipped: false,
+        },
+      ],
     },
     options: {
       responsive: true,
       plugins: {
         legend: { display: false },
-        title: { display: false }
+        title: { display: false },
       },
       scales: {
         y: {
           beginAtZero: true,
           max: 600000,
-          title: { display: true, text: 'Dollars (USD)' },
-          ticks: { callback: v => '$' + v.toLocaleString() }
+          title: { display: true, text: "Dollars (USD)" },
+          ticks: { callback: (v) => "$" + v.toLocaleString() },
         },
         x: {
-          title: { display: false }
-        }
-      }
-    }
+          title: { display: false },
+        },
+      },
+    },
   });
 }
 // After budgets table is initialized, render the chart
 const origInitBudgetsTable = initBudgetsTable;
-initBudgetsTable = function(budgets, rows) {
+initBudgetsTable = function (budgets, rows) {
   const table = origInitBudgetsTable(budgets, rows);
   window.budgetsTableInstance = table;
   setTimeout(renderBudgetsBarChart, 200);
-  table.on('dataChanged', renderBudgetsBarChart);
+  table.on("dataChanged", renderBudgetsBarChart);
   return table;
 };
 
 // Render region charts for budgets
 function renderBudgetsRegionCharts() {
-  const container = document.getElementById('budgetsChartsContainer');
+  const container = document.getElementById("budgetsChartsContainer");
   if (!container) return;
-  container.innerHTML = '';
+  container.innerHTML = "";
   // Get budgets data
   let budgetsData = [];
   if (window.budgetsTableInstance) {
     budgetsData = window.budgetsTableInstance.getData();
   } else if (window.budgetsObj) {
-    budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({ region, ...data }));
+    budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({
+      region,
+      ...data,
+    }));
   }
   // Get planning data (for forecasted/actual cost)
   let planningRows = [];
@@ -1164,158 +1401,170 @@ function renderBudgetsRegionCharts() {
     planningRows = window.planningRows;
   }
   // Get all unique regions from budgets and planning
-  const allRegions = Array.from(new Set([
-    ...budgetsData.map(b => b.region),
-    ...planningRows.map(r => r.region)
-  ])).filter(Boolean);
+  const allRegions = Array.from(
+    new Set([
+      ...budgetsData.map((b) => b.region),
+      ...planningRows.map((r) => r.region),
+    ]),
+  ).filter(Boolean);
   // For each region, create a chart
-  allRegions.forEach(region => {
+  allRegions.forEach((region) => {
     // Assigned budget
-    const budgetObj = budgetsData.find(b => b.region === region);
-    const assignedBudget = budgetObj && budgetObj.assignedBudget ? Number(budgetObj.assignedBudget) : 0;
+    const budgetObj = budgetsData.find((b) => b.region === region);
+    const assignedBudget =
+      budgetObj && budgetObj.assignedBudget
+        ? Number(budgetObj.assignedBudget)
+        : 0;
     // Forecasted cost: sum of forecastedCost for this region
-    const regionForecasts = planningRows
-      .filter(r => r.region === region && typeof r.forecastedCost === 'number');
-    const forecastedCost = regionForecasts.reduce((sum, r) => sum + r.forecastedCost, 0);
+    const regionForecasts = planningRows.filter(
+      (r) => r.region === region && typeof r.forecastedCost === "number",
+    );
+    const forecastedCost = regionForecasts.reduce(
+      (sum, r) => sum + r.forecastedCost,
+      0,
+    );
     // Actual cost: sum of actualCost for this region
     const actualCost = planningRows
-      .filter(r => r.region === region && typeof r.actualCost === 'number')
+      .filter((r) => r.region === region && typeof r.actualCost === "number")
       .reduce((sum, r) => sum + r.actualCost, 0);
     // Prepare forecasted cost breakdown
-    let forecastBreakdown = '';
+    let forecastBreakdown = "";
     if (regionForecasts.length > 1) {
-      forecastBreakdown = '<div style="font-size:0.98em;margin-top:8px;text-align:left;">';
-      forecastBreakdown += '<b>Forecasted Cost Breakdown:</b><br>';
-      regionForecasts.forEach(r => {
-        forecastBreakdown += `${r.campaignName ? r.campaignName : '(Unnamed)'}: $${Number(r.forecastedCost).toLocaleString()}<br>`;
+      forecastBreakdown =
+        '<div style="font-size:0.98em;margin-top:8px;text-align:left;">';
+      forecastBreakdown += "<b>Forecasted Cost Breakdown:</b><br>";
+      regionForecasts.forEach((r) => {
+        forecastBreakdown += `${r.campaignName ? r.campaignName : "(Unnamed)"}: $${Number(r.forecastedCost).toLocaleString()}<br>`;
       });
-      forecastBreakdown += '</div>';
+      forecastBreakdown += "</div>";
     }
     // Create chart canvas and fullscreen button
-    const chartDiv = document.createElement('div');
-    chartDiv.style.width = '300px';
-    chartDiv.style.height = 'auto';
-    chartDiv.style.background = '#fff';
-    chartDiv.style.borderRadius = '12px';
-    chartDiv.style.boxShadow = '0 2px 12px rgba(25,118,210,0.08)';
-    chartDiv.style.padding = '18px 12px 8px 12px';
-    chartDiv.style.display = 'flex';
-    chartDiv.style.flexDirection = 'column';
-    chartDiv.style.alignItems = 'center';
-    chartDiv.style.position = 'relative';
+    const chartDiv = document.createElement("div");
+    chartDiv.style.width = "300px";
+    chartDiv.style.height = "auto";
+    chartDiv.style.background = "#fff";
+    chartDiv.style.borderRadius = "12px";
+    chartDiv.style.boxShadow = "0 2px 12px rgba(25,118,210,0.08)";
+    chartDiv.style.padding = "18px 12px 8px 12px";
+    chartDiv.style.display = "flex";
+    chartDiv.style.flexDirection = "column";
+    chartDiv.style.alignItems = "center";
+    chartDiv.style.position = "relative";
     // Title and canvas
     chartDiv.innerHTML = `<h3 style="font-size:1.18rem;margin:0 0 12px 0;color:#1976d2;">${region}</h3><canvas id="chart-${region}"></canvas>${forecastBreakdown}`;
     // Fullscreen button
-    const fullscreenBtn = document.createElement('button');
-    fullscreenBtn.className = 'graph-fullscreen-btn';
-    fullscreenBtn.title = 'Expand graph';
-    fullscreenBtn.innerHTML = '⛶';
-    fullscreenBtn.style.position = 'absolute';
-    fullscreenBtn.style.top = '6px';
-    fullscreenBtn.style.right = '8px';
-    fullscreenBtn.style.fontSize = '1.1em';
-    fullscreenBtn.style.background = 'none';
-    fullscreenBtn.style.border = 'none';
-    fullscreenBtn.style.cursor = 'pointer';
-    fullscreenBtn.style.opacity = '0.7';
-    fullscreenBtn.style.padding = '2px 6px';
-    fullscreenBtn.style.zIndex = '2';
+    const fullscreenBtn = document.createElement("button");
+    fullscreenBtn.className = "graph-fullscreen-btn";
+    fullscreenBtn.title = "Expand graph";
+    fullscreenBtn.innerHTML = "⛶";
+    fullscreenBtn.style.position = "absolute";
+    fullscreenBtn.style.top = "6px";
+    fullscreenBtn.style.right = "8px";
+    fullscreenBtn.style.fontSize = "1.1em";
+    fullscreenBtn.style.background = "none";
+    fullscreenBtn.style.border = "none";
+    fullscreenBtn.style.cursor = "pointer";
+    fullscreenBtn.style.opacity = "0.7";
+    fullscreenBtn.style.padding = "2px 6px";
+    fullscreenBtn.style.zIndex = "2";
     chartDiv.appendChild(fullscreenBtn);
     container.appendChild(chartDiv);
     // Render chart in normal box
     setTimeout(() => {
-      const ctx = chartDiv.querySelector('canvas');
+      const ctx = chartDiv.querySelector("canvas");
       if (!ctx) return;
       if (ctx.chartInstance) ctx.chartInstance.destroy();
       ctx.chartInstance = new Chart(ctx, {
-        type: 'bar',
+        type: "bar",
         data: {
-          labels: ['Assigned', 'Forecasted', 'Actual'],
-          datasets: [{
-            label: 'USD',
-            data: [assignedBudget, forecastedCost, actualCost],
-            backgroundColor: ['#1976d2', '#42a5f5', '#66bb6a'],
-            borderRadius: 8,
-            borderSkipped: false,
-          }]
+          labels: ["Assigned", "Forecasted", "Actual"],
+          datasets: [
+            {
+              label: "USD",
+              data: [assignedBudget, forecastedCost, actualCost],
+              backgroundColor: ["#1976d2", "#42a5f5", "#66bb6a"],
+              borderRadius: 8,
+              borderSkipped: false,
+            },
+          ],
         },
         options: {
           responsive: false,
           plugins: {
             legend: { display: false },
-            title: { display: false }
+            title: { display: false },
           },
           scales: {
             y: {
               beginAtZero: true,
               max: 600000,
-              title: { display: true, text: 'Dollars (USD)' },
-              ticks: { callback: v => '$' + v.toLocaleString() }
+              title: { display: true, text: "Dollars (USD)" },
+              ticks: { callback: (v) => "$" + v.toLocaleString() },
             },
             x: {
-              title: { display: false }
-            }
-          }
-        }
+              title: { display: false },
+            },
+          },
+        },
       });
     }, 0);
     // Fullscreen overlay logic (toggle)
-    fullscreenBtn.onclick = function() {
-      let overlay = document.getElementById('graphFullscreenOverlay');
+    fullscreenBtn.onclick = function () {
+      let overlay = document.getElementById("graphFullscreenOverlay");
       if (overlay) {
         overlay.remove();
         return;
       }
-      overlay = document.createElement('div');
-      overlay.id = 'graphFullscreenOverlay';
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100vw';
-      overlay.style.height = '100vh';
-      overlay.style.background = 'rgba(20,30,60,0.92)';
-      overlay.style.display = 'flex';
-      overlay.style.alignItems = 'center';
-      overlay.style.justifyContent = 'center';
-      overlay.style.zIndex = '9999';
-      overlay.onclick = function(e) {
+      overlay = document.createElement("div");
+      overlay.id = "graphFullscreenOverlay";
+      overlay.style.position = "fixed";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100vw";
+      overlay.style.height = "100vh";
+      overlay.style.background = "rgba(20,30,60,0.92)";
+      overlay.style.display = "flex";
+      overlay.style.alignItems = "center";
+      overlay.style.justifyContent = "center";
+      overlay.style.zIndex = "9999";
+      overlay.onclick = function (e) {
         if (e.target === overlay) overlay.remove();
       };
       document.body.appendChild(overlay);
       // Chart container for fullscreen
-      const fsDiv = document.createElement('div');
-      fsDiv.style.background = '#fff';
-      fsDiv.style.borderRadius = '16px';
-      fsDiv.style.boxShadow = '0 4px 32px rgba(25,118,210,0.18)';
-      fsDiv.style.padding = '32px 32px 18px 32px';
-      fsDiv.style.display = 'flex';
-      fsDiv.style.flexDirection = 'column';
-      fsDiv.style.alignItems = 'center';
-      fsDiv.style.position = 'relative';
-      fsDiv.style.width = '75vw';
-      fsDiv.style.height = '75vh';
+      const fsDiv = document.createElement("div");
+      fsDiv.style.background = "#fff";
+      fsDiv.style.borderRadius = "16px";
+      fsDiv.style.boxShadow = "0 4px 32px rgba(25,118,210,0.18)";
+      fsDiv.style.padding = "32px 32px 18px 32px";
+      fsDiv.style.display = "flex";
+      fsDiv.style.flexDirection = "column";
+      fsDiv.style.alignItems = "center";
+      fsDiv.style.position = "relative";
+      fsDiv.style.width = "75vw";
+      fsDiv.style.height = "75vh";
       // Close button (same as fullscreen button)
-      const closeBtn = document.createElement('button');
-      closeBtn.textContent = '✕';
-      closeBtn.title = 'Close';
-      closeBtn.style.position = 'absolute';
-      closeBtn.style.top = '10px';
-      closeBtn.style.right = '16px';
-      closeBtn.style.fontSize = '1.3em';
-      closeBtn.style.background = 'none';
-      closeBtn.style.border = 'none';
-      closeBtn.style.cursor = 'pointer';
-      closeBtn.style.opacity = '0.7';
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "✕";
+      closeBtn.title = "Close";
+      closeBtn.style.position = "absolute";
+      closeBtn.style.top = "10px";
+      closeBtn.style.right = "16px";
+      closeBtn.style.fontSize = "1.3em";
+      closeBtn.style.background = "none";
+      closeBtn.style.border = "none";
+      closeBtn.style.cursor = "pointer";
+      closeBtn.style.opacity = "0.7";
       closeBtn.onclick = () => overlay.remove();
       fsDiv.appendChild(closeBtn);
       // Title
-      const title = document.createElement('h2');
+      const title = document.createElement("h2");
       title.textContent = region;
-      title.style.color = '#1976d2';
-      title.style.margin = '0 0 18px 0';
+      title.style.color = "#1976d2";
+      title.style.margin = "0 0 18px 0";
       fsDiv.appendChild(title);
       // Canvas
-      const fsCanvas = document.createElement('canvas');
+      const fsCanvas = document.createElement("canvas");
       fsCanvas.width = Math.floor(window.innerWidth * 0.7);
       fsCanvas.height = Math.floor(window.innerHeight * 0.6);
       fsDiv.appendChild(fsCanvas);
@@ -1323,35 +1572,37 @@ function renderBudgetsRegionCharts() {
       // Render chart in fullscreen
       setTimeout(() => {
         new Chart(fsCanvas, {
-          type: 'bar',
+          type: "bar",
           data: {
-            labels: ['Assigned', 'Forecasted', 'Actual'],
-            datasets: [{
-              label: 'USD',
-              data: [assignedBudget, forecastedCost, actualCost],
-              backgroundColor: ['#1976d2', '#42a5f5', '#66bb6a'],
-              borderRadius: 8,
-              borderSkipped: false,
-            }]
+            labels: ["Assigned", "Forecasted", "Actual"],
+            datasets: [
+              {
+                label: "USD",
+                data: [assignedBudget, forecastedCost, actualCost],
+                backgroundColor: ["#1976d2", "#42a5f5", "#66bb6a"],
+                borderRadius: 8,
+                borderSkipped: false,
+              },
+            ],
           },
           options: {
             responsive: false,
             plugins: {
               legend: { display: false },
-              title: { display: false }
+              title: { display: false },
             },
             scales: {
               y: {
                 beginAtZero: true,
                 max: 600000,
-                title: { display: true, text: 'Dollars (USD)' },
-                ticks: { callback: v => '$' + v.toLocaleString() }
+                title: { display: true, text: "Dollars (USD)" },
+                ticks: { callback: (v) => "$" + v.toLocaleString() },
               },
               x: {
-                title: { display: false }
-              }
-            }
-          }
+                title: { display: false },
+              },
+            },
+          },
         });
       }, 0);
     };
@@ -1359,37 +1610,40 @@ function renderBudgetsRegionCharts() {
 }
 // After budgets table is initialized, render the region charts
 const origInitBudgetsTable2 = initBudgetsTable;
-initBudgetsTable = function(budgets, rows) {
+initBudgetsTable = function (budgets, rows) {
   const table = origInitBudgetsTable2(budgets, rows);
   window.budgetsTableInstance = table;
   setTimeout(renderBudgetsRegionCharts, 200);
-  table.on('dataChanged', renderBudgetsRegionCharts);
+  table.on("dataChanged", renderBudgetsRegionCharts);
   return table;
 };
 // Also render on planning table data change
 const origInitPlanningGrid2 = initPlanningGrid;
-initPlanningGrid = function(rows) {
+initPlanningGrid = function (rows) {
   const table = origInitPlanningGrid2(rows);
   window.planningTableInstance = table;
   window.planningRows = rows;
-  table.on('dataChanged', renderBudgetsRegionCharts);
+  table.on("dataChanged", renderBudgetsRegionCharts);
   setTimeout(renderBudgetsRegionCharts, 200);
   return table;
 };
 
 // Sync Annual Budget Plan edits to budgets table and charts
-const saveAnnualBudgetBtn = document.getElementById('saveAnnualBudget');
+const saveAnnualBudgetBtn = document.getElementById("saveAnnualBudget");
 if (saveAnnualBudgetBtn) {
-  saveAnnualBudgetBtn.addEventListener('click', () => {
-    const planTableBody = document.querySelector('#planTable tbody');
+  saveAnnualBudgetBtn.addEventListener("click", () => {
+    const planTableBody = document.querySelector("#planTable tbody");
     if (!planTableBody) return;
-    const rows = Array.from(planTableBody.querySelectorAll('tr'));
-    const budgets = rows.map(tr => {
-      const tds = tr.querySelectorAll('td');
-      const region = tds[0]?.querySelector('input')?.value?.trim() || '';
-      const assignedBudget = Number(tds[1]?.querySelector('input')?.value) || 0;
-      return region ? { region, assignedBudget } : null;
-    }).filter(Boolean);
+    const rows = Array.from(planTableBody.querySelectorAll("tr"));
+    const budgets = rows
+      .map((tr) => {
+        const tds = tr.querySelectorAll("td");
+        const region = tds[0]?.querySelector("input")?.value?.trim() || "";
+        const assignedBudget =
+          Number(tds[1]?.querySelector("input")?.value) || 0;
+        return region ? { region, assignedBudget } : null;
+      })
+      .filter(Boolean);
     if (window.budgetsTableInstance) {
       window.budgetsTableInstance.replaceData(budgets);
     }

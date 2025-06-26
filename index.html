@@ -45,7 +45,12 @@
           <button id="addPlanningRow">Add Row</button>
           <button id="deletePlanningRow">Delete Row</button>
           <button id="importCSVBtn">Import Campaign</button>
-          <input type="file" id="csvFileInput" accept=".csv" style="display:none" />
+          <input
+            type="file"
+            id="csvFileInput"
+            accept=".csv"
+            style="display: none"
+          />
         </div>
         <button id="savePlanningRows" class="save-large">Save Changes</button>
       </div>
@@ -58,9 +63,30 @@
     </section>
     <section id="view-budgets">
       <h2>Budgets Dashboard</h2>
-      <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
-        <div id="budgetsChartsContainer" style="display:flex;flex-wrap:wrap;gap:32px 24px;margin-bottom:24px;"></div>
-        <button id="downloadBudgetsInfoCSV" class="small-download-btn" title="Download Info CSV">⬇️ download info</button>
+      <div
+        style="
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          margin-bottom: 8px;
+        "
+      >
+        <div
+          id="budgetsChartsContainer"
+          style="
+            display: flex;
+            flex-wrap: wrap;
+            gap: 32px 24px;
+            margin-bottom: 24px;
+          "
+        ></div>
+        <button
+          id="downloadBudgetsInfoCSV"
+          class="small-download-btn"
+          title="Download Info CSV"
+        >
+          ⬇️ download info
+        </button>
       </div>
       <div id="budgetsTable"></div>
       <div style="display: flex; gap: 12px; margin-top: 12px">
@@ -86,7 +112,8 @@
           <tr>
             <th>Region</th>
             <th>Plan (USD)</th>
-            <th></th> <!-- Delete column header -->
+            <th></th>
+            <!-- Delete column header -->
           </tr>
         </thead>
         <tbody>
