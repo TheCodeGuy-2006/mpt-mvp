@@ -758,6 +758,44 @@ function setupReportExport(table) {
   };
 }
 
+// Download hidden budgets table as CSV
+const downloadBudgetsInfoBtn = document.getElementById('downloadBudgetsInfoCSV');
+if (downloadBudgetsInfoBtn) {
+  downloadBudgetsInfoBtn.addEventListener('click', () => {
+    let budgetsData = [];
+    if (window.budgetsTableInstance) {
+      budgetsData = window.budgetsTableInstance.getData();
+    } else if (window.budgetsObj) {
+      budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({ region, ...data }));
+    }
+    if (!budgetsData || budgetsData.length === 0) {
+      alert('No budgets data available to export.');
+      return;
+    }
+    // Prepare CSV with all columns
+    const headers = ["Region", "Assigned Budget", "Notes", "Utilisation"];
+    const csvRows = [headers.join(",")];
+    budgetsData.forEach(row => {
+      csvRows.push([
+        `"${row.region ?? ''}"`,
+        `"${row.assignedBudget ?? ''}"`,
+        `"${row.notes ?? ''}"`,
+        `"${row.utilisation ?? ''}"`
+      ].join(","));
+    });
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'download info.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+}
+
 // --- LIVE SYNC LOGIC ---
 function syncGridsOnEdit(sourceTable, targetTable) {
   sourceTable.on("cellEdited", function(cell) {
@@ -879,7 +917,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       newRow.innerHTML = `
         <td><input type="text" placeholder="Region name" /></td>
         <td><input type="number" value="" /></td>
+        <td><button class="plan-delete-btn" title="Delete"><span style="font-size:1.2em;color:#b71c1c;">🗑️</span></button></td>
       `;
+      newRow.querySelector('.plan-delete-btn').onclick = function() {
+        newRow.remove();
+      };
       tbody.appendChild(newRow);
     };
   }
@@ -894,7 +936,12 @@ window.addEventListener("DOMContentLoaded", async () => {
         tr.innerHTML = `
           <td><input type="text" value="${row.region}" /></td>
           <td><input type="number" value="${row.assignedBudget ?? 0}" /></td>
+          <td><button class="plan-delete-btn" title="Delete"><span style="font-size:1.2em;color:#b71c1c;">🗑️</span></button></td>
         `;
+        // Add delete handler
+        tr.querySelector('.plan-delete-btn').onclick = function() {
+          tr.remove();
+        };
         planTableBody.appendChild(tr);
       });
     }
@@ -1076,11 +1123,12 @@ function renderBudgetsBarChart() {
       scales: {
         y: {
           beginAtZero: true,
+          max: 600000,
           title: { display: true, text: 'Dollars (USD)' },
           ticks: { callback: v => '$' + v.toLocaleString() }
         },
         x: {
-          title: { display: true, text: 'Region/Budget' }
+          title: { display: false }
         }
       }
     }
@@ -1143,7 +1191,7 @@ function renderBudgetsRegionCharts() {
       });
       forecastBreakdown += '</div>';
     }
-    // Create chart canvas
+    // Create chart canvas and fullscreen button
     const chartDiv = document.createElement('div');
     chartDiv.style.width = '300px';
     chartDiv.style.height = 'auto';
@@ -1154,9 +1202,27 @@ function renderBudgetsRegionCharts() {
     chartDiv.style.display = 'flex';
     chartDiv.style.flexDirection = 'column';
     chartDiv.style.alignItems = 'center';
+    chartDiv.style.position = 'relative';
+    // Title and canvas
     chartDiv.innerHTML = `<h3 style="font-size:1.18rem;margin:0 0 12px 0;color:#1976d2;">${region}</h3><canvas id="chart-${region}"></canvas>${forecastBreakdown}`;
+    // Fullscreen button
+    const fullscreenBtn = document.createElement('button');
+    fullscreenBtn.className = 'graph-fullscreen-btn';
+    fullscreenBtn.title = 'Expand graph';
+    fullscreenBtn.innerHTML = '⛶';
+    fullscreenBtn.style.position = 'absolute';
+    fullscreenBtn.style.top = '6px';
+    fullscreenBtn.style.right = '8px';
+    fullscreenBtn.style.fontSize = '1.1em';
+    fullscreenBtn.style.background = 'none';
+    fullscreenBtn.style.border = 'none';
+    fullscreenBtn.style.cursor = 'pointer';
+    fullscreenBtn.style.opacity = '0.7';
+    fullscreenBtn.style.padding = '2px 6px';
+    fullscreenBtn.style.zIndex = '2';
+    chartDiv.appendChild(fullscreenBtn);
     container.appendChild(chartDiv);
-    // Render chart
+    // Render chart in normal box
     setTimeout(() => {
       const ctx = chartDiv.querySelector('canvas');
       if (!ctx) return;
@@ -1182,6 +1248,7 @@ function renderBudgetsRegionCharts() {
           scales: {
             y: {
               beginAtZero: true,
+              max: 600000,
               title: { display: true, text: 'Dollars (USD)' },
               ticks: { callback: v => '$' + v.toLocaleString() }
             },
@@ -1192,6 +1259,102 @@ function renderBudgetsRegionCharts() {
         }
       });
     }, 0);
+    // Fullscreen overlay logic (toggle)
+    fullscreenBtn.onclick = function() {
+      let overlay = document.getElementById('graphFullscreenOverlay');
+      if (overlay) {
+        overlay.remove();
+        return;
+      }
+      overlay = document.createElement('div');
+      overlay.id = 'graphFullscreenOverlay';
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100vw';
+      overlay.style.height = '100vh';
+      overlay.style.background = 'rgba(20,30,60,0.92)';
+      overlay.style.display = 'flex';
+      overlay.style.alignItems = 'center';
+      overlay.style.justifyContent = 'center';
+      overlay.style.zIndex = '9999';
+      overlay.onclick = function(e) {
+        if (e.target === overlay) overlay.remove();
+      };
+      document.body.appendChild(overlay);
+      // Chart container for fullscreen
+      const fsDiv = document.createElement('div');
+      fsDiv.style.background = '#fff';
+      fsDiv.style.borderRadius = '16px';
+      fsDiv.style.boxShadow = '0 4px 32px rgba(25,118,210,0.18)';
+      fsDiv.style.padding = '32px 32px 18px 32px';
+      fsDiv.style.display = 'flex';
+      fsDiv.style.flexDirection = 'column';
+      fsDiv.style.alignItems = 'center';
+      fsDiv.style.position = 'relative';
+      fsDiv.style.width = '75vw';
+      fsDiv.style.height = '75vh';
+      // Close button (same as fullscreen button)
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = '✕';
+      closeBtn.title = 'Close';
+      closeBtn.style.position = 'absolute';
+      closeBtn.style.top = '10px';
+      closeBtn.style.right = '16px';
+      closeBtn.style.fontSize = '1.3em';
+      closeBtn.style.background = 'none';
+      closeBtn.style.border = 'none';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.style.opacity = '0.7';
+      closeBtn.onclick = () => overlay.remove();
+      fsDiv.appendChild(closeBtn);
+      // Title
+      const title = document.createElement('h2');
+      title.textContent = region;
+      title.style.color = '#1976d2';
+      title.style.margin = '0 0 18px 0';
+      fsDiv.appendChild(title);
+      // Canvas
+      const fsCanvas = document.createElement('canvas');
+      fsCanvas.width = Math.floor(window.innerWidth * 0.7);
+      fsCanvas.height = Math.floor(window.innerHeight * 0.6);
+      fsDiv.appendChild(fsCanvas);
+      overlay.appendChild(fsDiv);
+      // Render chart in fullscreen
+      setTimeout(() => {
+        new Chart(fsCanvas, {
+          type: 'bar',
+          data: {
+            labels: ['Assigned', 'Forecasted', 'Actual'],
+            datasets: [{
+              label: 'USD',
+              data: [assignedBudget, forecastedCost, actualCost],
+              backgroundColor: ['#1976d2', '#42a5f5', '#66bb6a'],
+              borderRadius: 8,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            responsive: false,
+            plugins: {
+              legend: { display: false },
+              title: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 600000,
+                title: { display: true, text: 'Dollars (USD)' },
+                ticks: { callback: v => '$' + v.toLocaleString() }
+              },
+              x: {
+                title: { display: false }
+              }
+            }
+          }
+        });
+      }, 0);
+    };
   });
 }
 // After budgets table is initialized, render the region charts

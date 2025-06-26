@@ -58,7 +58,10 @@
     </section>
     <section id="view-budgets">
       <h2>Budgets Dashboard</h2>
-      <div id="budgetsChartsContainer" style="display:flex;flex-wrap:wrap;gap:32px 24px;margin-bottom:24px;"></div>
+      <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+        <div id="budgetsChartsContainer" style="display:flex;flex-wrap:wrap;gap:32px 24px;margin-bottom:24px;"></div>
+        <button id="downloadBudgetsInfoCSV" class="small-download-btn" title="Download Info CSV">⬇️ download info</button>
+      </div>
       <div id="budgetsTable"></div>
       <div style="display: flex; gap: 12px; margin-top: 12px">
         <button id="saveBudgetDashboard">Save Budget Dashboard</button>
@@ -83,6 +86,7 @@
           <tr>
             <th>Region</th>
             <th>Plan (USD)</th>
+            <th></th> <!-- Delete column header -->
           </tr>
         </thead>
         <tbody>
