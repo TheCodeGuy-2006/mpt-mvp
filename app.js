@@ -1014,7 +1014,8 @@ function syncGridsOnEdit(sourceTable, targetTable) {
 }
 
 // run once the page loads
-if (location.hash === "#grid" || location.hash === "") loadProgrammes();
+// Removed call to loadProgrammes() as it is not defined and not needed
+// if (location.hash === "#grid" || location.hash === "") loadProgrammes();
 
 // Ensure grid and button handlers are set up every time user navigates to Programme Grid
 window.addEventListener("hashchange", () => {
@@ -1935,6 +1936,102 @@ function renderRoiByRegionChart() {
       scales: {
         y: {
           beginAtZero: true,
+                   title: { display: true, text: "ROI %" },
+          ticks: { callback: (v) => v + "%" },
+        },
+        x: {
+          title: { display: false },
+        },
+      },
+    },
+  });
+}
+
+// ROI % by Program Type Bar Chart
+function renderRoiByProgramTypeChart() {
+  // Prepare data
+  let ptMap = {};
+  if (window.executionTableInstance) {
+    const data = window.executionTableInstance.getData();
+    data.forEach(row => {
+      const pt = row.programType || "(None)";
+      if (!ptMap[pt]) {
+        ptMap[pt] = { spend: 0, pipeline: 0 };
+      }
+      let spend = row.actualCost;
+      if (typeof spend === "string") spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(spend)) ptMap[pt].spend += Number(spend);
+      let pipeline = row.pipelineForecast;
+      if (typeof pipeline === "string") pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(pipeline)) ptMap[pt].pipeline += Number(pipeline);
+    });
+  }
+  const pts = Object.keys(ptMap);
+  const roiPercents = pts.map(pt => {
+    const vals = ptMap[pt];
+    return vals.spend > 0 ? (vals.pipeline / vals.spend) * 100 : 0;
+  });
+
+  // Create or select chart container
+  let chartDiv = document.getElementById("roiProgramTypeChartDiv");
+  if (!chartDiv) {
+    chartDiv = document.createElement("div");
+    chartDiv.id = "roiProgramTypeChartDiv";
+    chartDiv.style.margin = "32px 0 24px 0";
+    chartDiv.style.background = "#fff";
+    chartDiv.style.borderRadius = "12px";
+    chartDiv.style.boxShadow = "0 2px 12px rgba(25,118,210,0.08)";
+    chartDiv.style.padding = "18px 12px 8px 12px";
+    chartDiv.style.maxWidth = "900px";
+    chartDiv.style.display = "flex";
+    chartDiv.style.flexDirection = "column";
+    chartDiv.style.alignItems = "center";
+    // Insert after ROI region chart if present, else at top
+    const regionChartDiv = document.getElementById("roiRegionChartDiv");
+    const roiTab = document.getElementById("view-roi") || document.body;
+    if (regionChartDiv && regionChartDiv.parentNode) {
+      regionChartDiv.parentNode.insertBefore(chartDiv, regionChartDiv.nextSibling);
+    } else {
+      roiTab.insertBefore(chartDiv, roiTab.firstChild);
+    }
+  }
+  chartDiv.innerHTML = `<h3 style='font-size:1.18rem;margin:0 0 12px 0;color:#1976d2;'>ROI % by Program Type</h3><canvas id='roiProgramTypeChart' height='220'></canvas>`;
+  const ctx = chartDiv.querySelector("#roiProgramTypeChart");
+  if (!ctx) return;
+  // Destroy previous chart if exists
+  if (window.roiProgramTypeChartInstance) {
+    window.roiProgramTypeChartInstance.destroy();
+  }
+  window.roiProgramTypeChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: pts,
+      datasets: [
+        {
+          label: "ROI %",
+          data: roiPercents,
+          backgroundColor: "#66bb6a",
+          borderRadius: 8,
+          borderSkipped: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.parsed.y.toFixed(1) + "%";
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
           title: { display: true, text: "ROI %" },
           ticks: { callback: (v) => v + "%" },
         },
@@ -1946,16 +2043,28 @@ function renderRoiByRegionChart() {
   });
 }
 
-// Update ROI region chart on execution grid changes and tab switch
+// Update ROI region and program type charts on execution grid changes and tab switch
 window.addEventListener("hashchange", () => {
-  if (location.hash === "#roi") renderRoiByRegionChart();
+  if (location.hash === "#roi") {
+    renderRoiByRegionChart();
+    renderRoiByProgramTypeChart();
+  }
 });
 if (window.executionTableInstance) {
-  window.executionTableInstance.on("dataChanged", renderRoiByRegionChart);
-  window.executionTableInstance.on("cellEdited", renderRoiByRegionChart);
+  window.executionTableInstance.on("dataChanged", () => {
+    renderRoiByRegionChart();
+    renderRoiByProgramTypeChart();
+  });
+  window.executionTableInstance.on("cellEdited", () => {
+    renderRoiByRegionChart();
+    renderRoiByProgramTypeChart();
+  });
 }
 window.addEventListener("DOMContentLoaded", () => {
-  setTimeout(renderRoiByRegionChart, 600);
+  setTimeout(() => {
+    renderRoiByRegionChart();
+    renderRoiByProgramTypeChart();
+  }, 700);
 });
 
 // Re-add missing setupPlanningDownload function
