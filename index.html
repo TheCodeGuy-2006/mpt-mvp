@@ -135,6 +135,37 @@
     <section id="view-roi" style="display: none;">
       <h2>ROI</h2>
       <div
+        id="roiFiltersDiv"
+        style="
+          display: flex;
+          gap: 24px;
+          margin: 24px 0;
+          padding: 18px;
+          background: #ffffff;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+        "
+      >
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label for="roiRegionFilter" style="font-weight: 500; color: #1976d2;">Filter by Region:</label>
+          <select id="roiRegionFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem; min-width: 150px;">
+            <option value="">(All Regions)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label for="roiQuarterFilter" style="font-weight: 500; color: #1976d2;">Filter by Quarter:</label>
+          <select id="roiQuarterFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem; min-width: 150px;">
+            <option value="">(All Quarters)</option>
+          </select>
+        </div>
+        <button id="roiClearFilters" style="padding: 8px 16px; background: #f5f5f5; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; font-size: 0.95rem;">
+          Clear Filters
+        </button>
+      </div>
+      <div
         id="roiTotalSpendBox"
         style="
           margin: 24px 0;
