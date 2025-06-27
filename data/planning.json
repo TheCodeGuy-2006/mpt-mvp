@@ -22,7 +22,9 @@
     "sql": 5,
     "opps": 4,
     "pipeline": 200000,
-    "actualCost": 13000
+    "actualCost": 13000,
+    "id": "row_0_1750993042434",
+    "actualLeads": 20
   },
   {
     "campaignName": "Exec Roundtable",
@@ -47,7 +49,9 @@
     "sql": 6,
     "opps": 5,
     "pipeline": 250000,
-    "actualCost": 200000
+    "actualCost": 200000,
+    "id": "row_1_1750993042434",
+    "actualLeads": 70
   },
   {
     "campaignName": "Digital Bootcamp",
@@ -71,7 +75,9 @@
     "mql": 6,
     "sql": 4,
     "opps": 3,
-    "pipeline": 150000
+    "pipeline": 150000,
+    "id": "row_2_1750993042434",
+    "actualLeads": 120
   },
   {
     "id": "program-1750842418400",

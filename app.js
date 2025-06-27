@@ -1767,19 +1767,195 @@ function updateRoiTotalSpend() {
   if (pipelineEl) {
     pipelineEl.textContent = "$" + pipelineValue.toLocaleString();
   }
+  // Update leads/conversions value in existing span if present
+  let totalLeads = 0;
+  if (window.executionTableInstance) {
+    const data = window.executionTableInstance.getData();
+    totalLeads = data.reduce((sum, row) => {
+      let val = row.actualLeads;
+      if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(val)) sum += Number(val);
+      return sum;
+    }, 0);
+  }
+  const leadsEl = document.getElementById("roiTotalLeadsValue");
+  if (leadsEl) {
+    leadsEl.textContent = totalLeads.toLocaleString();
+  }
+  // Update ROI percentage value in existing span if present
+  let roiPercent = 0;
+  if (totalSpend > 0) {
+    roiPercent = (totalPipeline / totalSpend) * 100;
+  }
+  const roiEl = document.getElementById("roiTotalRoiValue");
+  if (roiEl) {
+    roiEl.textContent = isNaN(roiPercent) ? "0%" : roiPercent.toFixed(1) + "%";
+  }
+
+  // --- Program Type Breakdown Table ---
+  const programTypeTableId = "roiProgramTypeBreakdownTable";
+  let table = document.getElementById(programTypeTableId);
+  if (!table) {
+    // Create table if not present
+    table = document.createElement("table");
+    table.id = programTypeTableId;
+    table.style.margin = "24px 0 0 0";
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    table.innerHTML = `<thead><tr style='background:#e3f2fd;'>
+      <th style='padding:6px 12px;border:1px solid #90caf9;'>Program Type</th>
+      <th style='padding:6px 12px;border:1px solid #90caf9;'>Total Spend</th>
+      <th style='padding:6px 12px;border:1px solid #90caf9;'>Total Pipeline</th>
+      <th style='padding:6px 12px;border:1px solid #90caf9;'>Total Leads</th>
+      <th style='padding:6px 12px;border:1px solid #90caf9;'>ROI %</th>
+    </tr></thead><tbody></tbody>`;
+    // Insert after region breakdown table if present, else at end of ROI tab
+    const regionTable = document.getElementById("roiRegionBreakdownTable");
+    if (regionTable && regionTable.parentNode) {
+      regionTable.parentNode.insertBefore(table, regionTable.nextSibling);
+    } else {
+      const roiTab = document.getElementById("view-roi") || document.body;
+      roiTab.appendChild(table);
+    }
+  }
+  // Calculate breakdown by program type
+  let programTypeMap = {};
+  if (window.executionTableInstance) {
+    const data = window.executionTableInstance.getData();
+    data.forEach(row => {
+      const pt = row.programType || "(None)";
+      if (!programTypeMap[pt]) {
+        programTypeMap[pt] = { spend: 0, pipeline: 0, leads: 0 };
+      }
+      let spend = row.actualCost;
+      if (typeof spend === "string") spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(spend)) programTypeMap[pt].spend += Number(spend);
+      let pipeline = row.pipelineForecast;
+      if (typeof pipeline === "string") pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(pipeline)) programTypeMap[pt].pipeline += Number(pipeline);
+      let leads = row.actualLeads;
+      if (typeof leads === "string") leads = Number(leads.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(leads)) programTypeMap[pt].leads += Number(leads);
+    });
+  }
+  // Render table body
+  const tbody = table.querySelector("tbody");
+  tbody.innerHTML = "";
+  Object.entries(programTypeMap).forEach(([pt, vals]) => {
+    const roi = vals.spend > 0 ? (vals.pipeline / vals.spend) * 100 : 0;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style='padding:6px 12px;border:1px solid #bbdefb;'>${pt}</td>
+      <td style='padding:6px 12px;border:1px solid #bbdefb;'>$${vals.spend.toLocaleString()}</td>
+      <td style='padding:6px 12px;border:1px solid #bbdefb;'>$${vals.pipeline.toLocaleString()}</td>
+      <td style='padding:6px 12px;border:1px solid #bbdefb;'>${vals.leads.toLocaleString()}</td>
+      <td style='padding:6px 12px;border:1px solid #bbdefb;'>${isNaN(roi) ? "0%" : roi.toFixed(1) + "%"}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
-// Update ROI spend box on tab switch and after execution grid edits
+// ROI % by Region Bar Chart
+function renderRoiByRegionChart() {
+  // Prepare data
+  let regionMap = {};
+  if (window.executionTableInstance) {
+    const data = window.executionTableInstance.getData();
+    data.forEach(row => {
+      const region = row.region || "(None)";
+      if (!regionMap[region]) {
+        regionMap[region] = { spend: 0, pipeline: 0 };
+      }
+      let spend = row.actualCost;
+      if (typeof spend === "string") spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(spend)) regionMap[region].spend += Number(spend);
+      let pipeline = row.pipelineForecast;
+      if (typeof pipeline === "string") pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(pipeline)) regionMap[region].pipeline += Number(pipeline);
+    });
+  }
+  const regions = Object.keys(regionMap);
+  const roiPercents = regions.map(region => {
+    const vals = regionMap[region];
+    return vals.spend > 0 ? (vals.pipeline / vals.spend) * 100 : 0;
+  });
+
+  // Create or select chart container
+  let chartDiv = document.getElementById("roiRegionChartDiv");
+  if (!chartDiv) {
+    chartDiv = document.createElement("div");
+    chartDiv.id = "roiRegionChartDiv";
+    chartDiv.style.margin = "32px 0 24px 0";
+    chartDiv.style.background = "#fff";
+    chartDiv.style.borderRadius = "12px";
+    chartDiv.style.boxShadow = "0 2px 12px rgba(25,118,210,0.08)";
+    chartDiv.style.padding = "18px 12px 8px 12px";
+    chartDiv.style.maxWidth = "700px";
+    chartDiv.style.display = "flex";
+    chartDiv.style.flexDirection = "column";
+    chartDiv.style.alignItems = "center";
+    // Insert at top of ROI tab
+    const roiTab = document.getElementById("view-roi") || document.body;
+    roiTab.insertBefore(chartDiv, roiTab.firstChild);
+  }
+  chartDiv.innerHTML = `<h3 style='font-size:1.18rem;margin:0 0 12px 0;color:#1976d2;'>ROI % by Region</h3><canvas id='roiRegionChart' height='220'></canvas>`;
+  const ctx = chartDiv.querySelector("#roiRegionChart");
+  if (!ctx) return;
+  // Destroy previous chart if exists
+  if (window.roiRegionChartInstance) {
+    window.roiRegionChartInstance.destroy();
+  }
+  window.roiRegionChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: regions,
+      datasets: [
+        {
+          label: "ROI %",
+          data: roiPercents,
+          backgroundColor: "#42a5f5",
+          borderRadius: 8,
+          borderSkipped: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.parsed.y.toFixed(1) + "%";
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: "ROI %" },
+          ticks: { callback: (v) => v + "%" },
+        },
+        x: {
+          title: { display: false },
+        },
+      },
+    },
+  });
+}
+
+// Update ROI region chart on execution grid changes and tab switch
 window.addEventListener("hashchange", () => {
-  if (location.hash === "#roi") updateRoiTotalSpend();
+  if (location.hash === "#roi") renderRoiByRegionChart();
 });
 if (window.executionTableInstance) {
-  window.executionTableInstance.on("dataChanged", updateRoiTotalSpend);
-  window.executionTableInstance.on("cellEdited", updateRoiTotalSpend);
+  window.executionTableInstance.on("dataChanged", renderRoiByRegionChart);
+  window.executionTableInstance.on("cellEdited", renderRoiByRegionChart);
 }
-// Also update after DOMContentLoaded
 window.addEventListener("DOMContentLoaded", () => {
-  setTimeout(updateRoiTotalSpend, 500);
+  setTimeout(renderRoiByRegionChart, 600);
 });
 
 // Re-add missing setupPlanningDownload function
