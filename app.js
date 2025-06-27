@@ -1793,6 +1793,54 @@ function updateRoiTotalSpend() {
     roiEl.textContent = isNaN(roiPercent) ? "0%" : roiPercent.toFixed(1) + "%";
   }
 
+  // Update Total MQL value
+  let totalMql = 0;
+  if (window.executionTableInstance) {
+    const data = window.executionTableInstance.getData();
+    totalMql = data.reduce((sum, row) => {
+      let val = row.actualMQLs || row.mqlForecast; // Use actual MQLs if available, otherwise forecast
+      if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(val)) sum += Number(val);
+      return sum;
+    }, 0);
+  }
+  const mqlEl = document.getElementById("roiTotalMqlValue");
+  if (mqlEl) {
+    mqlEl.textContent = totalMql.toLocaleString();
+  }
+
+  // Update Total SQL value
+  let totalSql = 0;
+  if (window.executionTableInstance) {
+    const data = window.executionTableInstance.getData();
+    totalSql = data.reduce((sum, row) => {
+      let val = row.actualSQLs || row.sqlForecast; // Use actual SQLs if available, otherwise forecast
+      if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(val)) sum += Number(val);
+      return sum;
+    }, 0);
+  }
+  const sqlEl = document.getElementById("roiTotalSqlValue");
+  if (sqlEl) {
+    sqlEl.textContent = totalSql.toLocaleString();
+  }
+
+  // Update Total Opportunities value
+  let totalOpps = 0;
+  if (window.executionTableInstance) {
+    const data = window.executionTableInstance.getData();
+    totalOpps = data.reduce((sum, row) => {
+      let val = row.actualOpps || row.oppsForecast; // Use actual Opps if available, otherwise forecast
+      if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(val)) sum += Number(val);
+      return sum;
+    }, 0);
+  }
+  const oppsEl = document.getElementById("roiTotalOppsValue");
+  if (oppsEl) {
+    oppsEl.textContent = totalOpps.toLocaleString();
+  }
+
   // --- Program Type Breakdown Table ---
   const programTypeTableId = "roiProgramTypeBreakdownTable";
   let table = document.getElementById(programTypeTableId);
