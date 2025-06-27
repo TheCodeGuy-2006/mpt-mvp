@@ -991,7 +991,6 @@ function setupAnnualBudgetSave() {
           alert("Failed to save: " + err.message);
         });
     }
-    setTimeout(renderBudgetsRegionCharts, 200);
   };
 }
 
@@ -1126,7 +1125,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize all grids/tables only once
   const planningTable = initPlanningGrid(rows);
-  window.planningTableInstance = planningTable;
+  window.pl
   const executionTable = initExecutionGrid(rows);
   window.executionTableInstance = executionTable;
   const budgetsTable = initBudgetsTable(budgets, rows); // pass rows to budgets table
@@ -1735,22 +1734,38 @@ if (saveAnnualBudgetBtn) {
   });
 }
 
-// ROI Total Spend Calculation
+// ROI Total Spend and Pipeline Calculation
 function updateRoiTotalSpend() {
-  let total = 0;
-  // Try to get all rows from executionTableInstance
+  let totalSpend = 0;
+  let totalPipeline = 0;
   if (window.executionTableInstance) {
     const data = window.executionTableInstance.getData();
-    total = data.reduce((sum, row) => {
+    // Debug: log pipelineForecast values
+    console.log('[ROI] Execution data for pipeline calculation:', data.map(r => r.pipelineForecast));
+    totalSpend = data.reduce((sum, row) => {
       let val = row.actualCost;
       if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(val)) sum += Number(val);
       return sum;
     }, 0);
+    totalPipeline = data.reduce((sum, row) => {
+      let val = row.pipelineForecast;
+      if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(val)) sum += Number(val);
+      return sum;
+    }, 0);
+    // Debug: log total pipeline
+    console.log('[ROI] Total pipeline calculated:', totalPipeline);
   }
-  const el = document.getElementById("roiTotalSpendValue");
-  if (el) {
-    el.textContent = "$" + total.toLocaleString();
+  const spendEl = document.getElementById("roiTotalSpendValue");
+  if (spendEl) {
+    spendEl.textContent = "$" + totalSpend.toLocaleString();
+  }
+  // Update pipeline value in existing span if present
+  const pipelineValue = isNaN(totalPipeline) || totalPipeline === undefined ? 0 : totalPipeline;
+  const pipelineEl = document.getElementById("roiTotalPipelineValue");
+  if (pipelineEl) {
+    pipelineEl.textContent = "$" + pipelineValue.toLocaleString();
   }
 }
 
@@ -1765,11 +1780,8 @@ if (window.executionTableInstance) {
 // Also update after DOMContentLoaded
 window.addEventListener("DOMContentLoaded", () => {
   setTimeout(updateRoiTotalSpend, 500);
-  if (window.executionTableInstance) {
-    window.executionTableInstance.on("dataChanged", updateRoiTotalSpend);
-    window.executionTableInstance.on("cellEdited", updateRoiTotalSpend);
-  }
 });
+
 // Re-add missing setupPlanningDownload function
 function setupPlanningDownload(table) {
   let btn = document.getElementById("downloadPlanningAll");
