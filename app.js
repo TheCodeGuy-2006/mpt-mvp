@@ -92,6 +92,8 @@ async function loadPlanning() {
         Object.assign(row, kpis(row.expectedLeads));
       }
       if (!row.id) {
+        // Assign a unique id if missing
+        row.id = `row_${i}_${Date.now()}`;
         console.warn("Row missing id at index", i, row);
       }
     });
@@ -1023,40 +1025,62 @@ window.addEventListener("hashchange", () => {
 // Show the section whose ID matches the current hash
 function route() {
   const hash = location.hash || "#planning";
+  // Print all section IDs for debugging
+  const allSections = Array.from(document.querySelectorAll("section")).map(sec => sec.id);
+  console.log("[route] All section IDs:", allSections);
+  // Hide all sections first
   document.querySelectorAll("section").forEach((sec) => {
-    const name = "#" + sec.id.replace("view-", "");
-    // Show both Budgets Dashboard and Annual Budget Plan for Budgets tab
-    if (
-      hash === "#budgets" &&
-      (sec.id === "view-budgets" || sec.id === "view-budget-setup")
-    ) {
-      sec.style.display = "block";
-    } else if (name === hash) {
-      sec.style.display = "block";
-      // If showing planning, force redraw
-      if (name === "#planning" && planningTableInstance) {
-        setTimeout(() => {
-          planningTableInstance.redraw(true);
-          planningTableInstance.setData(planningTableInstance.getData());
-          console.log("Forced redraw of planning grid");
-        }, 0);
-      }
-      // If showing execution, force redraw
-      if (name === "#execution" && window.executionTableInstance) {
-        setTimeout(() => {
-          window.executionTableInstance.redraw(true);
-          window.executionTableInstance.setData(window.executionTableInstance.getData());
-          console.log("Forced redraw of execution grid");
-        }, 0);
-      }
-    } else {
-      sec.style.display = "none";
-    }
+    sec.style.display = "none";
   });
+  // Show correct section(s) for the active tab
+  if (hash === "#budgets") {
+    const budgetsSection = document.getElementById("view-budgets");
+    const budgetSetupSection = document.getElementById("view-budget-setup");
+    if (budgetsSection) budgetsSection.style.display = "block";
+    if (budgetSetupSection) budgetSetupSection.style.display = "block";
+    if (window.budgetsTableInstance) {
+      setTimeout(() => {
+        window.budgetsTableInstance.redraw(true);
+        window.budgetsTableInstance.setData(window.budgetsTableInstance.getData());
+        console.log("[route] Redrew budgets table");
+      }, 0);
+    }
+  } else {
+    // Show only the section matching the tab
+    const section = document.querySelector(`section#view-${hash.replace('#','')}`);
+    console.log(`[route] hash:`, hash, 'section:', section);
+    if (section) section.style.display = "block";
+    if (hash === "#planning" && window.planningTableInstance) {
+      setTimeout(() => {
+        window.planningTableInstance.redraw(true);
+        window.planningTableInstance.setData(window.planningTableInstance.getData());
+        console.log("[route] Redrew planning grid");
+      }, 0);
+    }
+    if (hash === "#execution" && window.executionTableInstance) {
+      setTimeout(() => {
+        window.executionTableInstance.redraw(true);
+        window.executionTableInstance.setData(window.executionTableInstance.getData());
+        console.log("[route] Redrew execution grid");
+      }, 0);
+    }
+    if (hash === "#roi" && typeof updateRoiTotalSpend === "function") {
+      setTimeout(updateRoiTotalSpend, 0);
+      console.log("[route] Updated ROI total spend");
+    }
+    if (hash === "#report" && window.reportTableInstance) {
+      setTimeout(() => {
+        window.reportTableInstance.redraw(true);
+        window.reportTableInstance.setData(window.reportTableInstance.getData());
+        console.log("[route] Redrew report grid");
+      }, 0);
+    }
+  }
 }
 
+// Ensure route() is called on every hash change for tab navigation
 window.addEventListener("hashchange", route);
-route(); // Initial call
+
 // Utility: Download JSON as file
 function downloadJSON(obj, filename) {
   const blob = new Blob([JSON.stringify(obj, null, 2)], {

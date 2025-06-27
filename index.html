@@ -29,7 +29,7 @@
       </a>
     </nav>
 
-    <section id="view-planning">
+    <section id="view-planning" style="display: none;">
       <h2>Planning</h2>
       <div
         id="planningGridButtons"
@@ -56,12 +56,12 @@
       </div>
       <div id="planningGrid"></div>
     </section>
-    <section id="view-execution">
+    <section id="view-execution" style="display: none;">
       <h2>Execution Tracking</h2>
       <div id="execRegionFilterDiv"></div>
       <div id="executionGrid"></div>
     </section>
-    <section id="view-budgets">
+    <section id="view-budgets" style="display: none;">
       <h2>Budgets Dashboard</h2>
       <div
         style="
@@ -93,15 +93,15 @@
         <button id="saveBudgetDashboard">Save Budget Dashboard</button>
       </div>
     </section>
-    <section id="view-report">
+    <section id="view-report" style="display: none;">
       <h2>Reporting</h2>
       <div id="reportGrid"></div>
     </section>
-    <section id="view-github-sync">
+    <section id="view-github-sync" style="display: none;">
       <h2>GitHub Sync</h2>
       <div id="githubSync"></div>
     </section>
-    <section id="view-budget-setup">
+    <section id="view-budget-setup" style="display: none;">
       <h2>Annual Budget Plan</h2>
       <p>
         Enter the approved annual budget (Plan) for each region, then click
@@ -132,7 +132,7 @@
         <button id="saveAnnualBudget">Save Annual Budget</button>
       </div>
     </section>
-    <section id="view-roi">
+    <section id="view-roi" style="display: none;">
       <h2>ROI</h2>
       <div
         id="roiTotalSpendBox"
@@ -158,6 +158,7 @@
       </div>
     </section>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="app.js"></script>
   </body>
 </html>
