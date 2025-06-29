@@ -166,6 +166,33 @@ function initPlanningGrid(rows) {
             ...Object.fromEntries(programTypes.map((v) => [v, v])),
           },
         },
+        cellEdited: (cell) => {
+          const r = cell.getRow();
+          const rowData = r.getData();
+          
+          // Special logic for In-Account Events (1:1)
+          if (cell.getValue() === "In-Account Events (1:1)") {
+            r.update({
+              expectedLeads: 0,
+              mqlForecast: 0,
+              sqlForecast: 0,
+              oppsForecast: 0,
+              pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
+            });
+          } else {
+            // For other program types, recalculate based on expected leads
+            if (typeof rowData.expectedLeads === "number" && rowData.expectedLeads > 0) {
+              const kpiVals = kpis(rowData.expectedLeads);
+              r.update({
+                mqlForecast: kpiVals.mql,
+                sqlForecast: kpiVals.sql,
+                oppsForecast: kpiVals.opps,
+                pipelineForecast: kpiVals.pipeline,
+              });
+            }
+          }
+          rowData.__modified = true;
+        },
       },
       {
         title: "Strategic Pillar",
@@ -358,6 +385,22 @@ function initPlanningGrid(rows) {
           if (max !== null && value > max) return false;
           return true;
         },
+        cellEdited: (cell) => {
+          const r = cell.getRow();
+          const rowData = r.getData();
+          
+          // Special logic for In-Account Events (1:1) - recalculate pipeline based on cost
+          if (rowData.programType === "In-Account Events (1:1)") {
+            r.update({
+              expectedLeads: 0,
+              mqlForecast: 0,
+              sqlForecast: 0,
+              oppsForecast: 0,
+              pipelineForecast: cell.getValue() ? Number(cell.getValue()) * 20 : 0,
+            });
+          }
+          rowData.__modified = true;
+        },
       },
       {
         title: "Expected Leads",
@@ -366,14 +409,28 @@ function initPlanningGrid(rows) {
         width: 150,
         cellEdited: (cell) => {
           const r = cell.getRow();
-          const kpiVals = kpis(cell.getValue());
-          r.update({
-            mqlForecast: kpiVals.mql,
-            sqlForecast: kpiVals.sql,
-            oppsForecast: kpiVals.opps,
-            pipelineForecast: kpiVals.pipeline,
-          });
-          r.getData().__modified = true;
+          const rowData = r.getData();
+          
+          // Special logic for In-Account Events (1:1) - ignore expected leads, use forecasted cost
+          if (rowData.programType === "In-Account Events (1:1)") {
+            r.update({
+              expectedLeads: 0,
+              mqlForecast: 0,
+              sqlForecast: 0,
+              oppsForecast: 0,
+              pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
+            });
+          } else {
+            // Normal KPI calculation for other program types
+            const kpiVals = kpis(cell.getValue());
+            r.update({
+              mqlForecast: kpiVals.mql,
+              sqlForecast: kpiVals.sql,
+              oppsForecast: kpiVals.opps,
+              pipelineForecast: kpiVals.pipeline,
+            });
+          }
+          rowData.__modified = true;
         },
       },
       { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
@@ -511,14 +568,32 @@ function initExecutionGrid(rows) {
         editable: false,
         formatter: function (cell) {
           const data = cell.getRow().getData();
-          // Render region and owner as button-like spans, then description below
-          return `
-          <div style="display:flex;gap:6px;margin-bottom:6px;">
-            <span style="background:#1976d2;color:#fff;padding:2px 10px;border-radius:12px;font-size:0.95em;display:inline-block;">${data.region || ""}</span>
-            <span style="background:#90caf9;color:#1a237e;padding:2px 10px;border-radius:12px;font-size:0.95em;display:inline-block;">${data.owner || ""}</span>
-          </div>
-          <div style="font-size:0.98em;color:#1a237e;white-space:pre-line;">${data.description || ""}</div>
-        `;
+          const region = data.region || "";
+          const owner = data.owner || "";
+          const description = data.description || "";
+          const programType = data.programType || "";
+          
+          // Create multi-line informative format
+          let html = '<div style="padding: 4px; line-height: 1.3; font-size: 12px;">';
+          
+          if (region) {
+            html += `<div style="font-weight: bold; color: #1976d2;">${region}</div>`;
+          }
+          
+          if (owner) {
+            html += `<div style="color: #666; margin-top: 2px;">${owner}</div>`;
+          }
+          
+          if (programType) {
+            html += `<div style="color: #888; font-size: 11px; margin-top: 2px;">${programType}</div>`;
+          }
+          
+          if (description) {
+            html += `<div style="color: #333; margin-top: 2px; word-wrap: break-word;">${description}</div>`;
+          }
+          
+          html += '</div>';
+          return html;
         },
       },
       {

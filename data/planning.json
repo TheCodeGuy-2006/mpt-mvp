@@ -24,7 +24,8 @@
     "pipeline": 200000,
     "actualCost": 13000,
     "id": "row_0_1750993042434",
-    "actualLeads": 20
+    "actualLeads": 20,
+    "actualMQLs": 7
   },
   {
     "campaignName": "Exec Roundtable",
@@ -51,7 +52,8 @@
     "pipeline": 250000,
     "actualCost": 200000,
     "id": "row_1_1750993042434",
-    "actualLeads": 70
+    "actualLeads": 70,
+    "actualMQLs": 10
   },
   {
     "campaignName": "Digital Bootcamp",
@@ -77,12 +79,36 @@
     "opps": 3,
     "pipeline": 150000,
     "id": "row_2_1750993042434",
-    "actualLeads": 120
+    "actualLeads": 120,
+    "actualCost": 30000,
+    "actualMQLs": 3
   },
   {
     "id": "program-1750842418400",
     "status": "Planning",
     "__modified": true,
-    "strategicPillars": "Account Growth and Product Adoption"
+    "strategicPillars": "Account Growth and Product Adoption",
+    "campaignName": "Digital Teaching at schools",
+    "programType": "In-Account Events (1:1)",
+    "description": "This will be a good oppurtunity to gain reach and knowledge into the younger generation",
+    "owner": "Beverly Leung",
+    "quarter": "Q1 September",
+    "region": "SAARC",
+    "country": "Malaysia",
+    "forecastedCost": 20000,
+    "expectedLeads": 0,
+    "mqlForecast": 0,
+    "sqlForecast": 0,
+    "oppsForecast": 0,
+    "pipelineForecast": 400000,
+    "revenuePlay": "New Business",
+    "poRaised": "Yes",
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "actualCost": 10000,
+    "actualLeads": 14,
+    "actualMQLs": 5
   }
 ]
