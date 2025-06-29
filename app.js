@@ -2269,6 +2269,7 @@ function updateReportTotalSpend() {
     .then(data => {
       let totalForecastedSpend = 0;
       let totalPipelineForecast = 0;
+      let spendByRegion = {};
       
       // Sum all forecasted costs and pipeline from planning data
       data.forEach(row => {
@@ -2279,6 +2280,13 @@ function updateReportTotalSpend() {
         }
         if (!isNaN(cost)) {
           totalForecastedSpend += Number(cost);
+          
+          // Aggregate by region for chart
+          const region = row.region || "Unknown";
+          if (!spendByRegion[region]) {
+            spendByRegion[region] = 0;
+          }
+          spendByRegion[region] += Number(cost);
         }
         
         // Pipeline Forecast
@@ -2302,6 +2310,9 @@ function updateReportTotalSpend() {
       if (pipelineEl) {
         pipelineEl.textContent = "$" + totalPipelineForecast.toLocaleString();
       }
+      
+      // Create/update the chart
+      createReportSpendByRegionChart(spendByRegion);
     })
     .catch(error => {
       console.error('Error loading planning data for reporting:', error);
@@ -2362,4 +2373,59 @@ function updateReportTotalSpend() {
       sqlEl.textContent = totalActualSql.toLocaleString();
     }
   }
+}
+
+// Create/update chart for spend by region
+function createReportSpendByRegionChart(spendByRegion) {
+  const canvas = document.getElementById("reportSpendByRegionChart");
+  if (!canvas) return;
+  
+  // Destroy existing chart if it exists
+  if (window.reportSpendChart) {
+    window.reportSpendChart.destroy();
+  }
+  
+  const ctx = canvas.getContext("2d");
+  const regions = Object.keys(spendByRegion).sort();
+  const amounts = regions.map(region => spendByRegion[region]);
+  
+  window.reportSpendChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: regions,
+      datasets: [{
+        label: 'Forecasted Spend',
+        data: amounts,
+        backgroundColor: 'rgba(25, 118, 210, 0.6)',
+        borderColor: 'rgba(25, 118, 210, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return '$' + value.toLocaleString();
+            }
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return 'Forecasted Spend: $' + context.parsed.y.toLocaleString();
+            }
+          }
+        },
+        legend: {
+          display: false
+        }
+      }
+    }
+  });
 }

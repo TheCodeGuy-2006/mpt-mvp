@@ -576,6 +576,18 @@ table#planTable td input[type="text"] {
   opacity: 1;
   background: #e3f2fd;
 }
+/* Chart styling */
+.chart-container {
+  height: 140px !important;
+  max-height: 140px !important;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+#reportSpendByRegionChart {
+  max-height: 120px !important;
+  height: 120px !important;
+}
 @media (max-width: 700px) {
   section {
     padding: 18px 4px;
