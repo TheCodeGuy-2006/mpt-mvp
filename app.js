@@ -2307,27 +2307,59 @@ function updateReportTotalSpend() {
       console.error('Error loading planning data for reporting:', error);
     });
 
-  // Calculate actual spend from execution data
+  // Calculate actual spend, MQL, and SQL from execution data
   if (window.executionTableInstance) {
     const executionData = window.executionTableInstance.getData();
     let totalActualSpend = 0;
+    let totalActualMql = 0;
+    let totalActualSql = 0;
     
-    // Sum all actual costs from execution data
-    totalActualSpend = executionData.reduce((sum, row) => {
+    // Sum all actual costs, MQLs, and SQLs from execution data
+    executionData.forEach(row => {
+      // Actual Cost
       let cost = row.actualCost || 0;
       if (typeof cost === "string") {
         cost = Number(cost.toString().replace(/[^\d.-]/g, ""));
       }
       if (!isNaN(cost)) {
-        sum += Number(cost);
+        totalActualSpend += Number(cost);
       }
-      return sum;
-    }, 0);
+      
+      // Actual MQLs
+      let mql = row.actualMQLs || 0;
+      if (typeof mql === "string") {
+        mql = Number(mql.toString().replace(/[^\d.-]/g, ""));
+      }
+      if (!isNaN(mql)) {
+        totalActualMql += Number(mql);
+      }
+      
+      // Actual SQLs - Note: need to check the actual field name
+      let sql = row.actualSQLs || row.actualSQL || 0;
+      if (typeof sql === "string") {
+        sql = Number(sql.toString().replace(/[^\d.-]/g, ""));
+      }
+      if (!isNaN(sql)) {
+        totalActualSql += Number(sql);
+      }
+    });
     
     // Update the actual spend display
     const actualSpendEl = document.getElementById("reportTotalActualSpendValue");
     if (actualSpendEl) {
       actualSpendEl.textContent = "$" + totalActualSpend.toLocaleString();
+    }
+    
+    // Update the total MQL display
+    const mqlEl = document.getElementById("reportTotalMqlValue");
+    if (mqlEl) {
+      mqlEl.textContent = totalActualMql.toLocaleString();
+    }
+    
+    // Update the total SQL display
+    const sqlEl = document.getElementById("reportTotalSqlValue");
+    if (sqlEl) {
+      sqlEl.textContent = totalActualSql.toLocaleString();
     }
   }
 }
