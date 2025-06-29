@@ -737,7 +737,6 @@ function initReportGrid(rows) {
     ],
     footerElement: '<div id="reportTotals"></div>',
   });
-  setupReportExport(table);
   // Show calculated totals using regionMetrics
   import("./src/calc.js").then(({ regionMetrics }) => {
     fetch("data/budgets.json")
@@ -1150,6 +1149,10 @@ function route() {
         console.log("[route] Redrew report grid");
       }, 0);
     }
+    if (hash === "#report" && typeof updateReportTotalSpend === "function") {
+      setTimeout(updateReportTotalSpend, 0);
+      console.log("[route] Updated report total spend");
+    }
   }
 }
 
@@ -1211,8 +1214,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   setupPlanningSave(planningTable, rows);
   setupBudgetsSave(budgetsTable);
   setupExecutionSave(executionTable, rows);
-  setupReportExport(document.getElementById("reportGrid"));
   setupPlanningDownload(planningTable);
+
+  // Initialize reporting total spend
+  updateReportTotalSpend();
 
   // Add handler for '+ Add Region' button in Annual Budget Plan
   const addRegionBtn = document.getElementById("addRegionRow");
@@ -2213,23 +2218,7 @@ function setupPlanningDownload(table) {
   };
 }
 
-// Report export setup
-function setupReportExport(table) {
-  // Add an Export CSV button to the Report view
-  let btn = document.getElementById("exportReportCSV");
-  if (!btn) {
-    btn = document.createElement("button");
-    btn.id = "exportReportCSV";
-    btn.textContent = "Export to CSV";
-    btn.style.margin = "12px 0";
-    document.getElementById("view-report").insertBefore(btn, document.getElementById("reportGrid"));
-  }
-  btn.onclick = () => {
-    if (table && typeof table.download === 'function') {
-      table.download("csv", "report.csv");
-    }
-  };
-}
+// Report export setup - REMOVED
 
 // Populate ROI filter dropdowns
 function populateRoiFilters() {
@@ -2268,6 +2257,77 @@ function populateRoiFilters() {
         quarterSelect.value = "";
         updateRoiTotalSpend();
       });
+    }
+  }
+}
+
+// Reporting Total Spend Calculation
+function updateReportTotalSpend() {
+  // Calculate forecasted spend and pipeline from planning data
+  fetch("data/planning.json")
+    .then(response => response.json())
+    .then(data => {
+      let totalForecastedSpend = 0;
+      let totalPipelineForecast = 0;
+      
+      // Sum all forecasted costs and pipeline from planning data
+      data.forEach(row => {
+        // Forecasted Cost
+        let cost = row.forecastedCost || 0;
+        if (typeof cost === "string") {
+          cost = Number(cost.toString().replace(/[^\d.-]/g, ""));
+        }
+        if (!isNaN(cost)) {
+          totalForecastedSpend += Number(cost);
+        }
+        
+        // Pipeline Forecast
+        let pipeline = row.pipelineForecast || 0;
+        if (typeof pipeline === "string") {
+          pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
+        }
+        if (!isNaN(pipeline)) {
+          totalPipelineForecast += Number(pipeline);
+        }
+      });
+      
+      // Update the forecasted spend display
+      const spendEl = document.getElementById("reportTotalSpendValue");
+      if (spendEl) {
+        spendEl.textContent = "$" + totalForecastedSpend.toLocaleString();
+      }
+      
+      // Update the pipeline forecast display
+      const pipelineEl = document.getElementById("reportTotalPipelineValue");
+      if (pipelineEl) {
+        pipelineEl.textContent = "$" + totalPipelineForecast.toLocaleString();
+      }
+    })
+    .catch(error => {
+      console.error('Error loading planning data for reporting:', error);
+    });
+
+  // Calculate actual spend from execution data
+  if (window.executionTableInstance) {
+    const executionData = window.executionTableInstance.getData();
+    let totalActualSpend = 0;
+    
+    // Sum all actual costs from execution data
+    totalActualSpend = executionData.reduce((sum, row) => {
+      let cost = row.actualCost || 0;
+      if (typeof cost === "string") {
+        cost = Number(cost.toString().replace(/[^\d.-]/g, ""));
+      }
+      if (!isNaN(cost)) {
+        sum += Number(cost);
+      }
+      return sum;
+    }, 0);
+    
+    // Update the actual spend display
+    const actualSpendEl = document.getElementById("reportTotalActualSpendValue");
+    if (actualSpendEl) {
+      actualSpendEl.textContent = "$" + totalActualSpend.toLocaleString();
     }
   }
 }
