@@ -286,6 +286,22 @@ function initPlanningGrid(rows) {
         },
       },
       {
+        title: "Fiscal Year",
+        field: "fiscalYear",
+        editor: "list",
+        editorParams: { values: ["FY25", "FY26", "FY27"] },
+        width: 100,
+        headerFilter: "list",
+        headerFilterParams: {
+          values: {
+            "": "(Clear Filter)",
+            "FY25": "FY25",
+            "FY26": "FY26",
+            "FY27": "FY27",
+          },
+        },
+      },
+      {
         title: "Country",
         field: "country",
         editor: "list",
@@ -2409,7 +2425,7 @@ function createReportSpendByRegionChart(spendByRegion) {
           beginAtZero: true,
           ticks: {
             callback: function(value) {
-              return '$' + value.toLocaleString();
+              return '£' + value.toLocaleString();
             }
           }
         }
@@ -2418,7 +2434,7 @@ function createReportSpendByRegionChart(spendByRegion) {
         tooltip: {
           callbacks: {
             label: function(context) {
-              return 'Forecasted Spend: $' + context.parsed.y.toLocaleString();
+              return 'Forecasted Spend: £' + context.parsed.y.toLocaleString();
             }
           }
         },
