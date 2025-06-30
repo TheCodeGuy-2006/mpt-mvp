@@ -482,6 +482,14 @@ function initPlanningGrid(rows) {
         field: "status",
         editor: "list",
         editorParams: { values: statusOptions },
+        width: 130,
+        headerFilter: "list",
+        headerFilterParams: {
+          values: {
+            "": "(Clear Filter)",
+            ...Object.fromEntries(statusOptions.map((v) => [v, v])),
+          },
+        },
         cellEdited: (cell) => {
           cell.getRow().getData().__modified = true;
         },
@@ -1343,9 +1351,71 @@ document
       } else {
         rows = csvToObj(csv);
       }
-      // Optionally: map CSV headers to your table fields here if needed
+      // Map CSV headers to table fields and clean up data
+      const mappedRows = rows.map(row => {
+        const mappedRow = {};
+        
+        // Map column names from CSV to expected field names
+        const columnMapping = {
+          'campaignName': 'campaignName',
+          'campaignType': 'programType',  // CSV uses campaignType, grid uses programType
+          'strategicPillars': 'strategicPillars',
+          'revenuePlay': 'revenuePlay',
+          'fiscalYear': 'fiscalYear',
+          'quarterMonth': 'quarter',  // CSV uses quarterMonth, grid uses quarter
+          'region': 'region',
+          'country': 'country',
+          'owner': 'owner',
+          'description': 'description',
+          'forecastedCost': 'forecastedCost',
+          'expectedLeads': 'expectedLeads',
+          'status': 'status'
+        };
+        
+        // Apply mapping and clean up values
+        Object.keys(row).forEach(csvField => {
+          const gridField = columnMapping[csvField] || csvField;
+          let value = row[csvField];
+          
+          // Clean up specific fields
+          if (gridField === 'forecastedCost') {
+            // Handle forecasted cost - remove commas, quotes, and convert to number
+            if (typeof value === 'string') {
+              value = value.replace(/[",\s]/g, ''); // Remove commas, quotes, and spaces
+              value = value ? Number(value) : 0;
+            } else {
+              value = value ? Number(value) : 0;
+            }
+          } else if (gridField === 'expectedLeads') {
+            // Ensure expected leads is a number
+            if (typeof value === 'string') {
+              value = value.replace(/[",\s]/g, ''); // Remove any formatting
+              value = value ? Number(value) : 0;
+            } else {
+              value = value ? Number(value) : 0;
+            }
+          } else if (gridField === 'status') {
+            // Ensure status is a string and handle any numeric values
+            if (value && typeof value !== 'string') {
+              value = String(value);
+            }
+            // If it's empty or undefined, default to 'Planning'
+            if (!value || value === '' || value === 'undefined') {
+              value = 'Planning';
+            }
+          }
+          
+          // Only add non-empty values to avoid overwriting with empty strings
+          if (value !== '' && value !== undefined && value !== null) {
+            mappedRow[gridField] = value;
+          }
+        });
+        
+        return mappedRow;
+      });
+      
       // Before adding, update calculated fields for each row
-      rows.forEach((row) => {
+      mappedRows.forEach((row) => {
         // Special logic for In-Account Events (1:1): no leads, pipeline = 20x forecasted cost
         if (row.programType === "In-Account Events (1:1)") {
           row.expectedLeads = 0;
@@ -1369,7 +1439,7 @@ document
         }
       });
       if (planningTableInstance) {
-        planningTableInstance.addData(rows);
+        planningTableInstance.addData(mappedRows);
       }
     };
     reader.readAsText(file);
@@ -1381,10 +1451,32 @@ function csvToObj(csv) {
   const headers = lines[0]
     .split(",")
     .map((h) => h.replace(/^"|"$/g, "").trim());
+  
   return lines.slice(1).map((line) => {
-    const values = line.split(",").map((v) => v.replace(/^"|"$/g, "").trim());
+    // Handle CSV parsing more carefully to deal with quoted values containing commas
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        values.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    values.push(current.trim()); // Don't forget the last value
+    
     const obj = {};
-    headers.forEach((h, i) => (obj[h] = values[i]));
+    headers.forEach((h, i) => {
+      const value = values[i] || '';
+      obj[h] = value.replace(/^"|"$/g, ""); // Remove surrounding quotes
+    });
     return obj;
   });
 }
