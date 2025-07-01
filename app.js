@@ -1128,6 +1128,7 @@ function route() {
     }
     if (hash === "#roi" && typeof updateRoiTotalSpend === "function") {
       setTimeout(updateRoiTotalSpend, 0);
+      setTimeout(initRoiTabSwitching, 100); // Initialize tab switching when ROI tab is viewed
       console.log("[route] Updated ROI total spend");
     }
     if (hash === "#report" && window.reportTableInstance) {
@@ -2185,12 +2186,12 @@ function renderRoiByRegionChart() {
             callback: function(value) {
               return value + "%";
             },
-            font: { size: 10 }
+            font: { size: 12 }
           }
         },
         x: {
           ticks: {
-            font: { size: 10 }
+            font: { size: 12 }
           }
         }
       }
@@ -2267,17 +2268,17 @@ function renderRoiByProgramTypeChart() {
             callback: function(value) {
               return value + "%";
             },
-            font: { size: 10 }
+            font: { size: 12 }
           }
         },
         x: {
           ticks: {
-            font: { size: 9 },
+            font: { size: 12 },
             maxRotation: 45
           }
         }
       }
-    }
+    },
   });
 }
 
@@ -2302,6 +2303,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     renderRoiByRegionChart();
     renderRoiByProgramTypeChart();
+    initRoiTabSwitching(); // Initialize ROI tab functionality
   }, 700);
 });
 
@@ -2616,6 +2618,65 @@ function createReportSpendByRegionChart(spendByRegion) {
           display: false
         }
       }
-    }
+    } // Close the options object
+  }); // Close the new Chart() call
+} // Close the function
+
+// ROI Tab Functionality
+function initRoiTabSwitching() {
+  const regionTabBtn = document.getElementById('roiRegionTabBtn');
+  const programTypeTabBtn = document.getElementById('roiProgramTypeTabBtn');
+  const regionPanel = document.getElementById('roiRegionChartContainer');
+  const programTypePanel = document.getElementById('roiProgramTypeChartContainer');
+
+  if (!regionTabBtn || !programTypeTabBtn || !regionPanel || !programTypePanel) {
+    return;
+  }
+
+  // Function to switch tabs
+  function switchToTab(activeTab, activePanel) {
+    // Reset all tabs
+    [regionTabBtn, programTypeTabBtn].forEach(btn => {
+      btn.style.background = '#f5f5f5';
+      btn.style.color = '#666';
+      btn.classList.remove('active');
+    });
+
+    // Reset all panels
+    [regionPanel, programTypePanel].forEach(panel => {
+      panel.style.display = 'none';
+      panel.classList.remove('active');
+    });
+
+    // Activate selected tab and panel
+    activeTab.style.background = '#1976d2';
+    activeTab.style.color = 'white';
+    activeTab.classList.add('active');
+    
+    activePanel.style.display = 'flex';
+    activePanel.classList.add('active');
+
+    // Re-render charts when switching tabs to ensure proper sizing
+    setTimeout(() => {
+      if (activePanel === regionPanel) {
+        renderRoiByRegionChart();
+      } else if (activePanel === programTypePanel) {
+        renderRoiByProgramTypeChart();
+      }
+    }, 100);
+  }
+
+  // Add click listeners
+  regionTabBtn.addEventListener('click', () => {
+    switchToTab(regionTabBtn, regionPanel);
   });
+
+  programTypeTabBtn.addEventListener('click', () => {
+    switchToTab(programTypeTabBtn, programTypePanel);
+  });
+
+  // Initialize with the first tab active (already set in HTML)
+  // Just ensure the panel visibility is correct
+  regionPanel.style.display = 'flex';
+  programTypePanel.style.display = 'none';
 }
