@@ -162,19 +162,19 @@
       </div>
       <div
         style="
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
+          display: block;
           margin-bottom: 8px;
         "
       >
+        <!-- First Row: ROI Gauge and Info Boxes -->
         <div
-          id="roiChartsContainer"
+          id="roiTopRow"
           style="
             display: flex;
-            flex-wrap: wrap;
-            gap: 32px 24px;
-            margin-bottom: 24px;
+            gap: 32px;
+            margin-bottom: 32px;
+            align-items: flex-start;
+            justify-content: flex-start;
           "
         >
           <!-- ROI Gauge Chart -->
@@ -186,12 +186,12 @@
               border-radius: 12px;
               box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
               text-align: center;
-              width: 280px;
-              height: 220px;
+              width: 350px;
+              height: 280px;
             "
           >
-            <h4 style="margin: 0 0 16px 0; color: #1976d2; font-size: 1rem;">ROI Performance</h4>
-            <div style="position: relative; height: 120px; width: 100%; max-width: 240px; margin: 0 auto;">
+            <h4 style="margin: 0 0 16px 0; color: #1976d2; font-size: 1.1rem;">ROI Performance</h4>
+            <div style="position: relative; height: 180px; width: 100%; max-width: 310px; margin: 0 auto;">
               <canvas id="roiGaugeChart"></canvas>
             </div>
           </div>
@@ -201,97 +201,129 @@
             style="
               display: grid;
               grid-template-columns: repeat(2, 1fr);
-              gap: 16px;
-              width: 320px;
+              gap: 20px;
+              width: 480px;
             "
           >
             <div
               id="roiTotalSpendBox"
               style="
-                padding: 16px;
+                padding: 20px;
                 background: #f5f5f5;
                 border-radius: 8px;
                 box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-                font-size: 1rem;
+                font-size: 1.1rem;
                 font-weight: 600;
                 color: #1976d2;
                 text-align: center;
+                height: 80px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
               "
             >
-              <div style="font-size: 0.85rem; margin-bottom: 4px;">Total Costs</div>
+              <div style="font-size: 0.9rem; margin-bottom: 6px;">Total Costs</div>
               <div id="roiTotalSpendValue">$0</div>
             </div>
             
             <div
               id="roiTotalPipelineBox"
               style="
-                padding: 16px;
+                padding: 20px;
                 background: #f5f5f5;
                 border-radius: 8px;
                 box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-                font-size: 1rem;
+                font-size: 1.1rem;
                 font-weight: 600;
                 color: #388e3c;
                 text-align: center;
+                height: 80px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
               "
             >
-              <div style="font-size: 0.85rem; margin-bottom: 4px;">Total Forecasted Pipeline</div>
+              <div style="font-size: 0.9rem; margin-bottom: 6px;">Total Forecasted Pipeline</div>
               <div id="roiTotalPipelineValue">$0</div>
             </div>
             
             <div
               id="roiTotalLeadsBox"
               style="
-                padding: 16px;
+                padding: 20px;
                 background: #f5f5f5;
                 border-radius: 8px;
                 box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-                font-size: 1rem;
+                font-size: 1.1rem;
                 font-weight: 600;
                 color: #f57c00;
                 text-align: center;
+                height: 80px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
               "
             >
-              <div style="font-size: 0.85rem; margin-bottom: 4px;">Total Leads/Conversions</div>
+              <div style="font-size: 0.9rem; margin-bottom: 6px;">Total Leads/Conversions</div>
               <div id="roiTotalLeadsValue">0</div>
             </div>
             
             <div
               id="roiTotalMqlBox"
               style="
-                padding: 16px;
+                padding: 20px;
                 background: #f5f5f5;
                 border-radius: 8px;
                 box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-                font-size: 1rem;
+                font-size: 1.1rem;
                 font-weight: 600;
                 color: #7b1fa2;
                 text-align: center;
+                height: 80px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
               "
             >
-              <div style="font-size: 0.85rem; margin-bottom: 4px;">Total MQL</div>
+              <div style="font-size: 0.9rem; margin-bottom: 6px;">Total MQL</div>
               <div id="roiTotalMqlValue">0</div>
             </div>
             
             <div
               id="roiTotalForecastedCostBox"
               style="
-                padding: 16px;
+                padding: 20px;
                 background: #f5f5f5;
                 border-radius: 8px;
                 box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-                font-size: 1rem;
+                font-size: 1.1rem;
                 font-weight: 600;
                 color: #ff6f00;
                 text-align: center;
                 grid-column: span 2;
+                height: 80px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
               "
             >
-              <div style="font-size: 0.85rem; margin-bottom: 4px;">Total Forecasted Cost</div>
+              <div style="font-size: 0.9rem; margin-bottom: 6px;">Total Forecasted Cost</div>
               <div id="roiTotalForecastedCostValue">$0</div>
             </div>
           </div>
-          
+        </div>
+        
+        <!-- Second Row: Charts -->
+        <div
+          id="roiChartsContainer"
+          style="
+            display: flex;
+            gap: 32px;
+            margin-bottom: 24px;
+            align-items: flex-start;
+            justify-content: flex-start;
+          "
+        >
           <!-- ROI by Region Chart -->
           <div
             id="roiRegionChartContainer"

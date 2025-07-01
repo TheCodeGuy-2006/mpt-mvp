@@ -736,41 +736,6 @@ function initBudgetsTable(budgets, rows) {
   return table;
 }
 
-// REPORT GRID
-function initReportGrid(rows) {
-  const table = new Tabulator("#reportGrid", {
-    data: rows,
-    layout: "fitColumns",
-    columns: [
-      { title: "Region", field: "region", headerFilter: "input" },
-      { title: "Country", field: "country", headerFilter: "input" },
-      { title: "Quarter", field: "quarter", headerFilter: "input" },
-      { title: "Forecasted Cost", field: "forecastedCost" },
-      { title: "Actual Cost", field: "actualCost" },
-      { title: "Expected Leads", field: "expectedLeads" },
-      { title: "Actual Leads", field: "actualLeads" },
-      { title: "MQL", field: "mqlForecast" },
-      { title: "SQL", field: "sqlForecast" },
-      { title: "Opps", field: "oppsForecast" },
-      { title: "Pipeline", field: "pipelineForecast" },
-    ],
-    footerElement: '<div id="reportTotals"></div>',
-  });
-  // Show calculated totals using regionMetrics
-  import("./src/calc.js").then(({ regionMetrics }) => {
-    fetch("data/budgets.json")
-      .then((r) => r.json())
-      .then((budgetsObj) => {
-        const metrics = regionMetrics(rows, budgetsObj);
-        let html = "<b>Totals by Region:</b><br>";
-        Object.entries(metrics).forEach(([region, m]) => {
-          html += `${region}: Plan ${m.plan}, Forecast ${m.forecast}, Actuals ${m.actuals}, Var Plan ${m.varPlan}, Var Actual ${m.varActual}<br>`;
-        });
-        document.getElementById("reportTotals").innerHTML = html;
-      });
-  });
-}
-
 // GITHUB SYNC PLACEHOLDER
 function initGithubSync() {
   document.getElementById("githubSync").innerHTML = `
@@ -1232,7 +1197,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   window.executionTableInstance = executionTable;
   const budgetsTable = initBudgetsTable(budgets, rows); // pass rows to budgets table
   window.budgetsTableInstance = budgetsTable;
-  initReportGrid(rows);
   initGithubSync();
   setupPlanningSave(planningTable, rows);
   setupBudgetsSave(budgetsTable);
@@ -2069,25 +2033,34 @@ function updateRoiTotalSpend() {
 
 // ROI % by Region Bar Chart
 function renderRoiByRegionChart() {
+  // Define the specific regions to display
+  const targetRegions = ["JP & Korea", "South APAC", "SAARC"];
+  
   // Prepare data
   let regionMap = {};
+  
+  // Initialize all target regions with zero values
+  targetRegions.forEach(region => {
+    regionMap[region] = { spend: 0, pipeline: 0 };
+  });
+  
   if (window.executionTableInstance) {
     const data = window.executionTableInstance.getData();
     data.forEach(row => {
-      const region = row.region || "(None)";
-      if (!regionMap[region]) {
-        regionMap[region] = { spend: 0, pipeline: 0 };
+      const region = row.region;
+      // Only process data for our target regions
+      if (targetRegions.includes(region)) {
+        let spend = row.actualCost;
+        if (typeof spend === "string") spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
+        if (!isNaN(spend)) regionMap[region].spend += Number(spend);
+        let pipeline = row.pipelineForecast;
+        if (typeof pipeline === "string") pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
+        if (!isNaN(pipeline)) regionMap[region].pipeline += Number(pipeline);
       }
-      let spend = row.actualCost;
-      if (typeof spend === "string") spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
-      if (!isNaN(spend)) regionMap[region].spend += Number(spend);
-      let pipeline = row.pipelineForecast;
-      if (typeof pipeline === "string") pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
-      if (!isNaN(pipeline)) regionMap[region].pipeline += Number(pipeline);
-       });
+    });
   }
-  const regions = Object.keys(regionMap);
-  const roiPercents = regions.map(region => {
+  
+  const roiPercents = targetRegions.map(region => {
     const vals = regionMap[region];
     return vals.spend > 0 ? (vals.pipeline / vals.spend) * 100 : 0;
   });
@@ -2104,7 +2077,7 @@ function renderRoiByRegionChart() {
   window.roiRegionChartInstance = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: regions,
+      labels: targetRegions,
       datasets: [
         {
           label: "ROI %",

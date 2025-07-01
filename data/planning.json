@@ -160,7 +160,8 @@
     "sql": 15,
     "opps": 12,
     "pipeline": 600000,
-    "id": "row_5_1751333373752"
+    "id": "row_5_1751333373752",
+    "campaignName": "third check"
   },
   {
     "programType": "3P Sponsored Events",
