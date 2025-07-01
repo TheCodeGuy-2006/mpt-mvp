@@ -951,6 +951,10 @@ function setupPlanningSave(table, rows) {
       .then((result) => {
         if (result.success) {
           alert("Planning data saved to backend!");
+          // Update ROI metrics to reflect changes in forecasted costs
+          if (typeof updateRoiTotalSpend === "function") {
+            updateRoiTotalSpend();
+          }
         } else {
           alert("Failed to save: " + (result.error || "Unknown error"));
         }
@@ -1435,6 +1439,10 @@ document
       });
       if (planningTableInstance) {
         planningTableInstance.addData(mappedRows);
+        // Update ROI metrics to reflect newly imported forecasted costs
+        if (typeof updateRoiTotalSpend === "function") {
+          setTimeout(updateRoiTotalSpend, 100); // Small delay to ensure data is fully loaded
+        }
       }
     };
     reader.readAsText(file);
@@ -2003,6 +2011,26 @@ function updateRoiTotalSpend() {
     mqlEl.textContent = totalMql.toLocaleString();
   }
 
+  // Update Total Forecasted Cost value from Planning tab
+  let totalForecastedCost = 0;
+  if (window.planningTableInstance) {
+    const planningData = window.planningTableInstance.getData();
+    totalForecastedCost = planningData.reduce((sum, row) => {
+      let val = row.forecastedCost;
+      if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(val)) sum += Number(val);
+      return sum;
+    }, 0);
+  }
+  
+  const forecastedCostEl = document.getElementById("roiTotalForecastedCostValue");
+  if (forecastedCostEl) {
+    forecastedCostEl.textContent = "$" + totalForecastedCost.toLocaleString();
+  }
+
+  // Update ROI Gauge
+  updateRoiGauge(roiPercent);
+
   // Update Total SQL value
   let totalSql = 0;
   totalSql = filteredData.reduce((sum, row) => {
@@ -2319,6 +2347,93 @@ function setupPlanningDownload(table) {
     const data = table.getData();
     downloadJSON(data, "planning-all.json");
   };
+}
+
+// ROI Gauge Chart
+let roiGaugeChart = null;
+
+function updateRoiGauge(roiPercent) {
+  const ctx = document.getElementById('roiGaugeChart');
+  if (!ctx) return;
+
+  // Destroy existing chart if it exists
+  if (roiGaugeChart) {
+    roiGaugeChart.destroy();
+  }
+
+  // Determine gauge color based on ROI performance
+  let gaugeColor = '#d32f2f'; // Red for poor performance
+  let performanceText = 'Poor';
+  
+  if (roiPercent >= 300) {
+    gaugeColor = '#2e7d32'; // Dark green for excellent
+    performanceText = 'Excellent';
+  } else if (roiPercent >= 200) {
+    gaugeColor = '#388e3c'; // Green for very good
+    performanceText = 'Very Good';
+  } else if (roiPercent >= 100) {
+    gaugeColor = '#689f38'; // Light green for good
+    performanceText = 'Good';
+  } else if (roiPercent >= 50) {
+    gaugeColor = '#ffa000'; // Orange for fair
+    performanceText = 'Fair';
+  }
+
+  // Create doughnut chart configured as a gauge
+  roiGaugeChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [Math.min(roiPercent, 400), Math.max(400 - roiPercent, 0)], // Cap at 400% for display
+        backgroundColor: [gaugeColor, '#e0e0e0'],
+        borderWidth: 0,
+        circumference: 180,
+        rotation: 270
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2,
+      cutout: '75%',
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          enabled: false
+        }
+      },
+      elements: {
+        arc: {
+          borderWidth: 0
+        }
+      }
+    },
+    plugins: [{
+      id: 'gaugeText',
+      beforeDraw: function(chart) {
+        const ctx = chart.ctx;
+        ctx.save();
+        
+        // ROI percentage text
+        ctx.font = 'bold 24px Arial';
+        ctx.fillStyle = gaugeColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
+        const centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2 + 10;
+        ctx.fillText(roiPercent.toFixed(1) + '%', centerX, centerY);
+        
+        // Performance text
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#666';
+        ctx.fillText(performanceText, centerX, centerY + 25);
+        
+        ctx.restore();
+      }
+    }]
+  });
 }
 
 // Report export setup - REMOVED
