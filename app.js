@@ -1639,17 +1639,7 @@ function renderBudgetsRegionCharts() {
     const actualCost = planningRows
       .filter((r) => r.region === region && typeof r.actualCost === "number")
       .reduce((sum, r) => sum + r.actualCost, 0);
-    // Prepare forecasted cost breakdown
-    let forecastBreakdown = "";
-    if (regionForecasts.length > 1) {
-      forecastBreakdown =
-        '<div style="font-size:0.98em;margin-top:8px;text-align:left;">';
-      forecastBreakdown += "<b>Forecasted Cost Breakdown:</b><br>";
-      regionForecasts.forEach((r) => {
-        forecastBreakdown += `${r.campaignName ? r.campaignName : "(Unnamed)"}: $${Number(r.forecastedCost).toLocaleString()}<br>`;
-      });
-      forecastBreakdown += "</div>";
-    }
+    // Forecasted cost breakdown will only be shown in fullscreen mode
     // Create chart canvas and fullscreen button
     const chartDiv = document.createElement("div");
     chartDiv.style.width = "300px";
@@ -1663,7 +1653,7 @@ function renderBudgetsRegionCharts() {
     chartDiv.style.alignItems = "center";
     chartDiv.style.position = "relative";
     // Title and canvas
-    chartDiv.innerHTML = `<h3 style="font-size:1.18rem;margin:0 0 12px 0;color:#1976d2;">${region}</h3><canvas id="chart-${region}"></canvas>${forecastBreakdown}`;
+    chartDiv.innerHTML = `<h3 style="font-size:1.18rem;margin:0 0 12px 0;color:#1976d2;">${region}</h3><canvas id="chart-${region}"></canvas>`;
     // Fullscreen button
     const fullscreenBtn = document.createElement("button");
     fullscreenBtn.className = "graph-fullscreen-btn";
@@ -1753,8 +1743,8 @@ function renderBudgetsRegionCharts() {
       fsDiv.style.flexDirection = "column";
       fsDiv.style.alignItems = "center";
       fsDiv.style.position = "relative";
-      fsDiv.style.width = "75vw";
-      fsDiv.style.height = "75vh";
+      fsDiv.style.width = "85vw";
+      fsDiv.style.height = "80vh";
       // Close button (same as fullscreen button)
       const closeBtn = document.createElement("button");
       closeBtn.textContent = "✕";
@@ -1775,11 +1765,97 @@ function renderBudgetsRegionCharts() {
       title.style.color = "#1976d2";
       title.style.margin = "0 0 18px 0";
       fsDiv.appendChild(title);
+      
+      // Content container with chart and breakdown side by side
+      const contentDiv = document.createElement("div");
+      contentDiv.style.display = "flex";
+      contentDiv.style.gap = "32px";
+      contentDiv.style.width = "100%";
+      contentDiv.style.height = "calc(100% - 80px)";
+      contentDiv.style.alignItems = "flex-start";
+      
+      // Chart container
+      const chartContainer = document.createElement("div");
+      chartContainer.style.flex = "2";
+      chartContainer.style.display = "flex";
+      chartContainer.style.justifyContent = "center";
+      chartContainer.style.alignItems = "center";
+      chartContainer.style.height = "100%";
+      
       // Canvas
       const fsCanvas = document.createElement("canvas");
-      fsCanvas.width = Math.floor(window.innerWidth * 0.7);
-      fsCanvas.height = Math.floor(window.innerHeight * 0.6);
-      fsDiv.appendChild(fsCanvas);
+      fsCanvas.width = Math.floor(window.innerWidth * 0.5);
+      fsCanvas.height = Math.floor(window.innerHeight * 0.55);
+      chartContainer.appendChild(fsCanvas);
+      contentDiv.appendChild(chartContainer);
+      
+      // Breakdown container (only show if there are multiple forecasts)
+      if (regionForecasts.length > 1) {
+        const breakdownContainer = document.createElement("div");
+        breakdownContainer.style.flex = "1";
+        breakdownContainer.style.minWidth = "300px";
+        breakdownContainer.style.maxWidth = "400px";
+        breakdownContainer.style.height = "100%";
+        breakdownContainer.style.overflowY = "auto";
+        breakdownContainer.style.background = "#f8f9fa";
+        breakdownContainer.style.borderRadius = "12px";
+        breakdownContainer.style.padding = "20px";
+        breakdownContainer.style.border = "1px solid #e3f2fd";
+        
+        // Breakdown title
+        const breakdownTitle = document.createElement("h3");
+        breakdownTitle.textContent = "Forecasted Cost Breakdown";
+        breakdownTitle.style.color = "#1976d2";
+        breakdownTitle.style.margin = "0 0 16px 0";
+        breakdownTitle.style.fontSize = "1.2rem";
+        breakdownTitle.style.fontWeight = "600";
+        breakdownContainer.appendChild(breakdownTitle);
+        
+        // Breakdown items
+        regionForecasts.forEach((r, index) => {
+          const itemDiv = document.createElement("div");
+          itemDiv.style.marginBottom = "12px";
+          itemDiv.style.padding = "12px";
+          itemDiv.style.background = "#ffffff";
+          itemDiv.style.borderRadius = "8px";
+          itemDiv.style.border = "1px solid #e0e0e0";
+          itemDiv.style.boxShadow = "0 1px 3px rgba(0,0,0,0.05)";
+          
+          const campaignName = document.createElement("div");
+          campaignName.textContent = r.campaignName ? r.campaignName : `Campaign ${index + 1}`;
+          campaignName.style.fontWeight = "600";
+          campaignName.style.color = "#333";
+          campaignName.style.marginBottom = "4px";
+          campaignName.style.fontSize = "0.95rem";
+          
+          const costValue = document.createElement("div");
+          costValue.textContent = `$${Number(r.forecastedCost).toLocaleString()}`;
+          costValue.style.color = "#1976d2";
+          costValue.style.fontWeight = "700";
+          costValue.style.fontSize = "1.1rem";
+          
+          itemDiv.appendChild(campaignName);
+          itemDiv.appendChild(costValue);
+          breakdownContainer.appendChild(itemDiv);
+        });
+        
+        // Total at the bottom
+        const totalDiv = document.createElement("div");
+        totalDiv.style.marginTop = "16px";
+        totalDiv.style.padding = "16px";
+        totalDiv.style.background = "#1976d2";
+        totalDiv.style.color = "#ffffff";
+        totalDiv.style.borderRadius = "8px";
+        totalDiv.style.fontWeight = "700";
+        totalDiv.style.fontSize = "1.1rem";
+        totalDiv.style.textAlign = "center";
+        totalDiv.textContent = `Total: $${Number(forecastedCost).toLocaleString()}`;
+        breakdownContainer.appendChild(totalDiv);
+        
+        contentDiv.appendChild(breakdownContainer);
+      }
+      
+      fsDiv.appendChild(contentDiv);
       overlay.appendChild(fsDiv);
       // Render chart in fullscreen
       setTimeout(() => {
