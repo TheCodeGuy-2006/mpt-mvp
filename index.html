@@ -13,8 +13,7 @@
   <body>
     <nav>
       <a href="#planning">Planning</a>| <a href="#execution">Execution</a>|
-      <a href="#budgets">Budgets</a>| <a href="#report">Reporting</a>|
-      <a href="#roi">ROI</a>| <a href="#github-sync">GitHub Sync</a>
+      <a href="#budgets">Budgets</a>| <a href="#roi">ROI</a>| <a href="#github-sync">GitHub Sync</a>
       <a
         href="https://github.com/"
         target="_blank"
@@ -91,136 +90,6 @@
       <div id="budgetsTable"></div>
       <div style="display: flex; gap: 12px; margin-top: 12px">
         <button id="saveBudgetDashboard">Save Budget Dashboard</button>
-      </div>
-    </section>
-    <section id="view-report" style="display: none;">
-      <h2>Reporting</h2>
-      <div
-        id="reportTotalSpendBox"
-        style="
-          margin: 24px 0;
-          padding: 24px;
-          background: #f5f5f5;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #1976d2;
-          text-align: center;
-          max-width: 400px;
-          margin-left: auto;
-          margin-right: auto;
-        "
-      >
-        Total Forecasted Spend: <span id="reportTotalSpendValue">$0</span>
-      </div>
-      <div
-        id="reportTotalActualSpendBox"
-        style="
-          margin: 24px 0;
-          padding: 24px;
-          background: #f5f5f5;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #388e3c;
-          text-align: center;
-          max-width: 400px;
-          margin-left: auto;
-          margin-right: auto;
-        "
-      >
-        Total Actual Spend: <span id="reportTotalActualSpendValue">$0</span>
-      </div>
-      <div
-        id="reportTotalPipelineBox"
-        style="
-          margin: 24px 0;
-          padding: 24px;
-          background: #f5f5f5;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #ff9800;
-          text-align: center;
-          max-width: 400px;
-          margin-left: auto;
-          margin-right: auto;
-        "
-      >
-        Total Pipeline Forecast: <span id="reportTotalPipelineValue">$0</span>
-      </div>
-      <div
-        id="reportTotalMqlBox"
-        style="
-          margin: 24px 0;
-          padding: 24px;
-          background: #f5f5f5;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #7b1fa2;
-          text-align: center;
-          max-width: 400px;
-          margin-left: auto;
-          margin-right: auto;
-        "
-      >
-        Total MQL: <span id="reportTotalMqlValue">0</span>
-      </div>
-      <div
-        id="reportTotalSqlBox"
-        style="
-          margin: 24px 0;
-          padding: 24px;
-          background: #f5f5f5;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #d32f2f;
-          text-align: center;
-          max-width: 400px;
-          margin-left: auto;
-          margin-right: auto;
-        "
-      >
-        Total SQL: <span id="reportTotalSqlValue">0</span>
-      </div>
-      <div
-        id="reportChartContainer"
-        style="
-          margin: 48px 0;
-          padding: 24px;
-          background: #ffffff;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-          max-width: 800px;
-          margin-left: auto;
-          margin-right: auto;
-        "
-      >
-        <h3 style="text-align: center; color: #1976d2; margin-bottom: 20px;">Forecasted Spend by Region</h3>
-        <canvas id="reportSpendByRegionChart" width="400" height="120" style="max-height: 120px;"></canvas>
-      </div>
-      <div
-        id="reportPipelineChartContainer"
-        style="
-          margin: 48px 0;
-          padding: 24px;
-          background: #ffffff;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-          max-width: 800px;
-          margin-left: auto;
-          margin-right: auto;
-        "
-      >
-        <h3 style="text-align: center; color: #1976d2; margin-bottom: 20px;">Lead Generation Pipeline</h3>
-        <canvas id="reportPipelineChart" width="400" height="120" style="max-height: 120px;"></canvas>
       </div>
     </section>
     <section id="view-github-sync" style="display: none;">
