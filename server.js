@@ -77,4 +77,16 @@ app.post("/save-budgets", (req, res) => {
   });
 });
 
+app.post("/save-calendar", (req, res) => {
+  const calendarData = req.body.content;
+  const filePath = path.join(process.cwd(), "data", "calendar.json");
+  fs.writeFile(filePath, JSON.stringify(calendarData, null, 2), (err) => {
+    if (err) {
+      console.error("Failed to write calendar.json:", err);
+      return res.status(500).json({ success: false, error: err.message });
+    }
+    res.json({ success: true });
+  });
+});
+
 app.listen(3000, () => console.log("Backend running on http://localhost:3000"));

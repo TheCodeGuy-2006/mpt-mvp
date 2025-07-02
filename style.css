@@ -634,3 +634,127 @@ table#planTable td input[type="text"] {
   display: flex;
   align-items: center;
 }
+/* Calendar Styles */
+#calendarGrid {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#calendarContainer {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.calendar-day-cell {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.calendar-day-cell:hover {
+  background-color: #f0f0f0 !important;
+}
+
+.event-item {
+  display: block;
+  margin: 2px 0;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.event-item:hover {
+  opacity: 0.8;
+}
+
+#eventForm input,
+#eventForm select,
+#eventForm textarea {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+#eventForm input:focus,
+#eventForm select:focus,
+#eventForm textarea:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+#eventDetails {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+#eventDetails h3 {
+  margin-top: 0;
+  color: #1976d2;
+}
+
+/* Calendar controls styling */
+#calendarControls button {
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+#calendarControls button:hover {
+  background: #1565c0;
+  transform: translateY(-1px);
+}
+
+#calendarControls button:active {
+  transform: translateY(0);
+}
+
+#currentMonth {
+  font-size: 1.2rem;
+  color: #1976d2;
+}
+
+/* Save button styling */
+.save-large {
+  background: #4caf50 !important;
+  font-weight: 500 !important;
+}
+
+.save-large:hover {
+  background: #45a049 !important;
+}
+
+/* Responsive calendar */
+@media (max-width: 768px) {
+  #calendarControls {
+    flex-direction: column;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+  
+  #calendarControls > div {
+    justify-content: center;
+  }
+  
+  #calendarGrid {
+    font-size: 0.9rem;
+  }
+  
+  #calendarGrid > div {
+    min-height: 80px !important;
+  }
+}

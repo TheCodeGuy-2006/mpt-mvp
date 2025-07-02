@@ -167,6 +167,10 @@ function route() {
       setTimeout(window.roiModule.updateReportTotalSpend, 0);
       console.log("[route] Updated report total spend");
     }
+    if (hash === "#calendar" && typeof window.calendarModule?.handleCalendarRouting === "function") {
+      window.calendarModule.handleCalendarRouting();
+      console.log("[route] Handled calendar routing");
+    }
   }
 }
 
@@ -248,6 +252,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     "#planning",
     "#execution",
     "#budgets",
+    "#calendar",
     "#report",
     "#roi",
     "#github-sync",
@@ -265,6 +270,9 @@ window.addEventListener("DOMContentLoaded", async () => {
   
   // Setup ROI chart event handlers
   window.roiModule.setupRoiChartEventHandlers();
+  
+  // Initialize calendar module
+  window.calendarModule.initializeCalendar();
 });
 
 // Initialize Chart.js and render charts

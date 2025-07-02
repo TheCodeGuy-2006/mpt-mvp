@@ -13,7 +13,7 @@
   <body>
     <nav>
       <a href="#planning">Planning</a>| <a href="#execution">Execution</a>|
-      <a href="#budgets">Budgets</a>| <a href="#roi">ROI</a>| <a href="#github-sync">GitHub Sync</a>
+      <a href="#budgets">Budgets</a>| <a href="#calendar">Calendar</a>| <a href="#roi">ROI</a>| <a href="#github-sync">GitHub Sync</a>
       <a
         href="https://github.com/"
         target="_blank"
@@ -90,6 +90,86 @@
       <div id="budgetsTable"></div>
       <div style="display: flex; gap: 12px; margin-top: 12px">
         <button id="saveBudgetDashboard">Save Budget Dashboard</button>
+      </div>
+    </section>
+    <section id="view-calendar" style="display: none;">
+      <h2>Event Calendar</h2>
+      <div
+        id="calendarControls"
+        style="
+          display: flex;
+          gap: 12px;
+          margin-bottom: 18px;
+          align-items: center;
+          justify-content: space-between;
+        "
+      >
+        <div style="display: flex; gap: 12px; align-items: center">
+          <button id="addCalendarEvent">Add Event</button>
+          <button id="deleteCalendarEvent">Delete Event</button>
+          <button id="todayBtn">Today</button>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center">
+          <button id="prevMonth">Previous</button>
+          <span id="currentMonth" style="font-weight: bold; min-width: 150px; text-align: center;"></span>
+          <button id="nextMonth">Next</button>
+        </div>
+        <button id="saveCalendarEvents" class="save-large">Save Events</button>
+      </div>
+      <div id="calendarContainer">
+        <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #ddd; border: 1px solid #ddd;">
+          <!-- Calendar grid will be populated by JavaScript -->
+        </div>
+      </div>
+      <div id="eventDetails" style="margin-top: 20px; display: none;">
+        <h3>Event Details</h3>
+        <div id="eventForm">
+          <div style="margin-bottom: 12px;">
+            <label for="eventTitle">Event Title:</label>
+            <input type="text" id="eventTitle" style="width: 100%; padding: 8px; margin-top: 4px;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label for="eventDate">Date:</label>
+            <input type="date" id="eventDate" style="width: 100%; padding: 8px; margin-top: 4px;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label for="eventType">Event Type:</label>
+            <select id="eventType" style="width: 100%; padding: 8px; margin-top: 4px;">
+              <option value="">Select Type</option>
+              <option value="Webinar">Webinar</option>
+              <option value="Workshop">Workshop</option>
+              <option value="Conference">Conference</option>
+              <option value="User Group">User Group</option>
+              <option value="Executive Event">Executive Event</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label for="eventRegion">Region:</label>
+            <select id="eventRegion" style="width: 100%; padding: 8px; margin-top: 4px;">
+              <option value="">Select Region</option>
+              <!-- Regions will be populated by JavaScript -->
+            </select>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label for="eventDescription">Description:</label>
+            <textarea id="eventDescription" style="width: 100%; padding: 8px; margin-top: 4px; height: 80px;"></textarea>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label for="eventStatus">Status:</label>
+            <select id="eventStatus" style="width: 100%; padding: 8px; margin-top: 4px;">
+              <option value="Planning">Planning</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button id="saveEvent">Save Event</button>
+            <button id="cancelEvent">Cancel</button>
+          </div>
+        </div>
       </div>
     </section>
     <section id="view-github-sync" style="display: none;">
@@ -468,6 +548,7 @@
     <script type="module" src="execution.js"></script>
     <script type="module" src="budgets.js"></script>
     <script type="module" src="roi.js"></script>
+    <script type="module" src="calendar.js"></script>
     <script type="module" src="app.js"></script>
   </body>
 </html>
