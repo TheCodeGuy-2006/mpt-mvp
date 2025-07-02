@@ -506,113 +506,76 @@ function renderRoiByRegionChart() {
   });
 }
 
-// ROI by Program Type Chart
+// ROI by Program Type Table (replacing chart)
 function renderRoiByProgramTypeChart() {
-  // Prepare data
-  let ptMap = {};
-  if (window.executionTableInstance) {
-    const data = window.executionTableInstance.getData();
-    data.forEach(row => {
-      const pt = row.programType || "(None)";
-      if (!ptMap[pt]) {
-        ptMap[pt] = { spend: 0, pipeline: 0 };
-      }
-      let spend = row.actualCost;
-      if (typeof spend === "string") spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
-      if (!isNaN(spend)) ptMap[pt].spend += Number(spend);
-      let pipeline = row.pipelineForecast;
-      if (typeof pipeline === "string") pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
-      if (!isNaN(pipeline)) ptMap[pt].pipeline += Number(pipeline);
-    });
-  }
-  const pts = Object.keys(ptMap);
-  const roiPercents = pts.map(pt => {
-    const vals = ptMap[pt];
-    return vals.spend > 0 ? (vals.pipeline / vals.spend) * 100 : 0;
-  });
-
-  // Use the predefined chart container
-  const ctx = document.getElementById("roiProgramTypeChart");
-  if (!ctx) return;
+  // Get the chart container and replace it with a table
+  const container = document.getElementById("roiProgramTypeChartContainer");
+  if (!container) return;
   
-  // Destroy previous chart if exists
-  if (window.roiProgramTypeChartInstance) {
-    window.roiProgramTypeChartInstance.destroy();
-  }
+  // Find the chart div and replace it with a table container
+  const chartDiv = container.querySelector('div[style*="max-width: 800px"]');
+  if (!chartDiv) return;
   
-  window.roiProgramTypeChartInstance = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: pts,
-      datasets: [
-        {
-          label: "ROI %",
-          data: roiPercents,
-          backgroundColor: "#66bb6a",
-          borderRadius: 4,
-          borderSkipped: false,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        title: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return context.parsed.y.toFixed(1) + "%";
-            }
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return value + "%";
-            },
-            font: { size: 12 }
-          }
-        },
-        x: {
-          ticks: {
-            font: { size: 12 },
-            maxRotation: 45
-          }
-        }
-      }
-    },
-  });
+  // Create table HTML
+  const tableHTML = `
+    <div style="width: 100%; max-width: 800px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #1976d2; color: white;">
+            <th style="padding: 16px; text-align: left; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.2);">Column 1</th>
+            <th style="padding: 16px; text-align: left; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.2);">Column 2</th>
+            <th style="padding: 16px; text-align: left; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.2);">Column 3</th>
+            <th style="padding: 16px; text-align: left; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.2);">Column 4</th>
+            <th style="padding: 16px; text-align: left; font-weight: 600;">Column 5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background: #f8f9fa;">
+            <td style="padding: 16px; border-right: 1px solid #e0e0e0; color: #333;">Data 1</td>
+            <td style="padding: 16px; border-right: 1px solid #e0e0e0; color: #333;">Data 2</td>
+            <td style="padding: 16px; border-right: 1px solid #e0e0e0; color: #333;">Data 3</td>
+            <td style="padding: 16px; border-right: 1px solid #e0e0e0; color: #333;">Data 4</td>
+            <td style="padding: 16px; color: #333;">Data 5</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  // Replace the chart div with the table
+  chartDiv.outerHTML = tableHTML;
 }
 
-// ROI by Quarter Chart
+// Forecasted vs Actual Performance Chart (replacing ROI by Quarter)
 function renderRoiByQuarterChart() {
-  // Prepare data
-  let quarterMap = {};
+  // Calculate totals from execution data
+  let forecastedMql = 0;
+  let actualMql = 0;
+  let forecastedLeads = 0;
+  let actualLeads = 0;
+
   if (window.executionTableInstance) {
     const data = window.executionTableInstance.getData();
     data.forEach(row => {
-      const quarter = row.quarter || "(None)";
-      if (!quarterMap[quarter]) {
-        quarterMap[quarter] = { spend: 0, pipeline: 0 };
-      }
-      let spend = row.actualCost;
-      if (typeof spend === "string") spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
-      if (!isNaN(spend)) quarterMap[quarter].spend += Number(spend);
-      let pipeline = row.pipelineForecast;
-      if (typeof pipeline === "string") pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
-      if (!isNaN(pipeline)) quarterMap[quarter].pipeline += Number(pipeline);
+      // MQL data
+      let fMql = row.mqlForecast || 0;
+      if (typeof fMql === "string") fMql = Number(fMql.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(fMql)) forecastedMql += Number(fMql);
+
+      let aMql = row.actualMQLs || 0;
+      if (typeof aMql === "string") aMql = Number(aMql.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(aMql)) actualMql += Number(aMql);
+
+      // Leads data
+      let fLeads = row.expectedLeads || 0;
+      if (typeof fLeads === "string") fLeads = Number(fLeads.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(fLeads)) forecastedLeads += Number(fLeads);
+
+      let aLeads = row.actualLeads || 0;
+      if (typeof aLeads === "string") aLeads = Number(aLeads.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(aLeads)) actualLeads += Number(aLeads);
     });
   }
-  const quarters = Object.keys(quarterMap).sort(); // Sort quarters chronologically
-  const roiPercents = quarters.map(quarter => {
-    const vals = quarterMap[quarter];
-    return vals.spend > 0 ? (vals.pipeline / vals.spend) * 100 : 0;
-  });
 
   // Use the predefined chart container
   const ctx = document.getElementById("roiQuarterChart");
@@ -626,45 +589,55 @@ function renderRoiByQuarterChart() {
   window.roiQuarterChartInstance = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: quarters,
+      labels: ["MQL", "Leads"],
       datasets: [
         {
-          label: "ROI %",
-          data: roiPercents,
-          backgroundColor: "#ff9800",
+          label: "Forecasted",
+          data: [forecastedMql, forecastedLeads],
+          backgroundColor: "#42a5f5",
           borderRadius: 4,
           borderSkipped: false,
         },
+        {
+          label: "Actual",
+          data: [actualMql, actualLeads],
+          backgroundColor: "#66bb6a",
+          borderRadius: 4,
+          borderSkipped: false,
+        }
       ],
     },
     options: {
+      indexAxis: 'y', // This makes it horizontal
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: false },
+        legend: { 
+          display: true,
+          position: 'top'
+        },
         title: { display: false },
         tooltip: {
           callbacks: {
             label: function(context) {
-              return context.parsed.y.toFixed(1) + "%";
+              return context.dataset.label + ': ' + context.parsed.x.toLocaleString();
             }
           }
         }
       },
       scales: {
-        y: {
+        x: {
           beginAtZero: true,
           ticks: {
             callback: function(value) {
-              return value + "%";
+              return value.toLocaleString();
             },
             font: { size: 12 }
           }
         },
-        x: {
+        y: {
           ticks: {
-            font: { size: 12 },
-            maxRotation: 45
+            font: { size: 12 }
           }
         }
       }
