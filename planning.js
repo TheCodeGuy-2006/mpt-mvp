@@ -67,11 +67,7 @@ const monthOptions = [
   "Dec",
 ];
 
-const regionOptions = [
-  "JP & Korea",
-  "South APAC",
-  "SAARC",
-];
+const regionOptions = ["JP & Korea", "South APAC", "SAARC"];
 
 const statusOptions = ["Planning", "On Track", "Shipped", "Cancelled"];
 const yesNo = ["Yes", "No"];
@@ -242,7 +238,7 @@ function initPlanningGrid(rows) {
         cellEdited: (cell) => {
           const r = cell.getRow();
           const rowData = r.getData();
-          
+
           // Special logic for In-Account events (1:1)
           if (cell.getValue() === "In-Account events (1:1)") {
             r.update({
@@ -250,11 +246,16 @@ function initPlanningGrid(rows) {
               mqlForecast: 0,
               sqlForecast: 0,
               oppsForecast: 0,
-              pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
+              pipelineForecast: rowData.forecastedCost
+                ? Number(rowData.forecastedCost) * 20
+                : 0,
             });
           } else {
             // For other program types, recalculate based on expected leads
-            if (typeof rowData.expectedLeads === "number" && rowData.expectedLeads > 0) {
+            if (
+              typeof rowData.expectedLeads === "number" &&
+              rowData.expectedLeads > 0
+            ) {
               const kpiVals = kpis(rowData.expectedLeads);
               r.update({
                 mqlForecast: kpiVals.mql,
@@ -368,9 +369,9 @@ function initPlanningGrid(rows) {
         headerFilterParams: {
           values: {
             "": "(Clear Filter)",
-            "FY25": "FY25",
-            "FY26": "FY26",
-            "FY27": "FY27",
+            FY25: "FY25",
+            FY26: "FY26",
+            FY27: "FY27",
           },
         },
       },
@@ -477,7 +478,7 @@ function initPlanningGrid(rows) {
         cellEdited: (cell) => {
           const r = cell.getRow();
           const rowData = r.getData();
-          
+
           // Special logic for In-Account events (1:1) - recalculate pipeline based on cost
           if (rowData.programType === "In-Account events (1:1)") {
             r.update({
@@ -485,7 +486,9 @@ function initPlanningGrid(rows) {
               mqlForecast: 0,
               sqlForecast: 0,
               oppsForecast: 0,
-              pipelineForecast: cell.getValue() ? Number(cell.getValue()) * 20 : 0,
+              pipelineForecast: cell.getValue()
+                ? Number(cell.getValue()) * 20
+                : 0,
             });
           }
           rowData.__modified = true;
@@ -499,7 +502,7 @@ function initPlanningGrid(rows) {
         cellEdited: (cell) => {
           const r = cell.getRow();
           const rowData = r.getData();
-          
+
           // Special logic for In-Account events (1:1) - ignore expected leads, use forecasted cost
           if (rowData.programType === "In-Account events (1:1)") {
             r.update({
@@ -507,7 +510,9 @@ function initPlanningGrid(rows) {
               mqlForecast: 0,
               sqlForecast: 0,
               oppsForecast: 0,
-              pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
+              pipelineForecast: rowData.forecastedCost
+                ? Number(rowData.forecastedCost) * 20
+                : 0,
             });
           } else {
             // Normal KPI calculation for other program types
@@ -696,7 +701,9 @@ function setupPlanningDownload(table) {
     btn.id = "downloadPlanningAll";
     btn.textContent = "Download All as JSON";
     btn.style.margin = "12px 0 12px 12px";
-    document.getElementById("view-planning").insertBefore(btn, document.getElementById("planningGrid"));
+    document
+      .getElementById("view-planning")
+      .insertBefore(btn, document.getElementById("planningGrid"));
   }
   btn.onclick = () => {
     const data = table.getData();
@@ -741,68 +748,68 @@ document
         rows = csvToObj(csv);
       }
       // Map CSV headers to table fields and clean up data
-      const mappedRows = rows.map(row => {
+      const mappedRows = rows.map((row) => {
         const mappedRow = {};
-        
+
         // Map column names from CSV to expected field names
         const columnMapping = {
-          'campaignName': 'campaignName',
-          'campaignType': 'programType',  // CSV uses campaignType, grid uses programType
-          'strategicPillars': 'strategicPillars',
-          'revenuePlay': 'revenuePlay',
-          'fiscalYear': 'fiscalYear',
-          'quarterMonth': 'quarter',  // CSV uses quarterMonth, grid uses quarter
-          'region': 'region',
-          'country': 'country',
-          'owner': 'owner',
-          'description': 'description',
-          'forecastedCost': 'forecastedCost',
-          'expectedLeads': 'expectedLeads',
-          'status': 'status'
+          campaignName: "campaignName",
+          campaignType: "programType", // CSV uses campaignType, grid uses programType
+          strategicPillars: "strategicPillars",
+          revenuePlay: "revenuePlay",
+          fiscalYear: "fiscalYear",
+          quarterMonth: "quarter", // CSV uses quarterMonth, grid uses quarter
+          region: "region",
+          country: "country",
+          owner: "owner",
+          description: "description",
+          forecastedCost: "forecastedCost",
+          expectedLeads: "expectedLeads",
+          status: "status",
         };
-        
+
         // Apply mapping and clean up values
-        Object.keys(row).forEach(csvField => {
+        Object.keys(row).forEach((csvField) => {
           const gridField = columnMapping[csvField] || csvField;
           let value = row[csvField];
-          
+
           // Clean up specific fields
-          if (gridField === 'forecastedCost') {
+          if (gridField === "forecastedCost") {
             // Handle forecasted cost - remove commas, quotes, and convert to number
-            if (typeof value === 'string') {
-              value = value.replace(/[",\s]/g, ''); // Remove commas, quotes, and spaces
+            if (typeof value === "string") {
+              value = value.replace(/[",\s]/g, ""); // Remove commas, quotes, and spaces
               value = value ? Number(value) : 0;
             } else {
               value = value ? Number(value) : 0;
             }
-          } else if (gridField === 'expectedLeads') {
+          } else if (gridField === "expectedLeads") {
             // Ensure expected leads is a number
-            if (typeof value === 'string') {
-              value = value.replace(/[",\s]/g, ''); // Remove any formatting
+            if (typeof value === "string") {
+              value = value.replace(/[",\s]/g, ""); // Remove any formatting
               value = value ? Number(value) : 0;
             } else {
               value = value ? Number(value) : 0;
             }
-          } else if (gridField === 'status') {
+          } else if (gridField === "status") {
             // Ensure status is a string and handle any numeric values
-            if (value && typeof value !== 'string') {
+            if (value && typeof value !== "string") {
               value = String(value);
             }
             // If it's empty or undefined, default to 'Planning'
-            if (!value || value === '' || value === 'undefined') {
-              value = 'Planning';
+            if (!value || value === "" || value === "undefined") {
+              value = "Planning";
             }
           }
-          
+
           // Only add non-empty values to avoid overwriting with empty strings
-          if (value !== '' && value !== undefined && value !== null) {
+          if (value !== "" && value !== undefined && value !== null) {
             mappedRow[gridField] = value;
           }
         });
-        
+
         return mappedRow;
       });
-      
+
       // Before adding, update calculated fields for each row
       mappedRows.forEach((row) => {
         // Special logic for In-Account events (1:1): no leads, pipeline = 20x forecasted cost
@@ -844,30 +851,30 @@ function csvToObj(csv) {
   const headers = lines[0]
     .split(",")
     .map((h) => h.replace(/^"|"$/g, "").trim());
-  
+
   return lines.slice(1).map((line) => {
     // Handle CSV parsing more carefully to deal with quoted values containing commas
     const values = [];
-    let current = '';
+    let current = "";
     let inQuotes = false;
-    
+
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      
+
       if (char === '"') {
         inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
+      } else if (char === "," && !inQuotes) {
         values.push(current.trim());
-        current = '';
+        current = "";
       } else {
         current += char;
       }
     }
     values.push(current.trim()); // Don't forget the last value
-    
+
     const obj = {};
     headers.forEach((h, i) => {
-      const value = values[i] || '';
+      const value = values[i] || "";
       obj[h] = value.replace(/^"|"$/g, ""); // Remove surrounding quotes
     });
     return obj;
@@ -894,15 +901,17 @@ window.planningModule = {
     regionOptions,
     statusOptions,
     yesNo,
-    countryOptionsByRegion
-  }
+    countryOptionsByRegion,
+  },
 };
 
 // Export the planning table instance getter
-Object.defineProperty(window.planningModule, 'tableInstance', {
-  get: function() {
+Object.defineProperty(window.planningModule, "tableInstance", {
+  get: function () {
     return planningTableInstance;
-  }
+  },
 });
 
-console.log("Planning module initialized and exported to window.planningModule");
+console.log(
+  "Planning module initialized and exported to window.planningModule",
+);

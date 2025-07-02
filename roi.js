@@ -5,46 +5,55 @@ console.log("roi.js loaded");
 function updateRoiTotalSpend() {
   // Populate filter dropdowns if not already done
   populateRoiFilters();
-  
+
   // Get filter values
   const regionFilter = document.getElementById("roiRegionFilter")?.value || "";
-  const quarterFilter = document.getElementById("roiQuarterFilter")?.value || "";
-  
+  const quarterFilter =
+    document.getElementById("roiQuarterFilter")?.value || "";
+
   // Filter data based on selected filters
   let filteredData = [];
   if (window.executionModule.tableInstance) {
-    filteredData = window.executionModule.tableInstance.getData().filter(row => {
-      let matchesRegion = !regionFilter || row.region === regionFilter;
-      let matchesQuarter = !quarterFilter || row.quarter === quarterFilter;
-      return matchesRegion && matchesQuarter;
-    });
+    filteredData = window.executionModule.tableInstance
+      .getData()
+      .filter((row) => {
+        let matchesRegion = !regionFilter || row.region === regionFilter;
+        let matchesQuarter = !quarterFilter || row.quarter === quarterFilter;
+        return matchesRegion && matchesQuarter;
+      });
   }
 
   let totalSpend = 0;
   let totalPipeline = 0;
   // Debug: log pipelineForecast values
-  console.log('[ROI] Filtered data for pipeline calculation:', filteredData.map(r => r.pipelineForecast));
+  console.log(
+    "[ROI] Filtered data for pipeline calculation:",
+    filteredData.map((r) => r.pipelineForecast),
+  );
   totalSpend = filteredData.reduce((sum, row) => {
     let val = row.actualCost;
-    if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
     if (!isNaN(val)) sum += Number(val);
     return sum;
   }, 0);
   totalPipeline = filteredData.reduce((sum, row) => {
     let val = row.pipelineForecast;
-    if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
     if (!isNaN(val)) sum += Number(val);
     return sum;
   }, 0);
   // Debug: log total pipeline
-  console.log('[ROI] Total pipeline calculated:', totalPipeline);
-  
+  console.log("[ROI] Total pipeline calculated:", totalPipeline);
+
   const spendEl = document.getElementById("roiTotalSpendValue");
   if (spendEl) {
     spendEl.textContent = "$" + totalSpend.toLocaleString();
   }
   // Update pipeline value in existing span if present
-  const pipelineValue = isNaN(totalPipeline) || totalPipeline === undefined ? 0 : totalPipeline;
+  const pipelineValue =
+    isNaN(totalPipeline) || totalPipeline === undefined ? 0 : totalPipeline;
   const pipelineEl = document.getElementById("roiTotalPipelineValue");
   if (pipelineEl) {
     pipelineEl.textContent = "$" + pipelineValue.toLocaleString();
@@ -53,11 +62,12 @@ function updateRoiTotalSpend() {
   let totalLeads = 0;
   totalLeads = filteredData.reduce((sum, row) => {
     let val = row.actualLeads;
-    if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
     if (!isNaN(val)) sum += Number(val);
     return sum;
   }, 0);
-  
+
   const leadsEl = document.getElementById("roiTotalLeadsValue");
   if (leadsEl) {
     leadsEl.textContent = totalLeads.toLocaleString();
@@ -76,11 +86,12 @@ function updateRoiTotalSpend() {
   let totalMql = 0;
   totalMql = filteredData.reduce((sum, row) => {
     let val = row.actualMQLs || row.mqlForecast; // Use actual MQLs if available, otherwise forecast
-    if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
     if (!isNaN(val)) sum += Number(val);
     return sum;
   }, 0);
-  
+
   const mqlEl = document.getElementById("roiTotalMqlValue");
   if (mqlEl) {
     mqlEl.textContent = totalMql.toLocaleString();
@@ -92,20 +103,23 @@ function updateRoiTotalSpend() {
     const planningData = window.planningModule.tableInstance.getData();
     totalForecastedCost = planningData.reduce((sum, row) => {
       let val = row.forecastedCost;
-      if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+      if (typeof val === "string")
+        val = Number(val.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(val)) sum += Number(val);
       return sum;
     }, 0);
   }
-  
-  const forecastedCostEl = document.getElementById("roiTotalForecastedCostValue");
+
+  const forecastedCostEl = document.getElementById(
+    "roiTotalForecastedCostValue",
+  );
   if (forecastedCostEl) {
     forecastedCostEl.textContent = "$" + totalForecastedCost.toLocaleString();
   }
 
   // Update ROI Gauge
   updateRoiGauge(roiPercent);
-  
+
   // Update ROI Charts
   renderRoiByRegionChart();
   renderRoiByProgramTypeChart();
@@ -114,11 +128,12 @@ function updateRoiTotalSpend() {
   let totalSql = 0;
   totalSql = filteredData.reduce((sum, row) => {
     let val = row.actualSQLs || row.sqlForecast; // Use actual SQLs if available, otherwise forecast
-    if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
     if (!isNaN(val)) sum += Number(val);
     return sum;
   }, 0);
-  
+
   const sqlEl = document.getElementById("roiTotalSqlValue");
   if (sqlEl) {
     sqlEl.textContent = totalSql.toLocaleString();
@@ -128,11 +143,12 @@ function updateRoiTotalSpend() {
   let totalOpps = 0;
   totalOpps = filteredData.reduce((sum, row) => {
     let val = row.actualOpps || row.oppsForecast; // Use actual Opps if available, otherwise forecast
-    if (typeof val === "string") val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
     if (!isNaN(val)) sum += Number(val);
     return sum;
   }, 0);
-  
+
   const oppsEl = document.getElementById("roiTotalOppsValue");
   if (oppsEl) {
     oppsEl.textContent = totalOpps.toLocaleString();
@@ -146,35 +162,35 @@ function updateRoiTotalSpend() {
 function populateRoiFilters() {
   const regionSelect = document.getElementById("roiRegionFilter");
   const quarterSelect = document.getElementById("roiQuarterFilter");
-  
+
   if (!regionSelect || !quarterSelect) return;
-  
+
   // Get options from planning module constants
   const regionOptions = window.planningModule?.constants?.regionOptions || [];
   const quarterOptions = window.planningModule?.constants?.quarterOptions || [];
-  
+
   // Only populate if not already populated
   if (regionSelect.children.length <= 1) {
     // Populate region filter
-    regionOptions.forEach(region => {
+    regionOptions.forEach((region) => {
       const option = document.createElement("option");
       option.value = region;
       option.textContent = region;
       regionSelect.appendChild(option);
     });
-    
+
     // Populate quarter filter
-    quarterOptions.forEach(quarter => {
+    quarterOptions.forEach((quarter) => {
       const option = document.createElement("option");
       option.value = quarter;
       option.textContent = quarter;
       quarterSelect.appendChild(option);
     });
-    
+
     // Set up event listeners
     regionSelect.addEventListener("change", updateRoiTotalSpend);
     quarterSelect.addEventListener("change", updateRoiTotalSpend);
-    
+
     // Clear filters button
     const clearButton = document.getElementById("roiClearFilters");
     if (clearButton) {
@@ -191,14 +207,14 @@ function populateRoiFilters() {
 function updateReportTotalSpend() {
   // Calculate forecasted spend and pipeline from planning data
   fetch("data/planning.json")
-    .then(response => response.json())
-    .then(data => {
+    .then((response) => response.json())
+    .then((data) => {
       let totalForecastedSpend = 0;
       let totalPipelineForecast = 0;
       let spendByRegion = {};
-      
+
       // Sum all forecasted costs and pipeline from planning data
-      data.forEach(row => {
+      data.forEach((row) => {
         // Forecasted Cost
         let cost = row.forecastedCost || 0;
         if (typeof cost === "string") {
@@ -206,7 +222,7 @@ function updateReportTotalSpend() {
         }
         if (!isNaN(cost)) {
           totalForecastedSpend += Number(cost);
-          
+
           // Aggregate by region for chart
           const region = row.region || "Unknown";
           if (!spendByRegion[region]) {
@@ -214,7 +230,7 @@ function updateReportTotalSpend() {
           }
           spendByRegion[region] += Number(cost);
         }
-        
+
         // Pipeline Forecast
         let pipeline = row.pipelineForecast || 0;
         if (typeof pipeline === "string") {
@@ -224,24 +240,24 @@ function updateReportTotalSpend() {
           totalPipelineForecast += Number(pipeline);
         }
       });
-      
+
       // Update the forecasted spend display
       const spendEl = document.getElementById("reportTotalSpendValue");
       if (spendEl) {
         spendEl.textContent = "$" + totalForecastedSpend.toLocaleString();
       }
-      
+
       // Update the pipeline forecast display
       const pipelineEl = document.getElementById("reportTotalPipelineValue");
       if (pipelineEl) {
         pipelineEl.textContent = "$" + totalPipelineForecast.toLocaleString();
       }
-      
+
       // Create/update the chart
       createReportSpendByRegionChart(spendByRegion);
     })
-    .catch(error => {
-      console.error('Error loading planning data for reporting:', error);
+    .catch((error) => {
+      console.error("Error loading planning data for reporting:", error);
     });
 
   // Calculate actual spend, MQL, and SQL from execution data
@@ -250,9 +266,9 @@ function updateReportTotalSpend() {
     let totalActualSpend = 0;
     let totalActualMql = 0;
     let totalActualSql = 0;
-    
+
     // Sum all actual costs, MQLs, and SQLs from execution data
-    executionData.forEach(row => {
+    executionData.forEach((row) => {
       // Actual Cost
       let cost = row.actualCost || 0;
       if (typeof cost === "string") {
@@ -261,7 +277,7 @@ function updateReportTotalSpend() {
       if (!isNaN(cost)) {
         totalActualSpend += Number(cost);
       }
-      
+
       // Actual MQLs
       let mql = row.actualMQLs || 0;
       if (typeof mql === "string") {
@@ -270,7 +286,7 @@ function updateReportTotalSpend() {
       if (!isNaN(mql)) {
         totalActualMql += Number(mql);
       }
-      
+
       // Actual SQLs - Note: need to check the actual field name
       let sql = row.actualSQLs || row.actualSQL || 0;
       if (typeof sql === "string") {
@@ -280,19 +296,21 @@ function updateReportTotalSpend() {
         totalActualSql += Number(sql);
       }
     });
-    
+
     // Update the actual spend display
-    const actualSpendEl = document.getElementById("reportTotalActualSpendValue");
+    const actualSpendEl = document.getElementById(
+      "reportTotalActualSpendValue",
+    );
     if (actualSpendEl) {
       actualSpendEl.textContent = "$" + totalActualSpend.toLocaleString();
     }
-    
+
     // Update the total MQL display
     const mqlEl = document.getElementById("reportTotalMqlValue");
     if (mqlEl) {
       mqlEl.textContent = totalActualMql.toLocaleString();
     }
-    
+
     // Update the total SQL display
     const sqlEl = document.getElementById("reportTotalSqlValue");
     if (sqlEl) {
@@ -311,7 +329,7 @@ function setupRoiChartEventHandlers() {
       renderRoiByQuarterChart();
     }
   });
-  
+
   // Setup execution table event handlers for ROI chart updates
   if (window.executionModule.tableInstance) {
     window.executionModule.tableInstance.on("dataChanged", () => {
@@ -358,7 +376,7 @@ const roiModule = {
   updateReportTotalSpend,
   setupRoiChartEventHandlers,
   initializeRoiFunctionality,
-  handleRoiTabRouting
+  handleRoiTabRouting,
 };
 
 // Export to window for access from other modules

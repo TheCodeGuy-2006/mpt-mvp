@@ -745,15 +745,15 @@ table#planTable td input[type="text"] {
     gap: 12px !important;
     align-items: stretch !important;
   }
-  
+
   #calendarControls > div {
     justify-content: center;
   }
-  
+
   #calendarGrid {
     font-size: 0.9rem;
   }
-  
+
   #calendarGrid > div {
     min-height: 80px !important;
   }

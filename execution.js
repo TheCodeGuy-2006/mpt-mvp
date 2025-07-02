@@ -8,9 +8,14 @@ let executionTableInstance = null;
 // EXECUTION GRID INITIALIZATION
 function initExecutionGrid(rows) {
   // Get constants from planning module for consistency
-  const statusOptions = window.planningModule?.constants?.statusOptions || ["Planning", "On Track", "Shipped", "Cancelled"];
+  const statusOptions = window.planningModule?.constants?.statusOptions || [
+    "Planning",
+    "On Track",
+    "Shipped",
+    "Cancelled",
+  ];
   const yesNo = window.planningModule?.constants?.yesNo || ["Yes", "No"];
-  
+
   const table = new Tabulator("#executionGrid", {
     data: rows,
     reactiveData: true,
@@ -42,27 +47,28 @@ function initExecutionGrid(rows) {
           const owner = data.owner || "";
           const description = data.description || "";
           const programType = data.programType || "";
-          
+
           // Create multi-line informative format
-          let html = '<div style="padding: 4px; line-height: 1.3; font-size: 12px;">';
-          
+          let html =
+            '<div style="padding: 4px; line-height: 1.3; font-size: 12px;">';
+
           if (region) {
             html += `<div style="font-weight: bold; color: #1976d2;">${region}</div>`;
           }
-          
+
           if (owner) {
             html += `<div style="color: #666; margin-top: 2px;">${owner}</div>`;
           }
-          
+
           if (programType) {
             html += `<div style="color: #888; font-size: 11px; margin-top: 2px;">${programType}</div>`;
           }
-          
+
           if (description) {
             html += `<div style="color: #333; margin-top: 2px; word-wrap: break-word;">${description}</div>`;
           }
-          
-          html += '</div>';
+
+          html += "</div>";
           return html;
         },
       },
@@ -185,8 +191,17 @@ function setupExecutionSave(table, rows) {
 // EXECUTION FILTERS SETUP
 function setupExecutionFilters() {
   // Get constants from planning module for consistency
-  const regionOptions = window.planningModule?.constants?.regionOptions || ["JP & Korea", "South APAC", "SAARC"];
-  const statusOptions = window.planningModule?.constants?.statusOptions || ["Planning", "On Track", "Shipped", "Cancelled"];
+  const regionOptions = window.planningModule?.constants?.regionOptions || [
+    "JP & Korea",
+    "South APAC",
+    "SAARC",
+  ];
+  const statusOptions = window.planningModule?.constants?.statusOptions || [
+    "Planning",
+    "On Track",
+    "Shipped",
+    "Cancelled",
+  ];
   const yesNo = window.planningModule?.constants?.yesNo || ["Yes", "No"];
 
   // Add region, status, and PO Raised filter buttons below the execution tracking title
@@ -236,8 +251,12 @@ function setupExecutionFilters() {
         if (executionTableInstance) {
           executionTableInstance.setFilter(
             [
-              regionVal ? { field: "region", type: "=", value: regionVal } : null,
-              statusVal ? { field: "status", type: "=", value: statusVal } : null,
+              regionVal
+                ? { field: "region", type: "=", value: regionVal }
+                : null,
+              statusVal
+                ? { field: "status", type: "=", value: statusVal }
+                : null,
               poVal ? { field: "poRaised", type: "=", value: poVal } : null,
             ].filter(Boolean),
           );
@@ -278,14 +297,16 @@ window.executionModule = {
   initExecutionGrid,
   setupExecutionSave,
   setupExecutionFilters,
-  syncGridsOnEdit
+  syncGridsOnEdit,
 };
 
 // Export the execution table instance getter
-Object.defineProperty(window.executionModule, 'tableInstance', {
-  get: function() {
+Object.defineProperty(window.executionModule, "tableInstance", {
+  get: function () {
     return executionTableInstance;
-  }
+  },
 });
 
-console.log("Execution module initialized and exported to window.executionModule");
+console.log(
+  "Execution module initialized and exported to window.executionModule",
+);

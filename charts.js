@@ -22,7 +22,7 @@ function initializeChartJS() {
 function renderBudgetsBarChart() {
   const ctx = document.getElementById("budgetsBarChart");
   if (!ctx) return;
-  
+
   // Get budgets data from the table or from the budgets object
   let budgetsData = [];
   if (window.budgetsTableInstance) {
@@ -33,20 +33,20 @@ function renderBudgetsBarChart() {
       ...data,
     }));
   }
-  
+
   if (!budgetsData || budgetsData.length === 0) return;
-  
+
   // Prepare data for chart
   const labels = budgetsData.map((row) => row.region || row.Region || "");
   const values = budgetsData.map((row) =>
     Number(row.assignedBudget || row.AssignedBudget || 0),
   );
-  
+
   // Destroy previous chart if exists
   if (window.budgetsBarChartInstance) {
     window.budgetsBarChartInstance.destroy();
   }
-  
+
   window.budgetsBarChartInstance = new Chart(ctx, {
     type: "bar",
     data: {
@@ -87,7 +87,7 @@ function renderBudgetsRegionCharts() {
   const container = document.getElementById("budgetsChartsContainer");
   if (!container) return;
   container.innerHTML = "";
-  
+
   // Get budgets data
   let budgetsData = [];
   if (window.budgetsTableInstance) {
@@ -98,7 +98,7 @@ function renderBudgetsRegionCharts() {
       ...data,
     }));
   }
-  
+
   // Get planning data (for forecasted/actual cost)
   let planningRows = [];
   if (window.planningTableInstance) {
@@ -106,7 +106,7 @@ function renderBudgetsRegionCharts() {
   } else if (window.planningRows) {
     planningRows = window.planningRows;
   }
-  
+
   // Get all unique regions from budgets and planning
   const allRegions = Array.from(
     new Set([
@@ -114,27 +114,27 @@ function renderBudgetsRegionCharts() {
       ...planningRows.map((r) => r.region),
     ]),
   ).filter(Boolean);
-  
+
   // For each region, create a chart
   let rowDiv = null;
   allRegions.forEach((region, idx) => {
     if (idx % 4 === 0) {
-      rowDiv = document.createElement('div');
-      rowDiv.className = 'budgets-graph-row';
-      rowDiv.style.display = 'flex';
-      rowDiv.style.flexDirection = 'row';
-      rowDiv.style.gap = '24px';
-      rowDiv.style.marginBottom = '24px';
+      rowDiv = document.createElement("div");
+      rowDiv.className = "budgets-graph-row";
+      rowDiv.style.display = "flex";
+      rowDiv.style.flexDirection = "row";
+      rowDiv.style.gap = "24px";
+      rowDiv.style.marginBottom = "24px";
       container.appendChild(rowDiv);
     }
-    
+
     // Assigned budget
     const budgetObj = budgetsData.find((b) => b.region === region);
     const assignedBudget =
       budgetObj && budgetObj.assignedBudget
         ? Number(budgetObj.assignedBudget)
         : 0;
-    
+
     // Forecasted cost: sum of forecastedCost for this region
     const regionForecasts = planningRows.filter(
       (r) => r.region === region && typeof r.forecastedCost === "number",
@@ -143,12 +143,12 @@ function renderBudgetsRegionCharts() {
       (sum, r) => sum + r.forecastedCost,
       0,
     );
-    
+
     // Actual cost: sum of actualCost for this region
     const actualCost = planningRows
       .filter((r) => r.region === region && typeof r.actualCost === "number")
       .reduce((sum, r) => sum + r.actualCost, 0);
-    
+
     // Create chart canvas and fullscreen button
     const chartDiv = document.createElement("div");
     chartDiv.style.width = "300px";
@@ -161,10 +161,10 @@ function renderBudgetsRegionCharts() {
     chartDiv.style.flexDirection = "column";
     chartDiv.style.alignItems = "center";
     chartDiv.style.position = "relative";
-    
+
     // Title and canvas
     chartDiv.innerHTML = `<h3 style="font-size:1.18rem;margin:0 0 12px 0;color:#1976d2;">${region}</h3><canvas id="chart-${region}"></canvas>`;
-    
+
     // Fullscreen button
     const fullscreenBtn = document.createElement("button");
     fullscreenBtn.className = "graph-fullscreen-btn";
@@ -182,7 +182,7 @@ function renderBudgetsRegionCharts() {
     fullscreenBtn.style.zIndex = "2";
     chartDiv.appendChild(fullscreenBtn);
     rowDiv.appendChild(chartDiv);
-    
+
     // Render chart in normal box
     setTimeout(() => {
       const ctx = chartDiv.querySelector("canvas");
@@ -222,7 +222,7 @@ function renderBudgetsRegionCharts() {
         },
       });
     }, 0);
-    
+
     // Fullscreen overlay logic
     fullscreenBtn.onclick = function () {
       let overlay = document.getElementById("graphFullscreenOverlay");
@@ -230,7 +230,7 @@ function renderBudgetsRegionCharts() {
         overlay.remove();
         return;
       }
-      
+
       overlay = document.createElement("div");
       overlay.id = "graphFullscreenOverlay";
       overlay.style.position = "fixed";
@@ -247,7 +247,7 @@ function renderBudgetsRegionCharts() {
         if (e.target === overlay) overlay.remove();
       };
       document.body.appendChild(overlay);
-      
+
       // Chart container for fullscreen
       const fsDiv = document.createElement("div");
       fsDiv.style.background = "#fff";
@@ -260,7 +260,7 @@ function renderBudgetsRegionCharts() {
       fsDiv.style.position = "relative";
       fsDiv.style.width = "85vw";
       fsDiv.style.height = "80vh";
-      
+
       // Close button
       const closeBtn = document.createElement("button");
       closeBtn.textContent = "✕";
@@ -275,14 +275,14 @@ function renderBudgetsRegionCharts() {
       closeBtn.style.opacity = "0.7";
       closeBtn.onclick = () => overlay.remove();
       fsDiv.appendChild(closeBtn);
-      
+
       // Title
       const title = document.createElement("h2");
       title.textContent = region;
       title.style.color = "#1976d2";
       title.style.margin = "0 0 18px 0";
       fsDiv.appendChild(title);
-      
+
       // Content container with chart and breakdown side by side
       const contentDiv = document.createElement("div");
       contentDiv.style.display = "flex";
@@ -290,7 +290,7 @@ function renderBudgetsRegionCharts() {
       contentDiv.style.width = "100%";
       contentDiv.style.height = "calc(100% - 80px)";
       contentDiv.style.alignItems = "flex-start";
-      
+
       // Chart container
       const chartContainer = document.createElement("div");
       chartContainer.style.flex = "2";
@@ -298,14 +298,14 @@ function renderBudgetsRegionCharts() {
       chartContainer.style.justifyContent = "center";
       chartContainer.style.alignItems = "center";
       chartContainer.style.height = "100%";
-      
+
       // Canvas
       const fsCanvas = document.createElement("canvas");
       fsCanvas.width = Math.floor(window.innerWidth * 0.5);
       fsCanvas.height = Math.floor(window.innerHeight * 0.55);
       chartContainer.appendChild(fsCanvas);
       contentDiv.appendChild(chartContainer);
-      
+
       // Breakdown container (only show if there are multiple forecasts)
       if (regionForecasts.length > 1) {
         const breakdownContainer = document.createElement("div");
@@ -318,7 +318,7 @@ function renderBudgetsRegionCharts() {
         breakdownContainer.style.borderRadius = "12px";
         breakdownContainer.style.padding = "20px";
         breakdownContainer.style.border = "1px solid #e3f2fd";
-        
+
         // Breakdown title
         const breakdownTitle = document.createElement("h3");
         breakdownTitle.textContent = "Forecasted Cost Breakdown";
@@ -327,7 +327,7 @@ function renderBudgetsRegionCharts() {
         breakdownTitle.style.fontSize = "1.2rem";
         breakdownTitle.style.fontWeight = "600";
         breakdownContainer.appendChild(breakdownTitle);
-        
+
         // Breakdown items
         regionForecasts.forEach((r, index) => {
           const itemDiv = document.createElement("div");
@@ -337,25 +337,27 @@ function renderBudgetsRegionCharts() {
           itemDiv.style.borderRadius = "8px";
           itemDiv.style.border = "1px solid #e0e0e0";
           itemDiv.style.boxShadow = "0 1px 3px rgba(0,0,0,0.05)";
-          
+
           const campaignName = document.createElement("div");
-          campaignName.textContent = r.campaignName ? r.campaignName : `Campaign ${index + 1}`;
+          campaignName.textContent = r.campaignName
+            ? r.campaignName
+            : `Campaign ${index + 1}`;
           campaignName.style.fontWeight = "600";
           campaignName.style.color = "#333";
           campaignName.style.marginBottom = "4px";
           campaignName.style.fontSize = "0.95rem";
-          
+
           const costValue = document.createElement("div");
           costValue.textContent = `$${Number(r.forecastedCost).toLocaleString()}`;
           costValue.style.color = "#1976d2";
           costValue.style.fontWeight = "700";
           costValue.style.fontSize = "1.1rem";
-          
+
           itemDiv.appendChild(campaignName);
           itemDiv.appendChild(costValue);
           breakdownContainer.appendChild(itemDiv);
         });
-        
+
         // Total at the bottom
         const totalDiv = document.createElement("div");
         totalDiv.style.marginTop = "16px";
@@ -368,13 +370,13 @@ function renderBudgetsRegionCharts() {
         totalDiv.style.textAlign = "center";
         totalDiv.textContent = `Total: $${Number(forecastedCost).toLocaleString()}`;
         breakdownContainer.appendChild(totalDiv);
-        
+
         contentDiv.appendChild(breakdownContainer);
       }
-      
+
       fsDiv.appendChild(contentDiv);
       overlay.appendChild(fsDiv);
-      
+
       // Render chart in fullscreen
       setTimeout(() => {
         new Chart(fsCanvas, {
@@ -419,32 +421,34 @@ function renderBudgetsRegionCharts() {
 function renderRoiByRegionChart() {
   // Define the specific regions to display
   const targetRegions = ["JP & Korea", "South APAC", "SAARC"];
-  
+
   // Prepare data
   let regionMap = {};
-  
+
   // Initialize all target regions with zero values
-  targetRegions.forEach(region => {
+  targetRegions.forEach((region) => {
     regionMap[region] = { spend: 0, pipeline: 0 };
   });
-  
+
   if (window.executionTableInstance) {
     const data = window.executionTableInstance.getData();
-    data.forEach(row => {
+    data.forEach((row) => {
       const region = row.region;
       // Only process data for our target regions
       if (targetRegions.includes(region)) {
         let spend = row.actualCost;
-        if (typeof spend === "string") spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
+        if (typeof spend === "string")
+          spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
         if (!isNaN(spend)) regionMap[region].spend += Number(spend);
         let pipeline = row.pipelineForecast;
-        if (typeof pipeline === "string") pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
+        if (typeof pipeline === "string")
+          pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
         if (!isNaN(pipeline)) regionMap[region].pipeline += Number(pipeline);
       }
     });
   }
-  
-  const roiPercents = targetRegions.map(region => {
+
+  const roiPercents = targetRegions.map((region) => {
     const vals = regionMap[region];
     return vals.spend > 0 ? (vals.pipeline / vals.spend) * 100 : 0;
   });
@@ -452,12 +456,12 @@ function renderRoiByRegionChart() {
   // Use the predefined chart container
   const ctx = document.getElementById("roiRegionChart");
   if (!ctx) return;
-  
+
   // Destroy previous chart if exists
   if (window.roiRegionChartInstance) {
     window.roiRegionChartInstance.destroy();
   }
-  
+
   window.roiRegionChartInstance = new Chart(ctx, {
     type: "bar",
     data: {
@@ -480,29 +484,29 @@ function renderRoiByRegionChart() {
         title: { display: false },
         tooltip: {
           callbacks: {
-            label: function(context) {
+            label: function (context) {
               return context.parsed.y.toFixed(1) + "%";
-            }
-          }
-        }
+            },
+          },
+        },
       },
       scales: {
         y: {
           beginAtZero: true,
           ticks: {
-            callback: function(value) {
+            callback: function (value) {
               return value + "%";
             },
-            font: { size: 12 }
-          }
+            font: { size: 12 },
+          },
         },
         x: {
           ticks: {
-            font: { size: 12 }
-          }
-        }
-      }
-    }
+            font: { size: 12 },
+          },
+        },
+      },
+    },
   });
 }
 
@@ -511,11 +515,11 @@ function renderRoiByProgramTypeChart() {
   // Get the chart container and replace it with a table
   const container = document.getElementById("roiProgramTypeChartContainer");
   if (!container) return;
-  
+
   // Find the chart div and replace it with a table container
   const chartDiv = container.querySelector('div[style*="max-width: 800px"]');
   if (!chartDiv) return;
-  
+
   // Create table HTML
   const tableHTML = `
     <div style="width: 100%; max-width: 800px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
@@ -541,7 +545,7 @@ function renderRoiByProgramTypeChart() {
       </table>
     </div>
   `;
-  
+
   // Replace the chart div with the table
   chartDiv.outerHTML = tableHTML;
 }
@@ -556,23 +560,27 @@ function renderRoiByQuarterChart() {
 
   if (window.executionTableInstance) {
     const data = window.executionTableInstance.getData();
-    data.forEach(row => {
+    data.forEach((row) => {
       // MQL data
       let fMql = row.mqlForecast || 0;
-      if (typeof fMql === "string") fMql = Number(fMql.toString().replace(/[^\d.-]/g, ""));
+      if (typeof fMql === "string")
+        fMql = Number(fMql.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(fMql)) forecastedMql += Number(fMql);
 
       let aMql = row.actualMQLs || 0;
-      if (typeof aMql === "string") aMql = Number(aMql.toString().replace(/[^\d.-]/g, ""));
+      if (typeof aMql === "string")
+        aMql = Number(aMql.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(aMql)) actualMql += Number(aMql);
 
       // Leads data
       let fLeads = row.expectedLeads || 0;
-      if (typeof fLeads === "string") fLeads = Number(fLeads.toString().replace(/[^\d.-]/g, ""));
+      if (typeof fLeads === "string")
+        fLeads = Number(fLeads.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(fLeads)) forecastedLeads += Number(fLeads);
 
       let aLeads = row.actualLeads || 0;
-      if (typeof aLeads === "string") aLeads = Number(aLeads.toString().replace(/[^\d.-]/g, ""));
+      if (typeof aLeads === "string")
+        aLeads = Number(aLeads.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(aLeads)) actualLeads += Number(aLeads);
     });
   }
@@ -580,12 +588,12 @@ function renderRoiByQuarterChart() {
   // Use the predefined chart container
   const ctx = document.getElementById("roiQuarterChart");
   if (!ctx) return;
-  
+
   // Destroy previous chart if exists
   if (window.roiQuarterChartInstance) {
     window.roiQuarterChartInstance.destroy();
   }
-  
+
   window.roiQuarterChartInstance = new Chart(ctx, {
     type: "bar",
     data: {
@@ -604,50 +612,52 @@ function renderRoiByQuarterChart() {
           backgroundColor: "#66bb6a",
           borderRadius: 4,
           borderSkipped: false,
-        }
+        },
       ],
     },
     options: {
-      indexAxis: 'y', // This makes it horizontal
+      indexAxis: "y", // This makes it horizontal
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { 
+        legend: {
           display: true,
-          position: 'top'
+          position: "top",
         },
         title: { display: false },
         tooltip: {
           callbacks: {
-            label: function(context) {
-              return context.dataset.label + ': ' + context.parsed.x.toLocaleString();
-            }
-          }
-        }
+            label: function (context) {
+              return (
+                context.dataset.label + ": " + context.parsed.x.toLocaleString()
+              );
+            },
+          },
+        },
       },
       scales: {
         x: {
           beginAtZero: true,
           ticks: {
-            callback: function(value) {
+            callback: function (value) {
               return value.toLocaleString();
             },
-            font: { size: 12 }
-          }
+            font: { size: 12 },
+          },
         },
         y: {
           ticks: {
-            font: { size: 12 }
-          }
-        }
-      }
+            font: { size: 12 },
+          },
+        },
+      },
     },
   });
 }
 
 // ROI Gauge Chart
 function updateRoiGauge(roiPercent) {
-  const ctx = document.getElementById('roiGaugeChart');
+  const ctx = document.getElementById("roiGaugeChart");
   if (!ctx) return;
 
   // Destroy existing chart if it exists
@@ -656,77 +666,82 @@ function updateRoiGauge(roiPercent) {
   }
 
   // Determine gauge color based on ROI performance
-  let gaugeColor = '#d32f2f'; // Red for poor performance
-  let performanceText = 'Poor';
-  
+  let gaugeColor = "#d32f2f"; // Red for poor performance
+  let performanceText = "Poor";
+
   if (roiPercent >= 300) {
-    gaugeColor = '#2e7d32'; // Dark green for excellent
-    performanceText = 'Excellent';
+    gaugeColor = "#2e7d32"; // Dark green for excellent
+    performanceText = "Excellent";
   } else if (roiPercent >= 200) {
-    gaugeColor = '#388e3c'; // Green for very good
-    performanceText = 'Very Good';
+    gaugeColor = "#388e3c"; // Green for very good
+    performanceText = "Very Good";
   } else if (roiPercent >= 100) {
-    gaugeColor = '#689f38'; // Light green for good
-    performanceText = 'Good';
+    gaugeColor = "#689f38"; // Light green for good
+    performanceText = "Good";
   } else if (roiPercent >= 50) {
-    gaugeColor = '#ffa000'; // Orange for fair
-    performanceText = 'Fair';
+    gaugeColor = "#ffa000"; // Orange for fair
+    performanceText = "Fair";
   }
 
   // Create doughnut chart configured as a gauge
   roiGaugeChart = new Chart(ctx, {
-    type: 'doughnut',
+    type: "doughnut",
     data: {
-      datasets: [{
-        data: [Math.min(roiPercent, 400), Math.max(400 - roiPercent, 0)], // Cap at 400% for display
-        backgroundColor: [gaugeColor, '#e0e0e0'],
-        borderWidth: 0,
-        circumference: 180,
-        rotation: 270
-      }]
+      datasets: [
+        {
+          data: [Math.min(roiPercent, 400), Math.max(400 - roiPercent, 0)], // Cap at 400% for display
+          backgroundColor: [gaugeColor, "#e0e0e0"],
+          borderWidth: 0,
+          circumference: 180,
+          rotation: 270,
+        },
+      ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
       aspectRatio: 2,
-      cutout: '75%',
+      cutout: "75%",
       plugins: {
         legend: {
-          display: false
+          display: false,
         },
         tooltip: {
-          enabled: false
-        }
+          enabled: false,
+        },
       },
       elements: {
         arc: {
-          borderWidth: 0
-        }
-      }
+          borderWidth: 0,
+        },
+      },
     },
-    plugins: [{
-      id: 'gaugeText',
-      beforeDraw: function(chart) {
-        const ctx = chart.ctx;
-        ctx.save();
-        
-        // ROI percentage text
-        ctx.font = 'bold 24px Arial';
-        ctx.fillStyle = gaugeColor;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
-        const centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2 + 10;
-        ctx.fillText(roiPercent.toFixed(1) + '%', centerX, centerY);
-        
-        // Performance text
-        ctx.font = '14px Arial';
-        ctx.fillStyle = '#666';
-        ctx.fillText(performanceText, centerX, centerY + 25);
-        
-        ctx.restore();
-      }
-    }]
+    plugins: [
+      {
+        id: "gaugeText",
+        beforeDraw: function (chart) {
+          const ctx = chart.ctx;
+          ctx.save();
+
+          // ROI percentage text
+          ctx.font = "bold 24px Arial";
+          ctx.fillStyle = gaugeColor;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
+          const centerY =
+            (chart.chartArea.top + chart.chartArea.bottom) / 2 + 10;
+          ctx.fillText(roiPercent.toFixed(1) + "%", centerX, centerY);
+
+          // Performance text
+          ctx.font = "14px Arial";
+          ctx.fillStyle = "#666";
+          ctx.fillText(performanceText, centerX, centerY + 25);
+
+          ctx.restore();
+        },
+      },
+    ],
   });
 }
 
@@ -734,27 +749,29 @@ function updateRoiGauge(roiPercent) {
 function createReportSpendByRegionChart(spendByRegion) {
   const canvas = document.getElementById("reportSpendByRegionChart");
   if (!canvas) return;
-  
+
   // Destroy existing chart if it exists
   if (window.reportSpendChart) {
     window.reportSpendChart.destroy();
   }
-  
+
   const ctx = canvas.getContext("2d");
   const regions = Object.keys(spendByRegion).sort();
-  const amounts = regions.map(region => spendByRegion[region]);
-  
+  const amounts = regions.map((region) => spendByRegion[region]);
+
   window.reportSpendChart = new Chart(ctx, {
-    type: 'bar',
+    type: "bar",
     data: {
       labels: regions,
-      datasets: [{
-        label: 'Forecasted Spend',
-        data: amounts,
-        backgroundColor: 'rgba(25, 118, 210, 0.6)',
-        borderColor: 'rgba(25, 118, 210, 1)',
-        borderWidth: 1
-      }]
+      datasets: [
+        {
+          label: "Forecasted Spend",
+          data: amounts,
+          backgroundColor: "rgba(25, 118, 210, 0.6)",
+          borderColor: "rgba(25, 118, 210, 1)",
+          borderWidth: 1,
+        },
+      ],
     },
     options: {
       responsive: true,
@@ -763,63 +780,72 @@ function createReportSpendByRegionChart(spendByRegion) {
         y: {
           beginAtZero: true,
           ticks: {
-            callback: function(value) {
-              return '£' + value.toLocaleString();
-            }
-          }
-        }
+            callback: function (value) {
+              return "£" + value.toLocaleString();
+            },
+          },
+        },
       },
       plugins: {
         tooltip: {
           callbacks: {
-            label: function(context) {
-              return 'Forecasted Spend: £' + context.parsed.y.toLocaleString();
-            }
-          }
+            label: function (context) {
+              return "Forecasted Spend: £" + context.parsed.y.toLocaleString();
+            },
+          },
         },
         legend: {
-          display: false
-        }
-      }
-    }
+          display: false,
+        },
+      },
+    },
   });
 }
 
 // ROI Tab Functionality
 function initRoiTabSwitching() {
-  const regionTabBtn = document.getElementById('roiRegionTabBtn');
-  const programTypeTabBtn = document.getElementById('roiProgramTypeTabBtn');
-  const quarterTabBtn = document.getElementById('roiQuarterTabBtn');
-  const regionPanel = document.getElementById('roiRegionChartContainer');
-  const programTypePanel = document.getElementById('roiProgramTypeChartContainer');
-  const quarterPanel = document.getElementById('roiQuarterChartContainer');
+  const regionTabBtn = document.getElementById("roiRegionTabBtn");
+  const programTypeTabBtn = document.getElementById("roiProgramTypeTabBtn");
+  const quarterTabBtn = document.getElementById("roiQuarterTabBtn");
+  const regionPanel = document.getElementById("roiRegionChartContainer");
+  const programTypePanel = document.getElementById(
+    "roiProgramTypeChartContainer",
+  );
+  const quarterPanel = document.getElementById("roiQuarterChartContainer");
 
-  if (!regionTabBtn || !programTypeTabBtn || !quarterTabBtn || !regionPanel || !programTypePanel || !quarterPanel) {
+  if (
+    !regionTabBtn ||
+    !programTypeTabBtn ||
+    !quarterTabBtn ||
+    !regionPanel ||
+    !programTypePanel ||
+    !quarterPanel
+  ) {
     return;
   }
 
   // Function to switch tabs
   function switchToTab(activeTab, activePanel) {
     // Reset all tabs
-    [regionTabBtn, programTypeTabBtn, quarterTabBtn].forEach(btn => {
-      btn.style.background = '#f5f5f5';
-      btn.style.color = '#666';
-      btn.classList.remove('active');
+    [regionTabBtn, programTypeTabBtn, quarterTabBtn].forEach((btn) => {
+      btn.style.background = "#f5f5f5";
+      btn.style.color = "#666";
+      btn.classList.remove("active");
     });
 
     // Reset all panels
-    [regionPanel, programTypePanel, quarterPanel].forEach(panel => {
-      panel.style.display = 'none';
-      panel.classList.remove('active');
+    [regionPanel, programTypePanel, quarterPanel].forEach((panel) => {
+      panel.style.display = "none";
+      panel.classList.remove("active");
     });
 
     // Activate selected tab and panel
-    activeTab.style.background = '#1976d2';
-    activeTab.style.color = 'white';
-    activeTab.classList.add('active');
-    
-    activePanel.style.display = 'flex';
-    activePanel.classList.add('active');
+    activeTab.style.background = "#1976d2";
+    activeTab.style.color = "white";
+    activeTab.classList.add("active");
+
+    activePanel.style.display = "flex";
+    activePanel.classList.add("active");
 
     // Re-render charts when switching tabs to ensure proper sizing
     setTimeout(() => {
@@ -834,27 +860,27 @@ function initRoiTabSwitching() {
   }
 
   // Add click listeners
-  regionTabBtn.addEventListener('click', () => {
+  regionTabBtn.addEventListener("click", () => {
     switchToTab(regionTabBtn, regionPanel);
   });
 
-  programTypeTabBtn.addEventListener('click', () => {
+  programTypeTabBtn.addEventListener("click", () => {
     switchToTab(programTypeTabBtn, programTypePanel);
   });
 
-  quarterTabBtn.addEventListener('click', () => {
+  quarterTabBtn.addEventListener("click", () => {
     switchToTab(quarterTabBtn, quarterPanel);
   });
 
   // Initialize with the first tab active (already set in HTML)
   // Just ensure the panel visibility is correct
-  regionPanel.style.display = 'flex';
-  programTypePanel.style.display = 'none';
-  quarterPanel.style.display = 'none';
+  regionPanel.style.display = "flex";
+  programTypePanel.style.display = "none";
+  quarterPanel.style.display = "none";
 }
 
 // Export functions for use in app.js
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.initializeChartJS = initializeChartJS;
   window.renderBudgetsBarChart = renderBudgetsBarChart;
   window.renderBudgetsRegionCharts = renderBudgetsRegionCharts;

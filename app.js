@@ -113,7 +113,9 @@ window.addEventListener("hashchange", () => {
 function route() {
   const hash = location.hash || "#planning";
   // Print all section IDs for debugging
-  const allSections = Array.from(document.querySelectorAll("section")).map(sec => sec.id);
+  const allSections = Array.from(document.querySelectorAll("section")).map(
+    (sec) => sec.id,
+  );
   console.log("[route] All section IDs:", allSections);
   // Hide all sections first
   document.querySelectorAll("section").forEach((sec) => {
@@ -128,30 +130,41 @@ function route() {
     if (window.budgetsTableInstance) {
       setTimeout(() => {
         window.budgetsTableInstance.redraw(true);
-        window.budgetsTableInstance.setData(window.budgetsTableInstance.getData());
+        window.budgetsTableInstance.setData(
+          window.budgetsTableInstance.getData(),
+        );
         console.log("[route] Redrew budgets table");
       }, 0);
     }
   } else {
     // Show only the section matching the tab
-    const section = document.querySelector(`section#view-${hash.replace('#','')}`);
-    console.log(`[route] hash:`, hash, 'section:', section);
+    const section = document.querySelector(
+      `section#view-${hash.replace("#", "")}`,
+    );
+    console.log(`[route] hash:`, hash, "section:", section);
     if (section) section.style.display = "block";
     if (hash === "#planning" && window.planningModule.tableInstance) {
       setTimeout(() => {
         window.planningModule.tableInstance.redraw(true);
-        window.planningModule.tableInstance.setData(window.planningModule.tableInstance.getData());
+        window.planningModule.tableInstance.setData(
+          window.planningModule.tableInstance.getData(),
+        );
         console.log("[route] Redrew planning grid");
       }, 0);
     }
     if (hash === "#execution" && window.executionModule.tableInstance) {
       setTimeout(() => {
         window.executionModule.tableInstance.redraw(true);
-        window.executionModule.tableInstance.setData(window.executionModule.tableInstance.getData());
+        window.executionModule.tableInstance.setData(
+          window.executionModule.tableInstance.getData(),
+        );
         console.log("[route] Redrew execution grid");
       }, 0);
     }
-    if (hash === "#roi" && typeof window.roiModule.updateRoiTotalSpend === "function") {
+    if (
+      hash === "#roi" &&
+      typeof window.roiModule.updateRoiTotalSpend === "function"
+    ) {
       setTimeout(window.roiModule.updateRoiTotalSpend, 0);
       setTimeout(initRoiTabSwitching, 100); // Initialize tab switching when ROI tab is viewed
       console.log("[route] Updated ROI total spend");
@@ -159,15 +172,23 @@ function route() {
     if (hash === "#report" && window.reportTableInstance) {
       setTimeout(() => {
         window.reportTableInstance.redraw(true);
-        window.reportTableInstance.setData(window.reportTableInstance.getData());
+        window.reportTableInstance.setData(
+          window.reportTableInstance.getData(),
+        );
         console.log("[route] Redrew report grid");
       }, 0);
     }
-    if (hash === "#report" && typeof window.roiModule.updateReportTotalSpend === "function") {
+    if (
+      hash === "#report" &&
+      typeof window.roiModule.updateReportTotalSpend === "function"
+    ) {
       setTimeout(window.roiModule.updateReportTotalSpend, 0);
       console.log("[route] Updated report total spend");
     }
-    if (hash === "#calendar" && typeof window.calendarModule?.handleCalendarRouting === "function") {
+    if (
+      hash === "#calendar" &&
+      typeof window.calendarModule?.handleCalendarRouting === "function"
+    ) {
       window.calendarModule.handleCalendarRouting();
       console.log("[route] Handled calendar routing");
     }
@@ -194,10 +215,10 @@ function downloadJSON(obj, filename) {
 
 window.addEventListener("DOMContentLoaded", async () => {
   console.log("DOMContentLoaded event fired");
-  
+
   // Initialize constants from planning module
   initializeConstants();
-  
+
   // Show loading indicator
   const mainSection = document.querySelector("section#view-planning");
   const loadingDiv = document.createElement("div");
@@ -213,8 +234,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   try {
     // Use planning module functions
     [rows, budgetsObj] = await Promise.all([
-      window.planningModule.loadPlanning(), 
-      window.budgetsModule.loadBudgets()
+      window.planningModule.loadPlanning(),
+      window.budgetsModule.loadBudgets(),
     ]);
   } catch (e) {
     rows = [];
@@ -267,10 +288,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   // After both tables are initialized:
   window.executionModule.syncGridsOnEdit(planningTable, executionTable);
   window.executionModule.syncGridsOnEdit(executionTable, planningTable);
-  
+
   // Setup ROI chart event handlers
   window.roiModule.setupRoiChartEventHandlers();
-  
+
   // Initialize calendar module
   window.calendarModule.initializeCalendar();
 });

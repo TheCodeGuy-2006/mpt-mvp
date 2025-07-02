@@ -102,7 +102,7 @@ function setupBudgetsSave(table) {
 function setupAnnualBudgetSave() {
   const saveBtn = document.getElementById("saveAnnualBudget");
   if (!saveBtn) return;
-  
+
   saveBtn.onclick = () => {
     const planTableBody = document.querySelector("#planTable tbody");
     if (!planTableBody) return;
@@ -167,18 +167,18 @@ function initializeAnnualBudgetPlan(budgets) {
         newRow.remove();
       };
       tbody.appendChild(newRow);
-      
+
       const input = newRow.querySelector('input[type="number"]');
       if (input) {
-        input.type = 'text';
-        input.classList.add('plan-usd-input');
-        input.addEventListener('blur', function() {
-          let val = input.value.replace(/[^\d.]/g, '');
+        input.type = "text";
+        input.classList.add("plan-usd-input");
+        input.addEventListener("blur", function () {
+          let val = input.value.replace(/[^\d.]/g, "");
           val = val ? Number(val) : 0;
           input.value = `$${val.toLocaleString()}`;
         });
-        input.addEventListener('focus', function() {
-          let val = input.value.replace(/[^\d.]/g, '');
+        input.addEventListener("focus", function () {
+          let val = input.value.replace(/[^\d.]/g, "");
           input.value = val;
         });
       }
@@ -202,15 +202,15 @@ function initializeAnnualBudgetPlan(budgets) {
           tr.remove();
         };
         // Format input on blur/change
-        const input = tr.querySelector('.plan-usd-input');
-        input.addEventListener('blur', function() {
-          let val = input.value.replace(/[^\d.]/g, '');
+        const input = tr.querySelector(".plan-usd-input");
+        input.addEventListener("blur", function () {
+          let val = input.value.replace(/[^\d.]/g, "");
           val = val ? Number(val) : 0;
           input.value = `$${val.toLocaleString()}`;
         });
-        input.addEventListener('focus', function() {
+        input.addEventListener("focus", function () {
           // Remove formatting for editing
-          let val = input.value.replace(/[^\d.]/g, '');
+          let val = input.value.replace(/[^\d.]/g, "");
           input.value = val;
         });
         planTableBody.appendChild(tr);
@@ -219,7 +219,7 @@ function initializeAnnualBudgetPlan(budgets) {
   } catch (e) {
     // fallback: do nothing if error
   }
-  
+
   // Setup the save functionality for annual budget plan
   setupAnnualBudgetSave();
 }
@@ -234,20 +234,22 @@ function setupBudgetsDownload(table) {
       const headers = ["Region", "Assigned Budget", "Notes", "Utilisation"];
       const csvContent = [
         headers.join(","),
-        ...data.map(row => [
-          row.region || "",
-          row.assignedBudget || 0,
-          `"${(row.notes || "").replace(/"/g, '""')}"`, // Escape quotes in notes
-          `"${row.utilisation || ""}"`
-        ].join(","))
+        ...data.map((row) =>
+          [
+            row.region || "",
+            row.assignedBudget || 0,
+            `"${(row.notes || "").replace(/"/g, '""')}"`, // Escape quotes in notes
+            `"${row.utilisation || ""}"`,
+          ].join(","),
+        ),
       ].join("\n");
-      
+
       // Create and download file
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `budgets_info_${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `budgets_info_${new Date().toISOString().split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -263,7 +265,7 @@ const budgetsModule = {
   setupBudgetsSave,
   setupAnnualBudgetSave,
   initializeAnnualBudgetPlan,
-  setupBudgetsDownload
+  setupBudgetsDownload,
 };
 
 // Export to window for access from other modules
