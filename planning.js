@@ -676,8 +676,8 @@ function setupPlanningSave(table, rows) {
         if (result.success) {
           alert("Planning data saved to backend!");
           // Update ROI metrics to reflect changes in forecasted costs
-          if (typeof updateRoiTotalSpend === "function") {
-            updateRoiTotalSpend();
+          if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
+            window.roiModule.updateRoiTotalSpend();
           }
         } else {
           alert("Failed to save: " + (result.error || "Unknown error"));
@@ -830,8 +830,8 @@ document
       if (planningTableInstance) {
         planningTableInstance.addData(mappedRows);
         // Update ROI metrics to reflect newly imported forecasted costs
-        if (typeof updateRoiTotalSpend === "function") {
-          setTimeout(updateRoiTotalSpend, 100); // Small delay to ensure data is fully loaded
+        if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
+          setTimeout(window.roiModule.updateRoiTotalSpend, 100); // Small delay to ensure data is fully loaded
         }
       }
     };
