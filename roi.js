@@ -188,8 +188,14 @@ function populateRoiFilters() {
     });
 
     // Set up event listeners
-    regionSelect.addEventListener("change", updateRoiTotalSpend);
-    quarterSelect.addEventListener("change", updateRoiTotalSpend);
+    regionSelect.addEventListener("change", () => {
+      updateRoiTotalSpend();
+      updateRoiDataTable();
+    });
+    quarterSelect.addEventListener("change", () => {
+      updateRoiTotalSpend();
+      updateRoiDataTable();
+    });
 
     // Clear filters button
     const clearButton = document.getElementById("roiClearFilters");
@@ -198,6 +204,7 @@ function populateRoiFilters() {
         regionSelect.value = "";
         quarterSelect.value = "";
         updateRoiTotalSpend();
+        updateRoiDataTable();
       });
     }
   }
@@ -352,7 +359,222 @@ function initializeRoiFunctionality() {
     renderRoiByProgramTypeChart();
     renderRoiByQuarterChart();
     initRoiTabSwitching(); // Initialize ROI tab functionality
+    
+    // Initialize data table - wait a bit longer for planning module to load
+    setTimeout(() => {
+      console.log("Attempting to initialize ROI Data Table...");
+      window.roiDataTableInstance = initRoiDataTable();
+    }, 500);
   }, 700);
+}
+
+// Initialize ROI Data Table
+function initRoiDataTable() {
+  console.log("Initializing ROI Data Table...");
+  
+  const tableContainer = document.getElementById("roiDataTable");
+  if (!tableContainer) {
+    console.error("ROI Data Table container not found");
+    return null;
+  }
+  
+  console.log("Table container found:", tableContainer);
+  
+  if (typeof Tabulator === 'undefined') {
+    console.error("Tabulator library not loaded");
+    return null;
+  }
+  
+  const campaigns = getCampaignDataForRoi();
+  console.log("Campaign data for ROI:", campaigns.length, "campaigns");
+   try {
+    const table = new Tabulator(tableContainer, {
+      data: campaigns,
+      layout: "fitDataStretch",
+      height: "400px",
+      responsiveLayout: "collapse",
+      pagination: "local",
+      paginationSize: 15,
+      paginationSizeSelector: [10, 15, 25, 50],
+      movableColumns: true,
+      resizableColumns: true,
+      tooltips: true,
+      tooltipsHeader: true,
+      rowHeight: 60,
+      headerHeight: 50,
+      columns: [
+      {
+        title: "Campaign Name & Type",
+        field: "campaignInfo",
+        formatter: (cell) => {
+          const data = cell.getData();
+          const name = data.campaignName || 'Untitled Campaign';
+          const type = data.programType || 'No Type';
+          return `
+            <div style="line-height: 1.4;">
+              <div style="font-weight: bold; color: #1976d2; font-size: 0.95em;">${name}</div>
+              <div style="font-size: 0.8em; color: #666; margin-top: 2px;">${type}</div>
+            </div>
+          `;
+        },
+        width: 220,
+        sorter: (a, b) => {
+          const nameA = (a.campaignName || '').toLowerCase();
+          const nameB = (b.campaignName || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        }
+      },
+      {
+        title: "Forecasted Cost",
+        field: "forecastedCost",
+        formatter: (cell) => {
+          const value = Number(cell.getValue()) || 0;
+          return `$${value.toLocaleString()}`;
+        },
+        width: 130,
+        sorter: "number",
+        align: "right"
+      },
+      {
+        title: "Actual Cost",
+        field: "actualCost",
+        formatter: (cell) => {
+          const value = Number(cell.getValue()) || 0;
+          return `$${value.toLocaleString()}`;
+        },
+        width: 120,
+        sorter: "number",
+        align: "right"
+      },
+      {
+        title: "Expected Leads",
+        field: "expectedLeads",
+        formatter: (cell) => {
+          const value = Number(cell.getValue()) || 0;
+          return value.toLocaleString();
+        },
+        width: 120,
+        sorter: "number",
+        align: "right"
+      },
+      {
+        title: "Actual Leads",
+        field: "actualLeads",
+        formatter: (cell) => {
+          const value = Number(cell.getValue()) || 0;
+          return value.toLocaleString();
+        },
+        width: 110,
+        sorter: "number",
+        align: "right"
+      },
+      {
+        title: "Pipeline Forecasted",
+        field: "pipelineForecast",
+        formatter: (cell) => {
+          const value = Number(cell.getValue()) || 0;
+          return `$${value.toLocaleString()}`;
+        },
+        width: 150,
+        sorter: "number",
+        align: "right"
+      },
+      {
+        title: "ROI",
+        field: "roi",
+        formatter: (cell) => {
+          const data = cell.getData();
+          const actualCost = Number(data.actualCost) || 0;
+          const pipelineForecast = Number(data.pipelineForecast) || 0;
+          
+          if (actualCost === 0) return "N/A";
+          
+          const roi = ((pipelineForecast - actualCost) / actualCost * 100);
+          const color = roi >= 0 ? "#4caf50" : "#f44336";
+          
+          return `<span style="color: ${color}; font-weight: bold;">${roi.toFixed(1)}%</span>`;
+        },
+        width: 100,
+        sorter: (a, b) => {
+          const getROI = (data) => {
+            const actualCost = Number(data.actualCost) || 0;
+            const pipelineForecast = Number(data.pipelineForecast) || 0;
+            return actualCost === 0 ? 0 : ((pipelineForecast - actualCost) / actualCost * 100);
+          };
+          return getROI(a) - getROI(b);
+        },
+        align: "right"
+      }
+    ],
+    pagination: "local",
+    paginationSize: 15,
+    paginationSizeSelector: [10, 15, 25, 50],
+    movableColumns: true,
+    resizableColumns: true,
+    tooltips: true,
+    tooltipsHeader: true
+  });
+
+  // Store the table instance globally for updates
+  window.roiDataTableInstance = table;
+  console.log("ROI Data Table initialized successfully");
+
+  return table;
+  
+  } catch (error) {
+    console.error("Error initializing ROI Data Table:", error);
+    return null;
+  }
+}
+
+// Get campaign data for ROI table
+function getCampaignDataForRoi() {
+  if (!window.planningModule?.tableInstance) {
+    return [];
+  }
+
+  const planningData = window.planningModule.tableInstance.getData();
+  
+  return planningData.map(campaign => ({
+    campaignName: campaign.campaignName || 'Untitled Campaign',
+    programType: campaign.programType || 'No Type',
+    forecastedCost: Number(campaign.forecastedCost) || 0,
+    actualCost: Number(campaign.actualCost) || 0,
+    expectedLeads: Number(campaign.expectedLeads) || 0,
+    actualLeads: Number(campaign.actualLeads) || 0,
+    pipelineForecast: Number(campaign.pipelineForecast) || 0,
+    region: campaign.region || '',
+    quarter: campaign.quarter || '',
+    status: campaign.status || '',
+    owner: campaign.owner || ''
+  }));
+}
+
+// Update ROI data table with current filters
+function updateRoiDataTable() {
+  const table = window.roiDataTableInstance;
+  if (!table) {
+    console.log("ROI Data Table not initialized yet");
+    return;
+  }
+
+  // Get filter values from ROI filters
+  const regionFilter = document.getElementById("roiRegionFilter")?.value || "";
+  const quarterFilter = document.getElementById("roiQuarterFilter")?.value || "";
+
+  // Get fresh data
+  const campaigns = getCampaignDataForRoi();
+  
+  // Apply filters
+  const filteredCampaigns = campaigns.filter(campaign => {
+    const matchesRegion = !regionFilter || campaign.region === regionFilter;
+    const matchesQuarter = !quarterFilter || campaign.quarter === quarterFilter;
+    return matchesRegion && matchesQuarter;
+  });
+
+  // Update table data
+  table.replaceData(filteredCampaigns);
+  console.log(`ROI Data Table updated with ${filteredCampaigns.length} campaigns`);
 }
 
 // Handle ROI tab routing logic
@@ -377,6 +599,9 @@ const roiModule = {
   setupRoiChartEventHandlers,
   initializeRoiFunctionality,
   handleRoiTabRouting,
+  initRoiDataTable,
+  getCampaignDataForRoi,
+  updateRoiDataTable,
 };
 
 // Export to window for access from other modules

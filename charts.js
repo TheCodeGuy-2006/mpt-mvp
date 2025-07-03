@@ -805,20 +805,18 @@ function createReportSpendByRegionChart(spendByRegion) {
 // ROI Tab Functionality
 function initRoiTabSwitching() {
   const regionTabBtn = document.getElementById("roiRegionTabBtn");
-  const programTypeTabBtn = document.getElementById("roiProgramTypeTabBtn");
+  const dataTableTabBtn = document.getElementById("roiProgramTypeTabBtn");
   const quarterTabBtn = document.getElementById("roiQuarterTabBtn");
   const regionPanel = document.getElementById("roiRegionChartContainer");
-  const programTypePanel = document.getElementById(
-    "roiProgramTypeChartContainer",
-  );
+  const dataTablePanel = document.getElementById("roiProgramTypeChartContainer");
   const quarterPanel = document.getElementById("roiQuarterChartContainer");
 
   if (
     !regionTabBtn ||
-    !programTypeTabBtn ||
+    !dataTableTabBtn ||
     !quarterTabBtn ||
     !regionPanel ||
-    !programTypePanel ||
+    !dataTablePanel ||
     !quarterPanel
   ) {
     return;
@@ -827,14 +825,14 @@ function initRoiTabSwitching() {
   // Function to switch tabs
   function switchToTab(activeTab, activePanel) {
     // Reset all tabs
-    [regionTabBtn, programTypeTabBtn, quarterTabBtn].forEach((btn) => {
+    [regionTabBtn, dataTableTabBtn, quarterTabBtn].forEach((btn) => {
       btn.style.background = "#f5f5f5";
       btn.style.color = "#666";
       btn.classList.remove("active");
     });
 
     // Reset all panels
-    [regionPanel, programTypePanel, quarterPanel].forEach((panel) => {
+    [regionPanel, dataTablePanel, quarterPanel].forEach((panel) => {
       panel.style.display = "none";
       panel.classList.remove("active");
     });
@@ -847,12 +845,25 @@ function initRoiTabSwitching() {
     activePanel.style.display = "flex";
     activePanel.classList.add("active");
 
-    // Re-render charts when switching tabs to ensure proper sizing
+    // Re-render charts or update data table when switching tabs
     setTimeout(() => {
       if (activePanel === regionPanel) {
         renderRoiByRegionChart();
-      } else if (activePanel === programTypePanel) {
-        renderRoiByProgramTypeChart();
+      } else if (activePanel === dataTablePanel) {
+        console.log("Switching to Data Table tab");
+        // Initialize the ROI data table if it doesn't exist yet
+        if (!window.roiDataTableInstance) {
+          console.log("Initializing ROI Data Table for the first time");
+          if (window.roiModule && window.roiModule.initRoiDataTable) {
+            window.roiDataTableInstance = window.roiModule.initRoiDataTable();
+          }
+        } else {
+          // Update the ROI data table when switching to it
+          if (window.roiModule && window.roiModule.updateRoiDataTable) {
+            console.log("Updating existing ROI Data Table");
+            window.roiModule.updateRoiDataTable();
+          }
+        }
       } else if (activePanel === quarterPanel) {
         renderRoiByQuarterChart();
       }
@@ -864,8 +875,8 @@ function initRoiTabSwitching() {
     switchToTab(regionTabBtn, regionPanel);
   });
 
-  programTypeTabBtn.addEventListener("click", () => {
-    switchToTab(programTypeTabBtn, programTypePanel);
+  dataTableTabBtn.addEventListener("click", () => {
+    switchToTab(dataTableTabBtn, dataTablePanel);
   });
 
   quarterTabBtn.addEventListener("click", () => {
@@ -875,7 +886,7 @@ function initRoiTabSwitching() {
   // Initialize with the first tab active (already set in HTML)
   // Just ensure the panel visibility is correct
   regionPanel.style.display = "flex";
-  programTypePanel.style.display = "none";
+  dataTablePanel.style.display = "none";
   quarterPanel.style.display = "none";
 }
 
