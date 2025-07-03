@@ -136,6 +136,15 @@ function route() {
         console.log("[route] Redrew budgets table");
       }, 0);
     }
+    // --- Ensure Annual Budget Plan unlock logic is initialized every time tab is shown ---
+    if (window.budgetsModule && typeof window.budgetsModule.initializeAnnualBudgetPlan === 'function') {
+      // Use the latest budgets data if available, otherwise pass an empty array
+      let budgetsData = [];
+      try {
+        budgetsData = window.budgetsTableInstance ? window.budgetsTableInstance.getData() : [];
+      } catch (e) {}
+      window.budgetsModule.initializeAnnualBudgetPlan(budgetsData);
+    }
   } else {
     // Show only the section matching the tab
     const section = document.querySelector(

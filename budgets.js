@@ -150,12 +150,143 @@ function setupAnnualBudgetSave() {
   };
 }
 
-// Setup Annual Budget Plan table initialization
+// --- Annual Budget Permission Lock ---
+let annualBudgetUnlocked = false;
+
+function showAnnualBudgetPasswordModal(callback) {
+  const modal = document.getElementById("annualBudgetPasswordModal");
+  const input = document.getElementById("annualBudgetPasswordInput");
+  const error = document.getElementById("annualBudgetPasswordError");
+  const submit = document.getElementById("annualBudgetPasswordSubmit");
+  const cancel = document.getElementById("annualBudgetPasswordCancel");
+  if (!modal || !input || !submit || !cancel) return;
+  error.textContent = "";
+  input.value = "";
+  modal.style.display = "flex";
+  input.focus();
+  function closeModal() {
+    modal.style.display = "none";
+    submit.onclick = null;
+    cancel.onclick = null;
+    input.onkeydown = null;
+  }
+  submit.onclick = function () {
+    if (input.value === "git") {
+      annualBudgetUnlocked = true;
+      closeModal();
+      callback(true);
+    } else {
+      error.textContent = "Incorrect password.";
+      input.value = "";
+      input.focus();
+    }
+  };
+  cancel.onclick = function () {
+    closeModal();
+    callback(false);
+  };
+  input.onkeydown = function (e) {
+    if (e.key === "Enter") submit.onclick();
+    if (e.key === "Escape") cancel.onclick();
+  };
+}
+
+function setAnnualBudgetInputsEnabled(enabled) {
+  // Enable/disable all inputs and buttons in the plan table and controls
+  document.querySelectorAll('#planTable input, #planTable button, #addRegionRow, #saveAnnualBudget').forEach(el => {
+    if (enabled) {
+      el.removeAttribute('disabled');
+    } else {
+      el.setAttribute('disabled', 'disabled');
+    }
+  });
+  // For future rows: observe DOM changes and enable new inputs/buttons if unlocked
+  if (enabled && !setAnnualBudgetInputsEnabled._observer) {
+    const tbody = document.querySelector('#planTable tbody');
+    if (tbody) {
+      const observer = new MutationObserver(() => {
+        document.querySelectorAll('#planTable input, #planTable button').forEach(el => {
+          el.removeAttribute('disabled');
+        });
+      });
+      observer.observe(tbody, { childList: true, subtree: true });
+      setAnnualBudgetInputsEnabled._observer = observer;
+    }
+  }
+}
+
 function initializeAnnualBudgetPlan(budgets) {
+  // Populate Annual Budget Plan table from budgets.json
+  try {
+    const planTableBody = document.querySelector("#planTable tbody");
+    if (planTableBody && budgets.length > 0) {
+      planTableBody.innerHTML = "";
+      budgets.forEach((row) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input type="text" value="${row.region}" disabled /></td>
+          <td><input type="text" class="plan-usd-input" value="$${Number(row.assignedBudget ?? 0).toLocaleString()}" disabled /></td>
+          <td><button class="plan-delete-btn" title="Delete" disabled><span style="font-size:1.2em;color:#b71c1c;">🗑️</span></button></td>
+        `;
+        planTableBody.appendChild(tr);
+      });
+    }
+  } catch (e) {
+    // fallback: do nothing if error
+  }
+
+  // Always start with inputs disabled
+  setAnnualBudgetInputsEnabled(false);
+
+  // Overlay logic to intercept all clicks when locked
+  const planTable = document.getElementById('planTable');
+  if (planTable) {
+    // Remove any existing overlay
+    let overlay = document.getElementById('planTableLockOverlay');
+    if (overlay) overlay.remove();
+
+    if (!annualBudgetUnlocked) {
+      overlay = document.createElement('div');
+      overlay.id = 'planTableLockOverlay';
+      Object.assign(overlay.style, {
+        position: 'absolute',
+        top: planTable.offsetTop + 'px',
+        left: planTable.offsetLeft + 'px',
+        width: planTable.offsetWidth + 'px',
+        height: planTable.offsetHeight + 'px',
+        background: 'rgba(255,255,255,0)',
+        zIndex: 10,
+        cursor: 'pointer',
+      });
+      overlay.addEventListener('click', function(e) {
+        showAnnualBudgetPasswordModal((ok) => {
+          if (ok) {
+            setAnnualBudgetInputsEnabled(true);
+            // Remove overlay after unlock
+            overlay.remove();
+          }
+        });
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      // Insert overlay in the same parent as the table
+      planTable.parentNode.style.position = 'relative';
+      planTable.parentNode.appendChild(overlay);
+    }
+  }
+
   // Add handler for '+ Add Region' button in Annual Budget Plan
   const addRegionBtn = document.getElementById("addRegionRow");
   if (addRegionBtn) {
-    addRegionBtn.onclick = () => {
+    addRegionBtn.onclick = (e) => {
+      if (!annualBudgetUnlocked) {
+        showAnnualBudgetPasswordModal((ok) => {
+          if (ok) {
+            setAnnualBudgetInputsEnabled(true);
+          }
+        });
+        return;
+      }
       const tbody = document.querySelector("#planTable tbody");
       const newRow = document.createElement("tr");
       newRow.innerHTML = `
@@ -167,7 +298,10 @@ function initializeAnnualBudgetPlan(budgets) {
         newRow.remove();
       };
       tbody.appendChild(newRow);
-
+      // Enable new row's inputs/buttons if unlocked
+      if (annualBudgetUnlocked) {
+        newRow.querySelectorAll('input,button').forEach(el => el.removeAttribute('disabled'));
+      }
       const input = newRow.querySelector('input[type="number"]');
       if (input) {
         input.type = "text";
@@ -185,43 +319,35 @@ function initializeAnnualBudgetPlan(budgets) {
     };
   }
 
-  // Populate Annual Budget Plan table from budgets.json
-  try {
-    const planTableBody = document.querySelector("#planTable tbody");
-    if (planTableBody && budgets.length > 0) {
-      planTableBody.innerHTML = "";
-      budgets.forEach((row) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><input type="text" value="${row.region}" /></td>
-          <td><input type="text" class="plan-usd-input" value="$${Number(row.assignedBudget ?? 0).toLocaleString()}" /></td>
-          <td><button class="plan-delete-btn" title="Delete"><span style="font-size:1.2em;color:#b71c1c;">🗑️</span></button></td>
-        `;
-        // Add delete handler
-        tr.querySelector(".plan-delete-btn").onclick = function () {
-          tr.remove();
-        };
-        // Format input on blur/change
-        const input = tr.querySelector(".plan-usd-input");
-        input.addEventListener("blur", function () {
-          let val = input.value.replace(/[^\d.]/g, "");
-          val = val ? Number(val) : 0;
-          input.value = `$${val.toLocaleString()}`;
-        });
-        input.addEventListener("focus", function () {
-          // Remove formatting for editing
-          let val = input.value.replace(/[^\d.]/g, "");
-          input.value = val;
-        });
-        planTableBody.appendChild(tr);
-      });
-    }
-  } catch (e) {
-    // fallback: do nothing if error
-  }
-
   // Setup the save functionality for annual budget plan
   setupAnnualBudgetSave();
+
+  // Intercept save button
+  const saveBtn = document.getElementById('saveAnnualBudget');
+  if (saveBtn) {
+    saveBtn.onclick = (e) => {
+      if (!annualBudgetUnlocked) {
+        showAnnualBudgetPasswordModal((ok) => {
+          if (ok) setAnnualBudgetInputsEnabled(true);
+        });
+        return;
+      }
+      // If unlocked, proceed with original save
+      if (typeof window._originalAnnualBudgetSave === 'function') {
+        window._originalAnnualBudgetSave();
+      }
+    };
+  }
+
+  // If already unlocked (e.g. after reload), enable all inputs/buttons
+  if (annualBudgetUnlocked) {
+    setAnnualBudgetInputsEnabled(true);
+  }
+}
+
+// Patch setupAnnualBudgetSave to allow calling original logic after unlock
+if (!window._originalAnnualBudgetSave) {
+  window._originalAnnualBudgetSave = setupAnnualBudgetSave;
 }
 
 // Setup CSV download functionality for budgets

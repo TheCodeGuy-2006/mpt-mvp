@@ -146,18 +146,29 @@
         </thead>
         <tbody>
           <tr>
-            <td><input type="text" value="ANZ" /></td>
-            <td><input type="number" value="500000" /></td>
+            <td><input type="text" value="ANZ" disabled /></td>
+            <td><input type="number" value="500000" disabled /></td>
           </tr>
           <tr>
-            <td><input type="text" value="SAARC" /></td>
-            <td><input type="number" value="300000" /></td>
+            <td><input type="text" value="SAARC" disabled /></td>
+            <td><input type="number" value="300000" disabled /></td>
           </tr>
         </tbody>
       </table>
       <div style="display: flex; gap: 12px; margin-top: 12px">
-        <button id="addRegionRow">+ Add Region</button>
-        <button id="saveAnnualBudget">Save Annual Budget</button>
+        <button id="addRegionRow" disabled>+ Add Region</button>
+        <button id="saveAnnualBudget" disabled>Save Annual Budget</button>
+      </div>
+      <!-- Password Modal for Annual Budget Edit -->
+      <div id="annualBudgetPasswordModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:32px 24px; border-radius:8px; box-shadow:0 2px 16px #0002; min-width:320px; max-width:90vw; margin:auto;">
+          <h3 style="margin-top:0;">Unlock Annual Budget Editing</h3>
+          <p>Enter password to edit the annual budget plan:</p>
+          <input id="annualBudgetPasswordInput" type="password" style="width:100%; padding:8px; margin-bottom:12px;" placeholder="Password" />
+          <div style="color:#d32f2f; min-height:20px;" id="annualBudgetPasswordError"></div>
+          <button id="annualBudgetPasswordSubmit" style="margin-right:8px;">Unlock</button>
+          <button id="annualBudgetPasswordCancel">Cancel</button>
+        </div>
       </div>
     </section>
     <section id="view-roi" style="display: none">
