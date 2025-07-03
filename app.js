@@ -165,7 +165,10 @@ function route() {
       hash === "#roi" &&
       typeof window.roiModule.updateRoiTotalSpend === "function"
     ) {
-      setTimeout(window.roiModule.updateRoiTotalSpend, 0);
+      setTimeout(() => {
+        window.roiModule.populateRoiFilters();
+        window.roiModule.updateRoiTotalSpend();
+      }, 0);
       setTimeout(initRoiTabSwitching, 100); // Initialize tab switching when ROI tab is viewed
       console.log("[route] Updated ROI total spend");
     }
@@ -264,6 +267,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize reporting total spend using ROI module
   window.roiModule.updateReportTotalSpend();
+
+  // Initialize ROI functionality (charts, filters, data table)
+  window.roiModule.initializeRoiFunctionality();
 
   // Initialize Annual Budget Plan using budgets module
   window.budgetsModule.initializeAnnualBudgetPlan(budgets);

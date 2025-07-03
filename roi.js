@@ -158,55 +158,315 @@ function updateRoiTotalSpend() {
   // The table functionality has been replaced with the compact chart format in the grid
 }
 
+
+
+// --- ROI FILTER LOGIC UPDATE START ---
+// Update ROI Total Spend and Data Table to use all calendar filters
+function getRoiFilterValues() {
+  return {
+    region: document.getElementById("roiRegionFilter")?.value || "",
+    quarter: document.getElementById("roiQuarterFilter")?.value || "",
+    country: document.getElementById("roiCountryFilter")?.value || "",
+    owner: document.getElementById("roiOwnerFilter")?.value || "",
+    status: document.getElementById("roiStatusFilter")?.value || "",
+    programType: document.getElementById("roiProgramTypeFilter")?.value || "",
+    strategicPillars: document.getElementById("roiStrategicPillarsFilter")?.value || "",
+    revenuePlay: document.getElementById("roiRevenuePlayFilter")?.value || ""
+  };
+}
+
+// Patch updateRoiTotalSpend
+const _originalUpdateRoiTotalSpend = updateRoiTotalSpend;
+updateRoiTotalSpend = function() {
+  populateRoiFilters();
+  const filters = getRoiFilterValues();
+  let filteredData = [];
+  if (window.executionModule.tableInstance) {
+    filteredData = window.executionModule.tableInstance.getData().filter(row => {
+      return (!filters.region || row.region === filters.region)
+        && (!filters.quarter || row.quarter === filters.quarter)
+        && (!filters.country || row.country === filters.country)
+        && (!filters.owner || row.owner === filters.owner)
+        && (!filters.status || row.status === filters.status)
+        && (!filters.programType || row.programType === filters.programType)
+        && (!filters.strategicPillars || row.strategicPillars === filters.strategicPillars)
+        && (!filters.revenuePlay || row.revenuePlay === filters.revenuePlay);
+    });
+  }
+
+  let totalSpend = 0;
+  let totalPipeline = 0;
+  // Debug: log pipelineForecast values
+  console.log(
+    "[ROI] Filtered data for pipeline calculation:",
+    filteredData.map((r) => r.pipelineForecast),
+  );
+  totalSpend = filteredData.reduce((sum, row) => {
+    let val = row.actualCost;
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (!isNaN(val)) sum += Number(val);
+    return sum;
+  }, 0);
+  totalPipeline = filteredData.reduce((sum, row) => {
+    let val = row.pipelineForecast;
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (!isNaN(val)) sum += Number(val);
+    return sum;
+  }, 0);
+  // Debug: log total pipeline
+  console.log("[ROI] Total pipeline calculated:", totalPipeline);
+
+  const spendEl = document.getElementById("roiTotalSpendValue");
+  if (spendEl) {
+    spendEl.textContent = "$" + totalSpend.toLocaleString();
+  }
+  // Update pipeline value in existing span if present
+  const pipelineValue =
+    isNaN(totalPipeline) || totalPipeline === undefined ? 0 : totalPipeline;
+  const pipelineEl = document.getElementById("roiTotalPipelineValue");
+  if (pipelineEl) {
+    pipelineEl.textContent = "$" + pipelineValue.toLocaleString();
+  }
+  // Update leads/conversions value in existing span if present
+  let totalLeads = 0;
+  totalLeads = filteredData.reduce((sum, row) => {
+    let val = row.actualLeads;
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (!isNaN(val)) sum += Number(val);
+    return sum;
+  }, 0);
+
+  const leadsEl = document.getElementById("roiTotalLeadsValue");
+  if (leadsEl) {
+    leadsEl.textContent = totalLeads.toLocaleString();
+  }
+  // Update ROI percentage value in existing span if present
+  let roiPercent = 0;
+  if (totalSpend > 0) {
+    roiPercent = (totalPipeline / totalSpend) * 100;
+  }
+  const roiEl = document.getElementById("roiTotalRoiValue");
+  if (roiEl) {
+    roiEl.textContent = isNaN(roiPercent) ? "0%" : roiPercent.toFixed(1) + "%";
+  }
+
+  // Update Total MQL value
+  let totalMql = 0;
+  totalMql = filteredData.reduce((sum, row) => {
+    let val = row.actualMQLs || row.mqlForecast; // Use actual MQLs if available, otherwise forecast
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (!isNaN(val)) sum += Number(val);
+    return sum;
+  }, 0);
+
+  const mqlEl = document.getElementById("roiTotalMqlValue");
+  if (mqlEl) {
+    mqlEl.textContent = totalMql.toLocaleString();
+  }
+
+  // Update Total Forecasted Cost value from Planning tab
+  let totalForecastedCost = 0;
+  if (window.planningModule.tableInstance) {
+    const planningData = window.planningModule.tableInstance.getData();
+    totalForecastedCost = planningData.reduce((sum, row) => {
+      let val = row.forecastedCost;
+      if (typeof val === "string")
+        val = Number(val.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(val)) sum += Number(val);
+      return sum;
+    }, 0);
+  }
+
+  const forecastedCostEl = document.getElementById(
+    "roiTotalForecastedCostValue",
+  );
+  if (forecastedCostEl) {
+    forecastedCostEl.textContent = "$" + totalForecastedCost.toLocaleString();
+  }
+
+  // Update ROI Gauge
+  updateRoiGauge(roiPercent);
+
+  // Update ROI Charts
+  renderRoiByRegionChart();
+  renderRoiByProgramTypeChart();
+
+  // Update Total SQL value
+  let totalSql = 0;
+  totalSql = filteredData.reduce((sum, row) => {
+    let val = row.actualSQLs || row.sqlForecast; // Use actual SQLs if available, otherwise forecast
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (!isNaN(val)) sum += Number(val);
+    return sum;
+  }, 0);
+
+  const sqlEl = document.getElementById("roiTotalSqlValue");
+  if (sqlEl) {
+    sqlEl.textContent = totalSql.toLocaleString();
+  }
+
+  // Update Total Opportunities value
+  let totalOpps = 0;
+  totalOpps = filteredData.reduce((sum, row) => {
+    let val = row.actualOpps || row.oppsForecast; // Use actual Opps if available, otherwise forecast
+    if (typeof val === "string")
+      val = Number(val.toString().replace(/[^\d.-]/g, ""));
+    if (!isNaN(val)) sum += Number(val);
+    return sum;
+  }, 0);
+
+  const oppsEl = document.getElementById("roiTotalOppsValue");
+  if (oppsEl) {
+    oppsEl.textContent = totalOpps.toLocaleString();
+  }
+
+  // Note: Program Type Breakdown Table removed in favor of chart visualization
+  // The table functionality has been replaced with the compact chart format in the grid
+};
+
+// Patch updateRoiDataTable
+const _originalUpdateRoiDataTable = updateRoiDataTable;
+updateRoiDataTable = function() {
+  const table = window.roiDataTableInstance;
+  if (!table) {
+    console.log("ROI Data Table not initialized yet");
+    return;
+  }
+  const filters = getRoiFilterValues();
+  const campaigns = getCampaignDataForRoi();
+  const filteredCampaigns = campaigns.filter(campaign => {
+    return (!filters.region || campaign.region === filters.region)
+      && (!filters.quarter || campaign.quarter === filters.quarter)
+      && (!filters.country || campaign.country === filters.country)
+      && (!filters.owner || campaign.owner === filters.owner)
+      && (!filters.status || campaign.status === filters.status)
+      && (!filters.programType || campaign.programType === filters.programType)
+      && (!filters.strategicPillars || campaign.strategicPillars === filters.strategicPillars)
+      && (!filters.revenuePlay || campaign.revenuePlay === filters.revenuePlay);
+  });
+  table.replaceData(filteredCampaigns);
+  console.log(`ROI Data Table updated with ${filteredCampaigns.length} campaigns`);
+};
+// --- ROI FILTER LOGIC UPDATE END ---
+
 // Populate ROI filter dropdowns
 function populateRoiFilters() {
   const regionSelect = document.getElementById("roiRegionFilter");
   const quarterSelect = document.getElementById("roiQuarterFilter");
+  const countrySelect = document.getElementById("roiCountryFilter");
+  const ownerSelect = document.getElementById("roiOwnerFilter");
+  const statusSelect = document.getElementById("roiStatusFilter");
+  const programTypeSelect = document.getElementById("roiProgramTypeFilter");
+  const strategicPillarsSelect = document.getElementById("roiStrategicPillarsFilter");
+  const revenuePlaySelect = document.getElementById("roiRevenuePlayFilter");
 
-  if (!regionSelect || !quarterSelect) return;
+  if (!regionSelect || !quarterSelect || !countrySelect || !ownerSelect || !statusSelect || !programTypeSelect || !strategicPillarsSelect || !revenuePlaySelect) return;
 
-  // Get options from planning module constants
-  const regionOptions = window.planningModule?.constants?.regionOptions || [];
+  // Get options from planning data
+  const planningData = window.planningModule?.tableInstance?.getData() || [];
+  const regionOptions = Array.from(new Set(planningData.map(c => c.region).filter(Boolean))).sort();
   const quarterOptions = window.planningModule?.constants?.quarterOptions || [];
+  const countryOptions = Array.from(new Set(planningData.map(c => c.country).filter(Boolean))).sort();
+  const ownerOptions = Array.from(new Set(planningData.map(c => c.owner).filter(Boolean))).sort();
+  const statusOptions = Array.from(new Set(planningData.map(c => c.status).filter(Boolean))).sort();
+  const programTypeOptions = Array.from(new Set(planningData.map(c => c.programType).filter(Boolean))).sort();
+  const strategicPillarsOptions = Array.from(new Set(planningData.map(c => c.strategicPillars).filter(Boolean))).sort();
+  const revenuePlayOptions = Array.from(new Set(planningData.map(c => c.revenuePlay).filter(Boolean))).sort();
 
   // Only populate if not already populated
   if (regionSelect.children.length <= 1) {
-    // Populate region filter
     regionOptions.forEach((region) => {
       const option = document.createElement("option");
       option.value = region;
       option.textContent = region;
       regionSelect.appendChild(option);
     });
-
-    // Populate quarter filter
+  }
+  if (quarterSelect.children.length <= 1) {
     quarterOptions.forEach((quarter) => {
       const option = document.createElement("option");
       option.value = quarter;
       option.textContent = quarter;
       quarterSelect.appendChild(option);
     });
+  }
+  if (countrySelect.children.length <= 1) {
+    countryOptions.forEach((country) => {
+      const option = document.createElement("option");
+      option.value = country;
+      option.textContent = country;
+      countrySelect.appendChild(option);
+    });
+  }
+  if (ownerSelect.children.length <= 1) {
+    ownerOptions.forEach((owner) => {
+      const option = document.createElement("option");
+      option.value = owner;
+      option.textContent = owner;
+      ownerSelect.appendChild(option);
+    });
+  }
+  if (statusSelect.children.length <= 1) {
+    statusOptions.forEach((status) => {
+      const option = document.createElement("option");
+      option.value = status;
+      option.textContent = status;
+      statusSelect.appendChild(option);
+    });
+  }
+  if (programTypeSelect.children.length <= 1) {
+    programTypeOptions.forEach((type) => {
+      const option = document.createElement("option");
+      option.value = type;
+      option.textContent = type;
+      programTypeSelect.appendChild(option);
+    });
+  }
+  if (strategicPillarsSelect.children.length <= 1) {
+    strategicPillarsOptions.forEach((pillar) => {
+      const option = document.createElement("option");
+      option.value = pillar;
+      option.textContent = pillar;
+      strategicPillarsSelect.appendChild(option);
+    });
+  }
+  if (revenuePlaySelect.children.length <= 1) {
+    revenuePlayOptions.forEach((play) => {
+      const option = document.createElement("option");
+      option.value = play;
+      option.textContent = play;
+      revenuePlaySelect.appendChild(option);
+    });
+  }
 
-    // Set up event listeners
-    regionSelect.addEventListener("change", () => {
+  // Set up event listeners for all filters
+  [regionSelect, quarterSelect, countrySelect, ownerSelect, statusSelect, programTypeSelect, strategicPillarsSelect, revenuePlaySelect].forEach(select => {
+    select.addEventListener("change", () => {
       updateRoiTotalSpend();
       updateRoiDataTable();
     });
-    quarterSelect.addEventListener("change", () => {
+  });
+
+  // Clear filters button
+  const clearButton = document.getElementById("roiClearFilters");
+  if (clearButton) {
+    clearButton.addEventListener("click", () => {
+      regionSelect.value = "";
+      quarterSelect.value = "";
+      countrySelect.value = "";
+      ownerSelect.value = "";
+      statusSelect.value = "";
+      programTypeSelect.value = "";
+      strategicPillarsSelect.value = "";
+      revenuePlaySelect.value = "";
       updateRoiTotalSpend();
       updateRoiDataTable();
     });
-
-    // Clear filters button
-    const clearButton = document.getElementById("roiClearFilters");
-    if (clearButton) {
-      clearButton.addEventListener("click", () => {
-        regionSelect.value = "";
-        quarterSelect.value = "";
-        updateRoiTotalSpend();
-        updateRoiDataTable();
-      });
-    }
   }
 }
 
@@ -359,6 +619,9 @@ function initializeRoiFunctionality() {
     renderRoiByProgramTypeChart();
     renderRoiByQuarterChart();
     initRoiTabSwitching(); // Initialize ROI tab functionality
+    
+    // Populate ROI filters
+    populateRoiFilters();
     
     // Initialize data table - wait a bit longer for planning module to load
     setTimeout(() => {
