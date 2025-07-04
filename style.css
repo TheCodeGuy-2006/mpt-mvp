@@ -1044,7 +1044,51 @@ table#planTable td input[type="text"] {
   background: #fafbfc;
 }
 
-#roiProgramTypeChartContainer > div {
-  width: 100% !important;
-  max-width: none !important;
+/* ROI Info Box Hover Effects */
+#roiTotalSpendBox:hover,
+#roiTotalPipelineBox:hover,
+#roiTotalLeadsBox:hover,
+#roiTotalMqlBox:hover,
+#roiTotalForecastedCostBox:hover,
+#roiRemainingBudgetBox:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+}
+
+/* Specific hover effects for budget boxes */
+#roiRemainingBudgetBox:hover {
+  border-color: #2e7d32;
+  background: #e0f2e1;
+}
+
+/* Custom hover effect for forecasted budget usage box */
+div[style*="background: #fff3e0"]:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  cursor: pointer !important;
+  border-color: #f57c00 !important;
+  background: #fef3e2 !important;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 1200px) {
+  #roiTopRow {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  #roiTopRow > div:last-child {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  div[style*="grid-template-columns: repeat(3, 1fr)"] {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  #roiTopRow > div:last-child {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }

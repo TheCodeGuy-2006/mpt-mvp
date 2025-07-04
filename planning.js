@@ -600,6 +600,16 @@ function initPlanningGrid(rows) {
           // Toggle value
           const current = !!cell.getValue();
           cell.setValue(!current);
+          
+          // Trigger ROI budget updates when Digital Motions toggle changes
+          setTimeout(() => {
+            if (window.roiModule && typeof window.roiModule.updateRemainingBudget === 'function') {
+              const regionFilter = document.getElementById("roiRegionFilter")?.value || "";
+              window.roiModule.updateRemainingBudget(regionFilter);
+              window.roiModule.updateForecastedBudgetUsage(regionFilter);
+              console.log('[Planning] Triggered ROI budget updates after Digital Motions toggle');
+            }
+          }, 100);
         },
         headerSort: false,
       },
