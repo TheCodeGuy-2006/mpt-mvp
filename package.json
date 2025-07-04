@@ -1,11 +1,39 @@
 {
+  "name": "mpt-mvp",
+  "version": "1.0.0",
+  "description": "Marketing Performance Tracker MVP",
+  "main": "server.js",
   "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step required for frontend'",
+    "deploy-help": "bash deploy-setup.sh",
+    "test-backend": "node -e \"console.log('Backend test: Server starts on port', process.env.PORT || 3000)\""
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "axios": "^1.9.0",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^4.19.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0"
+  },
+  "keywords": [
+    "marketing",
+    "performance",
+    "tracking",
+    "roi",
+    "budget",
+    "campaigns"
+  ],
+  "author": "TheCodeGuy-2006",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheCodeGuy-2006/mpt-mvp.git"
   }
 }

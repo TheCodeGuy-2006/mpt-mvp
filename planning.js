@@ -698,15 +698,15 @@ function setupPlanningSave(table, rows) {
     });
     // Save all planning data to planning.json via backend API
     const data = table.getData();
-    fetch("http://localhost:3000/save-planning", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: data }),
-    })
-      .then((res) => res.json())
+    
+    // Use BackendStatus for improved error handling
+    BackendStatus.saveWithFallback("/save-planning", { content: data })
       .then((result) => {
         if (result.success) {
-          alert("Planning data saved to backend!");
+          const message = result.fallback 
+            ? "Planning saved locally (backend offline)" 
+            : "Planning data saved to backend!";
+          alert(message);
           // Update ROI metrics to reflect changes in forecasted costs
           if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
             window.roiModule.updateRoiTotalSpend();

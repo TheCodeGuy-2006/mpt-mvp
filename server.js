@@ -8,12 +8,46 @@ import path from "path";
 
 const app = express();
 
-app.use(cors());
-app.use(bodyParser.json());
-
+// Constants
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // Set this in your environment
 const REPO_OWNER = "TheCodeGuy-2006";
 const REPO_NAME = "mpt-mvp";
+
+// Enhanced CORS configuration for GitHub Pages
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5000',
+    'http://127.0.0.1:5000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+    `https://${REPO_OWNER.toLowerCase()}.github.io`,
+    `https://${REPO_OWNER.toLowerCase()}.github.io/${REPO_NAME}`,
+    // Add your custom domain if you have one
+    // 'https://your-custom-domain.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.use(bodyParser.json());
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
 app.post("/save-programme", async (req, res) => {
   const { filename, content, message } = req.body;
@@ -89,4 +123,8 @@ app.post("/save-calendar", (req, res) => {
   });
 });
 
-app.listen(3000, () => console.log("Backend running on http://localhost:3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});

@@ -169,15 +169,15 @@ function setupExecutionSave(table, rows) {
   btn.onclick = () => {
     // Save all execution data to planning.json via backend API (same as planning)
     const data = table.getData();
-    fetch("http://localhost:3000/save-planning", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: data }),
-    })
-      .then((res) => res.json())
+    
+    // Use BackendStatus for improved error handling
+    BackendStatus.saveWithFallback("/save-planning", { content: data })
       .then((result) => {
         if (result.success) {
-          alert("Execution data saved to backend!");
+          const message = result.fallback 
+            ? "Execution saved locally (backend offline)" 
+            : "Execution data saved to backend!";
+          alert(message);
         } else {
           alert("Failed to save: " + (result.error || "Unknown error"));
         }

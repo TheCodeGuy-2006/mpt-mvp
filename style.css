@@ -6,6 +6,66 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
+
+/* Backend Status Indicator */
+.status-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+  border: 2px solid;
+  transition: all 0.3s ease;
+}
+
+.status-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+
+.status-indicator.connected {
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+
+.status-indicator.connected::before {
+  background: #4caf50;
+}
+
+.status-indicator.disconnected {
+  border-color: #f44336;
+  color: #c62828;
+}
+
+.status-indicator.disconnected::before {
+  background: #f44336;
+}
+
+.status-indicator.checking {
+  border-color: #ff9800;
+  color: #f57c00;
+}
+
+.status-indicator.checking::before {
+  background: #ff9800;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 nav {
   display: flex;
   justify-content: flex-end;

@@ -79,15 +79,15 @@ function setupBudgetsSave(table) {
         utilisation: row.utilisation,
       };
     });
-    fetch("http://localhost:3000/save-budgets", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: obj }),
-    })
-      .then((res) => res.json())
+    
+    // Use BackendStatus for improved error handling
+    BackendStatus.saveWithFallback("/save-budgets", { content: obj })
       .then((result) => {
         if (result.success) {
-          alert("Budgets data saved to backend!");
+          const message = result.fallback 
+            ? "Budgets saved locally (backend offline)" 
+            : "Budgets data saved to backend!";
+          alert(message);
         } else {
           alert("Failed to save: " + (result.error || "Unknown error"));
         }
@@ -130,15 +130,15 @@ function setupAnnualBudgetSave() {
           utilisation: row.utilisation,
         };
       });
-      fetch("http://localhost:3000/save-budgets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: obj }),
-      })
-        .then((res) => res.json())
+      
+      // Use BackendStatus for improved error handling
+      BackendStatus.saveWithFallback("/save-budgets", { content: obj })
         .then((result) => {
           if (result.success) {
-            alert("Budgets data saved to backend!");
+            const message = result.fallback 
+              ? "Budgets saved locally (backend offline)" 
+              : "Budgets data saved to backend!";
+            alert(message);
           } else {
             alert("Failed to save: " + (result.error || "Unknown error"));
           }
