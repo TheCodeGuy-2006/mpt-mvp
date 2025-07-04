@@ -325,6 +325,9 @@ updateRoiTotalSpend = function() {
     oppsEl.textContent = totalOpps.toLocaleString();
   }
 
+  // Update Remaining Budget (Total Budget - Forecasted Cost, filtered by region only)
+  updateRemainingBudget(filters.region);
+
   // Note: Program Type Breakdown Table removed in favor of chart visualization
   // The table functionality has been replaced with the compact chart format in the grid
 };
@@ -623,6 +626,11 @@ function initializeRoiFunctionality() {
     // Populate ROI filters
     populateRoiFilters();
     
+    // Initial remaining budget calculation
+    setTimeout(() => {
+      updateRemainingBudget("");
+    }, 100);
+    
     // Initialize data table - wait a bit longer for planning module to load
     setTimeout(() => {
       console.log("Attempting to initialize ROI Data Table...");
@@ -865,9 +873,86 @@ const roiModule = {
   initRoiDataTable,
   getCampaignDataForRoi,
   updateRoiDataTable,
+  updateRemainingBudget,
+  loadBudgetsData,
 };
 
 // Export to window for access from other modules
 window.roiModule = roiModule;
+
+// Remaining Budget Calculation Functions
+let budgetsData = null;
+
+// Load budgets data from budgets.json
+async function loadBudgetsData() {
+  if (budgetsData) return budgetsData;
+  
+  try {
+    const response = await fetch('data/budgets.json');
+    budgetsData = await response.json();
+    console.log('[ROI] Loaded budgets data:', budgetsData);
+    return budgetsData;
+  } catch (error) {
+    console.error('[ROI] Error loading budgets data:', error);
+    return {};
+  }
+}
+
+// Update remaining budget calculation
+async function updateRemainingBudget(regionFilter) {
+  console.log('[ROI] Updating remaining budget, region filter:', regionFilter);
+  
+  try {
+    // Load budgets data
+    const budgets = await loadBudgetsData();
+    console.log('[ROI] Budgets data loaded:', budgets);
+    
+    // Calculate total budget (filtered by region if specified)
+    let totalBudget = 0;
+    for (const [region, data] of Object.entries(budgets)) {
+      if (!regionFilter || region === regionFilter) {
+        totalBudget += data.assignedBudget || 0;
+      }
+    }
+    console.log('[ROI] Total budget calculated:', totalBudget);
+    
+    // Calculate total actual cost (filtered by region if specified)
+    let totalActualCost = 0;
+    if (window.planningModule.tableInstance) {
+      const planningData = window.planningModule.tableInstance.getData();
+      totalActualCost = planningData.reduce((sum, row) => {
+        // Only include rows that match the region filter (if specified)
+        if (regionFilter && row.region !== regionFilter) return sum;
+        
+        let val = row.actualCost;
+        if (typeof val === "string")
+          val = Number(val.toString().replace(/[^\d.-]/g, ""));
+        if (!isNaN(val)) sum += Number(val);
+        return sum;
+      }, 0);
+    }
+    console.log('[ROI] Total actual cost calculated:', totalActualCost);
+    
+    // Calculate remaining budget
+    const remainingBudget = totalBudget - totalActualCost;
+    console.log('[ROI] Remaining budget calculated:', remainingBudget);
+    
+    // Update the display
+    const remainingBudgetEl = document.getElementById("roiRemainingBudgetValue");
+    if (remainingBudgetEl) {
+      remainingBudgetEl.textContent = "$" + remainingBudget.toLocaleString();
+      console.log('[ROI] Updated remaining budget display:', remainingBudgetEl.textContent);
+    } else {
+      console.error('[ROI] Could not find roiRemainingBudgetValue element');
+    }
+    
+  } catch (error) {
+    console.error('[ROI] Error updating remaining budget:', error);
+    const remainingBudgetEl = document.getElementById("roiRemainingBudgetValue");
+    if (remainingBudgetEl) {
+      remainingBudgetEl.textContent = "$0";
+    }
+  }
+}
 
 export default roiModule;

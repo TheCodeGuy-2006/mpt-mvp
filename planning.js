@@ -586,6 +586,23 @@ function initPlanningGrid(rows) {
           },
         },
       },
+      // Digital Motions toggle
+      {
+        title: "Digital Motions",
+        field: "digitalMotions",
+        formatter: function(cell) {
+          const value = cell.getValue();
+          return `<input type='checkbox' ${value ? "checked" : ""} style='transform:scale(1.3); cursor:pointer;' />`;
+        },
+        width: 120,
+        hozAlign: "center",
+        cellClick: function(e, cell) {
+          // Toggle value
+          const current = !!cell.getValue();
+          cell.setValue(!current);
+        },
+        headerSort: false,
+      },
       // Bin icon (delete)
       {
         title: "",
