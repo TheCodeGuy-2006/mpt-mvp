@@ -45,7 +45,18 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    port: process.env.PORT || 3000
+  });
+});
+
+// Root endpoint for basic testing
+app.get('/', (req, res) => {
+  res.json({
+    message: 'MPT MVP Backend API',
+    status: 'running',
+    endpoints: ['/health', '/save-planning', '/save-budgets', '/save-calendar'],
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -90,6 +101,13 @@ app.post("/save-programme", async (req, res) => {
 app.post("/save-planning", (req, res) => {
   const planningData = req.body.content;
   const filePath = path.join(process.cwd(), "data", "planning.json");
+  
+  // Ensure data directory exists
+  const dataDir = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  
   fs.writeFile(filePath, JSON.stringify(planningData, null, 2), (err) => {
     if (err) {
       console.error("Failed to write planning.json:", err);
@@ -102,6 +120,13 @@ app.post("/save-planning", (req, res) => {
 app.post("/save-budgets", (req, res) => {
   const budgetsData = req.body.content;
   const filePath = path.join(process.cwd(), "data", "budgets.json");
+  
+  // Ensure data directory exists
+  const dataDir = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  
   fs.writeFile(filePath, JSON.stringify(budgetsData, null, 2), (err) => {
     if (err) {
       console.error("Failed to write budgets.json:", err);
@@ -114,6 +139,13 @@ app.post("/save-budgets", (req, res) => {
 app.post("/save-calendar", (req, res) => {
   const calendarData = req.body.content;
   const filePath = path.join(process.cwd(), "data", "calendar.json");
+  
+  // Ensure data directory exists
+  const dataDir = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  
   fs.writeFile(filePath, JSON.stringify(calendarData, null, 2), (err) => {
     if (err) {
       console.error("Failed to write calendar.json:", err);
@@ -124,7 +156,19 @@ app.post("/save-calendar", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+
+// Add graceful error handling
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Health check available at: http://localhost:${PORT}/health`);
 });
