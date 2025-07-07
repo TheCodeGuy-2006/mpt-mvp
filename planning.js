@@ -266,6 +266,9 @@ function initPlanningGrid(rows) {
             }
           }
           rowData.__modified = true;
+          
+          // Trigger autosave
+          triggerPlanningAutosave(cell.getTable());
         },
       },
       {
@@ -492,6 +495,9 @@ function initPlanningGrid(rows) {
             });
           }
           rowData.__modified = true;
+          
+          // Trigger autosave
+          triggerPlanningAutosave(cell.getTable());
         },
       },
       {
@@ -525,6 +531,9 @@ function initPlanningGrid(rows) {
             });
           }
           rowData.__modified = true;
+          
+          // Trigger autosave
+          triggerPlanningAutosave(cell.getTable());
         },
       },
       { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
@@ -570,6 +579,9 @@ function initPlanningGrid(rows) {
         },
         cellEdited: (cell) => {
           cell.getRow().getData().__modified = true;
+          
+          // Trigger autosave
+          triggerPlanningAutosave(cell.getTable());
         },
       },
       {
@@ -698,21 +710,47 @@ function setupPlanningSave(table, rows) {
     });
     // Save all planning data to planning.json via backend API
     const data = table.getData();
-    fetch("http://localhost:3000/save-planning", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: data }),
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.success) {
-          alert("Planning data saved to backend!");
+    
+    // Save to both backend and Worker
+    const backendPromise = BackendStatus.saveWithFallback("/save-planning", { content: data });
+    const workerPromise = window.cloudflareSyncModule ? 
+      window.cloudflareSyncModule.saveToWorker('planning', data, { source: 'manual-save' })
+        .catch(error => {
+          console.warn('Worker save failed:', error);
+          return { error: error.message };
+        }) : 
+      Promise.resolve({ skipped: 'Worker not configured' });
+
+    Promise.allSettled([backendPromise, workerPromise])
+      .then((results) => {
+        const [backendResult, workerResult] = results;
+        
+        let message = '';
+        let success = false;
+        
+        if (backendResult.status === 'fulfilled' && backendResult.value.success) {
+          message += backendResult.value.fallback 
+            ? "✅ Planning saved locally (backend offline)" 
+            : "✅ Planning data saved to backend!";
+          success = true;
+        } else {
+          message += "❌ Backend save failed";
+        }
+        
+        if (workerResult.status === 'fulfilled' && !workerResult.value.error && !workerResult.value.skipped) {
+          message += success ? " and to Worker!" : "✅ Saved to Worker only";
+          success = true;
+        } else if (workerResult.value && workerResult.value.error) {
+          message += success ? " (Worker failed)" : " ❌ Worker save also failed";
+        }
+        
+        alert(message);
+        
+        if (success) {
           // Update ROI metrics to reflect changes in forecasted costs
           if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
             window.roiModule.updateRoiTotalSpend();
           }
-        } else {
-          alert("Failed to save: " + (result.error || "Unknown error"));
         }
       })
       .catch((err) => {
@@ -942,3 +980,16 @@ Object.defineProperty(window.planningModule, "tableInstance", {
 console.log(
   "Planning module initialized and exported to window.planningModule",
 );
+
+// Autosave functionality for planning
+function triggerPlanningAutosave(table) {
+  if (!window.cloudflareSyncModule) {
+    console.log('Cloudflare sync module not available');
+    return;
+  }
+
+  const data = table.getData();
+  window.cloudflareSyncModule.scheduleSave('planning', data, {
+    source: 'planning-autosave'
+  });
+}

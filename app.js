@@ -1,4 +1,5 @@
 import { kpis } from "./src/calc.js";
+import "./src/cloudflare-sync.js";
 
 console.log("app.js loaded");
 
@@ -31,18 +32,265 @@ function initializeConstants() {
   }
 }
 
-// GITHUB SYNC PLACEHOLDER
+// GITHUB SYNC CONFIGURATION
 function initGithubSync() {
   document.getElementById("githubSync").innerHTML = `
-    <form id="githubSyncForm" onsubmit="return false;">
-      <p>Configure your GitHub repo and branch for JSON sync. (Coming soon!)</p>
-      <label>Repo: <input type="text" id="repoName" placeholder="user/repo" autocomplete="off"></label><br>
-      <label>Branch: <input type="text" id="branchName" placeholder="main" autocomplete="off"></label><br>
-      <label>PAT: <input type="password" id="pat" placeholder="Personal Access Token" autocomplete="current-password"></label><br>
-      <button id="syncBtn">Sync Now</button>
-      <button id="zipExportBtn">Export ZIP</button>
-    </form>
+    <div style="max-width: 800px;">
+      <h3>🔗 GitHub Sync Configuration</h3>
+      <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h4>🚀 Cloudflare Worker Integration</h4>
+        <p>Configure your Cloudflare Worker endpoint for secure auto-save to GitHub.</p>
+        
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Worker Endpoint URL:</label>
+          <input type="text" id="workerEndpoint" placeholder="https://your-worker.your-subdomain.workers.dev" 
+                 style="width: 100%; max-width: 500px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+          <small style="display: block; color: #666; margin-top: 5px;">
+            Enter your Cloudflare Worker URL (without trailing slash)
+          </small>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: flex; align-items: center; margin-bottom: 10px;">
+            <input type="checkbox" id="autoSaveEnabled" style="margin-right: 8px; transform: scale(1.2);" />
+            <span style="font-weight: bold;">Enable Auto-Save</span>
+          </label>
+          <label style="display: block; margin-bottom: 5px;">Auto-save delay (seconds):</label>
+          <input type="number" id="autoSaveDelay" min="1" max="30" value="3" 
+                 style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;" />
+          <small style="display: block; color: #666; margin-top: 5px;">
+            Time to wait after changes before auto-saving (1-30 seconds)
+          </small>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <button type="button" id="saveConfigBtn" style="padding: 8px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            💾 Save Configuration
+          </button>
+          <button type="button" id="testConnectionBtn" style="padding: 8px 16px; background: #388e3c; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+            🔍 Test Connection
+          </button>
+          <button type="button" id="forceSyncBtn" style="padding: 8px 16px; background: #f57c00; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+            ⚡ Force Sync All Data
+          </button>
+        </div>
+
+        <div id="syncStatus" style="display: none; padding: 10px; border-radius: 4px; margin-top: 10px;"></div>
+      </div>
+      
+      <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #1976d2;">
+        <h4>📋 Setup Instructions</h4>
+        <ol style="margin: 10px 0; padding-left: 20px;">
+          <li>Create a Cloudflare Worker using the provided <code>cloudflare-worker.js</code> file</li>
+          <li>Set your GitHub token as the <code>GITHUB_TOKEN</code> environment variable in Cloudflare</li>
+          <li>Update the worker code with your GitHub username and repository name</li>
+          <li>Enter your Worker URL above and test the connection</li>
+          <li>Enable auto-save to automatically sync your changes to GitHub</li>
+        </ol>
+        <p style="margin: 10px 0; font-size: 0.9em; color: #666;">
+          See the setup documentation files for detailed instructions.
+        </p>
+      </div>
+    </div>
   `;
+
+  // Load saved configuration
+  loadGitHubSyncConfig();
+
+  // Wire up event handlers
+  document.getElementById("saveConfigBtn").addEventListener("click", saveGitHubSyncConfig);
+  document.getElementById("testConnectionBtn").addEventListener("click", testWorkerConnection);
+  document.getElementById("forceSyncBtn").addEventListener("click", forceSyncAllData);
+}
+
+function loadGitHubSyncConfig() {
+  try {
+    const savedConfig = localStorage.getItem('githubSyncConfig');
+    if (savedConfig) {
+      const config = JSON.parse(savedConfig);
+      document.getElementById("workerEndpoint").value = config.workerEndpoint || '';
+      document.getElementById("autoSaveEnabled").checked = config.autoSaveEnabled || false;
+      document.getElementById("autoSaveDelay").value = config.autoSaveDelay || 3;
+
+      // Apply configuration to the sync module
+      if (config.workerEndpoint && window.cloudflareSyncModule) {
+        window.cloudflareSyncModule.configureWorkerEndpoint(config.workerEndpoint);
+        window.cloudflareSyncModule.configureAutoSave({
+          enabled: config.autoSaveEnabled,
+          debounceMs: (config.autoSaveDelay || 3) * 1000
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error loading GitHub sync config:', error);
+  }
+}
+
+function saveGitHubSyncConfig() {
+  const rawEndpoint = document.getElementById("workerEndpoint").value;
+  const config = {
+    workerEndpoint: rawEndpoint ? rawEndpoint.replace(/\/$/, '') : '', // Remove trailing slash
+    autoSaveEnabled: document.getElementById("autoSaveEnabled").checked,
+    autoSaveDelay: parseInt(document.getElementById("autoSaveDelay").value)
+  };
+
+  // Validate configuration
+  if (config.workerEndpoint && !config.workerEndpoint.startsWith('https://')) {
+    showSyncStatus("❌ Worker endpoint must start with https://", "error");
+    return;
+  }
+
+  if (config.autoSaveDelay < 1 || config.autoSaveDelay > 30) {
+    showSyncStatus("❌ Auto-save delay must be between 1 and 30 seconds", "error");
+    return;
+  }
+
+  // Save to localStorage
+  localStorage.setItem('githubSyncConfig', JSON.stringify(config));
+
+  // Apply configuration
+  if (config.workerEndpoint) {
+    if (window.cloudflareSyncModule) {
+      window.cloudflareSyncModule.configureWorkerEndpoint(config.workerEndpoint);
+      window.cloudflareSyncModule.configureAutoSave({
+        enabled: config.autoSaveEnabled,
+        debounceMs: config.autoSaveDelay * 1000
+      });
+    }
+  }
+
+  showSyncStatus("✅ Configuration saved successfully!", "success");
+}
+
+async function testWorkerConnection() {
+  const endpoint = document.getElementById("workerEndpoint").value.trim();
+  
+  if (!endpoint) {
+    showSyncStatus("❌ Please enter a Worker endpoint URL", "error");
+    return;
+  }
+
+  if (!endpoint.startsWith('https://')) {
+    showSyncStatus("❌ Worker endpoint must start with https://", "error");
+    return;
+  }
+
+  showSyncStatus("🔄 Testing connection...", "info");
+
+  try {
+    // Remove trailing slash from endpoint to prevent double slashes
+    const cleanEndpoint = endpoint.replace(/\/$/, '');
+    const response = await fetch(cleanEndpoint + '/health', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    showSyncStatus("✅ Connection successful! Worker is healthy and ready.", "success");
+    console.log('Worker health check result:', result);
+  } catch (error) {
+    console.error('Worker connection test failed:', error);
+    showSyncStatus(`❌ Connection failed: ${error.message}`, "error");
+  }
+}
+
+async function forceSyncAllData() {
+  const endpoint = document.getElementById("workerEndpoint").value.trim();
+  
+  if (!endpoint) {
+    showSyncStatus("❌ Please configure and save the Worker endpoint first", "error");
+    return;
+  }
+
+  showSyncStatus("⚡ Force syncing all data...", "info");
+
+  try {
+    await forceSaveAll();
+    showSyncStatus("✅ Force sync completed successfully!", "success");
+  } catch (error) {
+    showSyncStatus(`❌ Force sync failed: ${error.message}`, "error");
+  }
+}
+
+function showSyncStatus(message, type) {
+  const statusDiv = document.getElementById("syncStatus");
+  statusDiv.style.display = "block";
+  statusDiv.textContent = message;
+  
+  // Set styles based on type
+  if (type === "success") {
+    statusDiv.style.background = "#d4edda";
+    statusDiv.style.color = "#155724";
+    statusDiv.style.border = "1px solid #c3e6cb";
+  } else if (type === "error") {
+    statusDiv.style.background = "#f8d7da";
+    statusDiv.style.color = "#721c24";
+    statusDiv.style.border = "1px solid #f5c6cb";
+  } else {
+    statusDiv.style.background = "#d1ecf1";
+    statusDiv.style.color = "#0c5460";
+    statusDiv.style.border = "1px solid #bee5eb";
+  }
+
+  // Auto-hide success and info messages after 5 seconds
+  if (type === "success" || type === "info") {
+    setTimeout(() => {
+      statusDiv.style.display = "none";
+    }, 5000);
+  }
+}
+
+// Force save all data to Worker
+async function forceSaveAll() {
+  if (!window.cloudflareSyncModule) {
+    throw new Error('Cloudflare sync module not loaded');
+  }
+
+  const promises = [];
+  
+  // Save planning data
+  if (window.planningModule && window.planningModule.tableInstance) {
+    const planningData = window.planningModule.tableInstance.getData();
+    promises.push(
+      window.cloudflareSyncModule.saveToWorker('planning', planningData, { 
+        source: 'force-sync' 
+      })
+    );
+  }
+  
+  // Save budgets data
+  if (window.budgetsModule && window.budgetsModule.tableInstance) {
+    const budgetsData = window.budgetsModule.tableInstance.getData();
+    promises.push(
+      window.cloudflareSyncModule.saveToWorker('budgets', budgetsData, { 
+        source: 'force-sync' 
+      })
+    );
+  }
+
+  // Save calendar data if available
+  if (window.calendarModule && typeof window.calendarModule.getData === 'function') {
+    const calendarData = window.calendarModule.getData();
+    promises.push(
+      window.cloudflareSyncModule.saveToWorker('calendar', calendarData, { 
+        source: 'force-sync' 
+      })
+    );
+  }
+
+  if (promises.length === 0) {
+    throw new Error('No data available to sync');
+  }
+
+  const results = await Promise.all(promises);
+  console.log('Force save all completed:', results);
+  return results;
 }
 
 // Utility: Dynamically load all JSON files in /data (except budgets)

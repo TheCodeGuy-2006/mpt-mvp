@@ -1,5 +1,23 @@
 {
+  "name": "mpt-mvp",
+  "version": "1.0.0",
+  "description": "Marketing Planning Tool MVP with GitHub Pages deployment and Cloudflare Worker integration",
+  "main": "index.html",
   "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jordanradford/mpt-mvp.git"
+  },
+  "author": "Jordan Radford",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jordanradford/mpt-mvp/issues"
+  },
+  "homepage": "https://jordanradford.github.io/mpt-mvp/",
   "dependencies": {
     "axios": "^1.9.0",
     "cors": "^2.8.5",

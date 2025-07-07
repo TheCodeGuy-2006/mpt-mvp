@@ -19,9 +19,30 @@ function initBudgetsTable(budgets, rows) {
     data: budgets,
     layout: "fitColumns",
     columns: [
-      { title: "Region", field: "region", editor: "input" },
-      { title: "Assigned Budget", field: "assignedBudget", editor: "number" },
-      { title: "Notes", field: "notes", editor: "input" },
+      { 
+        title: "Region", 
+        field: "region", 
+        editor: "input",
+        cellEdited: (cell) => {
+          triggerBudgetsAutosave(cell.getTable());
+        }
+      },
+      { 
+        title: "Assigned Budget", 
+        field: "assignedBudget", 
+        editor: "number",
+        cellEdited: (cell) => {
+          triggerBudgetsAutosave(cell.getTable());
+        }
+      },
+      { 
+        title: "Notes", 
+        field: "notes", 
+        editor: "input",
+        cellEdited: (cell) => {
+          triggerBudgetsAutosave(cell.getTable());
+        }
+      },
       {
         title: "Utilisation",
         field: "utilisation",
@@ -68,7 +89,7 @@ function setupBudgetsSave(table) {
     document.getElementById("view-budgets").appendChild(btn);
   }
   btn.onclick = () => {
-    // Save all budgets data to budgets.json via backend
+    // Save all budgets data to budgets.json via backend and Worker
     const data = table.getData();
     // Convert array back to object by region
     const obj = {};
@@ -79,23 +100,62 @@ function setupBudgetsSave(table) {
         utilisation: row.utilisation,
       };
     });
-    fetch("http://localhost:3000/save-budgets", {
+
+    // Save to both backend and Worker
+    const backendPromise = fetch("http://localhost:3000/save-budgets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: obj }),
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.success) {
-          alert("Budgets data saved to backend!");
+    }).then((res) => res.json());
+
+    const workerPromise = window.cloudflareSyncModule ? 
+      window.cloudflareSyncModule.saveToWorker('budgets', obj, { source: 'manual-save' })
+        .catch(error => {
+          console.warn('Worker save failed:', error);
+          return { error: error.message };
+        }) : 
+      Promise.resolve({ skipped: 'Worker not configured' });
+
+    Promise.allSettled([backendPromise, workerPromise])
+      .then((results) => {
+        const [backendResult, workerResult] = results;
+        
+        let message = '';
+        let success = false;
+        
+        if (backendResult.status === 'fulfilled' && backendResult.value.success) {
+          message += "✅ Budgets data saved to backend!";
+          success = true;
         } else {
-          alert("Failed to save: " + (result.error || "Unknown error"));
+          message += "❌ Backend save failed";
         }
+        
+        if (workerResult.status === 'fulfilled' && !workerResult.value.error && !workerResult.value.skipped) {
+          message += success ? " and to Worker!" : "✅ Saved to Worker only";
+          success = true;
+        } else if (workerResult.value && workerResult.value.error) {
+          message += success ? " (Worker failed)" : " ❌ Worker save also failed";
+        }
+        
+        alert(message);
       })
       .catch((err) => {
         alert("Failed to save: " + err.message);
       });
   };
+}
+
+// Autosave functionality for budgets
+function triggerBudgetsAutosave(table) {
+  if (!window.cloudflareSyncModule) {
+    console.log('Cloudflare sync module not available');
+    return;
+  }
+
+  const data = table.getData();
+  window.cloudflareSyncModule.scheduleSave('budgets', data, {
+    source: 'budgets-autosave'
+  });
 }
 
 // Setup Annual Budget Plan save functionality

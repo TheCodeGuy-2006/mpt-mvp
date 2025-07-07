@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare Worker Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1976d2;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #1976d2;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        .secondary {
+            background: #388e3c;
+        }
+        .secondary:hover {
+            background: #2e7d32;
+        }
+        .danger {
+            background: #d32f2f;
+        }
+        .danger:hover {
+            background: #c62828;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Cloudflare Worker Demo</h1>
+        <p>Use this page to test your Cloudflare Worker integration before using it with the main MPT MVP application.</p>
+        
+        <div class="form-group">
+            <label for="workerUrl">Worker URL:</label>
+            <input type="text" id="workerUrl" placeholder="https://your-worker.your-subdomain.workers.dev" value="">
+        </div>
+
+        <div class="form-group">
+            <button onclick="testHealth()">🔍 Test Health Check</button>
+            <button onclick="testSave()" class="secondary">💾 Test Save Operation</button>
+            <button onclick="clearResults()" class="danger">🗑️ Clear Results</button>
+        </div>
+
+        <div class="form-group">
+            <label for="testData">Test Data (JSON):</label>
+            <textarea id="testData" rows="10" placeholder="Enter JSON data to test saving...">[
+  {
+    "id": "test-campaign-1",
+    "campaignName": "Demo Campaign",
+    "programType": "Webinars",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "description": "Test campaign for Worker integration",
+    "owner": "Test User",
+    "quarter": "Q1 July",
+    "region": "South APAC",
+    "fiscalYear": "FY25",
+    "country": "Australia",
+    "forecastedCost": 5000,
+    "expectedLeads": 100,
+    "mqlForecast": 20,
+    "sqlForecast": 4,
+    "oppsForecast": 2,
+    "pipelineForecast": 100000,
+    "revenuePlay": "New Business",
+    "status": "Planning",
+    "poRaised": "No",
+    "digitalMotions": true
+  }
+]</textarea>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Auto-fill Worker URL if available in localStorage
+        window.addEventListener('load', () => {
+            const savedConfig = localStorage.getItem('githubSyncConfig');
+            if (savedConfig) {
+                try {
+                    const config = JSON.parse(savedConfig);
+                    if (config.workerEndpoint) {
+                        document.getElementById('workerUrl').value = config.workerEndpoint;
+                    }
+                } catch (e) {
+                    console.log('Could not load saved config');
+                }
+            }
+        });
+
+        function getWorkerUrl() {
+            const url = document.getElementById('workerUrl').value.trim();
+            if (!url) {
+                showResult('Please enter a Worker URL', 'error');
+                return null;
+            }
+            // Remove trailing slash
+            return url.replace(/\/$/, '');
+        }
+
+        async function testHealth() {
+            const workerUrl = getWorkerUrl();
+            if (!workerUrl) return;
+
+            showResult('🔄 Testing health check...', 'info');
+
+            try {
+                const response = await fetch(`${workerUrl}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(`✅ Health Check Successful!\n\n${JSON.stringify(result, null, 2)}`, 'success');
+                } else {
+                    showResult(`❌ Health Check Failed (${response.status})\n\n${JSON.stringify(result, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Health Check Error:\n${error.message}`, 'error');
+            }
+        }
+
+        async function testSave() {
+            const workerUrl = getWorkerUrl();
+            if (!workerUrl) return;
+
+            const testDataRaw = document.getElementById('testData').value.trim();
+            if (!testDataRaw) {
+                showResult('Please enter test data', 'error');
+                return;
+            }
+
+            let testData;
+            try {
+                testData = JSON.parse(testDataRaw);
+            } catch (e) {
+                showResult(`❌ Invalid JSON in test data:\n${e.message}`, 'error');
+                return;
+            }
+
+            showResult('🔄 Testing save operation...', 'info');
+
+            try {
+                const payload = {
+                    dataType: 'planning',
+                    data: testData,
+                    timestamp: new Date().toISOString(),
+                    source: 'demo-test'
+                };
+
+                const response = await fetch(`${workerUrl}/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Data-Type': 'planning'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(`✅ Save Operation Successful!\n\n${JSON.stringify(result, null, 2)}`, 'success');
+                } else {
+                    showResult(`❌ Save Operation Failed (${response.status})\n\n${JSON.stringify(result, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Save Operation Error:\n${error.message}`, 'error');
+            }
+        }
+
+        function showResult(message, type) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
