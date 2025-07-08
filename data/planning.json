@@ -79,7 +79,7 @@
     "opps": 2,
     "pipeline": 100000,
     "id": "row_4_1751333373752",
-    "campaignName": "quick test"
+    "campaignName": ""
   },
   {
     "programType": "Localized Programs",
@@ -103,7 +103,7 @@
     "opps": 12,
     "pipeline": 600000,
     "id": "row_5_1751333373752",
-    "campaignName": "another quick test"
+    "campaignName": ""
   },
   {
     "programType": "3P Sponsored Events",
@@ -127,7 +127,8 @@
     "opps": 12,
     "pipeline": 600000,
     "id": "row_6_1751333373752",
-    "campaignName": ""
+    "campaignName": "",
+    "digitalMotions": true
   },
   {
     "programType": "In-Account Events (1:1)",
