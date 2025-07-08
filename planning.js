@@ -708,54 +708,69 @@ function setupPlanningSave(table, rows) {
         if (changed) row.__modified = true;
       }
     });
-    // Save all planning data to planning.json via backend API
+    // Save all planning data
     const data = table.getData();
     
-    // Save to both backend and Worker
-    const backendPromise = BackendStatus.saveWithFallback("/save-planning", { content: data });
-    const workerPromise = window.cloudflareSyncModule ? 
+    console.log('Saving planning data:', data.length, 'rows');
+    
+    // Try Worker first, then backend fallback
+    if (window.cloudflareSyncModule) {
+      // Primary: Save to Worker
       window.cloudflareSyncModule.saveToWorker('planning', data, { source: 'manual-save' })
-        .catch(error => {
-          console.warn('Worker save failed:', error);
-          return { error: error.message };
-        }) : 
-      Promise.resolve({ skipped: 'Worker not configured' });
-
-    Promise.allSettled([backendPromise, workerPromise])
-      .then((results) => {
-        const [backendResult, workerResult] = results;
-        
-        let message = '';
-        let success = false;
-        
-        if (backendResult.status === 'fulfilled' && backendResult.value.success) {
-          message += backendResult.value.fallback 
-            ? "✅ Planning saved locally (backend offline)" 
-            : "✅ Planning data saved to backend!";
-          success = true;
-        } else {
-          message += "❌ Backend save failed";
-        }
-        
-        if (workerResult.status === 'fulfilled' && !workerResult.value.error && !workerResult.value.skipped) {
-          message += success ? " and to Worker!" : "✅ Saved to Worker only";
-          success = true;
-        } else if (workerResult.value && workerResult.value.error) {
-          message += success ? " (Worker failed)" : " ❌ Worker save also failed";
-        }
-        
-        alert(message);
-        
-        if (success) {
-          // Update ROI metrics to reflect changes in forecasted costs
+        .then((result) => {
+          console.log('Worker save successful:', result);
+          alert("✅ Planning data saved to GitHub!");
+          
+          // Update ROI metrics
           if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
             window.roiModule.updateRoiTotalSpend();
           }
-        }
+        })
+        .catch((error) => {
+          console.warn('Worker save failed, trying backend:', error);
+          
+          // Fallback: Save to backend
+          fetch("http://localhost:3000/save-planning", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: data }),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (result.success) {
+                alert("✅ Planning data saved to backend (Worker unavailable)!");
+              } else {
+                alert("❌ Failed to save: " + (result.error || "Unknown error"));
+              }
+            })
+            .catch((err) => {
+              alert("❌ Save failed: " + err.message);
+            });
+        });
+    } else {
+      // No Worker configured, use backend only
+      fetch("http://localhost:3000/save-planning", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: data }),
       })
-      .catch((err) => {
-        alert("Failed to save: " + err.message);
-      });
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success) {
+            alert("✅ Planning data saved to backend!");
+            
+            // Update ROI metrics
+            if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
+              window.roiModule.updateRoiTotalSpend();
+            }
+          } else {
+            alert("❌ Failed to save: " + (result.error || "Unknown error"));
+          }
+        })
+        .catch((err) => {
+          alert("❌ Save failed: " + err.message);
+        });
+    }
   };
 }
 

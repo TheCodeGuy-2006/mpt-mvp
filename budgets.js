@@ -89,7 +89,7 @@ function setupBudgetsSave(table) {
     document.getElementById("view-budgets").appendChild(btn);
   }
   btn.onclick = () => {
-    // Save all budgets data to budgets.json via backend and Worker
+    // Save all budgets data
     const data = table.getData();
     // Convert array back to object by region
     const obj = {};
@@ -101,47 +101,56 @@ function setupBudgetsSave(table) {
       };
     });
 
-    // Save to both backend and Worker
-    const backendPromise = fetch("http://localhost:3000/save-budgets", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: obj }),
-    }).then((res) => res.json());
+    console.log('Saving budgets data:', Object.keys(obj).length, 'regions');
 
-    const workerPromise = window.cloudflareSyncModule ? 
+    // Try Worker first, then backend fallback
+    if (window.cloudflareSyncModule) {
+      // Primary: Save to Worker
       window.cloudflareSyncModule.saveToWorker('budgets', obj, { source: 'manual-save' })
-        .catch(error => {
-          console.warn('Worker save failed:', error);
-          return { error: error.message };
-        }) : 
-      Promise.resolve({ skipped: 'Worker not configured' });
-
-    Promise.allSettled([backendPromise, workerPromise])
-      .then((results) => {
-        const [backendResult, workerResult] = results;
-        
-        let message = '';
-        let success = false;
-        
-        if (backendResult.status === 'fulfilled' && backendResult.value.success) {
-          message += "✅ Budgets data saved to backend!";
-          success = true;
-        } else {
-          message += "❌ Backend save failed";
-        }
-        
-        if (workerResult.status === 'fulfilled' && !workerResult.value.error && !workerResult.value.skipped) {
-          message += success ? " and to Worker!" : "✅ Saved to Worker only";
-          success = true;
-        } else if (workerResult.value && workerResult.value.error) {
-          message += success ? " (Worker failed)" : " ❌ Worker save also failed";
-        }
-        
-        alert(message);
+        .then((result) => {
+          console.log('Worker save successful:', result);
+          alert("✅ Budgets data saved to GitHub!");
+        })
+        .catch((error) => {
+          console.warn('Worker save failed, trying backend:', error);
+          
+          // Fallback: Save to backend
+          fetch("http://localhost:3000/save-budgets", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: obj }),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (result.success) {
+                alert("✅ Budgets data saved to backend (Worker unavailable)!");
+              } else {
+                alert("❌ Failed to save: " + (result.error || "Unknown error"));
+              }
+            })
+            .catch((err) => {
+              alert("❌ Save failed: " + err.message);
+            });
+        });
+    } else {
+      // No Worker configured, use backend only
+      fetch("http://localhost:3000/save-budgets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: obj }),
       })
-      .catch((err) => {
-        alert("Failed to save: " + err.message);
-      });
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success) {
+            alert("✅ Budgets data saved to backend!");
+          } else {
+            alert("❌ Failed to save: " + (result.error || "Unknown error"));
+          }
+        })
+        .catch((err) => {
+          alert("❌ Save failed: " + err.message);
+        });
+    }
   };
 }
 
@@ -180,7 +189,7 @@ function setupAnnualBudgetSave() {
       .filter(Boolean);
     if (window.budgetsTableInstance) {
       window.budgetsTableInstance.replaceData(budgets);
-      // Also save to backend
+      // Also save to backend and Worker
       const data = window.budgetsTableInstance.getData();
       const obj = {};
       data.forEach((row) => {
@@ -190,22 +199,57 @@ function setupAnnualBudgetSave() {
           utilisation: row.utilisation,
         };
       });
-      fetch("http://localhost:3000/save-budgets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: obj }),
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          if (result.success) {
-            alert("Budgets data saved to backend!");
-          } else {
-            alert("Failed to save: " + (result.error || "Unknown error"));
-          }
+
+      console.log('Saving annual budget data:', Object.keys(obj).length, 'regions');
+
+      // Try Worker first, then backend fallback
+      if (window.cloudflareSyncModule) {
+        // Primary: Save to Worker
+        window.cloudflareSyncModule.saveToWorker('budgets', obj, { source: 'annual-budget-save' })
+          .then((result) => {
+            console.log('Annual budget Worker save successful:', result);
+            alert("✅ Annual budget saved to GitHub!");
+          })
+          .catch((error) => {
+            console.warn('Worker save failed, trying backend:', error);
+            
+            // Fallback: Save to backend
+            fetch("http://localhost:3000/save-budgets", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ content: obj }),
+            })
+              .then((res) => res.json())
+              .then((result) => {
+                if (result.success) {
+                  alert("✅ Annual budget saved to backend (Worker unavailable)!");
+                } else {
+                  alert("❌ Failed to save: " + (result.error || "Unknown error"));
+                }
+              })
+              .catch((err) => {
+                alert("❌ Save failed: " + err.message);
+              });
+          });
+      } else {
+        // No Worker configured, use backend only
+        fetch("http://localhost:3000/save-budgets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: obj }),
         })
-        .catch((err) => {
-          alert("Failed to save: " + err.message);
-        });
+          .then((res) => res.json())
+          .then((result) => {
+            if (result.success) {
+              alert("✅ Annual budget saved to backend!");
+            } else {
+              alert("❌ Failed to save: " + (result.error || "Unknown error"));
+            }
+          })
+          .catch((err) => {
+            alert("❌ Save failed: " + err.message);
+          });
+      }
     }
   };
 }
