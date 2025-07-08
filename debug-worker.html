@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Worker Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Worker Debug Test</h1>
+    
+    <div>
+        <h3>1. Check Saved Configuration</h3>
+        <button onclick="checkConfig()">Check Saved Config</button>
+        <div id="configResult"></div>
+    </div>
+
+    <div>
+        <h3>2. Test Worker Connection</h3>
+        <input type="text" id="workerUrl" placeholder="Enter Worker URL" style="width: 400px; padding: 8px;">
+        <button onclick="testWorker()">Test Worker</button>
+        <div id="workerResult"></div>
+    </div>
+
+    <div>
+        <h3>3. Check Cloudflare Sync Module</h3>
+        <button onclick="checkModule()">Check Module</button>
+        <div id="moduleResult"></div>
+    </div>
+
+    <script>
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        function checkConfig() {
+            try {
+                const savedConfig = localStorage.getItem('githubSyncConfig');
+                if (savedConfig) {
+                    const config = JSON.parse(savedConfig);
+                    showResult('configResult', `Found configuration:\n${JSON.stringify(config, null, 2)}`, 'success');
+                    
+                    // Auto-fill the worker URL if found
+                    if (config.workerEndpoint) {
+                        document.getElementById('workerUrl').value = config.workerEndpoint;
+                    }
+                } else {
+                    showResult('configResult', 'No saved configuration found. Please configure in the main app first.', 'error');
+                }
+            } catch (error) {
+                showResult('configResult', `Error reading config: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWorker() {
+            const workerUrl = document.getElementById('workerUrl').value.trim();
+            if (!workerUrl) {
+                showResult('workerResult', 'Please enter a Worker URL', 'error');
+                return;
+            }
+
+            showResult('workerResult', 'Testing Worker connection...', 'info');
+
+            try {
+                // Clean URL (remove trailing slash)
+                const cleanUrl = workerUrl.replace(/\/$/, '');
+                
+                // Test health endpoint
+                const response = await fetch(`${cleanUrl}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showResult('workerResult', `✅ Worker is healthy!\n\nResponse:\n${JSON.stringify(result, null, 2)}`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    showResult('workerResult', `❌ Worker returned error ${response.status}:\n${errorText}`, 'error');
+                }
+            } catch (error) {
+                showResult('workerResult', `❌ Connection failed:\n${error.message}`, 'error');
+            }
+        }
+
+        function checkModule() {
+            try {
+                if (window.cloudflareSyncModule) {
+                    const config = window.cloudflareSyncModule.getAutoSaveConfig();
+                    const endpoint = window.cloudflareSyncModule.getWorkerEndpoint();
+                    
+                    showResult('moduleResult', 
+                        `✅ Cloudflare Sync Module is loaded!\n\n` +
+                        `Endpoint: ${endpoint}\n` +
+                        `Auto-save enabled: ${config.enabled}\n` +
+                        `Debounce delay: ${config.debounceMs}ms`, 'success');
+                } else {
+                    showResult('moduleResult', '❌ Cloudflare Sync Module not found. Make sure cloudflare-sync.js is loaded.', 'error');
+                }
+            } catch (error) {
+                showResult('moduleResult', `❌ Error checking module: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            checkConfig();
+            checkModule();
+        });
+    </script>
+</body>
+</html>
