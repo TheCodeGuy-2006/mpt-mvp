@@ -85,6 +85,11 @@ class AutoSaveManager {
       await this.saveToWorker(dataType, data, options);
       updateStatus('✅ Saved', 'success');
       
+      // Refresh data after successful auto-save
+      if (typeof window.cloudflareSyncModule?.refreshDataAfterSave === 'function') {
+        window.cloudflareSyncModule.refreshDataAfterSave(dataType);
+      }
+      
       // Clear success message after 2 seconds
       setTimeout(() => {
         updateStatus('', 'clear');
@@ -322,6 +327,35 @@ export function clearPendingSaves() {
   autoSaveManager.clearPending();
 }
 
+/**
+ * Refresh data after successful save
+ * @param {string} dataType - Type of data that was saved
+ */
+export function refreshDataAfterSave(dataType) {
+  // Trigger a refresh of the relevant data view
+  if (dataType === 'planning' && typeof window.loadPlanning === 'function') {
+    console.log('Refreshing planning data after save...');
+    window.loadPlanning().then(rows => {
+      if (window.planningTableInstance) {
+        window.planningTableInstance.setData(rows);
+        console.log('Planning data refreshed successfully');
+      }
+    }).catch(error => {
+      console.warn('Failed to refresh planning data:', error);
+    });
+  } else if (dataType === 'budgets' && typeof window.loadBudgets === 'function') {
+    console.log('Refreshing budgets data after save...');
+    window.loadBudgets().then(budgets => {
+      if (window.budgetsTableInstance) {
+        window.budgetsTableInstance.setData(budgets);
+        console.log('Budgets data refreshed successfully');
+      }
+    }).catch(error => {
+      console.warn('Failed to refresh budgets data:', error);
+    });
+  }
+}
+
 // Initialize status management
 console.log('Cloudflare sync module loaded');
 
@@ -337,5 +371,6 @@ window.cloudflareSyncModule = {
   getWorkerEndpoint,
   clearPendingSaves,
   addStatusCallback,
-  removeStatusCallback
+  removeStatusCallback,
+  refreshDataAfterSave
 };

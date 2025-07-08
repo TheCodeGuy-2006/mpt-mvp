@@ -153,19 +153,44 @@ window.debugCountryOptions = countryOptionsByRegion;
 window.debugGetCountryOptionsForRegion = getCountryOptionsForRegion;
 
 // PLANNING DATA LOADING
-// Load planning data from planning.json only
+// Load planning data from GitHub repository directly for real-time updates
 async function loadPlanning() {
   try {
-    const r = await fetch("data/planning.json");
-    console.log(
-      "Fetching data/planning.json, status:",
-      r.status,
-      r.statusText,
-      r.url,
-    );
-    if (!r.ok) throw new Error("Failed to fetch planning.json");
-    const rows = await r.json();
-    console.log("Loaded planning.json rows:", rows);
+    // Try to load from GitHub repository first (for real-time updates)
+    let r;
+    let rows;
+    
+    try {
+      const githubUrl = "https://raw.githubusercontent.com/TheCodeGuy-2006/mpt-mvp/main/data/planning.json";
+      r = await fetch(githubUrl);
+      console.log(
+        "Fetching from GitHub repository, status:",
+        r.status,
+        r.statusText,
+        r.url,
+      );
+      if (r.ok) {
+        rows = await r.json();
+        console.log("Loaded planning data from GitHub repository:", rows.length, "rows");
+      } else {
+        throw new Error("GitHub fetch failed");
+      }
+    } catch (githubError) {
+      console.warn("Failed to load from GitHub repository, falling back to local file:", githubError);
+      // Fallback to local file if GitHub fails
+      r = await fetch("data/planning.json");
+      console.log(
+        "Fetching local data/planning.json, status:",
+        r.status,
+        r.statusText,
+        r.url,
+      );
+      if (!r.ok) throw new Error("Failed to fetch planning.json");
+      rows = await r.json();
+      console.log("Loaded planning data from local file:", rows.length, "rows");
+    }
+    
+    console.log("Processing loaded planning data:", rows.length, "rows");
     // Ensure all rows have calculated fields before rendering
     rows.forEach((row, i) => {
       if (typeof row.expectedLeads === "number") {
@@ -187,6 +212,10 @@ async function loadPlanning() {
 
 // PLANNING GRID INITIALIZATION
 let planningTableInstance = null;
+
+// Make globally accessible for data refreshing
+window.planningTableInstance = planningTableInstance;
+window.loadPlanning = loadPlanning;
 
 function initPlanningGrid(rows) {
   console.log("Initializing Planning Grid with rows:", rows);
@@ -678,6 +707,10 @@ function initPlanningGrid(rows) {
 
   setupPlanningSave(planningTableInstance, rows);
   setupPlanningDownload(planningTableInstance);
+  
+  // Update global reference for data refreshing
+  window.planningTableInstance = planningTableInstance;
+  
   return planningTableInstance;
 }
 
@@ -720,6 +753,11 @@ function setupPlanningSave(table, rows) {
         .then((result) => {
           console.log('Worker save successful:', result);
           alert("✅ Planning data saved to GitHub!");
+          
+          // Refresh data after successful save
+          if (window.cloudflareSyncModule.refreshDataAfterSave) {
+            window.cloudflareSyncModule.refreshDataAfterSave('planning');
+          }
           
           // Update ROI metrics
           if (typeof window.roiModule?.updateRoiTotalSpend === "function") {

@@ -1,12 +1,44 @@
 // budgets.js - Budget Management Module
 console.log("budgets.js loaded");
 
-// Load budgets data from budgets.json only
+// Load budgets data from GitHub repository directly for real-time updates
 async function loadBudgets() {
   try {
-    const r = await fetch("data/budgets.json");
-    if (!r.ok) throw new Error("Failed to fetch budgets.json");
-    return await r.json();
+    // Try to load from GitHub repository first (for real-time updates)
+    let r;
+    let budgets;
+    
+    try {
+      const githubUrl = "https://raw.githubusercontent.com/TheCodeGuy-2006/mpt-mvp/main/data/budgets.json";
+      r = await fetch(githubUrl);
+      console.log(
+        "Fetching budgets from GitHub repository, status:",
+        r.status,
+        r.statusText,
+        r.url,
+      );
+      if (r.ok) {
+        budgets = await r.json();
+        console.log("Loaded budgets data from GitHub repository");
+      } else {
+        throw new Error("GitHub fetch failed");
+      }
+    } catch (githubError) {
+      console.warn("Failed to load budgets from GitHub repository, falling back to local file:", githubError);
+      // Fallback to local file if GitHub fails
+      r = await fetch("data/budgets.json");
+      console.log(
+        "Fetching local data/budgets.json, status:",
+        r.status,
+        r.statusText,
+        r.url,
+      );
+      if (!r.ok) throw new Error("Failed to fetch budgets.json");
+      budgets = await r.json();
+      console.log("Loaded budgets data from local file");
+    }
+    
+    return budgets;
   } catch (e) {
     alert("Failed to fetch budgets.json");
     return {};
@@ -76,6 +108,11 @@ function initBudgetsTable(budgets, rows) {
   });
   setupBudgetsSave(table);
   setupBudgetsDownload(table); // Setup download functionality
+  
+  // Make globally accessible for data refreshing
+  window.budgetsTableInstance = table;
+  window.loadBudgets = loadBudgets;
+  
   return table;
 }
 
@@ -110,6 +147,11 @@ function setupBudgetsSave(table) {
         .then((result) => {
           console.log('Worker save successful:', result);
           alert("✅ Budgets data saved to GitHub!");
+          
+          // Refresh data after successful save
+          if (window.cloudflareSyncModule.refreshDataAfterSave) {
+            window.cloudflareSyncModule.refreshDataAfterSave('budgets');
+          }
         })
         .catch((error) => {
           console.warn('Worker save failed, trying backend:', error);
