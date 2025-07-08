@@ -204,20 +204,58 @@ async function testWorkerConnection() {
   try {
     // Remove trailing slash from endpoint to prevent double slashes
     const cleanEndpoint = endpoint.replace(/\/$/, '');
-    const response = await fetch(cleanEndpoint + '/health', {
+    
+    // Test 1: Health check
+    const healthResponse = await fetch(cleanEndpoint + '/health', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       }
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    if (!healthResponse.ok) {
+      throw new Error(`Health check failed: HTTP ${healthResponse.status}: ${healthResponse.statusText}`);
     }
 
-    const result = await response.json();
-    showSyncStatus("✅ Connection successful! Worker is healthy and ready.", "success");
-    console.log('Worker health check result:', result);
+    const healthResult = await healthResponse.json();
+    console.log('Worker health check result:', healthResult);
+    
+    // Test 2: Data API endpoints
+    showSyncStatus("🔄 Testing data API endpoints...", "info");
+    
+    const dataEndpoints = ['planning', 'budgets'];
+    const endpointResults = [];
+    
+    for (const dataType of dataEndpoints) {
+      try {
+        const dataResponse = await fetch(`${cleanEndpoint}/data/${dataType}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (dataResponse.ok) {
+          endpointResults.push(`✅ ${dataType} data API`);
+        } else {
+          endpointResults.push(`❌ ${dataType} data API (${dataResponse.status})`);
+        }
+      } catch (error) {
+        endpointResults.push(`❌ ${dataType} data API (error)`);
+      }
+    }
+    
+    const successCount = endpointResults.filter(r => r.includes('✅')).length;
+    const totalCount = endpointResults.length;
+    
+    if (successCount === totalCount) {
+      showSyncStatus(`✅ All tests passed! Worker is healthy and all data APIs are working. ${endpointResults.join(', ')}`, "success");
+    } else if (successCount > 0) {
+      showSyncStatus(`⚠️ Partial success: Worker is healthy but some data APIs failed. ${endpointResults.join(', ')}. Real-time data loading may not work properly.`, "warning");
+    } else {
+      showSyncStatus(`⚠️ Worker is healthy but data APIs are not available. ${endpointResults.join(', ')}. Real-time data loading is disabled.`, "warning");
+    }
+    
   } catch (error) {
     console.error('Worker connection test failed:', error);
     showSyncStatus(`❌ Connection failed: ${error.message}`, "error");
@@ -256,6 +294,10 @@ function showSyncStatus(message, type) {
     statusDiv.style.background = "#f8d7da";
     statusDiv.style.color = "#721c24";
     statusDiv.style.border = "1px solid #f5c6cb";
+  } else if (type === "warning") {
+    statusDiv.style.background = "#fff3cd";
+    statusDiv.style.color = "#856404";
+    statusDiv.style.border = "1px solid #ffeaa7";
   } else {
     statusDiv.style.background = "#d1ecf1";
     statusDiv.style.color = "#0c5460";
@@ -605,6 +647,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem('githubSyncConfig', JSON.stringify(config));
     
     console.log("✅ Auto-save configured for all users!");
+    
+    // Check Worker API status and show notice if data API is unavailable
+    setTimeout(checkWorkerApiStatus, 2000); // Delay to allow page to load
   }
 
   // Show loading indicator
@@ -718,3 +763,35 @@ window.planningModule.initPlanningGrid = function (rows) {
   setTimeout(renderBudgetsRegionCharts, 200);
   return table;
 };
+
+// Check Worker API status and show notice if unavailable
+async function checkWorkerApiStatus() {
+  try {
+    const endpoint = 'https://mpt-mvp-sync.jordanradford.workers.dev';
+    console.log("🔄 Checking Worker API status...");
+    
+    // Test data API endpoint
+    const response = await fetch(`${endpoint}/data/planning`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      console.log("✅ Worker API data endpoints are available - real-time sync enabled");
+    } else {
+      console.warn("⚠️ Worker API data endpoints unavailable - using local data fallback");
+      // Show notice to user about limited functionality
+      if (document.getElementById("syncStatus")) {
+        showSyncStatus("⚠️ Real-time data sync is currently unavailable. Using local data files. Save operations will still work, but you may not see other users' changes immediately.", "warning");
+      }
+    }
+  } catch (error) {
+    console.warn("⚠️ Worker API check failed:", error);
+    // Show notice to user about limited functionality  
+    if (document.getElementById("syncStatus")) {
+      showSyncStatus("⚠️ Real-time data sync is currently unavailable. Using local data files. Save operations will still work, but you may not see other users' changes immediately.", "warning");
+    }
+  }
+}

@@ -45,6 +45,8 @@ async function handleRequest(request) {
       return handleHealthCheck(corsHeaders);
     } else if (path === '/save' && method === 'POST') {
       return handleSave(request, corsHeaders);
+    } else if (path.startsWith('/data/') && method === 'GET') {
+      return handleGetData(request, corsHeaders);
     } else {
       return new Response('Not Found', { 
         status: 404,
@@ -162,6 +164,125 @@ async function handleSave(request, corsHeaders) {
     return new Response(JSON.stringify({
       error: 'Save operation failed',
       message: error.message
+    }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
+    });
+  }
+}
+
+/**
+ * Handle GET requests for data files via GitHub API
+ */
+async function handleGetData(request, corsHeaders) {
+  try {
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    
+    // Extract data type from path: /data/{type}
+    if (pathParts.length !== 3 || pathParts[1] !== 'data') {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid path format. Use: /data/{planning|budgets|calendar}' 
+      }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
+      });
+    }
+    
+    const dataType = pathParts[2];
+    
+    // Validate data type
+    const filePath = FILE_PATHS[dataType];
+    if (!filePath) {
+      return new Response(JSON.stringify({ 
+        error: `Unknown data type: ${dataType}. Supported: ${Object.keys(FILE_PATHS).join(', ')}` 
+      }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
+      });
+    }
+
+    const githubToken = await getGitHubToken();
+    if (!githubToken) {
+      return new Response(JSON.stringify({ 
+        error: 'GitHub token not configured' 
+      }), {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
+      });
+    }
+
+    // Fetch data from GitHub API (bypasses raw file caching)
+    const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`;
+    
+    console.log(`Fetching data via GitHub API: ${apiUrl}`);
+    
+    const apiResponse = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'MPT-MVP-Worker'
+      }
+    });
+
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
+      console.error(`GitHub API error: ${apiResponse.status} ${apiResponse.statusText}`, errorText);
+      
+      return new Response(JSON.stringify({
+        error: 'Failed to fetch data from GitHub',
+        status: apiResponse.status,
+        message: errorText
+      }), {
+        status: apiResponse.status,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
+      });
+    }
+
+    const fileData = await apiResponse.json();
+    
+    // Decode base64 content
+    const content = atob(fileData.content);
+    const data = JSON.parse(content);
+    
+    console.log(`Successfully fetched ${dataType} data via API:`, data.length || Object.keys(data).length, 'items');
+
+    return new Response(JSON.stringify({
+      success: true,
+      dataType,
+      data,
+      source: 'github-api',
+      timestamp: new Date().toISOString(),
+      sha: fileData.sha
+    }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
+    });
+
+  } catch (error) {
+    console.error('Get data operation failed:', error);
+    return new Response(JSON.stringify({
+      error: 'Get data operation failed',
+      message: error.message,
+      timestamp: new Date().toISOString()
     }), {
       status: 500,
       headers: {

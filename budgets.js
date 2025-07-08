@@ -1,67 +1,78 @@
 // budgets.js - Budget Management Module
 console.log("budgets.js loaded");
 
-// Load budgets data from GitHub repository directly for real-time updates
+// Load budgets data via Worker API for real-time updates
 async function loadBudgets(retryCount = 0) {
   try {
-    // Try to load from GitHub repository first (for real-time updates)
-    let r;
+    // Try to load via Worker API first (real-time, no caching issues)
     let budgets;
     
     try {
-      // Add cache-busting parameter and retry logic for GitHub raw files
-      const cacheBuster = Date.now();
-      const githubUrl = `https://raw.githubusercontent.com/TheCodeGuy-2006/mpt-mvp/main/data/budgets.json?t=${cacheBuster}`;
+      // Use Worker API endpoint instead of raw GitHub files
+      const workerEndpoint = window.cloudflareSyncModule?.getWorkerEndpoint() || 'https://mpt-mvp-sync.jordanradford.workers.dev';
+      const workerUrl = `${workerEndpoint}/data/budgets`;
       
-      console.log(`Fetching budgets from GitHub repository (attempt ${retryCount + 1}):`, githubUrl);
+      console.log(`Fetching budgets data via Worker API (attempt ${retryCount + 1}):`, workerUrl);
       
-      r = await fetch(githubUrl, {
-        cache: 'no-cache',
+      const response = await fetch(workerUrl, {
+        method: 'GET',
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Content-Type': 'application/json'
         }
       });
       
       console.log(
-        "GitHub budgets fetch response - status:",
-        r.status,
-        r.statusText,
+        "Worker API budgets response - status:",
+        response.status,
+        response.statusText,
         "URL:",
-        r.url,
+        response.url,
       );
       
-      if (r.ok) {
-        budgets = await r.json();
-        console.log("✅ Loaded budgets data from GitHub repository");
+      if (response.ok) {
+        const result = await response.json();
+        budgets = result.data;
+        console.log("✅ Loaded budgets data via Worker API", `(source: ${result.source})`);
         
-        // Validate that we got actual data (not cached empty response)
+        // Validate that we got actual data
         if (budgets && Object.keys(budgets).length > 0) {
-          console.log("✅ GitHub budgets data validation passed");
+          console.log("✅ Worker API budgets data validation passed");
         } else {
-          console.warn("⚠️ GitHub returned empty budgets data, might be cached");
-          if (retryCount < 3) {
-            console.log(`Retrying GitHub budgets fetch in ${(retryCount + 1) * 2} seconds...`);
+          console.warn("⚠️ Worker API returned empty budgets data");
+          if (retryCount < 2) {
+            console.log(`Retrying Worker API budgets fetch in ${(retryCount + 1) * 2} seconds...`);
             await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
             return loadBudgets(retryCount + 1);
           }
         }
       } else {
-        throw new Error(`GitHub budgets fetch failed: ${r.status} ${r.statusText}`);
+        throw new Error(`Worker API budgets failed: ${response.status} ${response.statusText}`);
       }
-    } catch (githubError) {
-      console.warn("Failed to load budgets from GitHub repository, falling back to local file:", githubError);
-      // Fallback to local file if GitHub fails
-      r = await fetch("data/budgets.json");
-      console.log(
-        "Fetching local data/budgets.json, status:",
-        r.status,
-        r.statusText,
-        r.url,
-      );
-      if (!r.ok) throw new Error("Failed to fetch budgets.json");
-      budgets = await r.json();
-      console.log("📁 Loaded budgets data from local file");
+    } catch (workerError) {
+      console.warn("Worker API budgets failed, falling back to local file:", workerError);
+      
+      // Fallback: Try local file
+      try {
+        const r = await fetch("data/budgets.json");
+        console.log(
+          "Fallback: Fetching local data/budgets.json, status:",
+          r.status,
+          r.statusText,
+          r.url,
+        );
+        if (!r.ok) throw new Error("Failed to fetch budgets.json");
+        budgets = await r.json();
+        console.log("📁 Loaded budgets data from local file");
+        
+        // Show a message to the user about the Worker API being unavailable
+        if (retryCount === 0) {
+          console.warn("⚠️ Worker API unavailable - using local data. Real-time sync disabled.");
+          // You might want to show a notification to the user here
+        }
+      } catch (localError) {
+        console.error("Local file also failed:", localError);
+        throw new Error("Failed to load budgets data from both Worker API and local file");
+      }
     }
     
     return budgets;

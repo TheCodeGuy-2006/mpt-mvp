@@ -153,67 +153,78 @@ window.debugCountryOptions = countryOptionsByRegion;
 window.debugGetCountryOptionsForRegion = getCountryOptionsForRegion;
 
 // PLANNING DATA LOADING
-// Load planning data from GitHub repository directly for real-time updates
+// Load planning data via Worker API for real-time updates
 async function loadPlanning(retryCount = 0) {
   try {
-    // Try to load from GitHub repository first (for real-time updates)
-    let r;
+    // Try to load via Worker API first (real-time, no caching issues)
     let rows;
     
     try {
-      // Add cache-busting parameter and retry logic for GitHub raw files
-      const cacheBuster = Date.now();
-      const githubUrl = `https://raw.githubusercontent.com/TheCodeGuy-2006/mpt-mvp/main/data/planning.json?t=${cacheBuster}`;
+      // Use Worker API endpoint instead of raw GitHub files
+      const workerEndpoint = window.cloudflareSyncModule?.getWorkerEndpoint() || 'https://mpt-mvp-sync.jordanradford.workers.dev';
+      const workerUrl = `${workerEndpoint}/data/planning`;
       
-      console.log(`Fetching from GitHub repository (attempt ${retryCount + 1}):`, githubUrl);
+      console.log(`Fetching planning data via Worker API (attempt ${retryCount + 1}):`, workerUrl);
       
-      r = await fetch(githubUrl, {
-        cache: 'no-cache',
+      const response = await fetch(workerUrl, {
+        method: 'GET',
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Content-Type': 'application/json'
         }
       });
       
       console.log(
-        "GitHub fetch response - status:",
-        r.status,
-        r.statusText,
+        "Worker API response - status:",
+        response.status,
+        response.statusText,
         "URL:",
-        r.url,
+        response.url,
       );
       
-      if (r.ok) {
-        rows = await r.json();
-        console.log("✅ Loaded planning data from GitHub repository:", rows.length, "rows");
+      if (response.ok) {
+        const result = await response.json();
+        rows = result.data;
+        console.log("✅ Loaded planning data via Worker API:", rows.length, "rows", `(source: ${result.source})`);
         
-        // Validate that we got actual data (not cached empty response)
+        // Validate that we got actual data
         if (rows && rows.length > 0) {
-          console.log("✅ GitHub data validation passed");
+          console.log("✅ Worker API data validation passed");
         } else {
-          console.warn("⚠️ GitHub returned empty data, might be cached");
-          if (retryCount < 3) {
-            console.log(`Retrying GitHub fetch in ${(retryCount + 1) * 2} seconds...`);
+          console.warn("⚠️ Worker API returned empty data");
+          if (retryCount < 2) {
+            console.log(`Retrying Worker API fetch in ${(retryCount + 1) * 2} seconds...`);
             await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
             return loadPlanning(retryCount + 1);
           }
         }
       } else {
-        throw new Error(`GitHub fetch failed: ${r.status} ${r.statusText}`);
+        throw new Error(`Worker API failed: ${response.status} ${response.statusText}`);
       }
-    } catch (githubError) {
-      console.warn("Failed to load from GitHub repository, falling back to local file:", githubError);
-      // Fallback to local file if GitHub fails
-      r = await fetch("data/planning.json");
-      console.log(
-        "Fetching local data/planning.json, status:",
-        r.status,
-        r.statusText,
-        r.url,
-      );
-      if (!r.ok) throw new Error("Failed to fetch planning.json");
-      rows = await r.json();
-      console.log("📁 Loaded planning data from local file:", rows.length, "rows");
+    } catch (workerError) {
+      console.warn("Worker API failed, falling back to local file:", workerError);
+      
+      // Fallback: Try local file
+      try {
+        const r = await fetch("data/planning.json");
+        console.log(
+          "Fallback: Fetching local data/planning.json, status:",
+          r.status,
+          r.statusText,
+          r.url,
+        );
+        if (!r.ok) throw new Error("Failed to fetch planning.json");
+        rows = await r.json();
+        console.log("📁 Loaded planning data from local file:", rows.length, "rows");
+        
+        // Show a message to the user about the Worker API being unavailable
+        if (retryCount === 0) {
+          console.warn("⚠️ Worker API unavailable - using local data. Real-time sync disabled.");
+          // You might want to show a notification to the user here
+        }
+      } catch (localError) {
+        console.error("Local file also failed:", localError);
+        throw new Error("Failed to load planning data from both Worker API and local file");
+      }
     }
     
     console.log("Processing loaded planning data:", rows.length, "rows");

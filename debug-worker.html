@@ -39,6 +39,18 @@
         <div id="saveResult"></div>
     </div>
 
+    <div>
+        <h3>5. Test Data API Endpoints</h3>
+        <button onclick="testDataEndpoints()">Test Data API</button>
+        <div id="dataApiResult"></div>
+    </div>
+
+    <div>
+        <h3>6. Debug CORS Issues</h3>
+        <button onclick="testCORS()">Test CORS</button>
+        <div id="corsResult"></div>
+    </div>
+
     <script>
         function showResult(elementId, message, type) {
             const element = document.getElementById(elementId);
@@ -172,6 +184,101 @@
                 }
             } catch (error) {
                 showResult('saveResult', `❌ Save test failed:\n${error.message}`, 'error');
+            }
+        }
+
+        async function testDataEndpoints() {
+            const workerUrl = document.getElementById('workerUrl').value.trim();
+            if (!workerUrl) {
+                showResult('dataApiResult', 'Please enter a Worker URL first', 'error');
+                return;
+            }
+
+            showResult('dataApiResult', 'Testing data API endpoints...', 'info');
+
+            try {
+                const cleanUrl = workerUrl.replace(/\/$/, '');
+                const endpoints = ['planning', 'budgets', 'calendar'];
+                let results = [];
+
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(`${cleanUrl}/data/${endpoint}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            results.push(`✅ ${endpoint}: ${data.data ? data.data.length : 'N/A'} items`);
+                        } else {
+                            results.push(`❌ ${endpoint}: ${response.status} ${response.statusText}`);
+                        }
+                    } catch (error) {
+                        results.push(`❌ ${endpoint}: ${error.message}`);
+                    }
+                }
+
+                const successCount = results.filter(r => r.includes('✅')).length;
+                const totalCount = results.length;
+
+                showResult('dataApiResult', 
+                    `Data API Test Results (${successCount}/${totalCount} successful):\n\n` + 
+                    results.join('\n'), 
+                    successCount === totalCount ? 'success' : 'error'
+                );
+            } catch (error) {
+                showResult('dataApiResult', `❌ Data API test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCORS() {
+            const workerUrl = document.getElementById('workerUrl').value.trim();
+            if (!workerUrl) {
+                showResult('corsResult', 'Please enter a Worker URL first', 'error');
+                return;
+            }
+
+            showResult('corsResult', 'Testing CORS configuration...', 'info');
+
+            try {
+                const cleanUrl = workerUrl.replace(/\/$/, '');
+                
+                // Test preflight request
+                const preflightResponse = await fetch(`${cleanUrl}/health`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': window.location.origin
+                    }
+                });
+
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': preflightResponse.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': preflightResponse.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': preflightResponse.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Max-Age': preflightResponse.headers.get('Access-Control-Max-Age')
+                };
+
+                let corsStatus = [];
+                corsStatus.push(`Preflight Status: ${preflightResponse.status}`);
+                corsStatus.push(`Allow-Origin: ${corsHeaders['Access-Control-Allow-Origin'] || 'Missing'}`);
+                corsStatus.push(`Allow-Methods: ${corsHeaders['Access-Control-Allow-Methods'] || 'Missing'}`);
+                corsStatus.push(`Allow-Headers: ${corsHeaders['Access-Control-Allow-Headers'] || 'Missing'}`);
+                corsStatus.push(`Max-Age: ${corsHeaders['Access-Control-Max-Age'] || 'Missing'}`);
+
+                const isGoodCORS = corsHeaders['Access-Control-Allow-Origin'] === '*' && 
+                                   corsHeaders['Access-Control-Allow-Methods'] && 
+                                   corsHeaders['Access-Control-Allow-Headers'];
+
+                showResult('corsResult', 
+                    `CORS Test Results:\n\n${corsStatus.join('\n')}\n\nStatus: ${isGoodCORS ? '✅ CORS is properly configured' : '❌ CORS may have issues'}`, 
+                    isGoodCORS ? 'success' : 'error'
+                );
+            } catch (error) {
+                showResult('corsResult', `❌ CORS test failed: ${error.message}`, 'error');
             }
         }
 
