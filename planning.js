@@ -154,26 +154,52 @@ window.debugGetCountryOptionsForRegion = getCountryOptionsForRegion;
 
 // PLANNING DATA LOADING
 // Load planning data from GitHub repository directly for real-time updates
-async function loadPlanning() {
+async function loadPlanning(retryCount = 0) {
   try {
     // Try to load from GitHub repository first (for real-time updates)
     let r;
     let rows;
     
     try {
-      const githubUrl = "https://raw.githubusercontent.com/TheCodeGuy-2006/mpt-mvp/main/data/planning.json";
-      r = await fetch(githubUrl);
+      // Add cache-busting parameter and retry logic for GitHub raw files
+      const cacheBuster = Date.now();
+      const githubUrl = `https://raw.githubusercontent.com/TheCodeGuy-2006/mpt-mvp/main/data/planning.json?t=${cacheBuster}`;
+      
+      console.log(`Fetching from GitHub repository (attempt ${retryCount + 1}):`, githubUrl);
+      
+      r = await fetch(githubUrl, {
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
       console.log(
-        "Fetching from GitHub repository, status:",
+        "GitHub fetch response - status:",
         r.status,
         r.statusText,
+        "URL:",
         r.url,
       );
+      
       if (r.ok) {
         rows = await r.json();
-        console.log("Loaded planning data from GitHub repository:", rows.length, "rows");
+        console.log("✅ Loaded planning data from GitHub repository:", rows.length, "rows");
+        
+        // Validate that we got actual data (not cached empty response)
+        if (rows && rows.length > 0) {
+          console.log("✅ GitHub data validation passed");
+        } else {
+          console.warn("⚠️ GitHub returned empty data, might be cached");
+          if (retryCount < 3) {
+            console.log(`Retrying GitHub fetch in ${(retryCount + 1) * 2} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
+            return loadPlanning(retryCount + 1);
+          }
+        }
       } else {
-        throw new Error("GitHub fetch failed");
+        throw new Error(`GitHub fetch failed: ${r.status} ${r.statusText}`);
       }
     } catch (githubError) {
       console.warn("Failed to load from GitHub repository, falling back to local file:", githubError);
@@ -187,7 +213,7 @@ async function loadPlanning() {
       );
       if (!r.ok) throw new Error("Failed to fetch planning.json");
       rows = await r.json();
-      console.log("Loaded planning data from local file:", rows.length, "rows");
+      console.log("📁 Loaded planning data from local file:", rows.length, "rows");
     }
     
     console.log("Processing loaded planning data:", rows.length, "rows");
@@ -752,7 +778,7 @@ function setupPlanningSave(table, rows) {
       window.cloudflareSyncModule.saveToWorker('planning', data, { source: 'manual-save' })
         .then((result) => {
           console.log('Worker save successful:', result);
-          alert("✅ Planning data saved to GitHub!");
+          alert("✅ Planning data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed.");
           
           // Refresh data after successful save
           if (window.cloudflareSyncModule.refreshDataAfterSave) {

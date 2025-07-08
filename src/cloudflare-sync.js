@@ -332,28 +332,90 @@ export function clearPendingSaves() {
  * @param {string} dataType - Type of data that was saved
  */
 export function refreshDataAfterSave(dataType) {
-  // Trigger a refresh of the relevant data view
-  if (dataType === 'planning' && typeof window.loadPlanning === 'function') {
-    console.log('Refreshing planning data after save...');
-    window.loadPlanning().then(rows => {
-      if (window.planningTableInstance) {
-        window.planningTableInstance.setData(rows);
-        console.log('Planning data refreshed successfully');
-      }
-    }).catch(error => {
-      console.warn('Failed to refresh planning data:', error);
-    });
-  } else if (dataType === 'budgets' && typeof window.loadBudgets === 'function') {
-    console.log('Refreshing budgets data after save...');
-    window.loadBudgets().then(budgets => {
-      if (window.budgetsTableInstance) {
-        window.budgetsTableInstance.setData(budgets);
-        console.log('Budgets data refreshed successfully');
-      }
-    }).catch(error => {
-      console.warn('Failed to refresh budgets data:', error);
-    });
-  }
+  // Add a delay to account for GitHub's caching and processing time
+  const refreshDelay = 2000; // 2 seconds delay
+  
+  console.log(`Refreshing ${dataType} data in ${refreshDelay}ms...`);
+  
+  setTimeout(() => {
+    // Trigger a refresh of the relevant data view
+    if (dataType === 'planning' && typeof window.loadPlanning === 'function') {
+      console.log('Refreshing planning data after save...');
+      window.loadPlanning().then(rows => {
+        if (window.planningTableInstance && rows && rows.length > 0) {
+          window.planningTableInstance.setData(rows);
+          console.log('✅ Planning data refreshed successfully');
+          
+          // Show user feedback
+          updateStatus('🔄 Data refreshed from GitHub', 'success');
+          setTimeout(() => updateStatus('', 'clear'), 3000);
+        } else {
+          console.warn('⚠️ Planning data refresh returned empty data - GitHub might still be updating');
+          
+          // Try again after longer delay
+          setTimeout(() => {
+            console.log('Retrying planning data refresh...');
+            window.loadPlanning().then(retryRows => {
+              if (window.planningTableInstance && retryRows && retryRows.length > 0) {
+                window.planningTableInstance.setData(retryRows);
+                console.log('✅ Planning data refreshed on retry');
+                updateStatus('🔄 Data refreshed from GitHub (retry)', 'success');
+                setTimeout(() => updateStatus('', 'clear'), 3000);
+              }
+            }).catch(error => {
+              console.warn('Failed to refresh planning data on retry:', error);
+            });
+          }, 5000); // 5 second retry
+        }
+      }).catch(error => {
+        console.warn('Failed to refresh planning data:', error);
+        updateStatus('⚠️ Data refresh failed - GitHub may be updating', 'warning');
+        setTimeout(() => updateStatus('', 'clear'), 5000);
+      });
+    } else if (dataType === 'budgets' && typeof window.loadBudgets === 'function') {
+      console.log('Refreshing budgets data after save...');
+      window.loadBudgets().then(budgets => {
+        if (window.budgetsTableInstance && budgets && Object.keys(budgets).length > 0) {
+          // Convert object back to array format for the table
+          const budgetsArray = Object.entries(budgets).map(([region, data]) => ({
+            region,
+            ...data
+          }));
+          window.budgetsTableInstance.setData(budgetsArray);
+          console.log('✅ Budgets data refreshed successfully');
+          
+          // Show user feedback
+          updateStatus('🔄 Budgets refreshed from GitHub', 'success');
+          setTimeout(() => updateStatus('', 'clear'), 3000);
+        } else {
+          console.warn('⚠️ Budgets data refresh returned empty data - GitHub might still be updating');
+          
+          // Try again after longer delay
+          setTimeout(() => {
+            console.log('Retrying budgets data refresh...');
+            window.loadBudgets().then(retryBudgets => {
+              if (window.budgetsTableInstance && retryBudgets && Object.keys(retryBudgets).length > 0) {
+                const retryBudgetsArray = Object.entries(retryBudgets).map(([region, data]) => ({
+                  region,
+                  ...data
+                }));
+                window.budgetsTableInstance.setData(retryBudgetsArray);
+                console.log('✅ Budgets data refreshed on retry');
+                updateStatus('🔄 Budgets refreshed from GitHub (retry)', 'success');
+                setTimeout(() => updateStatus('', 'clear'), 3000);
+              }
+            }).catch(error => {
+              console.warn('Failed to refresh budgets data on retry:', error);
+            });
+          }, 5000); // 5 second retry
+        }
+      }).catch(error => {
+        console.warn('Failed to refresh budgets data:', error);
+        updateStatus('⚠️ Budgets refresh failed - GitHub may be updating', 'warning');
+        setTimeout(() => updateStatus('', 'clear'), 5000);
+      });
+    }
+  }, refreshDelay);
 }
 
 // Initialize status management

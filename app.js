@@ -77,6 +77,9 @@ function initGithubSync() {
           <button type="button" id="forceSyncBtn" style="padding: 8px 16px; background: #f57c00; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
             ⚡ Force Sync All Data
           </button>
+          <button type="button" id="refreshDataBtn" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+            🔄 Refresh Data
+          </button>
         </div>
 
         <div id="syncStatus" style="display: none; padding: 10px; border-radius: 4px; margin-top: 10px;"></div>
@@ -121,6 +124,7 @@ function initGithubSync() {
   document.getElementById("saveConfigBtn").addEventListener("click", saveGitHubSyncConfig);
   document.getElementById("testConnectionBtn").addEventListener("click", testWorkerConnection);
   document.getElementById("forceSyncBtn").addEventListener("click", forceSyncAllData);
+  document.getElementById("refreshDataBtn").addEventListener("click", refreshAllData);
 }
 
 function loadGitHubSyncConfig() {
@@ -311,6 +315,84 @@ async function forceSaveAll() {
   const results = await Promise.all(promises);
   console.log('Force save all completed:', results);
   return results;
+}
+
+// Refresh all data from GitHub repository
+async function refreshAllData() {
+  try {
+    showSyncStatus('🔄 Refreshing all data from GitHub...', 'info');
+    
+    const promises = [];
+    
+    // Refresh planning data
+    if (window.loadPlanning) {
+      promises.push(
+        window.loadPlanning().then(rows => {
+          if (window.planningTableInstance && rows && rows.length > 0) {
+            window.planningTableInstance.setData(rows);
+            console.log('✅ Planning data refreshed');
+            return { type: 'planning', success: true, count: rows.length };
+          }
+          return { type: 'planning', success: false, error: 'No data or table not available' };
+        }).catch(error => {
+          console.error('Planning refresh failed:', error);
+          return { type: 'planning', success: false, error: error.message };
+        })
+      );
+    }
+    
+    // Refresh budgets data
+    if (window.loadBudgets) {
+      promises.push(
+        window.loadBudgets().then(budgets => {
+          if (window.budgetsTableInstance && budgets && Object.keys(budgets).length > 0) {
+            // Convert object to array format for the table
+            const budgetsArray = Object.entries(budgets).map(([region, data]) => ({
+              region,
+              ...data
+            }));
+            window.budgetsTableInstance.setData(budgetsArray);
+            console.log('✅ Budgets data refreshed');
+            return { type: 'budgets', success: true, count: Object.keys(budgets).length };
+          }
+          return { type: 'budgets', success: false, error: 'No data or table not available' };
+        }).catch(error => {
+          console.error('Budgets refresh failed:', error);
+          return { type: 'budgets', success: false, error: error.message };
+        })
+      );
+    }
+    
+    if (promises.length === 0) {
+      throw new Error('No data refresh functions available');
+    }
+
+    const results = await Promise.all(promises);
+    
+    // Check results and show appropriate message
+    const successful = results.filter(r => r.success);
+    const failed = results.filter(r => !r.success);
+    
+    if (successful.length > 0 && failed.length === 0) {
+      const successMessage = successful.map(r => `${r.type} (${r.count} items)`).join(', ');
+      showSyncStatus(`✅ Successfully refreshed: ${successMessage}`, 'success');
+    } else if (successful.length > 0 && failed.length > 0) {
+      const successMessage = successful.map(r => `${r.type}`).join(', ');
+      const failMessage = failed.map(r => `${r.type}: ${r.error}`).join(', ');
+      showSyncStatus(`⚠️ Partial success: ${successMessage} refreshed. Failed: ${failMessage}`, 'warning');
+    } else {
+      const failMessage = failed.map(r => `${r.type}: ${r.error}`).join(', ');
+      showSyncStatus(`❌ Refresh failed: ${failMessage}`, 'error');
+    }
+    
+    console.log('Data refresh completed:', results);
+    return results;
+    
+  } catch (error) {
+    console.error('Error refreshing data:', error);
+    showSyncStatus('❌ Data refresh failed: ' + error.message, 'error');
+    throw error;
+  }
 }
 
 // Utility: Dynamically load all JSON files in /data (except budgets)

@@ -2,26 +2,52 @@
 console.log("budgets.js loaded");
 
 // Load budgets data from GitHub repository directly for real-time updates
-async function loadBudgets() {
+async function loadBudgets(retryCount = 0) {
   try {
     // Try to load from GitHub repository first (for real-time updates)
     let r;
     let budgets;
     
     try {
-      const githubUrl = "https://raw.githubusercontent.com/TheCodeGuy-2006/mpt-mvp/main/data/budgets.json";
-      r = await fetch(githubUrl);
+      // Add cache-busting parameter and retry logic for GitHub raw files
+      const cacheBuster = Date.now();
+      const githubUrl = `https://raw.githubusercontent.com/TheCodeGuy-2006/mpt-mvp/main/data/budgets.json?t=${cacheBuster}`;
+      
+      console.log(`Fetching budgets from GitHub repository (attempt ${retryCount + 1}):`, githubUrl);
+      
+      r = await fetch(githubUrl, {
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
       console.log(
-        "Fetching budgets from GitHub repository, status:",
+        "GitHub budgets fetch response - status:",
         r.status,
         r.statusText,
+        "URL:",
         r.url,
       );
+      
       if (r.ok) {
         budgets = await r.json();
-        console.log("Loaded budgets data from GitHub repository");
+        console.log("✅ Loaded budgets data from GitHub repository");
+        
+        // Validate that we got actual data (not cached empty response)
+        if (budgets && Object.keys(budgets).length > 0) {
+          console.log("✅ GitHub budgets data validation passed");
+        } else {
+          console.warn("⚠️ GitHub returned empty budgets data, might be cached");
+          if (retryCount < 3) {
+            console.log(`Retrying GitHub budgets fetch in ${(retryCount + 1) * 2} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
+            return loadBudgets(retryCount + 1);
+          }
+        }
       } else {
-        throw new Error("GitHub fetch failed");
+        throw new Error(`GitHub budgets fetch failed: ${r.status} ${r.statusText}`);
       }
     } catch (githubError) {
       console.warn("Failed to load budgets from GitHub repository, falling back to local file:", githubError);
@@ -35,7 +61,7 @@ async function loadBudgets() {
       );
       if (!r.ok) throw new Error("Failed to fetch budgets.json");
       budgets = await r.json();
-      console.log("Loaded budgets data from local file");
+      console.log("📁 Loaded budgets data from local file");
     }
     
     return budgets;
@@ -146,7 +172,7 @@ function setupBudgetsSave(table) {
       window.cloudflareSyncModule.saveToWorker('budgets', obj, { source: 'manual-save' })
         .then((result) => {
           console.log('Worker save successful:', result);
-          alert("✅ Budgets data saved to GitHub!");
+          alert("✅ Budgets data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed.");
           
           // Refresh data after successful save
           if (window.cloudflareSyncModule.refreshDataAfterSave) {
