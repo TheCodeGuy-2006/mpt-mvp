@@ -3,10 +3,10 @@
  * Handles autosave and manual save operations to Cloudflare Worker
  */
 
-// Configuration
-let WORKER_ENDPOINT = 'https://your-worker-name.your-subdomain.workers.dev';
+// Configuration - Pre-configured for all users
+let WORKER_ENDPOINT = 'https://mpt-mvp-sync.jordanradford.workers.dev';
 let AUTO_SAVE_CONFIG = {
-  enabled: false,
+  enabled: true,  // Auto-save enabled by default
   debounceMs: 3000 // 3 seconds default delay
 };
 

@@ -39,22 +39,26 @@ function initGithubSync() {
       <h3>🔗 GitHub Sync Configuration</h3>
       <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
         <h4>🚀 Cloudflare Worker Integration</h4>
-        <p>Configure your Cloudflare Worker endpoint for secure auto-save to GitHub.</p>
+        <p>✅ Pre-configured for all users! Auto-save is enabled by default.</p>
         
         <div style="margin-bottom: 15px;">
           <label style="display: block; margin-bottom: 5px; font-weight: bold;">Worker Endpoint URL:</label>
           <input type="text" id="workerEndpoint" placeholder="https://your-worker.your-subdomain.workers.dev" 
-                 style="width: 100%; max-width: 500px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+                 style="width: 100%; max-width: 500px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" 
+                 value="https://mpt-mvp-sync.jordanradford.workers.dev" readonly />
           <small style="display: block; color: #666; margin-top: 5px;">
-            Enter your Cloudflare Worker URL (without trailing slash)
+            ✅ Pre-configured Worker endpoint - ready to use!
           </small>
         </div>
 
         <div style="margin-bottom: 15px;">
           <label style="display: flex; align-items: center; margin-bottom: 10px;">
-            <input type="checkbox" id="autoSaveEnabled" style="margin-right: 8px; transform: scale(1.2);" />
+            <input type="checkbox" id="autoSaveEnabled" style="margin-right: 8px; transform: scale(1.2);" checked />
             <span style="font-weight: bold;">Enable Auto-Save</span>
           </label>
+          <small style="display: block; color: #666; margin-bottom: 10px;">
+            ✅ Auto-save is enabled by default for all users
+          </small>
           <label style="display: block; margin-bottom: 5px;">Auto-save delay (seconds):</label>
           <input type="number" id="autoSaveDelay" min="1" max="30" value="3" 
                  style="width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;" />
@@ -78,18 +82,34 @@ function initGithubSync() {
         <div id="syncStatus" style="display: none; padding: 10px; border-radius: 4px; margin-top: 10px;"></div>
       </div>
       
-      <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #1976d2;">
-        <h4>📋 Setup Instructions</h4>
-        <ol style="margin: 10px 0; padding-left: 20px;">
-          <li>Create a Cloudflare Worker using the provided <code>cloudflare-worker.js</code> file</li>
-          <li>Set your GitHub token as the <code>GITHUB_TOKEN</code> environment variable in Cloudflare</li>
-          <li>Update the worker code with your GitHub username and repository name</li>
-          <li>Enter your Worker URL above and test the connection</li>
-          <li>Enable auto-save to automatically sync your changes to GitHub</li>
-        </ol>
-        <p style="margin: 10px 0; font-size: 0.9em; color: #666;">
-          See the setup documentation files for detailed instructions.
+      <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+        <h4>✅ Ready to Use!</h4>
+        <p style="margin: 10px 0; font-size: 0.9em; color: #155724;">
+          <strong>This site is pre-configured for collaboration!</strong> Anyone can use this site to contribute data, and all changes will be automatically saved to GitHub. No additional setup required for users.
         </p>
+        <ul style="margin: 10px 0; padding-left: 20px; color: #155724;">
+          <li>✅ Worker endpoint is pre-configured</li>
+          <li>✅ Auto-save is enabled by default</li>
+          <li>✅ All data changes are automatically synced to GitHub</li>
+          <li>✅ No configuration needed for collaborators</li>
+        </ul>
+      </div>
+      
+      <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #1976d2;">
+        <h4>📋 For Administrators Only</h4>
+        <p style="margin: 10px 0; font-size: 0.9em; color: #666;">
+          The site is already configured and ready to use. The setup instructions below are for reference only.
+        </p>
+        <details style="margin-top: 10px;">
+          <summary style="cursor: pointer; font-weight: bold;">Show Setup Instructions</summary>
+          <ol style="margin: 10px 0; padding-left: 20px;">
+            <li>Create a Cloudflare Worker using the provided <code>cloudflare-worker.js</code> file</li>
+            <li>Set your GitHub token as the <code>GITHUB_TOKEN</code> environment variable in Cloudflare</li>
+            <li>Update the worker code with your GitHub username and repository name</li>
+            <li>The Worker URL is pre-configured in the code</li>
+            <li>Auto-save is enabled by default for all users</li>
+          </ol>
+        </details>
       </div>
     </div>
   `;
@@ -478,6 +498,32 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize constants from planning module
   initializeConstants();
+
+  // Auto-configure Worker for all users
+  if (window.cloudflareSyncModule) {
+    console.log("Auto-configuring Cloudflare Worker for all users...");
+    
+    // Set up the Worker endpoint for everyone
+    window.cloudflareSyncModule.configureWorkerEndpoint('https://mpt-mvp-sync.jordanradford.workers.dev');
+    
+    // Enable auto-save by default
+    window.cloudflareSyncModule.configureAutoSave({
+      enabled: true,
+      debounceMs: 3000
+    });
+    
+    // Save this configuration to localStorage so it persists
+    const config = {
+      workerEndpoint: 'https://mpt-mvp-sync.jordanradford.workers.dev',
+      autoSave: {
+        enabled: true,
+        debounceMs: 3000
+      }
+    };
+    localStorage.setItem('githubSyncConfig', JSON.stringify(config));
+    
+    console.log("✅ Auto-save configured for all users!");
+  }
 
   // Show loading indicator
   const mainSection = document.querySelector("section#view-planning");
