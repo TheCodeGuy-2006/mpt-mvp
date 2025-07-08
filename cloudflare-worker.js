@@ -1,6 +1,9 @@
 /**
  * Cloudflare Worker for MPT MVP GitHub Integration
  * Handles secure GitHub API calls to save data to repository
+ * 
+ * Uses the new ES Module format for Cloudflare Workers
+ * Compatible with Cloudflare Workers runtime
  */
 
 // Configuration - UPDATE THESE VALUES
@@ -297,7 +300,7 @@ async function handleGetData(request, corsHeaders) {
  * Get GitHub token from environment
  */
 async function getGitHubToken() {
-  return GITHUB_TOKEN || null;
+  return globalThis.GITHUB_TOKEN || null;
 }
 
 /**
@@ -372,11 +375,16 @@ async function saveToGitHub(token, filePath, data, metadata) {
 }
 
 /**
- * Main entry point
+ * Main entry point - Handle all requests
  */
-addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request));
-});
-
-// Export for testing
-export { handleRequest };
+export default {
+  async fetch(request, env, ctx) {
+    // Set GITHUB_TOKEN from environment
+    const GITHUB_TOKEN = env.GITHUB_TOKEN;
+    
+    // Make token available to other functions
+    globalThis.GITHUB_TOKEN = GITHUB_TOKEN;
+    
+    return handleRequest(request);
+  }
+};
