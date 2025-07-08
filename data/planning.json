@@ -246,8 +246,7 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_11_1751333373752",
-    "campaignName": "gamma test"
+    "id": "row_11_1751333373752"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -270,7 +269,8 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_12_1751333373752"
+    "id": "row_12_1751333373752",
+    "campaignName": ""
   },
   {
     "programType": "In-Account Events (1:1)",
