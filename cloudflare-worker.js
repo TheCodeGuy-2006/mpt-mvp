@@ -4,9 +4,9 @@
  */
 
 // Configuration - UPDATE THESE VALUES
-const REPO_OWNER = 'jordanradford';  // ← Your GitHub username
-const REPO_NAME = 'mpt-mvp';         // ← Your repository name
-const BRANCH = 'main';               // ← Target branch
+const REPO_OWNER = 'TheCodeGuy-2006';  // ← Your GitHub username
+const REPO_NAME = 'mpt-mvp';            // ← Your repository name
+const BRANCH = 'main';                  // ← Target branch
 
 // File paths mapping
 const FILE_PATHS = {
