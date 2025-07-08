@@ -150,7 +150,8 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_7_1751333373752"
+    "id": "row_7_1751333373752",
+    "campaignName": "save check beta"
   },
   {
     "programType": "In-Account Events (1:1)",
