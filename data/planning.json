@@ -639,5 +639,27 @@
     "opps": 14,
     "pipeline": 700000,
     "id": "row_28_1751333373752"
+  },
+  {
+    "id": "program-1751960814471",
+    "status": "Planning",
+    "__modified": true,
+    "campaignName": "AR Test",
+    "programType": "3P sponsored events",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "description": "Test",
+    "owner": "Shruti Narang",
+    "quarter": "Q3 February",
+    "region": "JP & Korea",
+    "fiscalYear": "FY25",
+    "country": "Singapore",
+    "forecastedCost": 20000,
+    "expectedLeads": 10,
+    "mqlForecast": 1,
+    "sqlForecast": 1,
+    "oppsForecast": 1,
+    "pipelineForecast": 50000,
+    "revenuePlay": "New Business",
+    "poRaised": "No"
   }
 ]
