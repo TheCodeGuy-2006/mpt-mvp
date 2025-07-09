@@ -49,6 +49,21 @@
         "
       >
         <div style="display: flex; align-items: center; gap: 8px">
+          <label for="planningCampaignNameFilter" style="font-weight: 500; color: #1976d2">Campaign Name:</label>
+          <input
+            type="text"
+            id="planningCampaignNameFilter"
+            placeholder="Search campaigns..."
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 180px;
+            "
+          />
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
           <label for="planningRegionFilter" style="font-weight: 500; color: #1976d2">Region:</label>
           <select
             id="planningRegionFilter"
@@ -123,6 +138,21 @@
             <option value="">(All Owners)</option>
           </select>
         </div>
+        <button
+          id="planningDigitalMotionsFilter"
+          style="
+            padding: 8px 16px;
+            background: #4caf50;
+            color: white;
+            border: 1px solid #45a049;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+          "
+        >
+          🚀 Digital Motions
+        </button>
         <button
           id="planningClearFilters"
           style="

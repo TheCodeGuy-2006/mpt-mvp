@@ -890,13 +890,15 @@ function csvToObj(csv) {
 
 // PLANNING FILTER FUNCTIONALITY
 function populatePlanningFilters() {
+  const campaignNameInput = document.getElementById("planningCampaignNameFilter");
   const regionSelect = document.getElementById("planningRegionFilter");
   const quarterSelect = document.getElementById("planningQuarterFilter");
   const statusSelect = document.getElementById("planningStatusFilter");
   const programTypeSelect = document.getElementById("planningProgramTypeFilter");
   const ownerSelect = document.getElementById("planningOwnerFilter");
+  const digitalMotionsButton = document.getElementById("planningDigitalMotionsFilter");
 
-  if (!regionSelect || !quarterSelect || !statusSelect || !programTypeSelect || !ownerSelect) return;
+  if (!campaignNameInput || !regionSelect || !quarterSelect || !statusSelect || !programTypeSelect || !ownerSelect || !digitalMotionsButton) return;
 
   // Get options from planning data
   const planningData = planningTableInstance?.getData() || [];
@@ -950,19 +952,49 @@ function populatePlanningFilters() {
   }
 
   // Set up event listeners for all filters
+  campaignNameInput.addEventListener("input", applyPlanningFilters);
   [regionSelect, quarterSelect, statusSelect, programTypeSelect, ownerSelect].forEach(select => {
     select.addEventListener("change", applyPlanningFilters);
+  });
+
+  // Digital Motions filter button toggle
+  digitalMotionsButton.addEventListener("click", () => {
+    const isActive = digitalMotionsButton.dataset.active === "true";
+    digitalMotionsButton.dataset.active = !isActive;
+    
+    if (!isActive) {
+      // Activating Digital Motions filter
+      digitalMotionsButton.style.background = "#2e7d32";
+      digitalMotionsButton.style.borderColor = "#2e7d32";
+      digitalMotionsButton.style.color = "white";
+      digitalMotionsButton.textContent = "🚀 Digital Motions ✓";
+      console.log("[Planning] Digital Motions filter activated");
+    } else {
+      // Deactivating Digital Motions filter
+      digitalMotionsButton.style.background = "#4caf50";
+      digitalMotionsButton.style.borderColor = "#45a049";
+      digitalMotionsButton.style.color = "white";
+      digitalMotionsButton.textContent = "🚀 Digital Motions";
+      console.log("[Planning] Digital Motions filter deactivated");
+    }
+    
+    applyPlanningFilters();
   });
 
   // Clear filters button
   const clearButton = document.getElementById("planningClearFilters");
   if (clearButton) {
     clearButton.addEventListener("click", () => {
+      campaignNameInput.value = "";
       regionSelect.value = "";
       quarterSelect.value = "";
       statusSelect.value = "";
       programTypeSelect.value = "";
       ownerSelect.value = "";
+      digitalMotionsButton.dataset.active = "false";
+      digitalMotionsButton.style.background = "#4caf50";
+      digitalMotionsButton.style.borderColor = "#45a049";
+      digitalMotionsButton.textContent = "🚀 Digital Motions";
       applyPlanningFilters();
     });
   }
@@ -970,11 +1002,13 @@ function populatePlanningFilters() {
 
 function getPlanningFilterValues() {
   return {
+    campaignName: document.getElementById("planningCampaignNameFilter")?.value || "",
     region: document.getElementById("planningRegionFilter")?.value || "",
     quarter: document.getElementById("planningQuarterFilter")?.value || "",
     status: document.getElementById("planningStatusFilter")?.value || "",
     programType: document.getElementById("planningProgramTypeFilter")?.value || "",
-    owner: document.getElementById("planningOwnerFilter")?.value || ""
+    owner: document.getElementById("planningOwnerFilter")?.value || "",
+    digitalMotions: document.getElementById("planningDigitalMotionsFilter")?.dataset.active === "true"
   };
 }
 
@@ -984,27 +1018,63 @@ function applyPlanningFilters() {
   const filters = getPlanningFilterValues();
   console.log("[Planning] Applying filters:", filters);
   
-  // Clear existing filters
-  planningTableInstance.clearFilter();
-  
-  // Apply filters if values are selected
-  if (filters.region) {
-    planningTableInstance.addFilter("region", "=", filters.region);
-  }
-  if (filters.quarter) {
-    planningTableInstance.addFilter("quarter", "=", filters.quarter);
-  }
-  if (filters.status) {
-    planningTableInstance.addFilter("status", "=", filters.status);
-  }
-  if (filters.programType) {
-    planningTableInstance.addFilter("programType", "=", filters.programType);
-  }
-  if (filters.owner) {
-    planningTableInstance.addFilter("owner", "=", filters.owner);
-  }
-  
-  console.log("[Planning] Filters applied, showing", planningTableInstance.getDataCount(true), "rows");
+  // Use requestAnimationFrame to reduce forced reflow
+  requestAnimationFrame(() => {
+    // Clear existing filters first
+    planningTableInstance.clearFilter();
+    
+    // Build filter functions array
+    const filterFunctions = [];
+    
+    // Campaign name filter (case-insensitive partial match)
+    if (filters.campaignName) {
+      const searchTerm = filters.campaignName.toLowerCase();
+      filterFunctions.push((data) => {
+        const campaignName = (data.campaignName || "").toLowerCase();
+        return campaignName.includes(searchTerm);
+      });
+    }
+    
+    // Digital Motions filter
+    if (filters.digitalMotions) {
+      filterFunctions.push((data) => {
+        return data.digitalMotions === true;
+      });
+    }
+    
+    // Standard exact match filters
+    if (filters.region) {
+      filterFunctions.push((data) => data.region === filters.region);
+    }
+    if (filters.quarter) {
+      filterFunctions.push((data) => data.quarter === filters.quarter);
+    }
+    if (filters.status) {
+      filterFunctions.push((data) => data.status === filters.status);
+    }
+    if (filters.programType) {
+      filterFunctions.push((data) => data.programType === filters.programType);
+    }
+    if (filters.owner) {
+      filterFunctions.push((data) => data.owner === filters.owner);
+    }
+    
+    // Apply combined filter function if any filters are active
+    if (filterFunctions.length > 0) {
+      planningTableInstance.addFilter(function(data) {
+        // All filter functions must return true (AND logic)
+        return filterFunctions.every(fn => fn(data));
+      });
+    }
+    
+    const visibleRows = planningTableInstance.getDataCount(true);
+    console.log("[Planning] Filters applied, showing", visibleRows, "rows");
+    
+    // Show helpful message when Digital Motions filter is active
+    if (filters.digitalMotions) {
+      console.log("[Planning] Digital Motions filter active - showing only campaigns with digitalMotions: true");
+    }
+  });
 }
 
 // Initialize planning filters when planning grid is ready

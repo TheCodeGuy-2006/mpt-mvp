@@ -26,7 +26,8 @@
     "actualLeads": 120,
     "actualCost": 30000,
     "actualMQLs": 3,
-    "fiscalYear": "FY26"
+    "fiscalYear": "FY26",
+    "digitalMotions": true
   },
   {
     "id": "program-1750842418400",
@@ -55,7 +56,8 @@
     "actualCost": 10000,
     "actualLeads": 14,
     "actualMQLs": 5,
-    "fiscalYear": "FY25"
+    "fiscalYear": "FY25",
+    "digitalMotions": true
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -660,6 +662,7 @@
     "oppsForecast": 1,
     "pipelineForecast": 50000,
     "revenuePlay": "New Business",
-    "poRaised": "No"
+    "poRaised": "No",
+    "digitalMotions": true
   }
 ]
