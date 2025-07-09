@@ -31,6 +31,113 @@
 
     <section id="view-planning" style="display: none">
       <h2>Planning</h2>
+      
+      <!-- Planning Filters Section -->
+      <div
+        id="planningFilters"
+        style="
+          display: flex;
+          gap: 16px;
+          margin-bottom: 24px;
+          padding: 16px;
+          background: #ffffff;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+        "
+      >
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label for="planningRegionFilter" style="font-weight: 500; color: #1976d2">Region:</label>
+          <select
+            id="planningRegionFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Regions)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label for="planningQuarterFilter" style="font-weight: 500; color: #1976d2">Quarter:</label>
+          <select
+            id="planningQuarterFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Quarters)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label for="planningStatusFilter" style="font-weight: 500; color: #1976d2">Status:</label>
+          <select
+            id="planningStatusFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Statuses)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label for="planningProgramTypeFilter" style="font-weight: 500; color: #1976d2">Program Type:</label>
+          <select
+            id="planningProgramTypeFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Program Types)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label for="planningOwnerFilter" style="font-weight: 500; color: #1976d2">Owner:</label>
+          <select
+            id="planningOwnerFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Owners)</option>
+          </select>
+        </div>
+        <button
+          id="planningClearFilters"
+          style="
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+          "
+        >
+          Clear Filters
+        </button>
+      </div>
+      
       <div
         id="planningGridButtons"
         style="

@@ -285,8 +285,6 @@ function initPlanningGrid(rows) {
         field: "campaignName",
         editor: "input",
         width: 160,
-        headerFilter: "input",
-        headerFilterPlaceholder: "Search...",
       },
       {
         title: "Program Type",
@@ -294,13 +292,6 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: programTypes },
         width: 200,
-        headerFilter: "list",
-        headerFilterParams: {
-          values: {
-            "": "(Clear Filter)",
-            ...Object.fromEntries(programTypes.map((v) => [v, v])),
-          },
-        },
         cellEdited: (cell) => {
           const r = cell.getRow();
           const rowData = r.getData();
@@ -343,13 +334,6 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: strategicPillars },
         width: 220,
-        headerFilter: "list",
-        headerFilterParams: {
-          values: {
-            "": "(Clear Filter)",
-            ...Object.fromEntries(strategicPillars.map((v) => [v, v])),
-          },
-        },
       },
       {
         title: "Description",
@@ -392,13 +376,6 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: names },
         width: 140,
-        headerFilter: "list",
-        headerFilterParams: {
-          values: {
-            "": "(Clear Filter)",
-            ...Object.fromEntries(names.map((v) => [v, v])),
-          },
-        },
       },
       {
         title: "Quarter",
@@ -406,13 +383,6 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: quarterOptions },
         width: 120,
-        headerFilter: "list",
-        headerFilterParams: {
-          values: {
-            "": "(Clear Filter)",
-            ...Object.fromEntries(quarterOptions.map((v) => [v, v])),
-          },
-        },
       },
       {
         title: "Region",
@@ -420,13 +390,6 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: regionOptions },
         width: 120,
-        headerFilter: "list",
-        headerFilterParams: {
-          values: {
-            "": "(Clear Filter)",
-            ...Object.fromEntries(regionOptions.map((v) => [v, v])),
-          },
-        },
       },
       {
         title: "Fiscal Year",
@@ -434,15 +397,6 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: ["FY25", "FY26", "FY27"] },
         width: 100,
-        headerFilter: "list",
-        headerFilterParams: {
-          values: {
-            "": "(Clear Filter)",
-            FY25: "FY25",
-            FY26: "FY26",
-            FY27: "FY27",
-          },
-        },
       },
       {
         title: "Country",
@@ -452,17 +406,6 @@ function initPlanningGrid(rows) {
           values: getAllCountries(),
         },
         width: 130,
-        headerFilter: "list",
-        headerFilterParams: {
-          values: (function () {
-            const allCountries = getAllCountries();
-            const obj = { "": "(Clear Filter)" };
-            allCountries.forEach((v) => {
-              obj[v] = v;
-            });
-            return obj;
-          })(),
-        },
       },
       {
         title: "Forecasted Cost",
@@ -473,76 +416,6 @@ function initPlanningGrid(rows) {
           const v = cell.getValue();
           if (v === null || v === undefined || v === "") return "";
           return "$" + Number(v).toLocaleString();
-        },
-        headerFilter: function (
-          cell,
-          onRendered,
-          success,
-          cancel,
-          editorParams,
-        ) {
-          var container = document.createElement("div");
-          container.style.display = "flex";
-          container.style.flexDirection = "column";
-          container.style.alignItems = "stretch";
-          var row1 = document.createElement("div");
-          row1.style.display = "flex";
-          row1.style.flexDirection = "row";
-          row1.style.alignItems = "center";
-          var min = document.createElement("input");
-          min.type = "number";
-          min.placeholder = "Min";
-          min.style.width = "60px";
-          min.style.marginRight = "4px";
-          var max = document.createElement("input");
-          max.type = "number";
-          max.placeholder = "Max";
-          max.style.width = "60px";
-          row1.appendChild(min);
-          row1.appendChild(document.createTextNode(" - "));
-          row1.appendChild(max);
-          var clearBtn = document.createElement("button");
-          clearBtn.textContent = "Clear";
-          clearBtn.style.marginTop = "4px";
-          clearBtn.style.padding = "2px 10px";
-          clearBtn.style.fontSize = "0.95em";
-          clearBtn.onclick = function (e) {
-            min.value = "";
-            max.value = "";
-            success({ min: "", max: "" });
-          };
-          function updateFilter() {
-            success({ min: min.value, max: max.value });
-          }
-          min.addEventListener("input", updateFilter);
-          min.addEventListener("change", updateFilter);
-          max.addEventListener("input", updateFilter);
-          max.addEventListener("change", updateFilter);
-          container.appendChild(row1);
-          container.appendChild(clearBtn);
-          return container;
-        },
-        headerFilterFunc: function (headerValue, rowValue) {
-          let min =
-            headerValue &&
-            headerValue.min !== undefined &&
-            headerValue.min !== ""
-              ? parseFloat(headerValue.min)
-              : null;
-          let max =
-            headerValue &&
-            headerValue.max !== undefined &&
-            headerValue.max !== ""
-              ? parseFloat(headerValue.max)
-              : null;
-          let value =
-            rowValue !== undefined && rowValue !== null && rowValue !== ""
-              ? parseFloat(rowValue)
-              : null;
-          if (value === null || isNaN(value)) return false;
-          if (min !== null && value < min) return false;
-          if (max !== null && value > max) return false;
-          return true;
         },
         cellEdited: (cell) => {
           const r = cell.getRow();
@@ -622,13 +495,6 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: revenuePlays },
         width: 140,
-        headerFilter: "list",
-        headerFilterParams: {
-          values: {
-            "": "(Clear Filter)",
-            ...Object.fromEntries(revenuePlays.map((v) => [v, v])),
-          },
-        },
       },
       {
         title: "Status",
@@ -636,13 +502,6 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: statusOptions },
         width: 130,
-        headerFilter: "list",
-        headerFilterParams: {
-          values: {
-            "": "(Clear Filter)",
-            ...Object.fromEntries(statusOptions.map((v) => [v, v])),
-          },
-        },
         cellEdited: (cell) => {
           cell.getRow().getData().__modified = true;
           
@@ -656,13 +515,6 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: yesNo },
         width: 110,
-        headerFilter: "list",
-        headerFilterParams: {
-          values: {
-            "": "(Clear Filter)",
-            ...Object.fromEntries(yesNo.map((v) => [v, v])),
-          },
-        },
       },
       // Digital Motions toggle
       {
@@ -1036,6 +888,133 @@ function csvToObj(csv) {
   });
 }
 
+// PLANNING FILTER FUNCTIONALITY
+function populatePlanningFilters() {
+  const regionSelect = document.getElementById("planningRegionFilter");
+  const quarterSelect = document.getElementById("planningQuarterFilter");
+  const statusSelect = document.getElementById("planningStatusFilter");
+  const programTypeSelect = document.getElementById("planningProgramTypeFilter");
+  const ownerSelect = document.getElementById("planningOwnerFilter");
+
+  if (!regionSelect || !quarterSelect || !statusSelect || !programTypeSelect || !ownerSelect) return;
+
+  // Get options from planning data
+  const planningData = planningTableInstance?.getData() || [];
+  const uniqueRegions = Array.from(new Set(planningData.map(c => c.region).filter(Boolean))).sort();
+  const uniqueOwners = Array.from(new Set(planningData.map(c => c.owner).filter(Boolean))).sort();
+
+  // Only populate if not already populated
+  if (regionSelect.children.length <= 1) {
+    regionOptions.forEach((region) => {
+      const option = document.createElement("option");
+      option.value = region;
+      option.textContent = region;
+      regionSelect.appendChild(option);
+    });
+  }
+  
+  if (quarterSelect.children.length <= 1) {
+    quarterOptions.forEach((quarter) => {
+      const option = document.createElement("option");
+      option.value = quarter;
+      option.textContent = quarter;
+      quarterSelect.appendChild(option);
+    });
+  }
+  
+  if (statusSelect.children.length <= 1) {
+    statusOptions.forEach((status) => {
+      const option = document.createElement("option");
+      option.value = status;
+      option.textContent = status;
+      statusSelect.appendChild(option);
+    });
+  }
+  
+  if (programTypeSelect.children.length <= 1) {
+    programTypes.forEach((type) => {
+      const option = document.createElement("option");
+      option.value = type;
+      option.textContent = type;
+      programTypeSelect.appendChild(option);
+    });
+  }
+  
+  if (ownerSelect.children.length <= 1) {
+    names.forEach((owner) => {
+      const option = document.createElement("option");
+      option.value = owner;
+      option.textContent = owner;
+      ownerSelect.appendChild(option);
+    });
+  }
+
+  // Set up event listeners for all filters
+  [regionSelect, quarterSelect, statusSelect, programTypeSelect, ownerSelect].forEach(select => {
+    select.addEventListener("change", applyPlanningFilters);
+  });
+
+  // Clear filters button
+  const clearButton = document.getElementById("planningClearFilters");
+  if (clearButton) {
+    clearButton.addEventListener("click", () => {
+      regionSelect.value = "";
+      quarterSelect.value = "";
+      statusSelect.value = "";
+      programTypeSelect.value = "";
+      ownerSelect.value = "";
+      applyPlanningFilters();
+    });
+  }
+}
+
+function getPlanningFilterValues() {
+  return {
+    region: document.getElementById("planningRegionFilter")?.value || "",
+    quarter: document.getElementById("planningQuarterFilter")?.value || "",
+    status: document.getElementById("planningStatusFilter")?.value || "",
+    programType: document.getElementById("planningProgramTypeFilter")?.value || "",
+    owner: document.getElementById("planningOwnerFilter")?.value || ""
+  };
+}
+
+function applyPlanningFilters() {
+  if (!planningTableInstance) return;
+  
+  const filters = getPlanningFilterValues();
+  console.log("[Planning] Applying filters:", filters);
+  
+  // Clear existing filters
+  planningTableInstance.clearFilter();
+  
+  // Apply filters if values are selected
+  if (filters.region) {
+    planningTableInstance.addFilter("region", "=", filters.region);
+  }
+  if (filters.quarter) {
+    planningTableInstance.addFilter("quarter", "=", filters.quarter);
+  }
+  if (filters.status) {
+    planningTableInstance.addFilter("status", "=", filters.status);
+  }
+  if (filters.programType) {
+    planningTableInstance.addFilter("programType", "=", filters.programType);
+  }
+  if (filters.owner) {
+    planningTableInstance.addFilter("owner", "=", filters.owner);
+  }
+  
+  console.log("[Planning] Filters applied, showing", planningTableInstance.getDataCount(true), "rows");
+}
+
+// Initialize planning filters when planning grid is ready
+function initializePlanningFilters() {
+  // Wait a bit for the planning grid to be initialized
+  setTimeout(() => {
+    populatePlanningFilters();
+  }, 500);
+}
+
 // EXPORT PLANNING MODULE FUNCTIONS
 window.planningModule = {
   loadPlanning,
@@ -1044,6 +1023,9 @@ window.planningModule = {
   setupPlanningDownload,
   getAllCountries,
   getCountryOptionsForRegion,
+  populatePlanningFilters,
+  applyPlanningFilters,
+  initializePlanningFilters,
   // Export constants for use by other modules
   constants: {
     programTypes,

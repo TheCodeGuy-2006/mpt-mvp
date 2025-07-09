@@ -99,7 +99,7 @@ function updateRoiTotalSpend() {
 
   // Update Total Forecasted Cost value from Planning tab
   let totalForecastedCost = 0;
-  if (window.planningModule.tableInstance) {
+  if (window.planningModule && window.planningModule.tableInstance) {
     const planningData = window.planningModule.tableInstance.getData();
     totalForecastedCost = planningData.reduce((sum, row) => {
       let val = row.forecastedCost;
@@ -270,7 +270,7 @@ updateRoiTotalSpend = function() {
 
   // Update Total Forecasted Cost value from Planning tab
   let totalForecastedCost = 0;
-  if (window.planningModule.tableInstance) {
+  if (window.planningModule && window.planningModule.tableInstance) {
     const planningData = window.planningModule.tableInstance.getData();
     totalForecastedCost = planningData.reduce((sum, row) => {
       let val = row.forecastedCost;
@@ -914,7 +914,7 @@ async function updateRemainingBudget(regionFilter) {
     
     // Check if Digital Motions toggle is enabled for any campaigns
     let useDigitalMotions = false;
-    if (window.planningModule.tableInstance) {
+    if (window.planningModule && window.planningModule.tableInstance) {
       const planningData = window.planningModule.tableInstance.getData();
       useDigitalMotions = planningData.some(row => row.digitalMotions === true);
     }
@@ -940,7 +940,7 @@ async function updateRemainingBudget(regionFilter) {
     
     // Calculate total actual cost
     let totalActualCost = 0;
-    if (window.planningModule.tableInstance) {
+    if (window.planningModule && window.planningModule.tableInstance) {
       const planningData = window.planningModule.tableInstance.getData();
       totalActualCost = planningData.reduce((sum, row) => {
         // If using Digital Motions, only include Digital Motions campaigns
@@ -1006,7 +1006,7 @@ async function updateForecastedBudgetUsage(regionFilter) {
     
     // Check if Digital Motions toggle is enabled for any campaigns
     let useDigitalMotions = false;
-    if (window.planningModule.tableInstance) {
+    if (window.planningModule && window.planningModule.tableInstance) {
       const planningData = window.planningModule.tableInstance.getData();
       useDigitalMotions = planningData.some(row => row.digitalMotions === true);
     }
@@ -1032,7 +1032,7 @@ async function updateForecastedBudgetUsage(regionFilter) {
     
     // Calculate total forecasted cost
     let totalForecastedCost = 0;
-    if (window.planningModule.tableInstance) {
+    if (window.planningModule && window.planningModule.tableInstance) {
       const planningData = window.planningModule.tableInstance.getData();
       totalForecastedCost = planningData.reduce((sum, row) => {
         // If using Digital Motions, only include Digital Motions campaigns

@@ -560,13 +560,17 @@ function route() {
     );
     console.log(`[route] hash:`, hash, "section:", section);
     if (section) section.style.display = "block";
-    if (hash === "#planning" && window.planningModule.tableInstance) {
+    if (hash === "#planning" && window.planningModule && window.planningModule.tableInstance) {
       setTimeout(() => {
         window.planningModule.tableInstance.redraw(true);
         window.planningModule.tableInstance.setData(
           window.planningModule.tableInstance.getData(),
         );
         console.log("[route] Redrew planning grid");
+        // Initialize filters when planning tab is shown
+        if (typeof window.planningModule.populatePlanningFilters === "function") {
+          window.planningModule.populatePlanningFilters();
+        }
       }, 0);
     }
     if (hash === "#execution" && window.executionModule.tableInstance) {
@@ -681,12 +685,40 @@ window.addEventListener("DOMContentLoaded", async () => {
   let rows = [];
   let budgetsObj = {};
   try {
+    // Ensure modules are loaded before proceeding
+    if (!window.planningModule) {
+      console.warn("Planning module not loaded yet, waiting...");
+      // Wait up to 5 seconds for modules to load
+      let attempts = 0;
+      while (!window.planningModule && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      if (!window.planningModule) {
+        throw new Error("Planning module failed to load");
+      }
+    }
+    
+    if (!window.budgetsModule) {
+      console.warn("Budgets module not loaded yet, waiting...");
+      // Wait up to 5 seconds for modules to load
+      let attempts = 0;
+      while (!window.budgetsModule && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      if (!window.budgetsModule) {
+        throw new Error("Budgets module failed to load");
+      }
+    }
+    
     // Use planning module functions
     [rows, budgetsObj] = await Promise.all([
       window.planningModule.loadPlanning(),
       window.budgetsModule.loadBudgets(),
     ]);
   } catch (e) {
+    console.error("Error loading data:", e);
     rows = [];
     budgetsObj = {};
   }
@@ -702,26 +734,71 @@ window.addEventListener("DOMContentLoaded", async () => {
   }));
 
   // Initialize all grids/tables only once
-  const planningTable = window.planningModule.initPlanningGrid(rows);
-  window.planningTableInstance = planningTable;
-  const executionTable = window.executionModule.initExecutionGrid(rows);
-  window.executionTableInstance = executionTable;
-  const budgetsTable = window.budgetsModule.initBudgetsTable(budgets, rows); // pass rows to budgets table
-  window.budgetsTableInstance = budgetsTable;
+  let planningTable = null;
+  let executionTable = null;
+  let budgetsTable = null;
+  
+  if (window.planningModule && typeof window.planningModule.initPlanningGrid === 'function') {
+    planningTable = window.planningModule.initPlanningGrid(rows);
+    window.planningTableInstance = planningTable;
+  } else {
+    console.error("Planning module or initPlanningGrid function not available");
+  }
+  
+  if (window.executionModule && typeof window.executionModule.initExecutionGrid === 'function') {
+    executionTable = window.executionModule.initExecutionGrid(rows);
+    window.executionTableInstance = executionTable;
+  } else {
+    console.error("Execution module or initExecutionGrid function not available");
+  }
+  
+  if (window.budgetsModule && typeof window.budgetsModule.initBudgetsTable === 'function') {
+    budgetsTable = window.budgetsModule.initBudgetsTable(budgets, rows); // pass rows to budgets table
+    window.budgetsTableInstance = budgetsTable;
+  } else {
+    console.error("Budgets module or initBudgetsTable function not available");
+  }
+  
   initGithubSync();
-  window.planningModule.setupPlanningSave(planningTable, rows);
-  window.budgetsModule.setupBudgetsSave(budgetsTable);
-  window.budgetsModule.setupBudgetsDownload(budgetsTable);
-  window.planningModule.setupPlanningDownload(planningTable);
+  
+  // Setup save and download functions with safety checks
+  if (planningTable && window.planningModule) {
+    if (typeof window.planningModule.setupPlanningSave === 'function') {
+      window.planningModule.setupPlanningSave(planningTable, rows);
+    }
+    if (typeof window.planningModule.setupPlanningDownload === 'function') {
+      window.planningModule.setupPlanningDownload(planningTable);
+    }
+  }
+  
+  if (budgetsTable && window.budgetsModule) {
+    if (typeof window.budgetsModule.setupBudgetsSave === 'function') {
+      window.budgetsModule.setupBudgetsSave(budgetsTable);
+    }
+    if (typeof window.budgetsModule.setupBudgetsDownload === 'function') {
+      window.budgetsModule.setupBudgetsDownload(budgetsTable);
+    }
+  }
 
   // Initialize reporting total spend using ROI module
-  window.roiModule.updateReportTotalSpend();
+  if (window.roiModule && typeof window.roiModule.updateReportTotalSpend === 'function') {
+    window.roiModule.updateReportTotalSpend();
+  }
 
   // Initialize ROI functionality (charts, filters, data table)
-  window.roiModule.initializeRoiFunctionality();
+  if (window.roiModule && typeof window.roiModule.initializeRoiFunctionality === 'function') {
+    window.roiModule.initializeRoiFunctionality();
+  }
+
+  // Initialize Planning filters
+  if (window.planningModule && typeof window.planningModule.initializePlanningFilters === "function") {
+    window.planningModule.initializePlanningFilters();
+  }
 
   // Initialize Annual Budget Plan using budgets module
-  window.budgetsModule.initializeAnnualBudgetPlan(budgets);
+  if (window.budgetsModule && typeof window.budgetsModule.initializeAnnualBudgetPlan === 'function') {
+    window.budgetsModule.initializeAnnualBudgetPlan(budgets);
+  }
 
   // Ensure hash is set to a valid tab on load (after all sections are initialized)
   const validTabs = [
@@ -741,56 +818,68 @@ window.addEventListener("DOMContentLoaded", async () => {
   setTimeout(route, 0);
 
   // After both tables are initialized:
-  window.executionModule.syncGridsOnEdit(planningTable, executionTable);
-  window.executionModule.syncGridsOnEdit(executionTable, planningTable);
+  if (planningTable && executionTable && window.executionModule && typeof window.executionModule.syncGridsOnEdit === 'function') {
+    window.executionModule.syncGridsOnEdit(planningTable, executionTable);
+    window.executionModule.syncGridsOnEdit(executionTable, planningTable);
+  }
 
   // Setup ROI chart event handlers
-  window.roiModule.setupRoiChartEventHandlers();
+  if (window.roiModule && typeof window.roiModule.setupRoiChartEventHandlers === 'function') {
+    window.roiModule.setupRoiChartEventHandlers();
+  }
 
   // Initialize calendar module
-  window.calendarModule.initializeCalendar();
+  if (window.calendarModule && typeof window.calendarModule.initializeCalendar === 'function') {
+    window.calendarModule.initializeCalendar();
+  }
 });
 
 // Initialize Chart.js and render charts
-initializeChartJS();
+if (typeof initializeChartJS === 'function') {
+  initializeChartJS();
+}
 
 // After budgets table is initialized, render both charts
-const origInitBudgetsTable = window.budgetsModule.initBudgetsTable;
-window.budgetsModule.initBudgetsTable = function (budgets, rows) {
-  const table = origInitBudgetsTable(budgets, rows);
-  window.budgetsTableInstance = table;
-  
-  // Render both the bar chart and region charts
-  setTimeout(() => {
-    if (typeof renderBudgetsBarChart === 'function') {
-      renderBudgetsBarChart();
-    }
-    if (typeof renderBudgetsRegionCharts === 'function') {
-      renderBudgetsRegionCharts();
-    }
-  }, 200);
-  
-  // Set up event listeners for both charts
-  table.on("dataChanged", () => {
-    if (typeof renderBudgetsBarChart === 'function') {
-      renderBudgetsBarChart();
-    }
-    if (typeof renderBudgetsRegionCharts === 'function') {
-      renderBudgetsRegionCharts();
-    }
-  });
-  
-  return table;
-};
+if (window.budgetsModule && window.budgetsModule.initBudgetsTable) {
+  const origInitBudgetsTable = window.budgetsModule.initBudgetsTable;
+  window.budgetsModule.initBudgetsTable = function (budgets, rows) {
+    const table = origInitBudgetsTable(budgets, rows);
+    window.budgetsTableInstance = table;
+    
+    // Render both the bar chart and region charts
+    setTimeout(() => {
+      if (typeof renderBudgetsBarChart === 'function') {
+        renderBudgetsBarChart();
+      }
+      if (typeof renderBudgetsRegionCharts === 'function') {
+        renderBudgetsRegionCharts();
+      }
+    }, 200);
+    
+    // Set up event listeners for both charts
+    table.on("dataChanged", () => {
+      if (typeof renderBudgetsBarChart === 'function') {
+        renderBudgetsBarChart();
+      }
+      if (typeof renderBudgetsRegionCharts === 'function') {
+        renderBudgetsRegionCharts();
+      }
+    });
+    
+    return table;
+  };
+}
 // Also render on planning table data change
-const origInitPlanningGrid2 = window.planningModule.initPlanningGrid;
-window.planningModule.initPlanningGrid = function (rows) {
-  const table = origInitPlanningGrid2(rows);
-  window.planningRows = rows;
-  table.on("dataChanged", renderBudgetsRegionCharts);
-  setTimeout(renderBudgetsRegionCharts, 200);
-  return table;
-};
+if (window.planningModule && window.planningModule.initPlanningGrid) {
+  const origInitPlanningGrid2 = window.planningModule.initPlanningGrid;
+  window.planningModule.initPlanningGrid = function (rows) {
+    const table = origInitPlanningGrid2(rows);
+    window.planningRows = rows;
+    table.on("dataChanged", renderBudgetsRegionCharts);
+    setTimeout(renderBudgetsRegionCharts, 200);
+    return table;
+  };
+}
 
 // Check Worker API status and show notice if unavailable
 async function checkWorkerApiStatus() {
