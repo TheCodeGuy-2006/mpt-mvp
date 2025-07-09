@@ -10,37 +10,58 @@ function initializeChartJS() {
     script.src = "https://cdn.jsdelivr.net/npm/chart.js";
     script.onload = () => {
       console.log("Chart.js loaded");
-      renderBudgetsBarChart();
+      // Only render if data is available
+      setTimeout(() => {
+        if (typeof renderBudgetsBarChart === 'function') {
+          renderBudgetsBarChart();
+        }
+      }, 500);
     };
     document.head.appendChild(script);
   } else {
-    renderBudgetsBarChart();
+    // Chart.js already loaded
+    setTimeout(() => {
+      if (typeof renderBudgetsBarChart === 'function') {
+        renderBudgetsBarChart();
+      }
+    }, 500);
   }
 }
 
 // Budgets Bar Chart
 function renderBudgetsBarChart() {
   const ctx = document.getElementById("budgetsBarChart");
-  if (!ctx) return;
+  if (!ctx) {
+    console.log("[Charts] budgetsBarChart element not found");
+    return;
+  }
 
   // Get budgets data from the table or from the budgets object
   let budgetsData = [];
   if (window.budgetsTableInstance) {
     budgetsData = window.budgetsTableInstance.getData();
+    console.log("[Charts] Using budgets data from table:", budgetsData);
   } else if (window.budgetsObj) {
     budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({
       region,
       ...data,
     }));
+    console.log("[Charts] Using budgets data from global object:", budgetsData);
   }
 
-  if (!budgetsData || budgetsData.length === 0) return;
+  if (!budgetsData || budgetsData.length === 0) {
+    console.log("[Charts] No budgets data available for chart");
+    return;
+  }
 
   // Prepare data for chart
   const labels = budgetsData.map((row) => row.region || row.Region || "");
   const values = budgetsData.map((row) =>
     Number(row.assignedBudget || row.AssignedBudget || 0),
   );
+
+  console.log("[Charts] Chart labels:", labels);
+  console.log("[Charts] Chart values:", values);
 
   // Destroy previous chart if exists
   if (window.budgetsBarChartInstance) {

@@ -387,15 +387,20 @@ async function refreshAllData() {
     if (window.loadBudgets) {
       promises.push(
         window.loadBudgets().then(budgets => {
-          if (window.budgetsTableInstance && budgets && Object.keys(budgets).length > 0) {
-            // Convert object to array format for the table
-            const budgetsArray = Object.entries(budgets).map(([region, data]) => ({
-              region,
-              ...data
-            }));
-            window.budgetsTableInstance.setData(budgetsArray);
-            console.log('✅ Budgets data refreshed');
-            return { type: 'budgets', success: true, count: Object.keys(budgets).length };
+          if (budgets && Object.keys(budgets).length > 0) {
+            // Update global budgets object for chart access
+            window.budgetsObj = budgets;
+            
+            if (window.budgetsTableInstance) {
+              // Convert object to array format for the table
+              const budgetsArray = Object.entries(budgets).map(([region, data]) => ({
+                region,
+                ...data
+              }));
+              window.budgetsTableInstance.setData(budgetsArray);
+              console.log('✅ Budgets data refreshed');
+              return { type: 'budgets', success: true, count: Object.keys(budgets).length };
+            }
           }
           return { type: 'budgets', success: false, error: 'No data or table not available' };
         }).catch(error => {
@@ -526,6 +531,17 @@ function route() {
           window.budgetsTableInstance.getData(),
         );
         console.log("[route] Redrew budgets table");
+        // Ensure both charts render after table redraw
+        setTimeout(() => {
+          if (typeof window.renderBudgetsBarChart === "function") {
+            window.renderBudgetsBarChart();
+            console.log("[route] Triggered budgets bar chart render");
+          }
+          if (typeof window.renderBudgetsRegionCharts === "function") {
+            window.renderBudgetsRegionCharts();
+            console.log("[route] Triggered budgets region charts render");
+          }
+        }, 100);
       }, 0);
     }
     // --- Ensure Annual Budget Plan unlock logic is initialized every time tab is shown ---
@@ -676,6 +692,9 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
   loadingDiv && loadingDiv.remove();
 
+  // Store budgets object globally for chart access
+  window.budgetsObj = budgetsObj;
+  
   // Convert budgets object to array for Tabulator
   const budgets = Object.entries(budgetsObj).map(([region, data]) => ({
     region,
@@ -735,23 +754,32 @@ window.addEventListener("DOMContentLoaded", async () => {
 // Initialize Chart.js and render charts
 initializeChartJS();
 
-// After budgets table is initialized, render the chart
+// After budgets table is initialized, render both charts
 const origInitBudgetsTable = window.budgetsModule.initBudgetsTable;
 window.budgetsModule.initBudgetsTable = function (budgets, rows) {
   const table = origInitBudgetsTable(budgets, rows);
   window.budgetsTableInstance = table;
-  setTimeout(renderBudgetsBarChart, 200);
-  table.on("dataChanged", renderBudgetsBarChart);
-  return table;
-};
-
-// After budgets table is initialized, render the region charts
-const origInitBudgetsTable2 = window.budgetsModule.initBudgetsTable;
-window.budgetsModule.initBudgetsTable = function (budgets, rows) {
-  const table = origInitBudgetsTable2(budgets, rows);
-  window.budgetsTableInstance = table;
-  setTimeout(renderBudgetsRegionCharts, 200);
-  table.on("dataChanged", renderBudgetsRegionCharts);
+  
+  // Render both the bar chart and region charts
+  setTimeout(() => {
+    if (typeof renderBudgetsBarChart === 'function') {
+      renderBudgetsBarChart();
+    }
+    if (typeof renderBudgetsRegionCharts === 'function') {
+      renderBudgetsRegionCharts();
+    }
+  }, 200);
+  
+  // Set up event listeners for both charts
+  table.on("dataChanged", () => {
+    if (typeof renderBudgetsBarChart === 'function') {
+      renderBudgetsBarChart();
+    }
+    if (typeof renderBudgetsRegionCharts === 'function') {
+      renderBudgetsRegionCharts();
+    }
+  });
+  
   return table;
 };
 // Also render on planning table data change
