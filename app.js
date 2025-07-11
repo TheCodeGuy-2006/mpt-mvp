@@ -563,9 +563,6 @@ function route() {
     if (hash === "#planning" && window.planningModule && window.planningModule.tableInstance) {
       setTimeout(() => {
         window.planningModule.tableInstance.redraw(true);
-        window.planningModule.tableInstance.setData(
-          window.planningModule.tableInstance.getData(),
-        );
         console.log("[route] Redrew planning grid");
         // Initialize filters when planning tab is shown
         if (typeof window.planningModule.populatePlanningFilters === "function") {

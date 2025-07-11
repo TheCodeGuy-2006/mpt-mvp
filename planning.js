@@ -900,6 +900,21 @@ function csvToObj(csv) {
 }
 
 // PLANNING FILTER FUNCTIONALITY
+function updateDigitalMotionsButtonVisual(button) {
+  const isActive = button.dataset.active === "true";
+  if (isActive) {
+    button.style.background = "#2e7d32";
+    button.style.borderColor = "#2e7d32";
+    button.style.color = "white";
+    button.textContent = "🚀 Digital Motions ✓";
+  } else {
+    button.style.background = "#4caf50";
+    button.style.borderColor = "#45a049";
+    button.style.color = "white";
+    button.textContent = "🚀 Digital Motions";
+  }
+}
+
 function populatePlanningFilters() {
   const campaignNameInput = document.getElementById("planningCampaignNameFilter");
   const regionSelect = document.getElementById("planningRegionFilter");
@@ -922,10 +937,26 @@ function populatePlanningFilters() {
     return;
   }
 
-  // Initialize Digital Motions button state
-  if (!digitalMotionsButton.dataset.active) {
+  // Initialize Digital Motions button state (preserve existing state if already set)
+  if (!digitalMotionsButton.hasAttribute('data-active')) {
     digitalMotionsButton.dataset.active = "false";
     console.log("[Planning] Initialized Digital Motions button state to false");
+  } else {
+    console.log("[Planning] Preserving existing Digital Motions button state:", digitalMotionsButton.dataset.active);
+  }
+  
+  // Update button visual state to match data attribute
+  updateDigitalMotionsButtonVisual(digitalMotionsButton);
+  
+  // Reapply filters if any are currently active (after navigation)
+  const currentFilters = getPlanningFilterValues();
+  const hasActiveFilters = currentFilters.campaignName || currentFilters.region || currentFilters.quarter || 
+                          currentFilters.status || currentFilters.programType || currentFilters.owner || 
+                          currentFilters.digitalMotions;
+  
+  if (hasActiveFilters) {
+    console.log("[Planning] Reapplying active filters after navigation");
+    applyPlanningFilters();
   }
 
   // Get options from planning data
@@ -979,45 +1010,40 @@ function populatePlanningFilters() {
     });
   }
 
-  // Set up event listeners for all filters
-  campaignNameInput.addEventListener("input", applyPlanningFilters);
+  // Set up event listeners for all filters (only if not already attached)
+  if (!campaignNameInput.hasAttribute('data-listener-attached')) {
+    campaignNameInput.addEventListener("input", applyPlanningFilters);
+    campaignNameInput.setAttribute('data-listener-attached', 'true');
+  }
+  
   [regionSelect, quarterSelect, statusSelect, programTypeSelect, ownerSelect].forEach(select => {
-    select.addEventListener("change", applyPlanningFilters);
+    if (!select.hasAttribute('data-listener-attached')) {
+      select.addEventListener("change", applyPlanningFilters);
+      select.setAttribute('data-listener-attached', 'true');
+    }
   });
 
-  // Digital Motions filter button toggle
-  digitalMotionsButton.addEventListener("click", () => {
-    const currentState = digitalMotionsButton.dataset.active;
-    const isActive = currentState === "true";
-    const newState = !isActive;
-    
-    console.log("[Planning] Digital Motions button clicked:", {
-      currentState,
-      isActive,
-      newState
+  // Digital Motions filter button toggle (only attach once)
+  if (!digitalMotionsButton.hasAttribute('data-listener-attached')) {
+    digitalMotionsButton.addEventListener("click", () => {
+      const currentState = digitalMotionsButton.dataset.active;
+      const isActive = currentState === "true";
+      const newState = !isActive;
+      
+      console.log("[Planning] Digital Motions button clicked:", {
+        currentState,
+        isActive,
+        newState
+      });
+      
+      digitalMotionsButton.dataset.active = newState.toString();
+      updateDigitalMotionsButtonVisual(digitalMotionsButton);
+      
+      console.log("[Planning] About to apply filters with Digital Motions state:", newState);
+      applyPlanningFilters();
     });
-    
-    digitalMotionsButton.dataset.active = newState.toString();
-    
-    if (newState) {
-      // Activating Digital Motions filter
-      digitalMotionsButton.style.background = "#2e7d32";
-      digitalMotionsButton.style.borderColor = "#2e7d32";
-      digitalMotionsButton.style.color = "white";
-      digitalMotionsButton.textContent = "🚀 Digital Motions ✓";
-      console.log("[Planning] Digital Motions filter activated");
-    } else {
-      // Deactivating Digital Motions filter
-      digitalMotionsButton.style.background = "#4caf50";
-      digitalMotionsButton.style.borderColor = "#45a049";
-      digitalMotionsButton.style.color = "white";
-      digitalMotionsButton.textContent = "🚀 Digital Motions";
-      console.log("[Planning] Digital Motions filter deactivated");
-    }
-    
-    console.log("[Planning] About to apply filters with Digital Motions state:", newState);
-    applyPlanningFilters();
-  });
+    digitalMotionsButton.setAttribute('data-listener-attached', 'true');
+  }
 
   // Clear filters button
   const clearButton = document.getElementById("planningClearFilters");
@@ -1030,9 +1056,7 @@ function populatePlanningFilters() {
       programTypeSelect.value = "";
       ownerSelect.value = "";
       digitalMotionsButton.dataset.active = "false";
-      digitalMotionsButton.style.background = "#4caf50";
-      digitalMotionsButton.style.borderColor = "#45a049";
-      digitalMotionsButton.textContent = "🚀 Digital Motions";
+      updateDigitalMotionsButtonVisual(digitalMotionsButton);
       applyPlanningFilters();
     });
   }
