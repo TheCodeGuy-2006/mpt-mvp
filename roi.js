@@ -708,7 +708,7 @@ function initRoiDataTable() {
         },
         width: 130,
         sorter: "number",
-        align: "right"
+        hozAlign: "right"
       },
       {
         title: "Actual Cost",
@@ -719,7 +719,7 @@ function initRoiDataTable() {
         },
         width: 120,
         sorter: "number",
-        align: "right"
+        hozAlign: "right"
       },
       {
         title: "Expected Leads",
@@ -730,7 +730,7 @@ function initRoiDataTable() {
         },
         width: 120,
         sorter: "number",
-        align: "right"
+        hozAlign: "right"
       },
       {
         title: "Actual Leads",
@@ -741,7 +741,7 @@ function initRoiDataTable() {
         },
         width: 110,
         sorter: "number",
-        align: "right"
+        hozAlign: "right"
       },
       {
         title: "Pipeline Forecasted",
@@ -752,7 +752,7 @@ function initRoiDataTable() {
         },
         width: 150,
         sorter: "number",
-        align: "right"
+        hozAlign: "right"
       },
       {
         title: "ROI",
@@ -778,7 +778,7 @@ function initRoiDataTable() {
           };
           return getROI(a) - getROI(b);
         },
-        align: "right"
+        hozAlign: "right"
       }
     ],
     pagination: "local",

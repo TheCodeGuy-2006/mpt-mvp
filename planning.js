@@ -1190,28 +1190,6 @@ window.planningModule = {
   populatePlanningFilters,
   applyPlanningFilters,
   initializePlanningFilters,
-  // Add debug function for Digital Motions
-  debugDigitalMotions: () => {
-    if (!planningTableInstance) {
-      console.log("❌ Planning table not initialized");
-      return;
-    }
-    const allData = planningTableInstance.getData();
-    const digitalMotionsRows = allData.filter(row => row.digitalMotions === true);
-    console.log("📊 Digital Motions Debug:");
-    console.log("  Total campaigns:", allData.length);
-    console.log("  Digital Motions campaigns:", digitalMotionsRows.length);
-    console.log("  Digital Motions data:", digitalMotionsRows.map(r => ({
-      id: r.id,
-      campaignName: r.campaignName || "(unnamed)",
-      digitalMotions: r.digitalMotions
-    })));
-    
-    const buttonState = document.getElementById("planningDigitalMotionsFilter")?.dataset.active;
-    console.log("  Button state:", buttonState);
-    
-    return digitalMotionsRows;
-  },
   // Export constants for use by other modules
   constants: {
     programTypes,

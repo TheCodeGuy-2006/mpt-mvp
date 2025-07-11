@@ -202,75 +202,321 @@ function setupExecutionFilters() {
     "Shipped",
     "Cancelled",
   ];
+  const programTypes = window.planningModule?.constants?.programTypes || [
+    "User Groups",
+    "Targeted paid ads & content sydication",
+    "Flagship events (galaxy, universe recaps) 1:many",
+    "3P sponsored events",
+    "Webinars",
+    "Microsoft",
+    "Lunch & learns and workshops (1:few)",
+    "Localized Programs",
+    "CxO events (1:few)",
+    "Exec engagement programs",
+    "In-Account events (1:1)",
+    "Contractor/Infrastructure",
+    "Paid ads",
+    "Operational/Infrastructure/Swag",
+  ];
+  const names = window.planningModule?.constants?.names || [
+    "Shruti Narang",
+    "Beverly Leung",
+    "Giorgia Parham",
+    "Tomoko Tanaka",
+  ];
   const yesNo = window.planningModule?.constants?.yesNo || ["Yes", "No"];
 
-  // Add region, status, and PO Raised filter buttons below the execution tracking title
-  const execRegionFilterDiv = document.createElement("div");
-  execRegionFilterDiv.id = "execRegionFilterDiv";
-  execRegionFilterDiv.style.margin = "0 0 16px 0";
-  execRegionFilterDiv.style.display = "flex";
-  execRegionFilterDiv.style.gap = "18px";
-  execRegionFilterDiv.innerHTML = `
-    <label for="execRegionFilter" style="font-weight:500;margin-right:8px;">Filter by Region:</label>
-    <select id="execRegionFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #90caf9;font-size:1rem;">
-      <option value="">(All Regions)</option>
-      ${regionOptions.map((r) => `<option value="${r}">${r}</option>`).join("")}
-    </select>
-    <label for="execStatusFilter" style="font-weight:500;margin-left:18px;margin-right:8px;">Status:</label>
-    <select id="execStatusFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #90caf9;font-size:1rem;">
-      <option value="">(All Statuses)</option>
-      ${statusOptions.map((s) => `<option value="${s}">${s}</option>`).join("")}
-    </select>
-    <label for="execPOFilter" style="font-weight:500;margin-left:18px;margin-right:8px;">PO Raised:</label>
-    <select id="execPOFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #90caf9;font-size:1rem;">
-      <option value="">(All)</option>
-      ${yesNo.map((v) => `<option value="${v}">${v}</option>`).join("")}
-    </select>
+  console.log("[Execution] Setting up filters with constants:", {
+    programTypes: programTypes.length,
+    names: names.length,
+    regionOptions: regionOptions.length,
+    statusOptions: statusOptions.length
+  });
+
+  // Create comprehensive filter UI matching planning tab
+  const execFiltersDiv = document.createElement("div");
+  execFiltersDiv.id = "execFiltersDiv";
+  execFiltersDiv.style.margin = "0 0 16px 0";
+  execFiltersDiv.style.background = "#f8f9fa";
+  execFiltersDiv.style.padding = "16px";
+  execFiltersDiv.style.borderRadius = "8px";
+  execFiltersDiv.style.border = "1px solid #e0e0e0";
+  execFiltersDiv.innerHTML = `
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="executionCampaignNameFilter" style="font-weight: 500; white-space: nowrap;">Campaign Name:</label>
+        <input type="text" id="executionCampaignNameFilter" placeholder="Search campaigns..." 
+               style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem; min-width: 200px;" />
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="executionRegionFilter" style="font-weight: 500; white-space: nowrap;">Region:</label>
+        <select id="executionRegionFilter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem;">
+          <option value="">(All Regions)</option>
+          ${regionOptions.map((r) => `<option value="${r}">${r}</option>`).join("")}
+        </select>
+      </div>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="executionStatusFilter" style="font-weight: 500; white-space: nowrap;">Status:</label>
+        <select id="executionStatusFilter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem;">
+          <option value="">(All Statuses)</option>
+          ${statusOptions.map((s) => `<option value="${s}">${s}</option>`).join("")}
+        </select>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="executionProgramTypeFilter" style="font-weight: 500; white-space: nowrap;">Program Type:</label>
+        <select id="executionProgramTypeFilter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem;">
+          <option value="">(All Types)</option>
+          ${programTypes.map((type) => `<option value="${type}">${type}</option>`).join("")}
+        </select>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="executionOwnerFilter" style="font-weight: 500; white-space: nowrap;">Owner:</label>
+        <select id="executionOwnerFilter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem;">
+          <option value="">(All Owners)</option>
+          ${names.map((owner) => `<option value="${owner}">${owner}</option>`).join("")}
+        </select>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="executionPOFilter" style="font-weight: 500; white-space: nowrap;">PO Raised:</label>
+        <select id="executionPOFilter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem;">
+          <option value="">(All)</option>
+          ${yesNo.map((v) => `<option value="${v}">${v}</option>`).join("")}
+        </select>
+      </div>
+      <button id="executionDigitalMotionsFilter" type="button" data-active="false"
+              style="padding: 8px 16px; border-radius: 6px; border: 2px solid #1976d2; background: white; color: #1976d2; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+        Digital Motions
+      </button>
+      <button id="executionClearFilters" type="button"
+              style="padding: 8px 16px; border-radius: 6px; border: 1px solid #666; background: white; color: #666; font-weight: 500; cursor: pointer; margin-left: 8px;">
+        Clear All Filters
+      </button>
+    </div>
   `;
 
   const execGridSection = document.getElementById("view-execution");
   if (execGridSection) {
     // Check if filters already exist to avoid duplication
-    const existingFilters = document.getElementById("execRegionFilterDiv");
+    const existingFilters = document.getElementById("execFiltersDiv");
     if (!existingFilters) {
       const h2 = execGridSection.querySelector("h2");
       if (h2 && execGridSection.contains(h2)) {
-        h2.insertAdjacentElement("afterend", execRegionFilterDiv);
+        h2.insertAdjacentElement("afterend", execFiltersDiv);
       } else {
         execGridSection.insertBefore(
-          execRegionFilterDiv,
+          execFiltersDiv,
           execGridSection.firstChild,
         );
       }
 
-      // Add filter logic for execution grid
-      function updateExecFilters() {
-        const regionVal = document.getElementById("execRegionFilter").value;
-        const statusVal = document.getElementById("execStatusFilter").value;
-        const poVal = document.getElementById("execPOFilter").value;
-        if (executionTableInstance) {
-          executionTableInstance.setFilter(
-            [
-              regionVal
-                ? { field: "region", type: "=", value: regionVal }
-                : null,
-              statusVal
-                ? { field: "status", type: "=", value: statusVal }
-                : null,
-              poVal ? { field: "poRaised", type: "=", value: poVal } : null,
-            ].filter(Boolean),
-          );
-        }
-      }
-
-      ["execRegionFilter", "execStatusFilter", "execPOFilter"].forEach((id) => {
-        const element = document.getElementById(id);
-        if (element) {
-          element.addEventListener("change", updateExecFilters);
-        }
-      });
+      setupExecutionFilterLogic();
     }
   }
+}
+
+// Helper function to update Digital Motions button visual state
+function updateExecutionDigitalMotionsButtonVisual(button) {
+  const isActive = button.dataset.active === "true";
+  if (isActive) {
+    button.style.background = "#1976d2";
+    button.style.color = "white";
+    button.style.fontWeight = "600";
+  } else {
+    button.style.background = "white";
+    button.style.color = "#1976d2";
+    button.style.fontWeight = "500";
+  }
+}
+
+// Setup filter logic for execution tracking
+function setupExecutionFilterLogic() {
+  // Ensure we have a valid table instance before setting up filters
+  if (!executionTableInstance) {
+    console.warn("[Execution] Table instance not available yet, retrying in 100ms...");
+    setTimeout(setupExecutionFilterLogic, 100);
+    return;
+  }
+
+  const campaignNameInput = document.getElementById("executionCampaignNameFilter");
+  const regionSelect = document.getElementById("executionRegionFilter");
+  const statusSelect = document.getElementById("executionStatusFilter");
+  const programTypeSelect = document.getElementById("executionProgramTypeFilter");
+  const ownerSelect = document.getElementById("executionOwnerFilter");
+  const poSelect = document.getElementById("executionPOFilter");
+  const digitalMotionsButton = document.getElementById("executionDigitalMotionsFilter");
+  const clearButton = document.getElementById("executionClearFilters");
+
+  if (!campaignNameInput || !regionSelect || !statusSelect || 
+      !programTypeSelect || !ownerSelect || !poSelect || !digitalMotionsButton) {
+    console.error("[Execution] Missing filter elements:", {
+      campaignNameInput: !!campaignNameInput,
+      regionSelect: !!regionSelect,
+      statusSelect: !!statusSelect,
+      programTypeSelect: !!programTypeSelect,
+      ownerSelect: !!ownerSelect,
+      poSelect: !!poSelect,
+      digitalMotionsButton: !!digitalMotionsButton
+    });
+    return;
+  }
+
+  console.log("[Execution] Setting up filter logic with table instance ready");
+
+  // Initialize Digital Motions button state
+  if (!digitalMotionsButton.hasAttribute('data-active')) {
+    digitalMotionsButton.dataset.active = "false";
+  }
+  updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
+
+  // Set up event listeners for all filters (only if not already attached)
+  if (!campaignNameInput.hasAttribute('data-listener-attached')) {
+    campaignNameInput.addEventListener("input", applyExecutionFilters);
+    campaignNameInput.setAttribute('data-listener-attached', 'true');
+  }
+  
+  [regionSelect, statusSelect, programTypeSelect, ownerSelect, poSelect].forEach(select => {
+    if (!select.hasAttribute('data-listener-attached')) {
+      select.addEventListener("change", applyExecutionFilters);
+      select.setAttribute('data-listener-attached', 'true');
+    }
+  });
+
+  // Digital Motions filter button toggle (only attach once)
+  if (!digitalMotionsButton.hasAttribute('data-listener-attached')) {
+    digitalMotionsButton.addEventListener("click", () => {
+      const currentState = digitalMotionsButton.dataset.active;
+      const isActive = currentState === "true";
+      const newState = !isActive;
+      
+      console.log("[Execution] Digital Motions button clicked:", {
+        currentState,
+        isActive,
+        newState
+      });
+      
+      digitalMotionsButton.dataset.active = newState.toString();
+      updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
+      
+      console.log("[Execution] About to apply filters with Digital Motions state:", newState);
+      applyExecutionFilters();
+    });
+    digitalMotionsButton.setAttribute('data-listener-attached', 'true');
+  }
+
+  // Clear filters button
+  if (clearButton) {
+    clearButton.addEventListener("click", () => {
+      campaignNameInput.value = "";
+      regionSelect.value = "";
+      quarterSelect.value = "";
+      statusSelect.value = "";
+      programTypeSelect.value = "";
+      ownerSelect.value = "";
+      poSelect.value = "";
+      digitalMotionsButton.dataset.active = "false";
+      updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
+      applyExecutionFilters();
+    });
+  }
+}
+
+// Get current filter values for execution tracking
+function getExecutionFilterValues() {
+  const digitalMotionsButton = document.getElementById("executionDigitalMotionsFilter");
+  const digitalMotionsActive = digitalMotionsButton?.dataset.active === "true";
+  
+  const filterValues = {
+    campaignName: document.getElementById("executionCampaignNameFilter")?.value || "",
+    region: document.getElementById("executionRegionFilter")?.value || "",
+    status: document.getElementById("executionStatusFilter")?.value || "",
+    programType: document.getElementById("executionProgramTypeFilter")?.value || "",
+    owner: document.getElementById("executionOwnerFilter")?.value || "",
+    poRaised: document.getElementById("executionPOFilter")?.value || "",
+    digitalMotions: digitalMotionsActive
+  };
+  
+  console.log("[Execution] getExecutionFilterValues:", {
+    campaignName: filterValues.campaignName,
+    region: filterValues.region,
+    status: filterValues.status,
+    programType: filterValues.programType,
+    owner: filterValues.owner,
+    poRaised: filterValues.poRaised,
+    digitalMotions: filterValues.digitalMotions,
+    digitalMotionsButtonState: digitalMotionsButton?.dataset.active
+  });
+  
+  return filterValues;
+}
+
+// Apply filters to execution tracking table
+function applyExecutionFilters() {
+  if (!executionTableInstance) {
+    console.warn("[Execution] Table instance not available, cannot apply filters");
+    return;
+  }
+  
+  const filters = getExecutionFilterValues();
+  console.log("[Execution] Applying filters:", filters);
+  
+  // Use requestAnimationFrame to reduce forced reflow
+  requestAnimationFrame(() => {
+    // Clear existing filters first
+    executionTableInstance.clearFilter();
+    
+    // Apply filters using Tabulator's built-in filter system
+    const activeFilters = [];
+    
+    // Campaign name filter (partial match)
+    if (filters.campaignName) {
+      activeFilters.push({field:"campaignName", type:"like", value:filters.campaignName});
+    }
+    
+    // Exact match filters
+    if (filters.region) {
+      activeFilters.push({field:"region", type:"=", value:filters.region});
+    }
+    if (filters.status) {
+      activeFilters.push({field:"status", type:"=", value:filters.status});
+    }
+    if (filters.programType) {
+      console.log("[Execution] Adding programType filter:", filters.programType);
+      activeFilters.push({field:"programType", type:"=", value:filters.programType});
+    }
+    if (filters.owner) {
+      activeFilters.push({field:"owner", type:"=", value:filters.owner});
+    }
+    if (filters.poRaised) {
+      activeFilters.push({field:"poRaised", type:"=", value:filters.poRaised});
+    }
+    
+    // Digital Motions filter (custom function)
+    if (filters.digitalMotions) {
+      activeFilters.push(function(data) {
+        return data.digitalMotions === true;
+      });
+    }
+    
+    console.log("[Execution] Applying", activeFilters.length, "filters");
+    
+    // Apply all filters
+    if (activeFilters.length > 0) {
+      executionTableInstance.setFilter(activeFilters);
+    }
+    
+    const visibleRows = executionTableInstance.getDataCount(true);
+    console.log("[Execution] Filters applied, showing", visibleRows, "rows");
+  });
+}
+
+// Initialize execution filters when execution grid is ready
+function initializeExecutionFilters() {
+  // Wait a bit for the execution grid to be initialized
+  setTimeout(() => {
+    setupExecutionFilters();
+  }, 500);
 }
 
 // SYNC GRID FUNCTIONALITY
@@ -298,6 +544,9 @@ window.executionModule = {
   setupExecutionSave,
   setupExecutionFilters,
   syncGridsOnEdit,
+  applyExecutionFilters,
+  getExecutionFilterValues,
+  initializeExecutionFilters
 };
 
 // Export the execution table instance getter

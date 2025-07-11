@@ -577,6 +577,10 @@ function route() {
           window.executionModule.tableInstance.getData(),
         );
         console.log("[route] Redrew execution grid");
+        // Initialize filters when execution tab is shown
+        if (typeof window.executionModule.setupExecutionFilters === "function") {
+          window.executionModule.setupExecutionFilters();
+        }
       }, 0);
     }
     if (
@@ -790,6 +794,11 @@ window.addEventListener("DOMContentLoaded", async () => {
   // Initialize Planning filters
   if (window.planningModule && typeof window.planningModule.initializePlanningFilters === "function") {
     window.planningModule.initializePlanningFilters();
+  }
+
+  // Initialize Execution filters
+  if (window.executionModule && typeof window.executionModule.initializeExecutionFilters === "function") {
+    window.executionModule.initializeExecutionFilters();
   }
 
   // Initialize Annual Budget Plan using budgets module
