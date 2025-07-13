@@ -72,8 +72,7 @@ h2 {
 #savePlan:hover {
   background: #1565c0;
 }
-#saveAnnualBudget,
-#saveBudgetDashboard {
+#saveAnnualBudget {
   background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
   color: #fff;
   border: none;
@@ -90,8 +89,7 @@ h2 {
     box-shadow 0.2s,
     transform 0.1s;
 }
-#saveAnnualBudget:hover,
-#saveBudgetDashboard:hover {
+#saveAnnualBudget:hover {
   background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
   box-shadow: 0 4px 16px rgba(25, 118, 210, 0.16);
   transform: translateY(-2px) scale(1.03);
@@ -511,22 +509,6 @@ table#planTable td input[type="text"] {
 }
 #budgetsTable {
   display: none !important;
-}
-.small-download-btn {
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 6px 14px;
-  font-size: 0.98rem;
-  font-weight: 500;
-  cursor: pointer;
-  margin-left: 8px;
-  margin-top: 4px;
-  transition: background 0.18s;
-}
-.small-download-btn:hover {
-  background: #1565c0;
 }
 .graph-fullscreen-btn {
   position: absolute;

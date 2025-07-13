@@ -866,12 +866,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   if (budgetsTable && window.budgetsModule) {
-    if (typeof window.budgetsModule.setupBudgetsSave === "function") {
-      window.budgetsModule.setupBudgetsSave(budgetsTable);
-    }
-    if (typeof window.budgetsModule.setupBudgetsDownload === "function") {
-      window.budgetsModule.setupBudgetsDownload(budgetsTable);
-    }
+    // Budgets save functionality is now handled through Annual Budget Plan
   }
 
   // Initialize reporting total spend using ROI module

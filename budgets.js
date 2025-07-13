@@ -164,99 +164,12 @@ function initBudgetsTable(budgets, rows) {
       }
     });
   });
-  setupBudgetsSave(table);
-  setupBudgetsDownload(table); // Setup download functionality
 
   // Make globally accessible for data refreshing
   window.budgetsTableInstance = table;
   window.loadBudgets = loadBudgets;
 
   return table;
-}
-
-function setupBudgetsSave(table) {
-  let btn = document.getElementById("saveBudgetDashboard");
-  if (!btn) {
-    btn = document.createElement("button");
-    btn.id = "saveBudgetDashboard";
-    btn.textContent = "Save Budget Dashboard";
-    btn.style.margin = "12px 0";
-    document.getElementById("view-budgets").appendChild(btn);
-  }
-  btn.onclick = () => {
-    // Save all budgets data
-    const data = table.getData();
-    // Convert array back to object by region
-    const obj = {};
-    data.forEach((row) => {
-      obj[row.region] = {
-        assignedBudget: row.assignedBudget,
-        notes: row.notes,
-        utilisation: row.utilisation,
-      };
-    });
-
-    console.log("Saving budgets data:", Object.keys(obj).length, "regions");
-
-    // Try Worker first, then backend fallback
-    if (window.cloudflareSyncModule) {
-      // Primary: Save to Worker
-      window.cloudflareSyncModule
-        .saveToWorker("budgets", obj, { source: "manual-save" })
-        .then((result) => {
-          console.log("Worker save successful:", result);
-          alert(
-            "✅ Budgets data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed.",
-          );
-
-          // Refresh data after successful save
-          if (window.cloudflareSyncModule.refreshDataAfterSave) {
-            window.cloudflareSyncModule.refreshDataAfterSave("budgets");
-          }
-        })
-        .catch((error) => {
-          console.warn("Worker save failed, trying backend:", error);
-
-          // Fallback: Save to backend
-          fetch("http://localhost:3000/save-budgets", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content: obj }),
-          })
-            .then((res) => res.json())
-            .then((result) => {
-              if (result.success) {
-                alert("✅ Budgets data saved to backend (Worker unavailable)!");
-              } else {
-                alert(
-                  "❌ Failed to save: " + (result.error || "Unknown error"),
-                );
-              }
-            })
-            .catch((err) => {
-              alert("❌ Save failed: " + err.message);
-            });
-        });
-    } else {
-      // No Worker configured, use backend only
-      fetch("http://localhost:3000/save-budgets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: obj }),
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          if (result.success) {
-            alert("✅ Budgets data saved to backend!");
-          } else {
-            alert("❌ Failed to save: " + (result.error || "Unknown error"));
-          }
-        })
-        .catch((err) => {
-          alert("❌ Save failed: " + err.message);
-        });
-    }
-  };
 }
 
 // Autosave functionality for budgets
@@ -577,47 +490,12 @@ if (!window._originalAnnualBudgetSave) {
 }
 
 // Setup CSV download functionality for budgets
-function setupBudgetsDownload(table) {
-  const downloadBtn = document.getElementById("downloadBudgetsInfoCSV");
-  if (downloadBtn) {
-    downloadBtn.onclick = () => {
-      const data = table.getData();
-      // Create CSV content
-      const headers = ["Region", "Assigned Budget", "Notes", "Utilisation"];
-      const csvContent = [
-        headers.join(","),
-        ...data.map((row) =>
-          [
-            row.region || "",
-            row.assignedBudget || 0,
-            `"${(row.notes || "").replace(/"/g, '""')}"`, // Escape quotes in notes
-            `"${row.utilisation || ""}"`,
-          ].join(","),
-        ),
-      ].join("\n");
-
-      // Create and download file
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `budgets_info_${new Date().toISOString().split("T")[0]}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    };
-  }
-}
-
 // Module exports
 const budgetsModule = {
   loadBudgets,
   initBudgetsTable,
-  setupBudgetsSave,
   setupAnnualBudgetSave,
   initializeAnnualBudgetPlan,
-  setupBudgetsDownload,
 };
 
 // Export to window for access from other modules

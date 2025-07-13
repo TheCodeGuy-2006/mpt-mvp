@@ -272,17 +272,8 @@ function renderFilterControls() {
         </div>
       </div>
       
-      <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="margin-top: 16px;">
         <div id="filterSummary" style="color: #666; font-size: 14px;"></div>
-        <button id="applyFilters" style="
-          background: #1976d2;
-          color: white;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: bold;
-        ">Apply Filters</button>
       </div>
     </div>
   `;
@@ -307,15 +298,12 @@ function setupFilterEventListeners() {
   filterIds.forEach((id) => {
     const element = document.getElementById(id);
     if (element) {
-      element.addEventListener("change", updateFilterSummary);
+      // Auto-update on change instead of waiting for apply button
+      element.addEventListener("change", () => {
+        applyFilters();
+      });
     }
   });
-
-  // Apply filters button
-  const applyBtn = document.getElementById("applyFilters");
-  if (applyBtn) {
-    applyBtn.addEventListener("click", applyFilters);
-  }
 
   // Clear filters button
   const clearBtn = document.getElementById("clearFilters");
