@@ -14,7 +14,7 @@ const programTypes = [
   "Localized Programs",
   "CxO events (1:few)",
   "Exec engagement programs",
-  "In-Account events (1:1)",
+  "In-Account Events (1:1)",
   "Contractor/Infrastructure",
   "Paid ads",
   "Operational/Infrastructure/Swag",
@@ -299,8 +299,8 @@ function initPlanningGrid(rows) {
           const r = cell.getRow();
           const rowData = r.getData();
 
-          // Special logic for In-Account events (1:1)
-          if (cell.getValue() === "In-Account events (1:1)") {
+          // Special logic for In-Account Events (1:1)
+          if (cell.getValue() === "In-Account Events (1:1)") {
             r.update({
               expectedLeads: 0,
               mqlForecast: 0,
@@ -424,8 +424,8 @@ function initPlanningGrid(rows) {
           const r = cell.getRow();
           const rowData = r.getData();
 
-          // Special logic for In-Account events (1:1) - recalculate pipeline based on cost
-          if (rowData.programType === "In-Account events (1:1)") {
+          // Special logic for In-Account Events (1:1) - recalculate pipeline based on cost
+          if (rowData.programType === "In-Account Events (1:1)") {
             r.update({
               expectedLeads: 0,
               mqlForecast: 0,
@@ -451,8 +451,8 @@ function initPlanningGrid(rows) {
           const r = cell.getRow();
           const rowData = r.getData();
 
-          // Special logic for In-Account events (1:1) - ignore expected leads, use forecasted cost
-          if (rowData.programType === "In-Account events (1:1)") {
+          // Special logic for In-Account Events (1:1) - ignore expected leads, use forecasted cost
+          if (rowData.programType === "In-Account Events (1:1)") {
             r.update({
               expectedLeads: 0,
               mqlForecast: 0,
@@ -533,6 +533,14 @@ function initPlanningGrid(rows) {
           // Toggle value
           const current = !!cell.getValue();
           cell.setValue(!current);
+          
+          // Sync digitalMotions change to execution table
+          setTimeout(() => {
+            if (window.executionModule && typeof window.executionModule.syncDigitalMotionsFromPlanning === 'function') {
+              window.executionModule.syncDigitalMotionsFromPlanning();
+              console.log('[Planning] Synced Digital Motions change to execution table');
+            }
+          }, 50);
           
           // Trigger ROI budget updates when Digital Motions toggle changes
           setTimeout(() => {
@@ -830,8 +838,8 @@ document
 
       // Before adding, update calculated fields for each row
       mappedRows.forEach((row) => {
-        // Special logic for In-Account events (1:1): no leads, pipeline = 20x forecasted cost
-        if (row.programType === "In-Account events (1:1)") {
+        // Special logic for In-Account Events (1:1): no leads, pipeline = 20x forecasted cost
+        if (row.programType === "In-Account Events (1:1)") {
           row.expectedLeads = 0;
           row.mqlForecast = 0;
           row.sqlForecast = 0;

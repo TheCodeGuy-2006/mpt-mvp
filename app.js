@@ -577,6 +577,10 @@ function route() {
           window.executionModule.tableInstance.getData(),
         );
         console.log("[route] Redrew execution grid");
+        // Sync digital motions data from planning tab
+        if (typeof window.executionModule.syncDigitalMotionsFromPlanning === "function") {
+          window.executionModule.syncDigitalMotionsFromPlanning();
+        }
         // Initialize filters when execution tab is shown
         if (typeof window.executionModule.setupExecutionFilters === "function") {
           window.executionModule.setupExecutionFilters();
