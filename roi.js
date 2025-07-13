@@ -329,11 +329,11 @@ updateRoiTotalSpend = function () {
     oppsEl.textContent = totalOpps.toLocaleString();
   }
 
-  // Update Remaining Budget (Total Budget - Actual Cost, filtered by region only)
-  updateRemainingBudget(filters.region);
+  // Update Remaining Budget (apply all ROI filters)
+  updateRemainingBudget(filters);
 
-  // Update Forecasted Budget Usage (Total Budget - Forecasted Cost, filtered by region only)
-  updateForecastedBudgetUsage(filters.region);
+  // Update Forecasted Budget Usage (apply all ROI filters)
+  updateForecastedBudgetUsage(filters);
 
   // Note: Program Type Breakdown Table removed in favor of chart visualization
   // The table functionality has been replaced with the compact chart format in the grid
@@ -675,8 +675,8 @@ function initializeRoiFunctionality() {
 
     // Initial remaining budget calculation
     setTimeout(() => {
-      updateRemainingBudget("");
-      updateForecastedBudgetUsage("");
+      updateRemainingBudget({});
+      updateForecastedBudgetUsage({});
     }, 100);
 
     // Initialize data table - wait a bit longer for planning module to load
@@ -804,25 +804,17 @@ function initRoiDataTable() {
           formatter: (cell) => {
             const data = cell.getData();
             const actualCost = Number(data.actualCost) || 0;
-            const pipelineForecast = Number(data.pipelineForecast) || 0;
-
+            
             if (actualCost === 0) return "N/A";
-
-            const roi = ((pipelineForecast - actualCost) / actualCost) * 100;
+            
+            const roi = Number(cell.getValue()) || 0;
             const color = roi >= 0 ? "#4caf50" : "#f44336";
 
             return `<span style="color: ${color}; font-weight: bold;">${roi.toFixed(1)}%</span>`;
           },
           width: 100,
           sorter: (a, b) => {
-            const getROI = (data) => {
-              const actualCost = Number(data.actualCost) || 0;
-              const pipelineForecast = Number(data.pipelineForecast) || 0;
-              return actualCost === 0
-                ? 0
-                : ((pipelineForecast - actualCost) / actualCost) * 100;
-            };
-            return getROI(a) - getROI(b);
+            return (Number(a.roi) || 0) - (Number(b.roi) || 0);
           },
           hozAlign: "right",
         },
@@ -855,19 +847,31 @@ function getCampaignDataForRoi() {
 
   const planningData = window.planningModule.tableInstance.getData();
 
-  return planningData.map((campaign) => ({
-    campaignName: campaign.campaignName || "Untitled Campaign",
-    programType: campaign.programType || "No Type",
-    forecastedCost: Number(campaign.forecastedCost) || 0,
-    actualCost: Number(campaign.actualCost) || 0,
-    expectedLeads: Number(campaign.expectedLeads) || 0,
-    actualLeads: Number(campaign.actualLeads) || 0,
-    pipelineForecast: Number(campaign.pipelineForecast) || 0,
-    region: campaign.region || "",
-    quarter: campaign.quarter || "",
-    status: campaign.status || "",
-    owner: campaign.owner || "",
-  }));
+  return planningData.map((campaign) => {
+    const actualCost = Number(campaign.actualCost) || 0;
+    const pipelineForecast = Number(campaign.pipelineForecast) || 0;
+    
+    // Calculate ROI
+    let roi = 0;
+    if (actualCost > 0) {
+      roi = ((pipelineForecast - actualCost) / actualCost) * 100;
+    }
+
+    return {
+      campaignName: campaign.campaignName || "Untitled Campaign",
+      programType: campaign.programType || "No Type",
+      forecastedCost: Number(campaign.forecastedCost) || 0,
+      actualCost: actualCost,
+      expectedLeads: Number(campaign.expectedLeads) || 0,
+      actualLeads: Number(campaign.actualLeads) || 0,
+      pipelineForecast: pipelineForecast,
+      roi: roi, // Add calculated ROI field
+      region: campaign.region || "",
+      quarter: campaign.quarter || "",
+      status: campaign.status || "",
+      owner: campaign.owner || "",
+    };
+  });
 }
 
 // Update ROI data table with current filters
@@ -952,57 +956,38 @@ async function loadBudgetsData() {
 }
 
 // Update remaining budget calculation
-async function updateRemainingBudget(regionFilter) {
-  console.log("[ROI] Updating remaining budget, region filter:", regionFilter);
+async function updateRemainingBudget(filters) {
+  console.log("[ROI] Updating remaining budget with filters:", filters);
 
   try {
     // Load budgets data
     const budgets = await loadBudgetsData();
     console.log("[ROI] Budgets data loaded:", budgets);
 
-    // Check if Digital Motions toggle is enabled for any campaigns
-    let useDigitalMotions = false;
-    if (window.planningModule && window.planningModule.tableInstance) {
-      const planningData = window.planningModule.tableInstance.getData();
-      useDigitalMotions = planningData.some(
-        (row) => row.digitalMotions === true,
-      );
-    }
-    console.log("[ROI] Use Digital Motions budget:", useDigitalMotions);
-
-    // Calculate total budget
+    // Calculate total budget (apply region filter only for budget selection)
     let totalBudget = 0;
-    if (useDigitalMotions) {
-      // Use Digital Motions budget, ignore region filter
-      if (budgets["Digital Motions"]) {
-        totalBudget = budgets["Digital Motions"].assignedBudget || 0;
+    for (const [region, data] of Object.entries(budgets)) {
+      // Apply region filter if specified
+      if (!filters.region || region === filters.region) {
+        totalBudget += data.assignedBudget || 0;
       }
-      console.log("[ROI] Using Digital Motions budget:", totalBudget);
-    } else {
-      // Use region-based budget (filtered by region if specified)
-      for (const [region, data] of Object.entries(budgets)) {
-        if (
-          region !== "Digital Motions" &&
-          (!regionFilter || region === regionFilter)
-        ) {
-          totalBudget += data.assignedBudget || 0;
-        }
-      }
-      console.log("[ROI] Using region-based budget:", totalBudget);
     }
+    console.log("[ROI] Total budget calculated:", totalBudget, "for region filter:", filters.region || "all regions");
 
-    // Calculate total actual cost
+    // Calculate total actual cost from execution data (apply ALL filters)
     let totalActualCost = 0;
-    if (window.planningModule && window.planningModule.tableInstance) {
-      const planningData = window.planningModule.tableInstance.getData();
-      totalActualCost = planningData.reduce((sum, row) => {
-        // If using Digital Motions, only include Digital Motions campaigns
-        // If using region-based, apply region filter as before
-        if (useDigitalMotions) {
-          if (!row.digitalMotions) return sum;
-        } else {
-          if (regionFilter && row.region !== regionFilter) return sum;
-        }
+    if (window.executionModule && window.executionModule.tableInstance) {
+      const executionData = window.executionModule.tableInstance.getData();
+      totalActualCost = executionData.reduce((sum, row) => {
+        // Apply all filters
+        if (filters.region && row.region !== filters.region) return sum;
+        if (filters.quarter && row.quarter !== filters.quarter) return sum;
+        if (filters.country && row.country !== filters.country) return sum;
+        if (filters.owner && row.owner !== filters.owner) return sum;
+        if (filters.status && row.status !== filters.status) return sum;
+        if (filters.programType && row.programType !== filters.programType) return sum;
+        if (filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) return sum;
+        if (filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) return sum;
 
         let val = row.actualCost;
         if (typeof val === "string")
@@ -1017,7 +1002,20 @@ async function updateRemainingBudget(regionFilter) {
     const remainingBudget = totalBudget - totalActualCost;
     console.log("[ROI] Remaining budget calculated:", remainingBudget);
 
-    // Update the display with dynamic label
+    // Create filter description for label
+    const activeFilters = [];
+    if (filters.region) activeFilters.push(`Region: ${filters.region}`);
+    if (filters.quarter) activeFilters.push(`Quarter: ${filters.quarter}`);
+    if (filters.country) activeFilters.push(`Country: ${filters.country}`);
+    if (filters.owner) activeFilters.push(`Owner: ${filters.owner}`);
+    if (filters.status) activeFilters.push(`Status: ${filters.status}`);
+    if (filters.programType) activeFilters.push(`Program Type: ${filters.programType}`);
+    if (filters.strategicPillars) activeFilters.push(`Strategic Pillars: ${filters.strategicPillars}`);
+    if (filters.revenuePlay) activeFilters.push(`Revenue Play: ${filters.revenuePlay}`);
+    
+    const filterText = activeFilters.length > 0 ? ` (${activeFilters.join(', ')})` : " (All Data)";
+
+    // Update the display
     const remainingBudgetEl = document.getElementById(
       "roiRemainingBudgetValue",
     );
@@ -1029,17 +1027,11 @@ async function updateRemainingBudget(regionFilter) {
         remainingBudgetEl.textContent,
       );
 
-      // Update the label to reflect the mode
+      // Update the label to show what's being calculated
       if (remainingBudgetBox) {
         const labelEl = remainingBudgetBox.querySelector("div:first-child");
         if (labelEl) {
-          if (useDigitalMotions) {
-            labelEl.textContent =
-              "Digital Motions Remaining Budget (Total Budget - Actual Cost)";
-          } else {
-            labelEl.textContent =
-              "Remaining Budget (Total Budget - Actual Cost)";
-          }
+          labelEl.textContent = `Remaining Budget${filterText} (Total Budget - Actual Cost)`;
         }
       }
     } else {
@@ -1057,10 +1049,10 @@ async function updateRemainingBudget(regionFilter) {
 }
 
 // Update forecasted budget usage calculation
-async function updateForecastedBudgetUsage(regionFilter) {
+async function updateForecastedBudgetUsage(filters) {
   console.log(
-    "[ROI] Updating forecasted budget usage, region filter:",
-    regionFilter,
+    "[ROI] Updating forecasted budget usage with filters:",
+    filters,
   );
 
   try {
@@ -1071,58 +1063,30 @@ async function updateForecastedBudgetUsage(regionFilter) {
       budgets,
     );
 
-    // Check if Digital Motions toggle is enabled for any campaigns
-    let useDigitalMotions = false;
-    if (window.planningModule && window.planningModule.tableInstance) {
-      const planningData = window.planningModule.tableInstance.getData();
-      useDigitalMotions = planningData.some(
-        (row) => row.digitalMotions === true,
-      );
-    }
-    console.log(
-      "[ROI] Use Digital Motions budget for forecasted:",
-      useDigitalMotions,
-    );
-
-    // Calculate total budget
+    // Calculate total budget (apply region filter only for budget selection)
     let totalBudget = 0;
-    if (useDigitalMotions) {
-      // Use Digital Motions budget, ignore region filter
-      if (budgets["Digital Motions"]) {
-        totalBudget = budgets["Digital Motions"].assignedBudget || 0;
+    for (const [region, data] of Object.entries(budgets)) {
+      // Apply region filter if specified
+      if (!filters.region || region === filters.region) {
+        totalBudget += data.assignedBudget || 0;
       }
-      console.log(
-        "[ROI] Using Digital Motions budget for forecasted:",
-        totalBudget,
-      );
-    } else {
-      // Use region-based budget (filtered by region if specified)
-      for (const [region, data] of Object.entries(budgets)) {
-        if (
-          region !== "Digital Motions" &&
-          (!regionFilter || region === regionFilter)
-        ) {
-          totalBudget += data.assignedBudget || 0;
-        }
-      }
-      console.log(
-        "[ROI] Using region-based budget for forecasted:",
-        totalBudget,
-      );
     }
+    console.log("[ROI] Total budget calculated:", totalBudget, "for region filter:", filters.region || "all regions");
 
-    // Calculate total forecasted cost
+    // Calculate total forecasted cost from planning data (apply ALL filters)
     let totalForecastedCost = 0;
     if (window.planningModule && window.planningModule.tableInstance) {
       const planningData = window.planningModule.tableInstance.getData();
       totalForecastedCost = planningData.reduce((sum, row) => {
-        // If using Digital Motions, only include Digital Motions campaigns
-        // If using region-based, apply region filter as before
-        if (useDigitalMotions) {
-          if (!row.digitalMotions) return sum;
-        } else {
-          if (regionFilter && row.region !== regionFilter) return sum;
-        }
+        // Apply all filters
+        if (filters.region && row.region !== filters.region) return sum;
+        if (filters.quarter && row.quarter !== filters.quarter) return sum;
+        if (filters.country && row.country !== filters.country) return sum;
+        if (filters.owner && row.owner !== filters.owner) return sum;
+        if (filters.status && row.status !== filters.status) return sum;
+        if (filters.programType && row.programType !== filters.programType) return sum;
+        if (filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) return sum;
+        if (filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) return sum;
 
         let val = row.forecastedCost;
         if (typeof val === "string")
@@ -1133,14 +1097,27 @@ async function updateForecastedBudgetUsage(regionFilter) {
     }
     console.log("[ROI] Total forecasted cost calculated:", totalForecastedCost);
 
-    // Calculate forecasted budget usage
+    // Calculate forecasted budget usage (remaining budget after forecasted costs)
     const forecastedBudgetUsage = totalBudget - totalForecastedCost;
     console.log(
       "[ROI] Forecasted budget usage calculated:",
       forecastedBudgetUsage,
     );
 
-    // Update the display with dynamic label
+    // Create filter description for label
+    const activeFilters = [];
+    if (filters.region) activeFilters.push(`Region: ${filters.region}`);
+    if (filters.quarter) activeFilters.push(`Quarter: ${filters.quarter}`);
+    if (filters.country) activeFilters.push(`Country: ${filters.country}`);
+    if (filters.owner) activeFilters.push(`Owner: ${filters.owner}`);
+    if (filters.status) activeFilters.push(`Status: ${filters.status}`);
+    if (filters.programType) activeFilters.push(`Program Type: ${filters.programType}`);
+    if (filters.strategicPillars) activeFilters.push(`Strategic Pillars: ${filters.strategicPillars}`);
+    if (filters.revenuePlay) activeFilters.push(`Revenue Play: ${filters.revenuePlay}`);
+    
+    const filterText = activeFilters.length > 0 ? ` (${activeFilters.join(', ')})` : " (All Data)";
+
+    // Update the display
     const forecastedBudgetEl = document.getElementById(
       "roiForecastedBudgetValue",
     );
@@ -1153,17 +1130,11 @@ async function updateForecastedBudgetUsage(regionFilter) {
         forecastedBudgetEl.textContent,
       );
 
-      // Update the label to reflect the mode
+      // Update the label to show what's being calculated
       if (forecastedBudgetBox) {
         const labelEl = forecastedBudgetBox.querySelector("div:first-child");
         if (labelEl) {
-          if (useDigitalMotions) {
-            labelEl.textContent =
-              "Digital Motions Forecasted Budget Usage (Total Budget - Forecasted Cost)";
-          } else {
-            labelEl.textContent =
-              "Forecasted Budget Usage (Total Budget - Forecasted Cost)";
-          }
+          labelEl.textContent = `Forecasted Budget Usage${filterText} (Total Budget - Forecasted Cost)`;
         }
       }
     } else {
