@@ -158,21 +158,26 @@ async function loadPlanning(retryCount = 0) {
   try {
     // Try to load via Worker API first (real-time, no caching issues)
     let rows;
-    
+
     try {
       // Use Worker API endpoint instead of raw GitHub files
-      const workerEndpoint = window.cloudflareSyncModule?.getWorkerEndpoint() || 'https://mpt-mvp-sync.jordanradford.workers.dev';
+      const workerEndpoint =
+        window.cloudflareSyncModule?.getWorkerEndpoint() ||
+        "https://mpt-mvp-sync.jordanradford.workers.dev";
       const workerUrl = `${workerEndpoint}/data/planning`;
-      
-      console.log(`Fetching planning data via Worker API (attempt ${retryCount + 1}):`, workerUrl);
-      
+
+      console.log(
+        `Fetching planning data via Worker API (attempt ${retryCount + 1}):`,
+        workerUrl,
+      );
+
       const response = await fetch(workerUrl, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       });
-      
+
       console.log(
         "Worker API response - status:",
         response.status,
@@ -180,29 +185,43 @@ async function loadPlanning(retryCount = 0) {
         "URL:",
         response.url,
       );
-      
+
       if (response.ok) {
         const result = await response.json();
         rows = result.data;
-        console.log("✅ Loaded planning data via Worker API:", rows.length, "rows", `(source: ${result.source})`);
-        
+        console.log(
+          "✅ Loaded planning data via Worker API:",
+          rows.length,
+          "rows",
+          `(source: ${result.source})`,
+        );
+
         // Validate that we got actual data
         if (rows && rows.length > 0) {
           console.log("✅ Worker API data validation passed");
         } else {
           console.warn("⚠️ Worker API returned empty data");
           if (retryCount < 2) {
-            console.log(`Retrying Worker API fetch in ${(retryCount + 1) * 2} seconds...`);
-            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
+            console.log(
+              `Retrying Worker API fetch in ${(retryCount + 1) * 2} seconds...`,
+            );
+            await new Promise((resolve) =>
+              setTimeout(resolve, (retryCount + 1) * 2000),
+            );
             return loadPlanning(retryCount + 1);
           }
         }
       } else {
-        throw new Error(`Worker API failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Worker API failed: ${response.status} ${response.statusText}`,
+        );
       }
     } catch (workerError) {
-      console.warn("Worker API failed, falling back to local file:", workerError);
-      
+      console.warn(
+        "Worker API failed, falling back to local file:",
+        workerError,
+      );
+
       // Fallback: Try local file
       try {
         const r = await fetch("data/planning.json");
@@ -214,19 +233,27 @@ async function loadPlanning(retryCount = 0) {
         );
         if (!r.ok) throw new Error("Failed to fetch planning.json");
         rows = await r.json();
-        console.log("📁 Loaded planning data from local file:", rows.length, "rows");
-        
+        console.log(
+          "📁 Loaded planning data from local file:",
+          rows.length,
+          "rows",
+        );
+
         // Show a message to the user about the Worker API being unavailable
         if (retryCount === 0) {
-          console.warn("⚠️ Worker API unavailable - using local data. Real-time sync disabled.");
+          console.warn(
+            "⚠️ Worker API unavailable - using local data. Real-time sync disabled.",
+          );
           // You might want to show a notification to the user here
         }
       } catch (localError) {
         console.error("Local file also failed:", localError);
-        throw new Error("Failed to load planning data from both Worker API and local file");
+        throw new Error(
+          "Failed to load planning data from both Worker API and local file",
+        );
       }
     }
-    
+
     console.log("Processing loaded planning data:", rows.length, "rows");
     // Ensure all rows have calculated fields before rendering
     rows.forEach((row, i) => {
@@ -262,7 +289,7 @@ function initPlanningGrid(rows) {
     selectableRows: 1,
     layout: "fitColumns",
     initialSort: [
-      {column: "id", dir: "desc"} // Sort by ID descending so newer rows appear at top
+      { column: "id", dir: "desc" }, // Sort by ID descending so newer rows appear at top
     ],
     columns: [
       // Select row button (circle)
@@ -326,7 +353,7 @@ function initPlanningGrid(rows) {
             }
           }
           rowData.__modified = true;
-          
+
           // Trigger autosave
           triggerPlanningAutosave(cell.getTable());
         },
@@ -437,7 +464,7 @@ function initPlanningGrid(rows) {
             });
           }
           rowData.__modified = true;
-          
+
           // Trigger autosave
           triggerPlanningAutosave(cell.getTable());
         },
@@ -473,7 +500,7 @@ function initPlanningGrid(rows) {
             });
           }
           rowData.__modified = true;
-          
+
           // Trigger autosave
           triggerPlanningAutosave(cell.getTable());
         },
@@ -507,7 +534,7 @@ function initPlanningGrid(rows) {
         width: 130,
         cellEdited: (cell) => {
           cell.getRow().getData().__modified = true;
-          
+
           // Trigger autosave
           triggerPlanningAutosave(cell.getTable());
         },
@@ -523,32 +550,44 @@ function initPlanningGrid(rows) {
       {
         title: "Digital Motions",
         field: "digitalMotions",
-        formatter: function(cell) {
+        formatter: function (cell) {
           const value = cell.getValue();
           return `<input type='checkbox' ${value ? "checked" : ""} style='transform:scale(1.3); cursor:pointer;' />`;
         },
         width: 120,
         hozAlign: "center",
-        cellClick: function(e, cell) {
+        cellClick: function (e, cell) {
           // Toggle value
           const current = !!cell.getValue();
           cell.setValue(!current);
-          
+
           // Sync digitalMotions change to execution table
           setTimeout(() => {
-            if (window.executionModule && typeof window.executionModule.syncDigitalMotionsFromPlanning === 'function') {
+            if (
+              window.executionModule &&
+              typeof window.executionModule.syncDigitalMotionsFromPlanning ===
+                "function"
+            ) {
               window.executionModule.syncDigitalMotionsFromPlanning();
-              console.log('[Planning] Synced Digital Motions change to execution table');
+              console.log(
+                "[Planning] Synced Digital Motions change to execution table",
+              );
             }
           }, 50);
-          
+
           // Trigger ROI budget updates when Digital Motions toggle changes
           setTimeout(() => {
-            if (window.roiModule && typeof window.roiModule.updateRemainingBudget === 'function') {
-              const regionFilter = document.getElementById("roiRegionFilter")?.value || "";
+            if (
+              window.roiModule &&
+              typeof window.roiModule.updateRemainingBudget === "function"
+            ) {
+              const regionFilter =
+                document.getElementById("roiRegionFilter")?.value || "";
               window.roiModule.updateRemainingBudget(regionFilter);
               window.roiModule.updateForecastedBudgetUsage(regionFilter);
-              console.log('[Planning] Triggered ROI budget updates after Digital Motions toggle');
+              console.log(
+                "[Planning] Triggered ROI budget updates after Digital Motions toggle",
+              );
             }
           }, 100);
         },
@@ -577,12 +616,15 @@ function initPlanningGrid(rows) {
   if (addBtn) {
     addBtn.onclick = () => {
       console.log("Add Planning Row button clicked");
-      const newRow = planningTableInstance.addRow({
-        id: `program-${Date.now()}`,
-        status: "Planning",
-        __modified: true,
-      }, true); // Add 'true' as second parameter to add at top
-      
+      const newRow = planningTableInstance.addRow(
+        {
+          id: `program-${Date.now()}`,
+          status: "Planning",
+          __modified: true,
+        },
+        true,
+      ); // Add 'true' as second parameter to add at top
+
       // Scroll to the new row and make it visible
       setTimeout(() => {
         if (newRow && newRow.scrollTo) {
@@ -615,10 +657,10 @@ function initPlanningGrid(rows) {
 
   setupPlanningSave(planningTableInstance, rows);
   setupPlanningDownload(planningTableInstance);
-  
+
   // Update global reference for data refreshing
   window.planningTableInstance = planningTableInstance;
-  
+
   return planningTableInstance;
 }
 
@@ -651,30 +693,33 @@ function setupPlanningSave(table, rows) {
     });
     // Save all planning data
     const data = table.getData();
-    
-    console.log('Saving planning data:', data.length, 'rows');
-    
+
+    console.log("Saving planning data:", data.length, "rows");
+
     // Try Worker first, then backend fallback
     if (window.cloudflareSyncModule) {
       // Primary: Save to Worker
-      window.cloudflareSyncModule.saveToWorker('planning', data, { source: 'manual-save' })
+      window.cloudflareSyncModule
+        .saveToWorker("planning", data, { source: "manual-save" })
         .then((result) => {
-          console.log('Worker save successful:', result);
-          alert("✅ Planning data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed.");
-          
+          console.log("Worker save successful:", result);
+          alert(
+            "✅ Planning data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed.",
+          );
+
           // Refresh data after successful save
           if (window.cloudflareSyncModule.refreshDataAfterSave) {
-            window.cloudflareSyncModule.refreshDataAfterSave('planning');
+            window.cloudflareSyncModule.refreshDataAfterSave("planning");
           }
-          
+
           // Update ROI metrics
           if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
             window.roiModule.updateRoiTotalSpend();
           }
         })
         .catch((error) => {
-          console.warn('Worker save failed, trying backend:', error);
-          
+          console.warn("Worker save failed, trying backend:", error);
+
           // Fallback: Save to backend
           fetch("http://localhost:3000/save-planning", {
             method: "POST",
@@ -684,9 +729,13 @@ function setupPlanningSave(table, rows) {
             .then((res) => res.json())
             .then((result) => {
               if (result.success) {
-                alert("✅ Planning data saved to backend (Worker unavailable)!");
+                alert(
+                  "✅ Planning data saved to backend (Worker unavailable)!",
+                );
               } else {
-                alert("❌ Failed to save: " + (result.error || "Unknown error"));
+                alert(
+                  "❌ Failed to save: " + (result.error || "Unknown error"),
+                );
               }
             })
             .catch((err) => {
@@ -704,7 +753,7 @@ function setupPlanningSave(table, rows) {
         .then((result) => {
           if (result.success) {
             alert("✅ Planning data saved to backend!");
-            
+
             // Update ROI metrics
             if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
               window.roiModule.updateRoiTotalSpend();
@@ -924,15 +973,29 @@ function updateDigitalMotionsButtonVisual(button) {
 }
 
 function populatePlanningFilters() {
-  const campaignNameInput = document.getElementById("planningCampaignNameFilter");
+  const campaignNameInput = document.getElementById(
+    "planningCampaignNameFilter",
+  );
   const regionSelect = document.getElementById("planningRegionFilter");
   const quarterSelect = document.getElementById("planningQuarterFilter");
   const statusSelect = document.getElementById("planningStatusFilter");
-  const programTypeSelect = document.getElementById("planningProgramTypeFilter");
+  const programTypeSelect = document.getElementById(
+    "planningProgramTypeFilter",
+  );
   const ownerSelect = document.getElementById("planningOwnerFilter");
-  const digitalMotionsButton = document.getElementById("planningDigitalMotionsFilter");
+  const digitalMotionsButton = document.getElementById(
+    "planningDigitalMotionsFilter",
+  );
 
-  if (!campaignNameInput || !regionSelect || !quarterSelect || !statusSelect || !programTypeSelect || !ownerSelect || !digitalMotionsButton) {
+  if (
+    !campaignNameInput ||
+    !regionSelect ||
+    !quarterSelect ||
+    !statusSelect ||
+    !programTypeSelect ||
+    !ownerSelect ||
+    !digitalMotionsButton
+  ) {
     console.error("[Planning] Missing filter elements:", {
       campaignNameInput: !!campaignNameInput,
       regionSelect: !!regionSelect,
@@ -940,28 +1003,36 @@ function populatePlanningFilters() {
       statusSelect: !!statusSelect,
       programTypeSelect: !!programTypeSelect,
       ownerSelect: !!ownerSelect,
-      digitalMotionsButton: !!digitalMotionsButton
+      digitalMotionsButton: !!digitalMotionsButton,
     });
     return;
   }
 
   // Initialize Digital Motions button state (preserve existing state if already set)
-  if (!digitalMotionsButton.hasAttribute('data-active')) {
+  if (!digitalMotionsButton.hasAttribute("data-active")) {
     digitalMotionsButton.dataset.active = "false";
     console.log("[Planning] Initialized Digital Motions button state to false");
   } else {
-    console.log("[Planning] Preserving existing Digital Motions button state:", digitalMotionsButton.dataset.active);
+    console.log(
+      "[Planning] Preserving existing Digital Motions button state:",
+      digitalMotionsButton.dataset.active,
+    );
   }
-  
+
   // Update button visual state to match data attribute
   updateDigitalMotionsButtonVisual(digitalMotionsButton);
-  
+
   // Reapply filters if any are currently active (after navigation)
   const currentFilters = getPlanningFilterValues();
-  const hasActiveFilters = currentFilters.campaignName || currentFilters.region || currentFilters.quarter || 
-                          currentFilters.status || currentFilters.programType || currentFilters.owner || 
-                          currentFilters.digitalMotions;
-  
+  const hasActiveFilters =
+    currentFilters.campaignName ||
+    currentFilters.region ||
+    currentFilters.quarter ||
+    currentFilters.status ||
+    currentFilters.programType ||
+    currentFilters.owner ||
+    currentFilters.digitalMotions;
+
   if (hasActiveFilters) {
     console.log("[Planning] Reapplying active filters after navigation");
     applyPlanningFilters();
@@ -969,8 +1040,12 @@ function populatePlanningFilters() {
 
   // Get options from planning data
   const planningData = planningTableInstance?.getData() || [];
-  const uniqueRegions = Array.from(new Set(planningData.map(c => c.region).filter(Boolean))).sort();
-  const uniqueOwners = Array.from(new Set(planningData.map(c => c.owner).filter(Boolean))).sort();
+  const uniqueRegions = Array.from(
+    new Set(planningData.map((c) => c.region).filter(Boolean)),
+  ).sort();
+  const uniqueOwners = Array.from(
+    new Set(planningData.map((c) => c.owner).filter(Boolean)),
+  ).sort();
 
   // Only populate if not already populated
   if (regionSelect.children.length <= 1) {
@@ -981,7 +1056,7 @@ function populatePlanningFilters() {
       regionSelect.appendChild(option);
     });
   }
-  
+
   if (quarterSelect.children.length <= 1) {
     quarterOptions.forEach((quarter) => {
       const option = document.createElement("option");
@@ -990,7 +1065,7 @@ function populatePlanningFilters() {
       quarterSelect.appendChild(option);
     });
   }
-  
+
   if (statusSelect.children.length <= 1) {
     statusOptions.forEach((status) => {
       const option = document.createElement("option");
@@ -999,7 +1074,7 @@ function populatePlanningFilters() {
       statusSelect.appendChild(option);
     });
   }
-  
+
   if (programTypeSelect.children.length <= 1) {
     programTypes.forEach((type) => {
       const option = document.createElement("option");
@@ -1008,7 +1083,7 @@ function populatePlanningFilters() {
       programTypeSelect.appendChild(option);
     });
   }
-  
+
   if (ownerSelect.children.length <= 1) {
     names.forEach((owner) => {
       const option = document.createElement("option");
@@ -1019,38 +1094,47 @@ function populatePlanningFilters() {
   }
 
   // Set up event listeners for all filters (only if not already attached)
-  if (!campaignNameInput.hasAttribute('data-listener-attached')) {
+  if (!campaignNameInput.hasAttribute("data-listener-attached")) {
     campaignNameInput.addEventListener("input", applyPlanningFilters);
-    campaignNameInput.setAttribute('data-listener-attached', 'true');
+    campaignNameInput.setAttribute("data-listener-attached", "true");
   }
-  
-  [regionSelect, quarterSelect, statusSelect, programTypeSelect, ownerSelect].forEach(select => {
-    if (!select.hasAttribute('data-listener-attached')) {
+
+  [
+    regionSelect,
+    quarterSelect,
+    statusSelect,
+    programTypeSelect,
+    ownerSelect,
+  ].forEach((select) => {
+    if (!select.hasAttribute("data-listener-attached")) {
       select.addEventListener("change", applyPlanningFilters);
-      select.setAttribute('data-listener-attached', 'true');
+      select.setAttribute("data-listener-attached", "true");
     }
   });
 
   // Digital Motions filter button toggle (only attach once)
-  if (!digitalMotionsButton.hasAttribute('data-listener-attached')) {
+  if (!digitalMotionsButton.hasAttribute("data-listener-attached")) {
     digitalMotionsButton.addEventListener("click", () => {
       const currentState = digitalMotionsButton.dataset.active;
       const isActive = currentState === "true";
       const newState = !isActive;
-      
+
       console.log("[Planning] Digital Motions button clicked:", {
         currentState,
         isActive,
-        newState
+        newState,
       });
-      
+
       digitalMotionsButton.dataset.active = newState.toString();
       updateDigitalMotionsButtonVisual(digitalMotionsButton);
-      
-      console.log("[Planning] About to apply filters with Digital Motions state:", newState);
+
+      console.log(
+        "[Planning] About to apply filters with Digital Motions state:",
+        newState,
+      );
       applyPlanningFilters();
     });
-    digitalMotionsButton.setAttribute('data-listener-attached', 'true');
+    digitalMotionsButton.setAttribute("data-listener-attached", "true");
   }
 
   // Clear filters button
@@ -1071,58 +1155,75 @@ function populatePlanningFilters() {
 }
 
 function getPlanningFilterValues() {
-  const digitalMotionsButton = document.getElementById("planningDigitalMotionsFilter");
+  const digitalMotionsButton = document.getElementById(
+    "planningDigitalMotionsFilter",
+  );
   const digitalMotionsActive = digitalMotionsButton?.dataset.active === "true";
-  
+
   const filterValues = {
-    campaignName: document.getElementById("planningCampaignNameFilter")?.value || "",
+    campaignName:
+      document.getElementById("planningCampaignNameFilter")?.value || "",
     region: document.getElementById("planningRegionFilter")?.value || "",
     quarter: document.getElementById("planningQuarterFilter")?.value || "",
     status: document.getElementById("planningStatusFilter")?.value || "",
-    programType: document.getElementById("planningProgramTypeFilter")?.value || "",
+    programType:
+      document.getElementById("planningProgramTypeFilter")?.value || "",
     owner: document.getElementById("planningOwnerFilter")?.value || "",
-    digitalMotions: digitalMotionsActive
+    digitalMotions: digitalMotionsActive,
   };
-  
-  console.log("[Planning] getPlanningFilterValues - Digital Motions button state:", {
-    element: !!digitalMotionsButton,
-    datasetActive: digitalMotionsButton?.dataset.active,
-    digitalMotionsActive
-  });
-  
+
+  console.log(
+    "[Planning] getPlanningFilterValues - Digital Motions button state:",
+    {
+      element: !!digitalMotionsButton,
+      datasetActive: digitalMotionsButton?.dataset.active,
+      digitalMotionsActive,
+    },
+  );
+
   return filterValues;
 }
 
 function applyPlanningFilters() {
   if (!planningTableInstance) {
-    console.warn("[Planning] Table instance not available, cannot apply filters");
+    console.warn(
+      "[Planning] Table instance not available, cannot apply filters",
+    );
     return;
   }
-  
+
   const filters = getPlanningFilterValues();
   console.log("[Planning] Applying filters:", filters);
-  
+
   // Debug: Show Digital Motions data in the table
   if (filters.digitalMotions) {
     const allData = planningTableInstance.getData();
-    const digitalMotionsRows = allData.filter(row => row.digitalMotions === true);
+    const digitalMotionsRows = allData.filter(
+      (row) => row.digitalMotions === true,
+    );
     console.log("[Planning] Total rows:", allData.length);
-    console.log("[Planning] Rows with digitalMotions=true:", digitalMotionsRows.length);
-    console.log("[Planning] Digital Motions campaigns:", digitalMotionsRows.map(r => ({
-      id: r.id,
-      campaignName: r.campaignName,
-      digitalMotions: r.digitalMotions
-    })));
+    console.log(
+      "[Planning] Rows with digitalMotions=true:",
+      digitalMotionsRows.length,
+    );
+    console.log(
+      "[Planning] Digital Motions campaigns:",
+      digitalMotionsRows.map((r) => ({
+        id: r.id,
+        campaignName: r.campaignName,
+        digitalMotions: r.digitalMotions,
+      })),
+    );
   }
-  
+
   // Use requestAnimationFrame to reduce forced reflow
   requestAnimationFrame(() => {
     // Clear existing filters first
     planningTableInstance.clearFilter();
-    
+
     // Build filter functions array
     const filterFunctions = [];
-    
+
     // Campaign name filter (case-insensitive partial match)
     if (filters.campaignName) {
       const searchTerm = filters.campaignName.toLowerCase();
@@ -1131,19 +1232,24 @@ function applyPlanningFilters() {
         return campaignName.includes(searchTerm);
       });
     }
-    
+
     // Digital Motions filter
     if (filters.digitalMotions) {
-      console.log("[Planning] Digital Motions filter is active, adding filter function");
+      console.log(
+        "[Planning] Digital Motions filter is active, adding filter function",
+      );
       filterFunctions.push((data) => {
         const hasDigitalMotions = data.digitalMotions === true;
         if (!hasDigitalMotions) {
-          console.log("[Planning] Filtering out row without digitalMotions:", data.campaignName || data.id);
+          console.log(
+            "[Planning] Filtering out row without digitalMotions:",
+            data.campaignName || data.id,
+          );
         }
         return hasDigitalMotions;
       });
     }
-    
+
     // Standard exact match filters
     if (filters.region) {
       filterFunctions.push((data) => data.region === filters.region);
@@ -1160,21 +1266,23 @@ function applyPlanningFilters() {
     if (filters.owner) {
       filterFunctions.push((data) => data.owner === filters.owner);
     }
-    
+
     // Apply combined filter function if any filters are active
     if (filterFunctions.length > 0) {
-      planningTableInstance.addFilter(function(data) {
+      planningTableInstance.addFilter(function (data) {
         // All filter functions must return true (AND logic)
-        return filterFunctions.every(fn => fn(data));
+        return filterFunctions.every((fn) => fn(data));
       });
     }
-    
+
     const visibleRows = planningTableInstance.getDataCount(true);
     console.log("[Planning] Filters applied, showing", visibleRows, "rows");
-    
+
     // Show helpful message when Digital Motions filter is active
     if (filters.digitalMotions) {
-      console.log("[Planning] Digital Motions filter active - showing only campaigns with digitalMotions: true");
+      console.log(
+        "[Planning] Digital Motions filter active - showing only campaigns with digitalMotions: true",
+      );
     }
   });
 }
@@ -1228,12 +1336,12 @@ console.log(
 // Autosave functionality for planning
 function triggerPlanningAutosave(table) {
   if (!window.cloudflareSyncModule) {
-    console.log('Cloudflare sync module not available');
+    console.log("Cloudflare sync module not available");
     return;
   }
 
   const data = table.getData();
-  window.cloudflareSyncModule.scheduleSave('planning', data, {
-    source: 'planning-autosave'
+  window.cloudflareSyncModule.scheduleSave("planning", data, {
+    source: "planning-autosave",
   });
 }

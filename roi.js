@@ -158,8 +158,6 @@ function updateRoiTotalSpend() {
   // The table functionality has been replaced with the compact chart format in the grid
 }
 
-
-
 // --- ROI FILTER LOGIC UPDATE START ---
 // Update ROI Total Spend and Data Table to use all calendar filters
 function getRoiFilterValues() {
@@ -170,28 +168,34 @@ function getRoiFilterValues() {
     owner: document.getElementById("roiOwnerFilter")?.value || "",
     status: document.getElementById("roiStatusFilter")?.value || "",
     programType: document.getElementById("roiProgramTypeFilter")?.value || "",
-    strategicPillars: document.getElementById("roiStrategicPillarsFilter")?.value || "",
-    revenuePlay: document.getElementById("roiRevenuePlayFilter")?.value || ""
+    strategicPillars:
+      document.getElementById("roiStrategicPillarsFilter")?.value || "",
+    revenuePlay: document.getElementById("roiRevenuePlayFilter")?.value || "",
   };
 }
 
 // Patch updateRoiTotalSpend
 const _originalUpdateRoiTotalSpend = updateRoiTotalSpend;
-updateRoiTotalSpend = function() {
+updateRoiTotalSpend = function () {
   populateRoiFilters();
   const filters = getRoiFilterValues();
   let filteredData = [];
   if (window.executionModule.tableInstance) {
-    filteredData = window.executionModule.tableInstance.getData().filter(row => {
-      return (!filters.region || row.region === filters.region)
-        && (!filters.quarter || row.quarter === filters.quarter)
-        && (!filters.country || row.country === filters.country)
-        && (!filters.owner || row.owner === filters.owner)
-        && (!filters.status || row.status === filters.status)
-        && (!filters.programType || row.programType === filters.programType)
-        && (!filters.strategicPillars || row.strategicPillars === filters.strategicPillars)
-        && (!filters.revenuePlay || row.revenuePlay === filters.revenuePlay);
-    });
+    filteredData = window.executionModule.tableInstance
+      .getData()
+      .filter((row) => {
+        return (
+          (!filters.region || row.region === filters.region) &&
+          (!filters.quarter || row.quarter === filters.quarter) &&
+          (!filters.country || row.country === filters.country) &&
+          (!filters.owner || row.owner === filters.owner) &&
+          (!filters.status || row.status === filters.status) &&
+          (!filters.programType || row.programType === filters.programType) &&
+          (!filters.strategicPillars ||
+            row.strategicPillars === filters.strategicPillars) &&
+          (!filters.revenuePlay || row.revenuePlay === filters.revenuePlay)
+        );
+      });
   }
 
   let totalSpend = 0;
@@ -337,7 +341,7 @@ updateRoiTotalSpend = function() {
 
 // Patch updateRoiDataTable
 const _originalUpdateRoiDataTable = updateRoiDataTable;
-updateRoiDataTable = function() {
+updateRoiDataTable = function () {
   const table = window.roiDataTableInstance;
   if (!table) {
     console.log("ROI Data Table not initialized yet");
@@ -345,18 +349,23 @@ updateRoiDataTable = function() {
   }
   const filters = getRoiFilterValues();
   const campaigns = getCampaignDataForRoi();
-  const filteredCampaigns = campaigns.filter(campaign => {
-    return (!filters.region || campaign.region === filters.region)
-      && (!filters.quarter || campaign.quarter === filters.quarter)
-      && (!filters.country || campaign.country === filters.country)
-      && (!filters.owner || campaign.owner === filters.owner)
-      && (!filters.status || campaign.status === filters.status)
-      && (!filters.programType || campaign.programType === filters.programType)
-      && (!filters.strategicPillars || campaign.strategicPillars === filters.strategicPillars)
-      && (!filters.revenuePlay || campaign.revenuePlay === filters.revenuePlay);
+  const filteredCampaigns = campaigns.filter((campaign) => {
+    return (
+      (!filters.region || campaign.region === filters.region) &&
+      (!filters.quarter || campaign.quarter === filters.quarter) &&
+      (!filters.country || campaign.country === filters.country) &&
+      (!filters.owner || campaign.owner === filters.owner) &&
+      (!filters.status || campaign.status === filters.status) &&
+      (!filters.programType || campaign.programType === filters.programType) &&
+      (!filters.strategicPillars ||
+        campaign.strategicPillars === filters.strategicPillars) &&
+      (!filters.revenuePlay || campaign.revenuePlay === filters.revenuePlay)
+    );
   });
   table.replaceData(filteredCampaigns);
-  console.log(`ROI Data Table updated with ${filteredCampaigns.length} campaigns`);
+  console.log(
+    `ROI Data Table updated with ${filteredCampaigns.length} campaigns`,
+  );
 };
 // --- ROI FILTER LOGIC UPDATE END ---
 
@@ -368,21 +377,47 @@ function populateRoiFilters() {
   const ownerSelect = document.getElementById("roiOwnerFilter");
   const statusSelect = document.getElementById("roiStatusFilter");
   const programTypeSelect = document.getElementById("roiProgramTypeFilter");
-  const strategicPillarsSelect = document.getElementById("roiStrategicPillarsFilter");
+  const strategicPillarsSelect = document.getElementById(
+    "roiStrategicPillarsFilter",
+  );
   const revenuePlaySelect = document.getElementById("roiRevenuePlayFilter");
 
-  if (!regionSelect || !quarterSelect || !countrySelect || !ownerSelect || !statusSelect || !programTypeSelect || !strategicPillarsSelect || !revenuePlaySelect) return;
+  if (
+    !regionSelect ||
+    !quarterSelect ||
+    !countrySelect ||
+    !ownerSelect ||
+    !statusSelect ||
+    !programTypeSelect ||
+    !strategicPillarsSelect ||
+    !revenuePlaySelect
+  )
+    return;
 
   // Get options from planning data
   const planningData = window.planningModule?.tableInstance?.getData() || [];
-  const regionOptions = Array.from(new Set(planningData.map(c => c.region).filter(Boolean))).sort();
+  const regionOptions = Array.from(
+    new Set(planningData.map((c) => c.region).filter(Boolean)),
+  ).sort();
   const quarterOptions = window.planningModule?.constants?.quarterOptions || [];
-  const countryOptions = Array.from(new Set(planningData.map(c => c.country).filter(Boolean))).sort();
-  const ownerOptions = Array.from(new Set(planningData.map(c => c.owner).filter(Boolean))).sort();
-  const statusOptions = Array.from(new Set(planningData.map(c => c.status).filter(Boolean))).sort();
-  const programTypeOptions = Array.from(new Set(planningData.map(c => c.programType).filter(Boolean))).sort();
-  const strategicPillarsOptions = Array.from(new Set(planningData.map(c => c.strategicPillars).filter(Boolean))).sort();
-  const revenuePlayOptions = Array.from(new Set(planningData.map(c => c.revenuePlay).filter(Boolean))).sort();
+  const countryOptions = Array.from(
+    new Set(planningData.map((c) => c.country).filter(Boolean)),
+  ).sort();
+  const ownerOptions = Array.from(
+    new Set(planningData.map((c) => c.owner).filter(Boolean)),
+  ).sort();
+  const statusOptions = Array.from(
+    new Set(planningData.map((c) => c.status).filter(Boolean)),
+  ).sort();
+  const programTypeOptions = Array.from(
+    new Set(planningData.map((c) => c.programType).filter(Boolean)),
+  ).sort();
+  const strategicPillarsOptions = Array.from(
+    new Set(planningData.map((c) => c.strategicPillars).filter(Boolean)),
+  ).sort();
+  const revenuePlayOptions = Array.from(
+    new Set(planningData.map((c) => c.revenuePlay).filter(Boolean)),
+  ).sort();
 
   // Only populate if not already populated
   if (regionSelect.children.length <= 1) {
@@ -451,7 +486,16 @@ function populateRoiFilters() {
   }
 
   // Set up event listeners for all filters
-  [regionSelect, quarterSelect, countrySelect, ownerSelect, statusSelect, programTypeSelect, strategicPillarsSelect, revenuePlaySelect].forEach(select => {
+  [
+    regionSelect,
+    quarterSelect,
+    countrySelect,
+    ownerSelect,
+    statusSelect,
+    programTypeSelect,
+    strategicPillarsSelect,
+    revenuePlaySelect,
+  ].forEach((select) => {
     select.addEventListener("change", () => {
       updateRoiTotalSpend();
       updateRoiDataTable();
@@ -625,16 +669,16 @@ function initializeRoiFunctionality() {
     renderRoiByProgramTypeChart();
     renderRoiByQuarterChart();
     initRoiTabSwitching(); // Initialize ROI tab functionality
-    
+
     // Populate ROI filters
     populateRoiFilters();
-    
+
     // Initial remaining budget calculation
     setTimeout(() => {
       updateRemainingBudget("");
       updateForecastedBudgetUsage("");
     }, 100);
-    
+
     // Initialize data table - wait a bit longer for planning module to load
     setTimeout(() => {
       console.log("Attempting to initialize ROI Data Table...");
@@ -646,23 +690,23 @@ function initializeRoiFunctionality() {
 // Initialize ROI Data Table
 function initRoiDataTable() {
   console.log("Initializing ROI Data Table...");
-  
+
   const tableContainer = document.getElementById("roiDataTable");
   if (!tableContainer) {
     console.error("ROI Data Table container not found");
     return null;
   }
-  
+
   console.log("Table container found:", tableContainer);
-  
-  if (typeof Tabulator === 'undefined') {
+
+  if (typeof Tabulator === "undefined") {
     console.error("Tabulator library not loaded");
     return null;
   }
-  
+
   const campaigns = getCampaignDataForRoi();
   console.log("Campaign data for ROI:", campaigns.length, "campaigns");
-   try {
+  try {
     const table = new Tabulator(tableContainer, {
       data: campaigns,
       layout: "fitDataStretch",
@@ -678,124 +722,125 @@ function initRoiDataTable() {
       rowHeight: 60,
       headerHeight: 50,
       columns: [
-      {
-        title: "Campaign Name & Type",
-        field: "campaignInfo",
-        formatter: (cell) => {
-          const data = cell.getData();
-          const name = data.campaignName || 'Untitled Campaign';
-          const type = data.programType || 'No Type';
-          return `
+        {
+          title: "Campaign Name & Type",
+          field: "campaignInfo",
+          formatter: (cell) => {
+            const data = cell.getData();
+            const name = data.campaignName || "Untitled Campaign";
+            const type = data.programType || "No Type";
+            return `
             <div style="line-height: 1.4;">
               <div style="font-weight: bold; color: #1976d2; font-size: 0.95em;">${name}</div>
               <div style="font-size: 0.8em; color: #666; margin-top: 2px;">${type}</div>
             </div>
           `;
+          },
+          width: 220,
+          sorter: (a, b) => {
+            const nameA = (a.campaignName || "").toLowerCase();
+            const nameB = (b.campaignName || "").toLowerCase();
+            return nameA.localeCompare(nameB);
+          },
         },
-        width: 220,
-        sorter: (a, b) => {
-          const nameA = (a.campaignName || '').toLowerCase();
-          const nameB = (b.campaignName || '').toLowerCase();
-          return nameA.localeCompare(nameB);
-        }
-      },
-      {
-        title: "Forecasted Cost",
-        field: "forecastedCost",
-        formatter: (cell) => {
-          const value = Number(cell.getValue()) || 0;
-          return `$${value.toLocaleString()}`;
+        {
+          title: "Forecasted Cost",
+          field: "forecastedCost",
+          formatter: (cell) => {
+            const value = Number(cell.getValue()) || 0;
+            return `$${value.toLocaleString()}`;
+          },
+          width: 130,
+          sorter: "number",
+          hozAlign: "right",
         },
-        width: 130,
-        sorter: "number",
-        hozAlign: "right"
-      },
-      {
-        title: "Actual Cost",
-        field: "actualCost",
-        formatter: (cell) => {
-          const value = Number(cell.getValue()) || 0;
-          return `$${value.toLocaleString()}`;
+        {
+          title: "Actual Cost",
+          field: "actualCost",
+          formatter: (cell) => {
+            const value = Number(cell.getValue()) || 0;
+            return `$${value.toLocaleString()}`;
+          },
+          width: 120,
+          sorter: "number",
+          hozAlign: "right",
         },
-        width: 120,
-        sorter: "number",
-        hozAlign: "right"
-      },
-      {
-        title: "Expected Leads",
-        field: "expectedLeads",
-        formatter: (cell) => {
-          const value = Number(cell.getValue()) || 0;
-          return value.toLocaleString();
+        {
+          title: "Expected Leads",
+          field: "expectedLeads",
+          formatter: (cell) => {
+            const value = Number(cell.getValue()) || 0;
+            return value.toLocaleString();
+          },
+          width: 120,
+          sorter: "number",
+          hozAlign: "right",
         },
-        width: 120,
-        sorter: "number",
-        hozAlign: "right"
-      },
-      {
-        title: "Actual Leads",
-        field: "actualLeads",
-        formatter: (cell) => {
-          const value = Number(cell.getValue()) || 0;
-          return value.toLocaleString();
+        {
+          title: "Actual Leads",
+          field: "actualLeads",
+          formatter: (cell) => {
+            const value = Number(cell.getValue()) || 0;
+            return value.toLocaleString();
+          },
+          width: 110,
+          sorter: "number",
+          hozAlign: "right",
         },
-        width: 110,
-        sorter: "number",
-        hozAlign: "right"
-      },
-      {
-        title: "Pipeline Forecasted",
-        field: "pipelineForecast",
-        formatter: (cell) => {
-          const value = Number(cell.getValue()) || 0;
-          return `$${value.toLocaleString()}`;
+        {
+          title: "Pipeline Forecasted",
+          field: "pipelineForecast",
+          formatter: (cell) => {
+            const value = Number(cell.getValue()) || 0;
+            return `$${value.toLocaleString()}`;
+          },
+          width: 150,
+          sorter: "number",
+          hozAlign: "right",
         },
-        width: 150,
-        sorter: "number",
-        hozAlign: "right"
-      },
-      {
-        title: "ROI",
-        field: "roi",
-        formatter: (cell) => {
-          const data = cell.getData();
-          const actualCost = Number(data.actualCost) || 0;
-          const pipelineForecast = Number(data.pipelineForecast) || 0;
-          
-          if (actualCost === 0) return "N/A";
-          
-          const roi = ((pipelineForecast - actualCost) / actualCost * 100);
-          const color = roi >= 0 ? "#4caf50" : "#f44336";
-          
-          return `<span style="color: ${color}; font-weight: bold;">${roi.toFixed(1)}%</span>`;
-        },
-        width: 100,
-        sorter: (a, b) => {
-          const getROI = (data) => {
+        {
+          title: "ROI",
+          field: "roi",
+          formatter: (cell) => {
+            const data = cell.getData();
             const actualCost = Number(data.actualCost) || 0;
             const pipelineForecast = Number(data.pipelineForecast) || 0;
-            return actualCost === 0 ? 0 : ((pipelineForecast - actualCost) / actualCost * 100);
-          };
-          return getROI(a) - getROI(b);
+
+            if (actualCost === 0) return "N/A";
+
+            const roi = ((pipelineForecast - actualCost) / actualCost) * 100;
+            const color = roi >= 0 ? "#4caf50" : "#f44336";
+
+            return `<span style="color: ${color}; font-weight: bold;">${roi.toFixed(1)}%</span>`;
+          },
+          width: 100,
+          sorter: (a, b) => {
+            const getROI = (data) => {
+              const actualCost = Number(data.actualCost) || 0;
+              const pipelineForecast = Number(data.pipelineForecast) || 0;
+              return actualCost === 0
+                ? 0
+                : ((pipelineForecast - actualCost) / actualCost) * 100;
+            };
+            return getROI(a) - getROI(b);
+          },
+          hozAlign: "right",
         },
-        hozAlign: "right"
-      }
-    ],
-    pagination: "local",
-    paginationSize: 15,
-    paginationSizeSelector: [10, 15, 25, 50],
-    movableColumns: true,
-    resizableColumns: true,
-    tooltips: true,
-    tooltipsHeader: true
-  });
+      ],
+      pagination: "local",
+      paginationSize: 15,
+      paginationSizeSelector: [10, 15, 25, 50],
+      movableColumns: true,
+      resizableColumns: true,
+      tooltips: true,
+      tooltipsHeader: true,
+    });
 
-  // Store the table instance globally for updates
-  window.roiDataTableInstance = table;
-  console.log("ROI Data Table initialized successfully");
+    // Store the table instance globally for updates
+    window.roiDataTableInstance = table;
+    console.log("ROI Data Table initialized successfully");
 
-  return table;
-  
+    return table;
   } catch (error) {
     console.error("Error initializing ROI Data Table:", error);
     return null;
@@ -809,19 +854,19 @@ function getCampaignDataForRoi() {
   }
 
   const planningData = window.planningModule.tableInstance.getData();
-  
-  return planningData.map(campaign => ({
-    campaignName: campaign.campaignName || 'Untitled Campaign',
-    programType: campaign.programType || 'No Type',
+
+  return planningData.map((campaign) => ({
+    campaignName: campaign.campaignName || "Untitled Campaign",
+    programType: campaign.programType || "No Type",
     forecastedCost: Number(campaign.forecastedCost) || 0,
     actualCost: Number(campaign.actualCost) || 0,
     expectedLeads: Number(campaign.expectedLeads) || 0,
     actualLeads: Number(campaign.actualLeads) || 0,
     pipelineForecast: Number(campaign.pipelineForecast) || 0,
-    region: campaign.region || '',
-    quarter: campaign.quarter || '',
-    status: campaign.status || '',
-    owner: campaign.owner || ''
+    region: campaign.region || "",
+    quarter: campaign.quarter || "",
+    status: campaign.status || "",
+    owner: campaign.owner || "",
   }));
 }
 
@@ -835,13 +880,14 @@ function updateRoiDataTable() {
 
   // Get filter values from ROI filters
   const regionFilter = document.getElementById("roiRegionFilter")?.value || "";
-  const quarterFilter = document.getElementById("roiQuarterFilter")?.value || "";
+  const quarterFilter =
+    document.getElementById("roiQuarterFilter")?.value || "";
 
   // Get fresh data
   const campaigns = getCampaignDataForRoi();
-  
+
   // Apply filters
-  const filteredCampaigns = campaigns.filter(campaign => {
+  const filteredCampaigns = campaigns.filter((campaign) => {
     const matchesRegion = !regionFilter || campaign.region === regionFilter;
     const matchesQuarter = !quarterFilter || campaign.quarter === quarterFilter;
     return matchesRegion && matchesQuarter;
@@ -849,7 +895,9 @@ function updateRoiDataTable() {
 
   // Update table data
   table.replaceData(filteredCampaigns);
-  console.log(`ROI Data Table updated with ${filteredCampaigns.length} campaigns`);
+  console.log(
+    `ROI Data Table updated with ${filteredCampaigns.length} campaigns`,
+  );
 }
 
 // Handle ROI tab routing logic
@@ -891,53 +939,58 @@ let budgetsData = null;
 // Load budgets data from budgets.json
 async function loadBudgetsData() {
   if (budgetsData) return budgetsData;
-  
+
   try {
-    const response = await fetch('data/budgets.json');
+    const response = await fetch("data/budgets.json");
     budgetsData = await response.json();
-    console.log('[ROI] Loaded budgets data:', budgetsData);
+    console.log("[ROI] Loaded budgets data:", budgetsData);
     return budgetsData;
   } catch (error) {
-    console.error('[ROI] Error loading budgets data:', error);
+    console.error("[ROI] Error loading budgets data:", error);
     return {};
   }
 }
 
 // Update remaining budget calculation
 async function updateRemainingBudget(regionFilter) {
-  console.log('[ROI] Updating remaining budget, region filter:', regionFilter);
-  
+  console.log("[ROI] Updating remaining budget, region filter:", regionFilter);
+
   try {
     // Load budgets data
     const budgets = await loadBudgetsData();
-    console.log('[ROI] Budgets data loaded:', budgets);
-    
+    console.log("[ROI] Budgets data loaded:", budgets);
+
     // Check if Digital Motions toggle is enabled for any campaigns
     let useDigitalMotions = false;
     if (window.planningModule && window.planningModule.tableInstance) {
       const planningData = window.planningModule.tableInstance.getData();
-      useDigitalMotions = planningData.some(row => row.digitalMotions === true);
+      useDigitalMotions = planningData.some(
+        (row) => row.digitalMotions === true,
+      );
     }
-    console.log('[ROI] Use Digital Motions budget:', useDigitalMotions);
-    
+    console.log("[ROI] Use Digital Motions budget:", useDigitalMotions);
+
     // Calculate total budget
     let totalBudget = 0;
     if (useDigitalMotions) {
       // Use Digital Motions budget, ignore region filter
-      if (budgets['Digital Motions']) {
-        totalBudget = budgets['Digital Motions'].assignedBudget || 0;
+      if (budgets["Digital Motions"]) {
+        totalBudget = budgets["Digital Motions"].assignedBudget || 0;
       }
-      console.log('[ROI] Using Digital Motions budget:', totalBudget);
+      console.log("[ROI] Using Digital Motions budget:", totalBudget);
     } else {
       // Use region-based budget (filtered by region if specified)
       for (const [region, data] of Object.entries(budgets)) {
-        if (region !== 'Digital Motions' && (!regionFilter || region === regionFilter)) {
+        if (
+          region !== "Digital Motions" &&
+          (!regionFilter || region === regionFilter)
+        ) {
           totalBudget += data.assignedBudget || 0;
         }
       }
-      console.log('[ROI] Using region-based budget:', totalBudget);
+      console.log("[ROI] Using region-based budget:", totalBudget);
     }
-    
+
     // Calculate total actual cost
     let totalActualCost = 0;
     if (window.planningModule && window.planningModule.tableInstance) {
@@ -950,7 +1003,7 @@ async function updateRemainingBudget(regionFilter) {
         } else {
           if (regionFilter && row.region !== regionFilter) return sum;
         }
-        
+
         let val = row.actualCost;
         if (typeof val === "string")
           val = Number(val.toString().replace(/[^\d.-]/g, ""));
@@ -958,37 +1011,45 @@ async function updateRemainingBudget(regionFilter) {
         return sum;
       }, 0);
     }
-    console.log('[ROI] Total actual cost calculated:', totalActualCost);
-    
+    console.log("[ROI] Total actual cost calculated:", totalActualCost);
+
     // Calculate remaining budget
     const remainingBudget = totalBudget - totalActualCost;
-    console.log('[ROI] Remaining budget calculated:', remainingBudget);
-    
+    console.log("[ROI] Remaining budget calculated:", remainingBudget);
+
     // Update the display with dynamic label
-    const remainingBudgetEl = document.getElementById("roiRemainingBudgetValue");
+    const remainingBudgetEl = document.getElementById(
+      "roiRemainingBudgetValue",
+    );
     const remainingBudgetBox = document.getElementById("roiRemainingBudgetBox");
     if (remainingBudgetEl) {
       remainingBudgetEl.textContent = "$" + remainingBudget.toLocaleString();
-      console.log('[ROI] Updated remaining budget display:', remainingBudgetEl.textContent);
-      
+      console.log(
+        "[ROI] Updated remaining budget display:",
+        remainingBudgetEl.textContent,
+      );
+
       // Update the label to reflect the mode
       if (remainingBudgetBox) {
-        const labelEl = remainingBudgetBox.querySelector('div:first-child');
+        const labelEl = remainingBudgetBox.querySelector("div:first-child");
         if (labelEl) {
           if (useDigitalMotions) {
-            labelEl.textContent = "Digital Motions Remaining Budget (Total Budget - Actual Cost)";
+            labelEl.textContent =
+              "Digital Motions Remaining Budget (Total Budget - Actual Cost)";
           } else {
-            labelEl.textContent = "Remaining Budget (Total Budget - Actual Cost)";
+            labelEl.textContent =
+              "Remaining Budget (Total Budget - Actual Cost)";
           }
         }
       }
     } else {
-      console.error('[ROI] Could not find roiRemainingBudgetValue element');
+      console.error("[ROI] Could not find roiRemainingBudgetValue element");
     }
-    
   } catch (error) {
-    console.error('[ROI] Error updating remaining budget:', error);
-    const remainingBudgetEl = document.getElementById("roiRemainingBudgetValue");
+    console.error("[ROI] Error updating remaining budget:", error);
+    const remainingBudgetEl = document.getElementById(
+      "roiRemainingBudgetValue",
+    );
     if (remainingBudgetEl) {
       remainingBudgetEl.textContent = "$0";
     }
@@ -997,39 +1058,59 @@ async function updateRemainingBudget(regionFilter) {
 
 // Update forecasted budget usage calculation
 async function updateForecastedBudgetUsage(regionFilter) {
-  console.log('[ROI] Updating forecasted budget usage, region filter:', regionFilter);
-  
+  console.log(
+    "[ROI] Updating forecasted budget usage, region filter:",
+    regionFilter,
+  );
+
   try {
     // Load budgets data
     const budgets = await loadBudgetsData();
-    console.log('[ROI] Budgets data loaded for forecasted calculation:', budgets);
-    
+    console.log(
+      "[ROI] Budgets data loaded for forecasted calculation:",
+      budgets,
+    );
+
     // Check if Digital Motions toggle is enabled for any campaigns
     let useDigitalMotions = false;
     if (window.planningModule && window.planningModule.tableInstance) {
       const planningData = window.planningModule.tableInstance.getData();
-      useDigitalMotions = planningData.some(row => row.digitalMotions === true);
+      useDigitalMotions = planningData.some(
+        (row) => row.digitalMotions === true,
+      );
     }
-    console.log('[ROI] Use Digital Motions budget for forecasted:', useDigitalMotions);
-    
+    console.log(
+      "[ROI] Use Digital Motions budget for forecasted:",
+      useDigitalMotions,
+    );
+
     // Calculate total budget
     let totalBudget = 0;
     if (useDigitalMotions) {
       // Use Digital Motions budget, ignore region filter
-      if (budgets['Digital Motions']) {
-        totalBudget = budgets['Digital Motions'].assignedBudget || 0;
+      if (budgets["Digital Motions"]) {
+        totalBudget = budgets["Digital Motions"].assignedBudget || 0;
       }
-      console.log('[ROI] Using Digital Motions budget for forecasted:', totalBudget);
+      console.log(
+        "[ROI] Using Digital Motions budget for forecasted:",
+        totalBudget,
+      );
     } else {
       // Use region-based budget (filtered by region if specified)
       for (const [region, data] of Object.entries(budgets)) {
-        if (region !== 'Digital Motions' && (!regionFilter || region === regionFilter)) {
+        if (
+          region !== "Digital Motions" &&
+          (!regionFilter || region === regionFilter)
+        ) {
           totalBudget += data.assignedBudget || 0;
         }
       }
-      console.log('[ROI] Using region-based budget for forecasted:', totalBudget);
+      console.log(
+        "[ROI] Using region-based budget for forecasted:",
+        totalBudget,
+      );
     }
-    
+
     // Calculate total forecasted cost
     let totalForecastedCost = 0;
     if (window.planningModule && window.planningModule.tableInstance) {
@@ -1042,7 +1123,7 @@ async function updateForecastedBudgetUsage(regionFilter) {
         } else {
           if (regionFilter && row.region !== regionFilter) return sum;
         }
-        
+
         let val = row.forecastedCost;
         if (typeof val === "string")
           val = Number(val.toString().replace(/[^\d.-]/g, ""));
@@ -1050,37 +1131,49 @@ async function updateForecastedBudgetUsage(regionFilter) {
         return sum;
       }, 0);
     }
-    console.log('[ROI] Total forecasted cost calculated:', totalForecastedCost);
-    
+    console.log("[ROI] Total forecasted cost calculated:", totalForecastedCost);
+
     // Calculate forecasted budget usage
     const forecastedBudgetUsage = totalBudget - totalForecastedCost;
-    console.log('[ROI] Forecasted budget usage calculated:', forecastedBudgetUsage);
-    
+    console.log(
+      "[ROI] Forecasted budget usage calculated:",
+      forecastedBudgetUsage,
+    );
+
     // Update the display with dynamic label
-    const forecastedBudgetEl = document.getElementById("roiForecastedBudgetValue");
+    const forecastedBudgetEl = document.getElementById(
+      "roiForecastedBudgetValue",
+    );
     const forecastedBudgetBox = forecastedBudgetEl?.parentElement;
     if (forecastedBudgetEl) {
-      forecastedBudgetEl.textContent = "$" + forecastedBudgetUsage.toLocaleString();
-      console.log('[ROI] Updated forecasted budget display:', forecastedBudgetEl.textContent);
-      
+      forecastedBudgetEl.textContent =
+        "$" + forecastedBudgetUsage.toLocaleString();
+      console.log(
+        "[ROI] Updated forecasted budget display:",
+        forecastedBudgetEl.textContent,
+      );
+
       // Update the label to reflect the mode
       if (forecastedBudgetBox) {
-        const labelEl = forecastedBudgetBox.querySelector('div:first-child');
+        const labelEl = forecastedBudgetBox.querySelector("div:first-child");
         if (labelEl) {
           if (useDigitalMotions) {
-            labelEl.textContent = "Digital Motions Forecasted Budget Usage (Total Budget - Forecasted Cost)";
+            labelEl.textContent =
+              "Digital Motions Forecasted Budget Usage (Total Budget - Forecasted Cost)";
           } else {
-            labelEl.textContent = "Forecasted Budget Usage (Total Budget - Forecasted Cost)";
+            labelEl.textContent =
+              "Forecasted Budget Usage (Total Budget - Forecasted Cost)";
           }
         }
       }
     } else {
-      console.error('[ROI] Could not find roiForecastedBudgetValue element');
+      console.error("[ROI] Could not find roiForecastedBudgetValue element");
     }
-    
   } catch (error) {
-    console.error('[ROI] Error updating forecasted budget usage:', error);
-    const forecastedBudgetEl = document.getElementById("roiForecastedBudgetValue");
+    console.error("[ROI] Error updating forecasted budget usage:", error);
+    const forecastedBudgetEl = document.getElementById(
+      "roiForecastedBudgetValue",
+    );
     if (forecastedBudgetEl) {
       forecastedBudgetEl.textContent = "$0";
     }

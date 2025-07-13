@@ -121,64 +121,82 @@ function initGithubSync() {
   loadGitHubSyncConfig();
 
   // Wire up event handlers
-  document.getElementById("saveConfigBtn").addEventListener("click", saveGitHubSyncConfig);
-  document.getElementById("testConnectionBtn").addEventListener("click", testWorkerConnection);
-  document.getElementById("forceSyncBtn").addEventListener("click", forceSyncAllData);
-  document.getElementById("refreshDataBtn").addEventListener("click", refreshAllData);
+  document
+    .getElementById("saveConfigBtn")
+    .addEventListener("click", saveGitHubSyncConfig);
+  document
+    .getElementById("testConnectionBtn")
+    .addEventListener("click", testWorkerConnection);
+  document
+    .getElementById("forceSyncBtn")
+    .addEventListener("click", forceSyncAllData);
+  document
+    .getElementById("refreshDataBtn")
+    .addEventListener("click", refreshAllData);
 }
 
 function loadGitHubSyncConfig() {
   try {
-    const savedConfig = localStorage.getItem('githubSyncConfig');
+    const savedConfig = localStorage.getItem("githubSyncConfig");
     if (savedConfig) {
       const config = JSON.parse(savedConfig);
-      document.getElementById("workerEndpoint").value = config.workerEndpoint || '';
-      document.getElementById("autoSaveEnabled").checked = config.autoSaveEnabled || false;
-      document.getElementById("autoSaveDelay").value = config.autoSaveDelay || 3;
+      document.getElementById("workerEndpoint").value =
+        config.workerEndpoint || "";
+      document.getElementById("autoSaveEnabled").checked =
+        config.autoSaveEnabled || false;
+      document.getElementById("autoSaveDelay").value =
+        config.autoSaveDelay || 3;
 
       // Apply configuration to the sync module
       if (config.workerEndpoint && window.cloudflareSyncModule) {
-        window.cloudflareSyncModule.configureWorkerEndpoint(config.workerEndpoint);
+        window.cloudflareSyncModule.configureWorkerEndpoint(
+          config.workerEndpoint,
+        );
         window.cloudflareSyncModule.configureAutoSave({
           enabled: config.autoSaveEnabled,
-          debounceMs: (config.autoSaveDelay || 3) * 1000
+          debounceMs: (config.autoSaveDelay || 3) * 1000,
         });
       }
     }
   } catch (error) {
-    console.error('Error loading GitHub sync config:', error);
+    console.error("Error loading GitHub sync config:", error);
   }
 }
 
 function saveGitHubSyncConfig() {
   const rawEndpoint = document.getElementById("workerEndpoint").value;
   const config = {
-    workerEndpoint: rawEndpoint ? rawEndpoint.replace(/\/$/, '') : '', // Remove trailing slash
+    workerEndpoint: rawEndpoint ? rawEndpoint.replace(/\/$/, "") : "", // Remove trailing slash
     autoSaveEnabled: document.getElementById("autoSaveEnabled").checked,
-    autoSaveDelay: parseInt(document.getElementById("autoSaveDelay").value)
+    autoSaveDelay: parseInt(document.getElementById("autoSaveDelay").value),
   };
 
   // Validate configuration
-  if (config.workerEndpoint && !config.workerEndpoint.startsWith('https://')) {
+  if (config.workerEndpoint && !config.workerEndpoint.startsWith("https://")) {
     showSyncStatus("❌ Worker endpoint must start with https://", "error");
     return;
   }
 
   if (config.autoSaveDelay < 1 || config.autoSaveDelay > 30) {
-    showSyncStatus("❌ Auto-save delay must be between 1 and 30 seconds", "error");
+    showSyncStatus(
+      "❌ Auto-save delay must be between 1 and 30 seconds",
+      "error",
+    );
     return;
   }
 
   // Save to localStorage
-  localStorage.setItem('githubSyncConfig', JSON.stringify(config));
+  localStorage.setItem("githubSyncConfig", JSON.stringify(config));
 
   // Apply configuration
   if (config.workerEndpoint) {
     if (window.cloudflareSyncModule) {
-      window.cloudflareSyncModule.configureWorkerEndpoint(config.workerEndpoint);
+      window.cloudflareSyncModule.configureWorkerEndpoint(
+        config.workerEndpoint,
+      );
       window.cloudflareSyncModule.configureAutoSave({
         enabled: config.autoSaveEnabled,
-        debounceMs: config.autoSaveDelay * 1000
+        debounceMs: config.autoSaveDelay * 1000,
       });
     }
   }
@@ -188,13 +206,13 @@ function saveGitHubSyncConfig() {
 
 async function testWorkerConnection() {
   const endpoint = document.getElementById("workerEndpoint").value.trim();
-  
+
   if (!endpoint) {
     showSyncStatus("❌ Please enter a Worker endpoint URL", "error");
     return;
   }
 
-  if (!endpoint.startsWith('https://')) {
+  if (!endpoint.startsWith("https://")) {
     showSyncStatus("❌ Worker endpoint must start with https://", "error");
     return;
   }
@@ -203,70 +221,85 @@ async function testWorkerConnection() {
 
   try {
     // Remove trailing slash from endpoint to prevent double slashes
-    const cleanEndpoint = endpoint.replace(/\/$/, '');
-    
+    const cleanEndpoint = endpoint.replace(/\/$/, "");
+
     // Test 1: Health check
-    const healthResponse = await fetch(cleanEndpoint + '/health', {
-      method: 'GET',
+    const healthResponse = await fetch(cleanEndpoint + "/health", {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     });
 
     if (!healthResponse.ok) {
-      throw new Error(`Health check failed: HTTP ${healthResponse.status}: ${healthResponse.statusText}`);
+      throw new Error(
+        `Health check failed: HTTP ${healthResponse.status}: ${healthResponse.statusText}`,
+      );
     }
 
     const healthResult = await healthResponse.json();
-    console.log('Worker health check result:', healthResult);
-    
+    console.log("Worker health check result:", healthResult);
+
     // Test 2: Data API endpoints
     showSyncStatus("🔄 Testing data API endpoints...", "info");
-    
-    const dataEndpoints = ['planning', 'budgets'];
+
+    const dataEndpoints = ["planning", "budgets"];
     const endpointResults = [];
-    
+
     for (const dataType of dataEndpoints) {
       try {
         const dataResponse = await fetch(`${cleanEndpoint}/data/${dataType}`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         });
-        
+
         if (dataResponse.ok) {
           endpointResults.push(`✅ ${dataType} data API`);
         } else {
-          endpointResults.push(`❌ ${dataType} data API (${dataResponse.status})`);
+          endpointResults.push(
+            `❌ ${dataType} data API (${dataResponse.status})`,
+          );
         }
       } catch (error) {
         endpointResults.push(`❌ ${dataType} data API (error)`);
       }
     }
-    
-    const successCount = endpointResults.filter(r => r.includes('✅')).length;
+
+    const successCount = endpointResults.filter((r) => r.includes("✅")).length;
     const totalCount = endpointResults.length;
-    
+
     if (successCount === totalCount) {
-      showSyncStatus(`✅ All tests passed! Worker is healthy and all data APIs are working. ${endpointResults.join(', ')}`, "success");
+      showSyncStatus(
+        `✅ All tests passed! Worker is healthy and all data APIs are working. ${endpointResults.join(", ")}`,
+        "success",
+      );
     } else if (successCount > 0) {
-      showSyncStatus(`⚠️ Partial success: Worker is healthy but some data APIs failed. ${endpointResults.join(', ')}. Real-time data loading may not work properly.`, "warning");
+      showSyncStatus(
+        `⚠️ Partial success: Worker is healthy but some data APIs failed. ${endpointResults.join(", ")}. Real-time data loading may not work properly.`,
+        "warning",
+      );
     } else {
-      showSyncStatus(`⚠️ Worker is healthy but data APIs are not available. ${endpointResults.join(', ')}. Real-time data loading is disabled.`, "warning");
+      showSyncStatus(
+        `⚠️ Worker is healthy but data APIs are not available. ${endpointResults.join(", ")}. Real-time data loading is disabled.`,
+        "warning",
+      );
     }
-    
   } catch (error) {
-    console.error('Worker connection test failed:', error);
+    console.error("Worker connection test failed:", error);
     showSyncStatus(`❌ Connection failed: ${error.message}`, "error");
   }
 }
 
 async function forceSyncAllData() {
   const endpoint = document.getElementById("workerEndpoint").value.trim();
-  
+
   if (!endpoint) {
-    showSyncStatus("❌ Please configure and save the Worker endpoint first", "error");
+    showSyncStatus(
+      "❌ Please configure and save the Worker endpoint first",
+      "error",
+    );
     return;
   }
 
@@ -284,7 +317,7 @@ function showSyncStatus(message, type) {
   const statusDiv = document.getElementById("syncStatus");
   statusDiv.style.display = "block";
   statusDiv.textContent = message;
-  
+
   // Set styles based on type
   if (type === "success") {
     statusDiv.style.background = "#d4edda";
@@ -315,129 +348,156 @@ function showSyncStatus(message, type) {
 // Force save all data to Worker
 async function forceSaveAll() {
   if (!window.cloudflareSyncModule) {
-    throw new Error('Cloudflare sync module not loaded');
+    throw new Error("Cloudflare sync module not loaded");
   }
 
   const promises = [];
-  
+
   // Save planning data
   if (window.planningModule && window.planningModule.tableInstance) {
     const planningData = window.planningModule.tableInstance.getData();
     promises.push(
-      window.cloudflareSyncModule.saveToWorker('planning', planningData, { 
-        source: 'force-sync' 
-      })
+      window.cloudflareSyncModule.saveToWorker("planning", planningData, {
+        source: "force-sync",
+      }),
     );
   }
-  
+
   // Save budgets data
   if (window.budgetsModule && window.budgetsModule.tableInstance) {
     const budgetsData = window.budgetsModule.tableInstance.getData();
     promises.push(
-      window.cloudflareSyncModule.saveToWorker('budgets', budgetsData, { 
-        source: 'force-sync' 
-      })
+      window.cloudflareSyncModule.saveToWorker("budgets", budgetsData, {
+        source: "force-sync",
+      }),
     );
   }
 
   // Save calendar data if available
-  if (window.calendarModule && typeof window.calendarModule.getData === 'function') {
+  if (
+    window.calendarModule &&
+    typeof window.calendarModule.getData === "function"
+  ) {
     const calendarData = window.calendarModule.getData();
     promises.push(
-      window.cloudflareSyncModule.saveToWorker('calendar', calendarData, { 
-        source: 'force-sync' 
-      })
+      window.cloudflareSyncModule.saveToWorker("calendar", calendarData, {
+        source: "force-sync",
+      }),
     );
   }
 
   if (promises.length === 0) {
-    throw new Error('No data available to sync');
+    throw new Error("No data available to sync");
   }
 
   const results = await Promise.all(promises);
-  console.log('Force save all completed:', results);
+  console.log("Force save all completed:", results);
   return results;
 }
 
 // Refresh all data from GitHub repository
 async function refreshAllData() {
   try {
-    showSyncStatus('🔄 Refreshing all data from GitHub...', 'info');
-    
+    showSyncStatus("🔄 Refreshing all data from GitHub...", "info");
+
     const promises = [];
-    
+
     // Refresh planning data
     if (window.loadPlanning) {
       promises.push(
-        window.loadPlanning().then(rows => {
-          if (window.planningTableInstance && rows && rows.length > 0) {
-            window.planningTableInstance.setData(rows);
-            console.log('✅ Planning data refreshed');
-            return { type: 'planning', success: true, count: rows.length };
-          }
-          return { type: 'planning', success: false, error: 'No data or table not available' };
-        }).catch(error => {
-          console.error('Planning refresh failed:', error);
-          return { type: 'planning', success: false, error: error.message };
-        })
+        window
+          .loadPlanning()
+          .then((rows) => {
+            if (window.planningTableInstance && rows && rows.length > 0) {
+              window.planningTableInstance.setData(rows);
+              console.log("✅ Planning data refreshed");
+              return { type: "planning", success: true, count: rows.length };
+            }
+            return {
+              type: "planning",
+              success: false,
+              error: "No data or table not available",
+            };
+          })
+          .catch((error) => {
+            console.error("Planning refresh failed:", error);
+            return { type: "planning", success: false, error: error.message };
+          }),
       );
     }
-    
+
     // Refresh budgets data
     if (window.loadBudgets) {
       promises.push(
-        window.loadBudgets().then(budgets => {
-          if (budgets && Object.keys(budgets).length > 0) {
-            // Update global budgets object for chart access
-            window.budgetsObj = budgets;
-            
-            if (window.budgetsTableInstance) {
-              // Convert object to array format for the table
-              const budgetsArray = Object.entries(budgets).map(([region, data]) => ({
-                region,
-                ...data
-              }));
-              window.budgetsTableInstance.setData(budgetsArray);
-              console.log('✅ Budgets data refreshed');
-              return { type: 'budgets', success: true, count: Object.keys(budgets).length };
+        window
+          .loadBudgets()
+          .then((budgets) => {
+            if (budgets && Object.keys(budgets).length > 0) {
+              // Update global budgets object for chart access
+              window.budgetsObj = budgets;
+
+              if (window.budgetsTableInstance) {
+                // Convert object to array format for the table
+                const budgetsArray = Object.entries(budgets).map(
+                  ([region, data]) => ({
+                    region,
+                    ...data,
+                  }),
+                );
+                window.budgetsTableInstance.setData(budgetsArray);
+                console.log("✅ Budgets data refreshed");
+                return {
+                  type: "budgets",
+                  success: true,
+                  count: Object.keys(budgets).length,
+                };
+              }
             }
-          }
-          return { type: 'budgets', success: false, error: 'No data or table not available' };
-        }).catch(error => {
-          console.error('Budgets refresh failed:', error);
-          return { type: 'budgets', success: false, error: error.message };
-        })
+            return {
+              type: "budgets",
+              success: false,
+              error: "No data or table not available",
+            };
+          })
+          .catch((error) => {
+            console.error("Budgets refresh failed:", error);
+            return { type: "budgets", success: false, error: error.message };
+          }),
       );
     }
-    
+
     if (promises.length === 0) {
-      throw new Error('No data refresh functions available');
+      throw new Error("No data refresh functions available");
     }
 
     const results = await Promise.all(promises);
-    
+
     // Check results and show appropriate message
-    const successful = results.filter(r => r.success);
-    const failed = results.filter(r => !r.success);
-    
+    const successful = results.filter((r) => r.success);
+    const failed = results.filter((r) => !r.success);
+
     if (successful.length > 0 && failed.length === 0) {
-      const successMessage = successful.map(r => `${r.type} (${r.count} items)`).join(', ');
-      showSyncStatus(`✅ Successfully refreshed: ${successMessage}`, 'success');
+      const successMessage = successful
+        .map((r) => `${r.type} (${r.count} items)`)
+        .join(", ");
+      showSyncStatus(`✅ Successfully refreshed: ${successMessage}`, "success");
     } else if (successful.length > 0 && failed.length > 0) {
-      const successMessage = successful.map(r => `${r.type}`).join(', ');
-      const failMessage = failed.map(r => `${r.type}: ${r.error}`).join(', ');
-      showSyncStatus(`⚠️ Partial success: ${successMessage} refreshed. Failed: ${failMessage}`, 'warning');
+      const successMessage = successful.map((r) => `${r.type}`).join(", ");
+      const failMessage = failed.map((r) => `${r.type}: ${r.error}`).join(", ");
+      showSyncStatus(
+        `⚠️ Partial success: ${successMessage} refreshed. Failed: ${failMessage}`,
+        "warning",
+      );
     } else {
-      const failMessage = failed.map(r => `${r.type}: ${r.error}`).join(', ');
-      showSyncStatus(`❌ Refresh failed: ${failMessage}`, 'error');
+      const failMessage = failed.map((r) => `${r.type}: ${r.error}`).join(", ");
+      showSyncStatus(`❌ Refresh failed: ${failMessage}`, "error");
     }
-    
-    console.log('Data refresh completed:', results);
+
+    console.log("Data refresh completed:", results);
     return results;
-    
   } catch (error) {
-    console.error('Error refreshing data:', error);
-    showSyncStatus('❌ Data refresh failed: ' + error.message, 'error');
+    console.error("Error refreshing data:", error);
+    showSyncStatus("❌ Data refresh failed: " + error.message, "error");
     throw error;
   }
 }
@@ -545,11 +605,16 @@ function route() {
       }, 0);
     }
     // --- Ensure Annual Budget Plan unlock logic is initialized every time tab is shown ---
-    if (window.budgetsModule && typeof window.budgetsModule.initializeAnnualBudgetPlan === 'function') {
+    if (
+      window.budgetsModule &&
+      typeof window.budgetsModule.initializeAnnualBudgetPlan === "function"
+    ) {
       // Use the latest budgets data if available, otherwise pass an empty array
       let budgetsData = [];
       try {
-        budgetsData = window.budgetsTableInstance ? window.budgetsTableInstance.getData() : [];
+        budgetsData = window.budgetsTableInstance
+          ? window.budgetsTableInstance.getData()
+          : [];
       } catch (e) {}
       window.budgetsModule.initializeAnnualBudgetPlan(budgetsData);
     }
@@ -560,12 +625,18 @@ function route() {
     );
     console.log(`[route] hash:`, hash, "section:", section);
     if (section) section.style.display = "block";
-    if (hash === "#planning" && window.planningModule && window.planningModule.tableInstance) {
+    if (
+      hash === "#planning" &&
+      window.planningModule &&
+      window.planningModule.tableInstance
+    ) {
       setTimeout(() => {
         window.planningModule.tableInstance.redraw(true);
         console.log("[route] Redrew planning grid");
         // Initialize filters when planning tab is shown
-        if (typeof window.planningModule.populatePlanningFilters === "function") {
+        if (
+          typeof window.planningModule.populatePlanningFilters === "function"
+        ) {
           window.planningModule.populatePlanningFilters();
         }
       }, 0);
@@ -578,11 +649,16 @@ function route() {
         );
         console.log("[route] Redrew execution grid");
         // Sync digital motions data from planning tab
-        if (typeof window.executionModule.syncDigitalMotionsFromPlanning === "function") {
+        if (
+          typeof window.executionModule.syncDigitalMotionsFromPlanning ===
+          "function"
+        ) {
           window.executionModule.syncDigitalMotionsFromPlanning();
         }
         // Initialize filters when execution tab is shown
-        if (typeof window.executionModule.setupExecutionFilters === "function") {
+        if (
+          typeof window.executionModule.setupExecutionFilters === "function"
+        ) {
           window.executionModule.setupExecutionFilters();
         }
       }, 0);
@@ -651,28 +727,30 @@ window.addEventListener("DOMContentLoaded", async () => {
   // Auto-configure Worker for all users
   if (window.cloudflareSyncModule) {
     console.log("Auto-configuring Cloudflare Worker for all users...");
-    
+
     // Set up the Worker endpoint for everyone
-    window.cloudflareSyncModule.configureWorkerEndpoint('https://mpt-mvp-sync.jordanradford.workers.dev');
-    
+    window.cloudflareSyncModule.configureWorkerEndpoint(
+      "https://mpt-mvp-sync.jordanradford.workers.dev",
+    );
+
     // Enable auto-save by default
     window.cloudflareSyncModule.configureAutoSave({
       enabled: true,
-      debounceMs: 3000
+      debounceMs: 3000,
     });
-    
+
     // Save this configuration to localStorage so it persists
     const config = {
-      workerEndpoint: 'https://mpt-mvp-sync.jordanradford.workers.dev',
+      workerEndpoint: "https://mpt-mvp-sync.jordanradford.workers.dev",
       autoSave: {
         enabled: true,
-        debounceMs: 3000
-      }
+        debounceMs: 3000,
+      },
     };
-    localStorage.setItem('githubSyncConfig', JSON.stringify(config));
-    
+    localStorage.setItem("githubSyncConfig", JSON.stringify(config));
+
     console.log("✅ Auto-save configured for all users!");
-    
+
     // Check Worker API status and show notice if data API is unavailable
     setTimeout(checkWorkerApiStatus, 2000); // Delay to allow page to load
   }
@@ -696,27 +774,27 @@ window.addEventListener("DOMContentLoaded", async () => {
       // Wait up to 5 seconds for modules to load
       let attempts = 0;
       while (!window.planningModule && attempts < 50) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         attempts++;
       }
       if (!window.planningModule) {
         throw new Error("Planning module failed to load");
       }
     }
-    
+
     if (!window.budgetsModule) {
       console.warn("Budgets module not loaded yet, waiting...");
       // Wait up to 5 seconds for modules to load
       let attempts = 0;
       while (!window.budgetsModule && attempts < 50) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         attempts++;
       }
       if (!window.budgetsModule) {
         throw new Error("Budgets module failed to load");
       }
     }
-    
+
     // Use planning module functions
     [rows, budgetsObj] = await Promise.all([
       window.planningModule.loadPlanning(),
@@ -731,7 +809,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Store budgets object globally for chart access
   window.budgetsObj = budgetsObj;
-  
+
   // Convert budgets object to array for Tabulator
   const budgets = Object.entries(budgetsObj).map(([region, data]) => ({
     region,
@@ -742,71 +820,97 @@ window.addEventListener("DOMContentLoaded", async () => {
   let planningTable = null;
   let executionTable = null;
   let budgetsTable = null;
-  
-  if (window.planningModule && typeof window.planningModule.initPlanningGrid === 'function') {
+
+  if (
+    window.planningModule &&
+    typeof window.planningModule.initPlanningGrid === "function"
+  ) {
     planningTable = window.planningModule.initPlanningGrid(rows);
     window.planningTableInstance = planningTable;
   } else {
     console.error("Planning module or initPlanningGrid function not available");
   }
-  
-  if (window.executionModule && typeof window.executionModule.initExecutionGrid === 'function') {
+
+  if (
+    window.executionModule &&
+    typeof window.executionModule.initExecutionGrid === "function"
+  ) {
     executionTable = window.executionModule.initExecutionGrid(rows);
     window.executionTableInstance = executionTable;
   } else {
-    console.error("Execution module or initExecutionGrid function not available");
+    console.error(
+      "Execution module or initExecutionGrid function not available",
+    );
   }
-  
-  if (window.budgetsModule && typeof window.budgetsModule.initBudgetsTable === 'function') {
+
+  if (
+    window.budgetsModule &&
+    typeof window.budgetsModule.initBudgetsTable === "function"
+  ) {
     budgetsTable = window.budgetsModule.initBudgetsTable(budgets, rows); // pass rows to budgets table
     window.budgetsTableInstance = budgetsTable;
   } else {
     console.error("Budgets module or initBudgetsTable function not available");
   }
-  
+
   initGithubSync();
-  
+
   // Setup save and download functions with safety checks
   if (planningTable && window.planningModule) {
-    if (typeof window.planningModule.setupPlanningSave === 'function') {
+    if (typeof window.planningModule.setupPlanningSave === "function") {
       window.planningModule.setupPlanningSave(planningTable, rows);
     }
-    if (typeof window.planningModule.setupPlanningDownload === 'function') {
+    if (typeof window.planningModule.setupPlanningDownload === "function") {
       window.planningModule.setupPlanningDownload(planningTable);
     }
   }
-  
+
   if (budgetsTable && window.budgetsModule) {
-    if (typeof window.budgetsModule.setupBudgetsSave === 'function') {
+    if (typeof window.budgetsModule.setupBudgetsSave === "function") {
       window.budgetsModule.setupBudgetsSave(budgetsTable);
     }
-    if (typeof window.budgetsModule.setupBudgetsDownload === 'function') {
+    if (typeof window.budgetsModule.setupBudgetsDownload === "function") {
       window.budgetsModule.setupBudgetsDownload(budgetsTable);
     }
   }
 
   // Initialize reporting total spend using ROI module
-  if (window.roiModule && typeof window.roiModule.updateReportTotalSpend === 'function') {
+  if (
+    window.roiModule &&
+    typeof window.roiModule.updateReportTotalSpend === "function"
+  ) {
     window.roiModule.updateReportTotalSpend();
   }
 
   // Initialize ROI functionality (charts, filters, data table)
-  if (window.roiModule && typeof window.roiModule.initializeRoiFunctionality === 'function') {
+  if (
+    window.roiModule &&
+    typeof window.roiModule.initializeRoiFunctionality === "function"
+  ) {
     window.roiModule.initializeRoiFunctionality();
   }
 
   // Initialize Planning filters
-  if (window.planningModule && typeof window.planningModule.initializePlanningFilters === "function") {
+  if (
+    window.planningModule &&
+    typeof window.planningModule.initializePlanningFilters === "function"
+  ) {
     window.planningModule.initializePlanningFilters();
   }
 
   // Initialize Execution filters
-  if (window.executionModule && typeof window.executionModule.initializeExecutionFilters === "function") {
+  if (
+    window.executionModule &&
+    typeof window.executionModule.initializeExecutionFilters === "function"
+  ) {
     window.executionModule.initializeExecutionFilters();
   }
 
   // Initialize Annual Budget Plan using budgets module
-  if (window.budgetsModule && typeof window.budgetsModule.initializeAnnualBudgetPlan === 'function') {
+  if (
+    window.budgetsModule &&
+    typeof window.budgetsModule.initializeAnnualBudgetPlan === "function"
+  ) {
     window.budgetsModule.initializeAnnualBudgetPlan(budgets);
   }
 
@@ -828,24 +932,35 @@ window.addEventListener("DOMContentLoaded", async () => {
   setTimeout(route, 0);
 
   // After both tables are initialized:
-  if (planningTable && executionTable && window.executionModule && typeof window.executionModule.syncGridsOnEdit === 'function') {
+  if (
+    planningTable &&
+    executionTable &&
+    window.executionModule &&
+    typeof window.executionModule.syncGridsOnEdit === "function"
+  ) {
     window.executionModule.syncGridsOnEdit(planningTable, executionTable);
     window.executionModule.syncGridsOnEdit(executionTable, planningTable);
   }
 
   // Setup ROI chart event handlers
-  if (window.roiModule && typeof window.roiModule.setupRoiChartEventHandlers === 'function') {
+  if (
+    window.roiModule &&
+    typeof window.roiModule.setupRoiChartEventHandlers === "function"
+  ) {
     window.roiModule.setupRoiChartEventHandlers();
   }
 
   // Initialize calendar module
-  if (window.calendarModule && typeof window.calendarModule.initializeCalendar === 'function') {
+  if (
+    window.calendarModule &&
+    typeof window.calendarModule.initializeCalendar === "function"
+  ) {
     window.calendarModule.initializeCalendar();
   }
 });
 
 // Initialize Chart.js and render charts
-if (typeof initializeChartJS === 'function') {
+if (typeof initializeChartJS === "function") {
   initializeChartJS();
 }
 
@@ -855,27 +970,27 @@ if (window.budgetsModule && window.budgetsModule.initBudgetsTable) {
   window.budgetsModule.initBudgetsTable = function (budgets, rows) {
     const table = origInitBudgetsTable(budgets, rows);
     window.budgetsTableInstance = table;
-    
+
     // Render both the bar chart and region charts
     setTimeout(() => {
-      if (typeof renderBudgetsBarChart === 'function') {
+      if (typeof renderBudgetsBarChart === "function") {
         renderBudgetsBarChart();
       }
-      if (typeof renderBudgetsRegionCharts === 'function') {
+      if (typeof renderBudgetsRegionCharts === "function") {
         renderBudgetsRegionCharts();
       }
     }, 200);
-    
+
     // Set up event listeners for both charts
     table.on("dataChanged", () => {
-      if (typeof renderBudgetsBarChart === 'function') {
+      if (typeof renderBudgetsBarChart === "function") {
         renderBudgetsBarChart();
       }
-      if (typeof renderBudgetsRegionCharts === 'function') {
+      if (typeof renderBudgetsRegionCharts === "function") {
         renderBudgetsRegionCharts();
       }
     });
-    
+
     return table;
   };
 }
@@ -894,31 +1009,41 @@ if (window.planningModule && window.planningModule.initPlanningGrid) {
 // Check Worker API status and show notice if unavailable
 async function checkWorkerApiStatus() {
   try {
-    const endpoint = 'https://mpt-mvp-sync.jordanradford.workers.dev';
+    const endpoint = "https://mpt-mvp-sync.jordanradford.workers.dev";
     console.log("🔄 Checking Worker API status...");
-    
+
     // Test data API endpoint
     const response = await fetch(`${endpoint}/data/planning`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     });
-    
+
     if (response.ok) {
-      console.log("✅ Worker API data endpoints are available - real-time sync enabled");
+      console.log(
+        "✅ Worker API data endpoints are available - real-time sync enabled",
+      );
     } else {
-      console.warn("⚠️ Worker API data endpoints unavailable - using local data fallback");
+      console.warn(
+        "⚠️ Worker API data endpoints unavailable - using local data fallback",
+      );
       // Show notice to user about limited functionality
       if (document.getElementById("syncStatus")) {
-        showSyncStatus("⚠️ Real-time data sync is currently unavailable. Using local data files. Save operations will still work, but you may not see other users' changes immediately.", "warning");
+        showSyncStatus(
+          "⚠️ Real-time data sync is currently unavailable. Using local data files. Save operations will still work, but you may not see other users' changes immediately.",
+          "warning",
+        );
       }
     }
   } catch (error) {
     console.warn("⚠️ Worker API check failed:", error);
-    // Show notice to user about limited functionality  
+    // Show notice to user about limited functionality
     if (document.getElementById("syncStatus")) {
-      showSyncStatus("⚠️ Real-time data sync is currently unavailable. Using local data files. Save operations will still work, but you may not see other users' changes immediately.", "warning");
+      showSyncStatus(
+        "⚠️ Real-time data sync is currently unavailable. Using local data files. Save operations will still work, but you may not see other users' changes immediately.",
+        "warning",
+      );
     }
   }
 }

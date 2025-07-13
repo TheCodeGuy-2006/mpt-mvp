@@ -19,16 +19,19 @@ Visit the live application: **https://jordanradford.github.io/mpt-mvp/**
 ## 🏗️ Architecture
 
 ### Frontend (GitHub Pages)
+
 - Static HTML/CSS/JavaScript application
 - Deployed automatically via GitHub Actions
 - Responsive design with modern UI components
 
 ### Backend (Cloudflare Worker)
+
 - Serverless API for GitHub integration
 - Secure token handling and CORS support
 - Auto-save functionality with debouncing
 
 ### Data Storage (GitHub Repository)
+
 - JSON files stored in `/data` folder
 - Version-controlled with complete audit trail
 - Automatic commits for all changes
@@ -36,11 +39,13 @@ Visit the live application: **https://jordanradford.github.io/mpt-mvp/**
 ## 🚀 Quick Setup
 
 ### Option 1: Use the Live Version
+
 1. Visit https://jordanradford.github.io/mpt-mvp/
 2. Use the application with local storage
 3. Optionally set up Cloudflare Worker for GitHub sync
 
 ### Option 2: Deploy Your Own Copy
+
 1. **Fork this repository**
 2. **Enable GitHub Pages** in repository settings
 3. **Set up Cloudflare Worker** (optional, for auto-save)
@@ -74,23 +79,28 @@ mpt-mvp/
 ## 🔧 Local Development
 
 ### Prerequisites
+
 - Node.js (for local server, optional)
 - Modern web browser
 - Git
 
 ### Setup
+
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/jordanradford/mpt-mvp.git
    cd mpt-mvp
    ```
 
 2. **Install dependencies** (optional, for local server)
+
    ```bash
    npm install
    ```
 
 3. **Start local server** (optional)
+
    ```bash
    npm start
    ```
@@ -115,13 +125,16 @@ The deployment workflow is defined in `.github/workflows/deploy.yml`.
 For automatic data synchronization to GitHub:
 
 ### Quick Setup
+
 1. **Create GitHub token** with `repo` permissions
 2. **Deploy Cloudflare Worker** using `cloudflare-worker.js`
 3. **Configure environment variables** in Cloudflare dashboard
 4. **Test connection** in the GitHub Sync tab
 
 ### Detailed Setup
+
 See the comprehensive setup guides:
+
 - [`QUICK_SETUP.md`](QUICK_SETUP.md) - 5-minute setup guide
 - [`CLOUDFLARE_WORKER_SETUP.md`](CLOUDFLARE_WORKER_SETUP.md) - Detailed instructions
 - [`GITHUB_TOKEN_SETUP.md`](GITHUB_TOKEN_SETUP.md) - Token creation guide
@@ -137,12 +150,15 @@ See the comprehensive setup guides:
 ## 🔍 Testing
 
 ### Demo Page
+
 Use `demo.html` to test your Cloudflare Worker integration:
+
 1. Open `demo.html` in your browser
 2. Enter your Worker URL
 3. Test health check and save operations
 
 ### Manual Testing
+
 1. **Health Check**: `curl https://your-worker.workers.dev/health`
 2. **Save Test**: Use the demo page or browser console
 3. **Integration Test**: Make changes in the app and verify GitHub commits

@@ -7,6 +7,7 @@ This guide walks you through creating a GitHub Personal Access Token (PAT) for t
 ## Why Do You Need This?
 
 The Cloudflare Worker needs permission to:
+
 - Read your repository contents
 - Create and update files in the `/data` folder
 - Create commits with your changes
@@ -154,6 +155,7 @@ curl -H "Authorization: token YOUR_TOKEN" \
 ### What the Token Can Do
 
 With `repo` scope, the token can:
+
 - ✅ Read repository contents
 - ✅ Create and update files
 - ✅ Create commits
@@ -163,6 +165,7 @@ With `repo` scope, the token can:
 ### What the Token Cannot Do
 
 The token cannot:
+
 - ❌ Delete the repository
 - ❌ Change repository settings
 - ❌ Manage collaborators

@@ -30,8 +30,8 @@ This guide helps you set up a Cloudflare Worker to handle secure GitHub API call
    - Paste it into the Worker editor
    - **IMPORTANT**: Update the configuration constants at the top:
      ```javascript
-     const REPO_OWNER = 'jordanradford';  // ← Your GitHub username
-     const REPO_NAME = 'mpt-mvp';         // ← Your repository name
+     const REPO_OWNER = "jordanradford"; // ← Your GitHub username
+     const REPO_NAME = "mpt-mvp"; // ← Your repository name
      ```
    - Click **Save and Deploy**
 
@@ -52,11 +52,13 @@ This guide helps you set up a Cloudflare Worker to handle secure GitHub API call
    - Copy this URL for later use
 
 2. **Test Health Endpoint**
+
    ```bash
    curl https://your-worker-name.your-subdomain.workers.dev/health
    ```
-   
+
    Expected response:
+
    ```json
    {
      "status": "healthy",
@@ -121,6 +123,7 @@ This guide helps you set up a Cloudflare Worker to handle secure GitHub API call
    - Click **Logs** tab to see real-time debugging info
 
 2. **Test with curl**
+
    ```bash
    # Health check
    curl https://your-worker.workers.dev/health
@@ -148,6 +151,7 @@ This guide helps you set up a Cloudflare Worker to handle secure GitHub API call
 ## Next Steps
 
 Once your Worker is set up:
+
 1. Test the connection from your frontend
 2. Enable auto-save in the GitHub Sync configuration
 3. Make some changes to verify commits appear in your repository

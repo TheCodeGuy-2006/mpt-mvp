@@ -6,21 +6,26 @@ async function loadBudgets(retryCount = 0) {
   try {
     // Try to load via Worker API first (real-time, no caching issues)
     let budgets;
-    
+
     try {
       // Use Worker API endpoint instead of raw GitHub files
-      const workerEndpoint = window.cloudflareSyncModule?.getWorkerEndpoint() || 'https://mpt-mvp-sync.jordanradford.workers.dev';
+      const workerEndpoint =
+        window.cloudflareSyncModule?.getWorkerEndpoint() ||
+        "https://mpt-mvp-sync.jordanradford.workers.dev";
       const workerUrl = `${workerEndpoint}/data/budgets`;
-      
-      console.log(`Fetching budgets data via Worker API (attempt ${retryCount + 1}):`, workerUrl);
-      
+
+      console.log(
+        `Fetching budgets data via Worker API (attempt ${retryCount + 1}):`,
+        workerUrl,
+      );
+
       const response = await fetch(workerUrl, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       });
-      
+
       console.log(
         "Worker API budgets response - status:",
         response.status,
@@ -28,29 +33,41 @@ async function loadBudgets(retryCount = 0) {
         "URL:",
         response.url,
       );
-      
+
       if (response.ok) {
         const result = await response.json();
         budgets = result.data;
-        console.log("✅ Loaded budgets data via Worker API", `(source: ${result.source})`);
-        
+        console.log(
+          "✅ Loaded budgets data via Worker API",
+          `(source: ${result.source})`,
+        );
+
         // Validate that we got actual data
         if (budgets && Object.keys(budgets).length > 0) {
           console.log("✅ Worker API budgets data validation passed");
         } else {
           console.warn("⚠️ Worker API returned empty budgets data");
           if (retryCount < 2) {
-            console.log(`Retrying Worker API budgets fetch in ${(retryCount + 1) * 2} seconds...`);
-            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
+            console.log(
+              `Retrying Worker API budgets fetch in ${(retryCount + 1) * 2} seconds...`,
+            );
+            await new Promise((resolve) =>
+              setTimeout(resolve, (retryCount + 1) * 2000),
+            );
             return loadBudgets(retryCount + 1);
           }
         }
       } else {
-        throw new Error(`Worker API budgets failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Worker API budgets failed: ${response.status} ${response.statusText}`,
+        );
       }
     } catch (workerError) {
-      console.warn("Worker API budgets failed, falling back to local file:", workerError);
-      
+      console.warn(
+        "Worker API budgets failed, falling back to local file:",
+        workerError,
+      );
+
       // Fallback: Try local file
       try {
         const r = await fetch("data/budgets.json");
@@ -63,18 +80,22 @@ async function loadBudgets(retryCount = 0) {
         if (!r.ok) throw new Error("Failed to fetch budgets.json");
         budgets = await r.json();
         console.log("📁 Loaded budgets data from local file");
-        
+
         // Show a message to the user about the Worker API being unavailable
         if (retryCount === 0) {
-          console.warn("⚠️ Worker API unavailable - using local data. Real-time sync disabled.");
+          console.warn(
+            "⚠️ Worker API unavailable - using local data. Real-time sync disabled.",
+          );
           // You might want to show a notification to the user here
         }
       } catch (localError) {
         console.error("Local file also failed:", localError);
-        throw new Error("Failed to load budgets data from both Worker API and local file");
+        throw new Error(
+          "Failed to load budgets data from both Worker API and local file",
+        );
       }
     }
-    
+
     return budgets;
   } catch (e) {
     alert("Failed to fetch budgets.json");
@@ -88,29 +109,29 @@ function initBudgetsTable(budgets, rows) {
     data: budgets,
     layout: "fitColumns",
     columns: [
-      { 
-        title: "Region", 
-        field: "region", 
+      {
+        title: "Region",
+        field: "region",
         editor: "input",
         cellEdited: (cell) => {
           triggerBudgetsAutosave(cell.getTable());
-        }
+        },
       },
-      { 
-        title: "Assigned Budget", 
-        field: "assignedBudget", 
+      {
+        title: "Assigned Budget",
+        field: "assignedBudget",
         editor: "number",
         cellEdited: (cell) => {
           triggerBudgetsAutosave(cell.getTable());
-        }
+        },
       },
-      { 
-        title: "Notes", 
-        field: "notes", 
+      {
+        title: "Notes",
+        field: "notes",
         editor: "input",
         cellEdited: (cell) => {
           triggerBudgetsAutosave(cell.getTable());
-        }
+        },
       },
       {
         title: "Utilisation",
@@ -145,11 +166,11 @@ function initBudgetsTable(budgets, rows) {
   });
   setupBudgetsSave(table);
   setupBudgetsDownload(table); // Setup download functionality
-  
+
   // Make globally accessible for data refreshing
   window.budgetsTableInstance = table;
   window.loadBudgets = loadBudgets;
-  
+
   return table;
 }
 
@@ -175,24 +196,27 @@ function setupBudgetsSave(table) {
       };
     });
 
-    console.log('Saving budgets data:', Object.keys(obj).length, 'regions');
+    console.log("Saving budgets data:", Object.keys(obj).length, "regions");
 
     // Try Worker first, then backend fallback
     if (window.cloudflareSyncModule) {
       // Primary: Save to Worker
-      window.cloudflareSyncModule.saveToWorker('budgets', obj, { source: 'manual-save' })
+      window.cloudflareSyncModule
+        .saveToWorker("budgets", obj, { source: "manual-save" })
         .then((result) => {
-          console.log('Worker save successful:', result);
-          alert("✅ Budgets data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed.");
-          
+          console.log("Worker save successful:", result);
+          alert(
+            "✅ Budgets data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed.",
+          );
+
           // Refresh data after successful save
           if (window.cloudflareSyncModule.refreshDataAfterSave) {
-            window.cloudflareSyncModule.refreshDataAfterSave('budgets');
+            window.cloudflareSyncModule.refreshDataAfterSave("budgets");
           }
         })
         .catch((error) => {
-          console.warn('Worker save failed, trying backend:', error);
-          
+          console.warn("Worker save failed, trying backend:", error);
+
           // Fallback: Save to backend
           fetch("http://localhost:3000/save-budgets", {
             method: "POST",
@@ -204,7 +228,9 @@ function setupBudgetsSave(table) {
               if (result.success) {
                 alert("✅ Budgets data saved to backend (Worker unavailable)!");
               } else {
-                alert("❌ Failed to save: " + (result.error || "Unknown error"));
+                alert(
+                  "❌ Failed to save: " + (result.error || "Unknown error"),
+                );
               }
             })
             .catch((err) => {
@@ -236,13 +262,13 @@ function setupBudgetsSave(table) {
 // Autosave functionality for budgets
 function triggerBudgetsAutosave(table) {
   if (!window.cloudflareSyncModule) {
-    console.log('Cloudflare sync module not available');
+    console.log("Cloudflare sync module not available");
     return;
   }
 
   const data = table.getData();
-  window.cloudflareSyncModule.scheduleSave('budgets', data, {
-    source: 'budgets-autosave'
+  window.cloudflareSyncModule.scheduleSave("budgets", data, {
+    source: "budgets-autosave",
   });
 }
 
@@ -279,19 +305,24 @@ function setupAnnualBudgetSave() {
         };
       });
 
-      console.log('Saving annual budget data:', Object.keys(obj).length, 'regions');
+      console.log(
+        "Saving annual budget data:",
+        Object.keys(obj).length,
+        "regions",
+      );
 
       // Try Worker first, then backend fallback
       if (window.cloudflareSyncModule) {
         // Primary: Save to Worker
-        window.cloudflareSyncModule.saveToWorker('budgets', obj, { source: 'annual-budget-save' })
+        window.cloudflareSyncModule
+          .saveToWorker("budgets", obj, { source: "annual-budget-save" })
           .then((result) => {
-            console.log('Annual budget Worker save successful:', result);
+            console.log("Annual budget Worker save successful:", result);
             alert("✅ Annual budget saved to GitHub!");
           })
           .catch((error) => {
-            console.warn('Worker save failed, trying backend:', error);
-            
+            console.warn("Worker save failed, trying backend:", error);
+
             // Fallback: Save to backend
             fetch("http://localhost:3000/save-budgets", {
               method: "POST",
@@ -301,9 +332,13 @@ function setupAnnualBudgetSave() {
               .then((res) => res.json())
               .then((result) => {
                 if (result.success) {
-                  alert("✅ Annual budget saved to backend (Worker unavailable)!");
+                  alert(
+                    "✅ Annual budget saved to backend (Worker unavailable)!",
+                  );
                 } else {
-                  alert("❌ Failed to save: " + (result.error || "Unknown error"));
+                  alert(
+                    "❌ Failed to save: " + (result.error || "Unknown error"),
+                  );
                 }
               })
               .catch((err) => {
@@ -376,21 +411,27 @@ function showAnnualBudgetPasswordModal(callback) {
 
 function setAnnualBudgetInputsEnabled(enabled) {
   // Enable/disable all inputs and buttons in the plan table and controls
-  document.querySelectorAll('#planTable input, #planTable button, #addRegionRow, #saveAnnualBudget').forEach(el => {
-    if (enabled) {
-      el.removeAttribute('disabled');
-    } else {
-      el.setAttribute('disabled', 'disabled');
-    }
-  });
+  document
+    .querySelectorAll(
+      "#planTable input, #planTable button, #addRegionRow, #saveAnnualBudget",
+    )
+    .forEach((el) => {
+      if (enabled) {
+        el.removeAttribute("disabled");
+      } else {
+        el.setAttribute("disabled", "disabled");
+      }
+    });
   // For future rows: observe DOM changes and enable new inputs/buttons if unlocked
   if (enabled && !setAnnualBudgetInputsEnabled._observer) {
-    const tbody = document.querySelector('#planTable tbody');
+    const tbody = document.querySelector("#planTable tbody");
     if (tbody) {
       const observer = new MutationObserver(() => {
-        document.querySelectorAll('#planTable input, #planTable button').forEach(el => {
-          el.removeAttribute('disabled');
-        });
+        document
+          .querySelectorAll("#planTable input, #planTable button")
+          .forEach((el) => {
+            el.removeAttribute("disabled");
+          });
       });
       observer.observe(tbody, { childList: true, subtree: true });
       setAnnualBudgetInputsEnabled._observer = observer;
@@ -422,26 +463,26 @@ function initializeAnnualBudgetPlan(budgets) {
   setAnnualBudgetInputsEnabled(false);
 
   // Overlay logic to intercept all clicks when locked
-  const planTable = document.getElementById('planTable');
+  const planTable = document.getElementById("planTable");
   if (planTable) {
     // Remove any existing overlay
-    let overlay = document.getElementById('planTableLockOverlay');
+    let overlay = document.getElementById("planTableLockOverlay");
     if (overlay) overlay.remove();
 
     if (!annualBudgetUnlocked) {
-      overlay = document.createElement('div');
-      overlay.id = 'planTableLockOverlay';
+      overlay = document.createElement("div");
+      overlay.id = "planTableLockOverlay";
       Object.assign(overlay.style, {
-        position: 'absolute',
-        top: planTable.offsetTop + 'px',
-        left: planTable.offsetLeft + 'px',
-        width: planTable.offsetWidth + 'px',
-        height: planTable.offsetHeight + 'px',
-        background: 'rgba(255,255,255,0)',
+        position: "absolute",
+        top: planTable.offsetTop + "px",
+        left: planTable.offsetLeft + "px",
+        width: planTable.offsetWidth + "px",
+        height: planTable.offsetHeight + "px",
+        background: "rgba(255,255,255,0)",
         zIndex: 10,
-        cursor: 'pointer',
+        cursor: "pointer",
       });
-      overlay.addEventListener('click', function(e) {
+      overlay.addEventListener("click", function (e) {
         showAnnualBudgetPasswordModal((ok) => {
           if (ok) {
             setAnnualBudgetInputsEnabled(true);
@@ -453,7 +494,7 @@ function initializeAnnualBudgetPlan(budgets) {
         e.stopPropagation();
       });
       // Insert overlay in the same parent as the table
-      planTable.parentNode.style.position = 'relative';
+      planTable.parentNode.style.position = "relative";
       planTable.parentNode.appendChild(overlay);
     }
   }
@@ -483,7 +524,9 @@ function initializeAnnualBudgetPlan(budgets) {
       tbody.appendChild(newRow);
       // Enable new row's inputs/buttons if unlocked
       if (annualBudgetUnlocked) {
-        newRow.querySelectorAll('input,button').forEach(el => el.removeAttribute('disabled'));
+        newRow
+          .querySelectorAll("input,button")
+          .forEach((el) => el.removeAttribute("disabled"));
       }
       const input = newRow.querySelector('input[type="number"]');
       if (input) {
@@ -506,7 +549,7 @@ function initializeAnnualBudgetPlan(budgets) {
   setupAnnualBudgetSave();
 
   // Intercept save button
-  const saveBtn = document.getElementById('saveAnnualBudget');
+  const saveBtn = document.getElementById("saveAnnualBudget");
   if (saveBtn) {
     saveBtn.onclick = (e) => {
       if (!annualBudgetUnlocked) {
@@ -516,7 +559,7 @@ function initializeAnnualBudgetPlan(budgets) {
         return;
       }
       // If unlocked, proceed with original save
-      if (typeof window._originalAnnualBudgetSave === 'function') {
+      if (typeof window._originalAnnualBudgetSave === "function") {
         window._originalAnnualBudgetSave();
       }
     };

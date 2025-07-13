@@ -31,7 +31,7 @@
 
     <section id="view-planning" style="display: none">
       <h2>Planning</h2>
-      
+
       <!-- Planning Filters Section -->
       <div
         id="planningFilters"
@@ -49,7 +49,11 @@
         "
       >
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="planningCampaignNameFilter" style="font-weight: 500; color: #1976d2">Campaign Name:</label>
+          <label
+            for="planningCampaignNameFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Campaign Name:</label
+          >
           <input
             type="text"
             id="planningCampaignNameFilter"
@@ -64,7 +68,11 @@
           />
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="planningRegionFilter" style="font-weight: 500; color: #1976d2">Region:</label>
+          <label
+            for="planningRegionFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Region:</label
+          >
           <select
             id="planningRegionFilter"
             style="
@@ -79,7 +87,11 @@
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="planningQuarterFilter" style="font-weight: 500; color: #1976d2">Quarter:</label>
+          <label
+            for="planningQuarterFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Quarter:</label
+          >
           <select
             id="planningQuarterFilter"
             style="
@@ -94,7 +106,11 @@
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="planningStatusFilter" style="font-weight: 500; color: #1976d2">Status:</label>
+          <label
+            for="planningStatusFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Status:</label
+          >
           <select
             id="planningStatusFilter"
             style="
@@ -109,7 +125,11 @@
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="planningProgramTypeFilter" style="font-weight: 500; color: #1976d2">Program Type:</label>
+          <label
+            for="planningProgramTypeFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Program Type:</label
+          >
           <select
             id="planningProgramTypeFilter"
             style="
@@ -124,7 +144,11 @@
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="planningOwnerFilter" style="font-weight: 500; color: #1976d2">Owner:</label>
+          <label
+            for="planningOwnerFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Owner:</label
+          >
           <select
             id="planningOwnerFilter"
             style="
@@ -167,7 +191,7 @@
           Clear Filters
         </button>
       </div>
-      
+
       <div
         id="planningGridButtons"
         style="
@@ -199,13 +223,24 @@
     </section>
     <section id="view-budgets" style="display: none">
       <h2>Budgets Dashboard</h2>
-      
+
       <!-- Main Budget Overview Chart -->
-      <div style="background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(25,118,210,0.08); padding: 20px; margin-bottom: 24px; max-width: 800px;">
-        <h3 style="margin: 0 0 16px 0; color: #1976d2;">Budget Overview by Region</h3>
-        <canvas id="budgetsBarChart" style="max-height: 300px;"></canvas>
+      <div
+        style="
+          background: #fff;
+          border-radius: 12px;
+          box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+          padding: 20px;
+          margin-bottom: 24px;
+          max-width: 800px;
+        "
+      >
+        <h3 style="margin: 0 0 16px 0; color: #1976d2">
+          Budget Overview by Region
+        </h3>
+        <canvas id="budgetsBarChart" style="max-height: 300px"></canvas>
       </div>
-      
+
       <div
         style="
           display: flex;
@@ -238,11 +273,11 @@
     </section>
     <section id="view-calendar" style="display: none">
       <h2>Campaign Calendar</h2>
-      
+
       <!-- Financial Year Tabs -->
-      <div style="margin-bottom: 20px;">
-        <h3 style="margin-bottom: 10px;">Financial Year:</h3>
-        <div id="fyTabs" style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <div style="margin-bottom: 20px">
+        <h3 style="margin-bottom: 10px">Financial Year:</h3>
+        <div id="fyTabs" style="display: flex; gap: 8px; flex-wrap: wrap">
           <!-- FY tabs will be populated by JavaScript -->
         </div>
       </div>
@@ -253,18 +288,31 @@
       </div>
 
       <!-- Calendar Container -->
-      <div id="calendarContainer" style="background: #f5f5f5; border-radius: 8px; padding: 16px;">
+      <div
+        id="calendarContainer"
+        style="background: #f5f5f5; border-radius: 8px; padding: 16px"
+      >
         <div id="calendarGrid">
           <!-- Calendar grid will be populated by JavaScript -->
         </div>
       </div>
-      
+
       <!-- Instructions -->
-      <div style="margin-top: 20px; padding: 16px; background: #e3f2fd; border-radius: 6px; color: #1976d2;">
-        <h4 style="margin-top: 0;">📅 Campaign Calendar View</h4>
-        <p style="margin-bottom: 0;">
-          This calendar displays all campaigns from your planning data organized by month. 
-          Switch between financial years using the tabs above, use filters to narrow down campaigns, and click on any campaign to view detailed information.
+      <div
+        style="
+          margin-top: 20px;
+          padding: 16px;
+          background: #e3f2fd;
+          border-radius: 6px;
+          color: #1976d2;
+        "
+      >
+        <h4 style="margin-top: 0">📅 Campaign Calendar View</h4>
+        <p style="margin-bottom: 0">
+          This calendar displays all campaigns from your planning data organized
+          by month. Switch between financial years using the tabs above, use
+          filters to narrow down campaigns, and click on any campaign to view
+          detailed information.
         </p>
       </div>
     </section>
@@ -303,13 +351,47 @@
         <button id="saveAnnualBudget" disabled>Save Annual Budget</button>
       </div>
       <!-- Password Modal for Annual Budget Edit -->
-      <div id="annualBudgetPasswordModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
-        <div style="background:#fff; padding:32px 24px; border-radius:8px; box-shadow:0 2px 16px #0002; min-width:320px; max-width:90vw; margin:auto;">
-          <h3 style="margin-top:0;">Unlock Annual Budget Editing</h3>
+      <div
+        id="annualBudgetPasswordModal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.4);
+          z-index: 1000;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <div
+          style="
+            background: #fff;
+            padding: 32px 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 16px #0002;
+            min-width: 320px;
+            max-width: 90vw;
+            margin: auto;
+          "
+        >
+          <h3 style="margin-top: 0">Unlock Annual Budget Editing</h3>
           <p>Enter password to edit the annual budget plan:</p>
-          <input id="annualBudgetPasswordInput" type="password" style="width:100%; padding:8px; margin-bottom:12px;" placeholder="Password" />
-          <div style="color:#d32f2f; min-height:20px;" id="annualBudgetPasswordError"></div>
-          <button id="annualBudgetPasswordSubmit" style="margin-right:8px;">Unlock</button>
+          <input
+            id="annualBudgetPasswordInput"
+            type="password"
+            style="width: 100%; padding: 8px; margin-bottom: 12px"
+            placeholder="Password"
+          />
+          <div
+            style="color: #d32f2f; min-height: 20px"
+            id="annualBudgetPasswordError"
+          ></div>
+          <button id="annualBudgetPasswordSubmit" style="margin-right: 8px">
+            Unlock
+          </button>
           <button id="annualBudgetPasswordCancel">Cancel</button>
         </div>
       </div>
@@ -366,38 +448,110 @@
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="roiCountryFilter" style="font-weight: 500; color: #1976d2">Country:</label>
-          <select id="roiCountryFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem; min-width: 150px;">
+          <label for="roiCountryFilter" style="font-weight: 500; color: #1976d2"
+            >Country:</label
+          >
+          <select
+            id="roiCountryFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
             <option value="">(All Countries)</option>
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="roiOwnerFilter" style="font-weight: 500; color: #1976d2">Owner:</label>
-          <select id="roiOwnerFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem; min-width: 150px;">
+          <label for="roiOwnerFilter" style="font-weight: 500; color: #1976d2"
+            >Owner:</label
+          >
+          <select
+            id="roiOwnerFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
             <option value="">(All Owners)</option>
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="roiStatusFilter" style="font-weight: 500; color: #1976d2">Status:</label>
-          <select id="roiStatusFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem; min-width: 150px;">
+          <label for="roiStatusFilter" style="font-weight: 500; color: #1976d2"
+            >Status:</label
+          >
+          <select
+            id="roiStatusFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
             <option value="">(All Statuses)</option>
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="roiProgramTypeFilter" style="font-weight: 500; color: #1976d2">Program Type:</label>
-          <select id="roiProgramTypeFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem; min-width: 150px;">
+          <label
+            for="roiProgramTypeFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Program Type:</label
+          >
+          <select
+            id="roiProgramTypeFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
             <option value="">(All Program Types)</option>
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="roiStrategicPillarsFilter" style="font-weight: 500; color: #1976d2">Strategic Pillars:</label>
-          <select id="roiStrategicPillarsFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem; min-width: 150px;">
+          <label
+            for="roiStrategicPillarsFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Strategic Pillars:</label
+          >
+          <select
+            id="roiStrategicPillarsFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
             <option value="">(All Pillars)</option>
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
-          <label for="roiRevenuePlayFilter" style="font-weight: 500; color: #1976d2">Revenue Play:</label>
-          <select id="roiRevenuePlayFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem; min-width: 150px;">
+          <label
+            for="roiRevenuePlayFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Revenue Play:</label
+          >
+          <select
+            id="roiRevenuePlayFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
             <option value="">(All Revenue Plays)</option>
           </select>
         </div>
@@ -487,10 +641,22 @@
                 transition: transform 0.2s ease;
               "
             >
-              <div style="font-size: 0.85rem; margin-bottom: 8px; color: #666; font-weight: 500;">
+              <div
+                style="
+                  font-size: 0.85rem;
+                  margin-bottom: 8px;
+                  color: #666;
+                  font-weight: 500;
+                "
+              >
                 Total Costs
               </div>
-              <div id="roiTotalSpendValue" style="font-size: 1.3rem; font-weight: 700;">$0</div>
+              <div
+                id="roiTotalSpendValue"
+                style="font-size: 1.3rem; font-weight: 700"
+              >
+                $0
+              </div>
             </div>
 
             <div
@@ -512,10 +678,22 @@
                 transition: transform 0.2s ease;
               "
             >
-              <div style="font-size: 0.85rem; margin-bottom: 8px; color: #666; font-weight: 500;">
+              <div
+                style="
+                  font-size: 0.85rem;
+                  margin-bottom: 8px;
+                  color: #666;
+                  font-weight: 500;
+                "
+              >
                 Total Forecasted Pipeline
               </div>
-              <div id="roiTotalPipelineValue" style="font-size: 1.3rem; font-weight: 700;">$0</div>
+              <div
+                id="roiTotalPipelineValue"
+                style="font-size: 1.3rem; font-weight: 700"
+              >
+                $0
+              </div>
             </div>
 
             <div
@@ -537,10 +715,22 @@
                 transition: transform 0.2s ease;
               "
             >
-              <div style="font-size: 0.85rem; margin-bottom: 8px; color: #666; font-weight: 500;">
+              <div
+                style="
+                  font-size: 0.85rem;
+                  margin-bottom: 8px;
+                  color: #666;
+                  font-weight: 500;
+                "
+              >
                 Total Leads/Conversions
               </div>
-              <div id="roiTotalLeadsValue" style="font-size: 1.3rem; font-weight: 700;">0</div>
+              <div
+                id="roiTotalLeadsValue"
+                style="font-size: 1.3rem; font-weight: 700"
+              >
+                0
+              </div>
             </div>
 
             <div
@@ -562,8 +752,22 @@
                 transition: transform 0.2s ease;
               "
             >
-              <div style="font-size: 0.85rem; margin-bottom: 8px; color: #666; font-weight: 500;">Total MQL</div>
-              <div id="roiTotalMqlValue" style="font-size: 1.3rem; font-weight: 700;">0</div>
+              <div
+                style="
+                  font-size: 0.85rem;
+                  margin-bottom: 8px;
+                  color: #666;
+                  font-weight: 500;
+                "
+              >
+                Total MQL
+              </div>
+              <div
+                id="roiTotalMqlValue"
+                style="font-size: 1.3rem; font-weight: 700"
+              >
+                0
+              </div>
             </div>
           </div>
         </div>
@@ -597,10 +801,22 @@
               transition: transform 0.2s ease;
             "
           >
-            <div style="font-size: 0.85rem; margin-bottom: 8px; color: #666; font-weight: 500;">
+            <div
+              style="
+                font-size: 0.85rem;
+                margin-bottom: 8px;
+                color: #666;
+                font-weight: 500;
+              "
+            >
               Total Forecasted Cost
             </div>
-            <div id="roiTotalForecastedCostValue" style="font-size: 1.3rem; font-weight: 700;">$0</div>
+            <div
+              id="roiTotalForecastedCostValue"
+              style="font-size: 1.3rem; font-weight: 700"
+            >
+              $0
+            </div>
           </div>
 
           <div
@@ -622,12 +838,24 @@
               transition: transform 0.2s ease;
             "
           >
-            <div style="font-size: 0.85rem; margin-bottom: 8px; color: #2e7d32; font-weight: 500;">
+            <div
+              style="
+                font-size: 0.85rem;
+                margin-bottom: 8px;
+                color: #2e7d32;
+                font-weight: 500;
+              "
+            >
               Remaining Budget (Total Budget - Actual Cost)
             </div>
-            <div id="roiRemainingBudgetValue" style="font-size: 1.3rem; font-weight: 700;">$0</div>
+            <div
+              id="roiRemainingBudgetValue"
+              style="font-size: 1.3rem; font-weight: 700"
+            >
+              $0
+            </div>
           </div>
-            
+
           <!-- Forecasted Budget Usage Info Box -->
           <div
             style="
@@ -647,10 +875,22 @@
               transition: transform 0.2s ease;
             "
           >
-            <div style="font-size: 0.85rem; margin-bottom: 8px; color: #e65100; font-weight: 500;">
+            <div
+              style="
+                font-size: 0.85rem;
+                margin-bottom: 8px;
+                color: #e65100;
+                font-weight: 500;
+              "
+            >
               Forecasted Budget Usage (Total Budget - Forecasted Cost)
             </div>
-            <div id="roiForecastedBudgetValue" style="font-size: 1.3rem; font-weight: 700;">$0</div>
+            <div
+              id="roiForecastedBudgetValue"
+              style="font-size: 1.3rem; font-weight: 700"
+            >
+              $0
+            </div>
           </div>
         </div>
 
@@ -805,7 +1045,7 @@
                   position: relative;
                 "
               >
-                <div id="roiDataTable" style="width: 100%; height: 100%;"></div>
+                <div id="roiDataTable" style="width: 100%; height: 100%"></div>
               </div>
             </div>
 

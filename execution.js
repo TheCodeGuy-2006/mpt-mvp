@@ -192,7 +192,7 @@ function setupExecutionSave(table, rows) {
 function setupExecutionFilters() {
   // Sync digital motions data from planning table first
   syncDigitalMotionsFromPlanning();
-  
+
   // Get constants from planning module for consistency
   const regionOptions = window.planningModule?.constants?.regionOptions || [
     "JP & Korea",
@@ -233,7 +233,7 @@ function setupExecutionFilters() {
     programTypes: programTypes.length,
     names: names.length,
     regionOptions: regionOptions.length,
-    statusOptions: statusOptions.length
+    statusOptions: statusOptions.length,
   });
 
   // Create comprehensive filter UI matching planning tab
@@ -337,22 +337,37 @@ function updateExecutionDigitalMotionsButtonVisual(button) {
 function setupExecutionFilterLogic() {
   // Ensure we have a valid table instance before setting up filters
   if (!executionTableInstance) {
-    console.warn("[Execution] Table instance not available yet, retrying in 100ms...");
+    console.warn(
+      "[Execution] Table instance not available yet, retrying in 100ms...",
+    );
     setTimeout(setupExecutionFilterLogic, 100);
     return;
   }
 
-  const campaignNameInput = document.getElementById("executionCampaignNameFilter");
+  const campaignNameInput = document.getElementById(
+    "executionCampaignNameFilter",
+  );
   const regionSelect = document.getElementById("executionRegionFilter");
   const statusSelect = document.getElementById("executionStatusFilter");
-  const programTypeSelect = document.getElementById("executionProgramTypeFilter");
+  const programTypeSelect = document.getElementById(
+    "executionProgramTypeFilter",
+  );
   const ownerSelect = document.getElementById("executionOwnerFilter");
   const poSelect = document.getElementById("executionPOFilter");
-  const digitalMotionsButton = document.getElementById("executionDigitalMotionsFilter");
+  const digitalMotionsButton = document.getElementById(
+    "executionDigitalMotionsFilter",
+  );
   const clearButton = document.getElementById("executionClearFilters");
 
-  if (!campaignNameInput || !regionSelect || !statusSelect || 
-      !programTypeSelect || !ownerSelect || !poSelect || !digitalMotionsButton) {
+  if (
+    !campaignNameInput ||
+    !regionSelect ||
+    !statusSelect ||
+    !programTypeSelect ||
+    !ownerSelect ||
+    !poSelect ||
+    !digitalMotionsButton
+  ) {
     console.error("[Execution] Missing filter elements:", {
       campaignNameInput: !!campaignNameInput,
       regionSelect: !!regionSelect,
@@ -360,7 +375,7 @@ function setupExecutionFilterLogic() {
       programTypeSelect: !!programTypeSelect,
       ownerSelect: !!ownerSelect,
       poSelect: !!poSelect,
-      digitalMotionsButton: !!digitalMotionsButton
+      digitalMotionsButton: !!digitalMotionsButton,
     });
     return;
   }
@@ -368,44 +383,53 @@ function setupExecutionFilterLogic() {
   console.log("[Execution] Setting up filter logic with table instance ready");
 
   // Initialize Digital Motions button state
-  if (!digitalMotionsButton.hasAttribute('data-active')) {
+  if (!digitalMotionsButton.hasAttribute("data-active")) {
     digitalMotionsButton.dataset.active = "false";
   }
   updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
 
   // Set up event listeners for all filters (only if not already attached)
-  if (!campaignNameInput.hasAttribute('data-listener-attached')) {
+  if (!campaignNameInput.hasAttribute("data-listener-attached")) {
     campaignNameInput.addEventListener("input", applyExecutionFilters);
-    campaignNameInput.setAttribute('data-listener-attached', 'true');
+    campaignNameInput.setAttribute("data-listener-attached", "true");
   }
-  
-  [regionSelect, statusSelect, programTypeSelect, ownerSelect, poSelect].forEach(select => {
-    if (!select.hasAttribute('data-listener-attached')) {
+
+  [
+    regionSelect,
+    statusSelect,
+    programTypeSelect,
+    ownerSelect,
+    poSelect,
+  ].forEach((select) => {
+    if (!select.hasAttribute("data-listener-attached")) {
       select.addEventListener("change", applyExecutionFilters);
-      select.setAttribute('data-listener-attached', 'true');
+      select.setAttribute("data-listener-attached", "true");
     }
   });
 
   // Digital Motions filter button toggle (only attach once)
-  if (!digitalMotionsButton.hasAttribute('data-listener-attached')) {
+  if (!digitalMotionsButton.hasAttribute("data-listener-attached")) {
     digitalMotionsButton.addEventListener("click", () => {
       const currentState = digitalMotionsButton.dataset.active;
       const isActive = currentState === "true";
       const newState = !isActive;
-      
+
       console.log("[Execution] Digital Motions button clicked:", {
         currentState,
         isActive,
-        newState
+        newState,
       });
-      
+
       digitalMotionsButton.dataset.active = newState.toString();
       updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
-      
-      console.log("[Execution] About to apply filters with Digital Motions state:", newState);
+
+      console.log(
+        "[Execution] About to apply filters with Digital Motions state:",
+        newState,
+      );
       applyExecutionFilters();
     });
-    digitalMotionsButton.setAttribute('data-listener-attached', 'true');
+    digitalMotionsButton.setAttribute("data-listener-attached", "true");
   }
 
   // Clear filters button
@@ -420,13 +444,13 @@ function setupExecutionFilterLogic() {
       poSelect.value = "";
       digitalMotionsButton.dataset.active = "false";
       updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
-      
+
       // Clear all table filters first
       if (executionTableInstance) {
         executionTableInstance.clearFilter();
         console.log("[Execution] Cleared table filters");
       }
-      
+
       // Then apply the empty filter state to ensure consistency
       applyExecutionFilters();
     });
@@ -435,19 +459,23 @@ function setupExecutionFilterLogic() {
 
 // Get current filter values for execution tracking
 function getExecutionFilterValues() {
-  const digitalMotionsButton = document.getElementById("executionDigitalMotionsFilter");
+  const digitalMotionsButton = document.getElementById(
+    "executionDigitalMotionsFilter",
+  );
   const digitalMotionsActive = digitalMotionsButton?.dataset.active === "true";
-  
+
   const filterValues = {
-    campaignName: document.getElementById("executionCampaignNameFilter")?.value || "",
+    campaignName:
+      document.getElementById("executionCampaignNameFilter")?.value || "",
     region: document.getElementById("executionRegionFilter")?.value || "",
     status: document.getElementById("executionStatusFilter")?.value || "",
-    programType: document.getElementById("executionProgramTypeFilter")?.value || "",
+    programType:
+      document.getElementById("executionProgramTypeFilter")?.value || "",
     owner: document.getElementById("executionOwnerFilter")?.value || "",
     poRaised: document.getElementById("executionPOFilter")?.value || "",
-    digitalMotions: digitalMotionsActive
+    digitalMotions: digitalMotionsActive,
   };
-  
+
   console.log("[Execution] getExecutionFilterValues:", {
     campaignName: filterValues.campaignName,
     region: filterValues.region,
@@ -456,71 +484,94 @@ function getExecutionFilterValues() {
     owner: filterValues.owner,
     poRaised: filterValues.poRaised,
     digitalMotions: filterValues.digitalMotions,
-    digitalMotionsButtonState: digitalMotionsButton?.dataset.active
+    digitalMotionsButtonState: digitalMotionsButton?.dataset.active,
   });
-  
+
   return filterValues;
 }
 
 // Apply filters to execution tracking table
 function applyExecutionFilters() {
   if (!executionTableInstance) {
-    console.warn("[Execution] Table instance not available, cannot apply filters");
+    console.warn(
+      "[Execution] Table instance not available, cannot apply filters",
+    );
     return;
   }
-  
+
   const filters = getExecutionFilterValues();
   console.log("[Execution] Applying filters:", filters);
-  
+
   // Use requestAnimationFrame to reduce forced reflow
   requestAnimationFrame(() => {
     // Clear existing filters first
     executionTableInstance.clearFilter();
-    
+
     // Apply filters using Tabulator's built-in filter system
     const activeFilters = [];
-    
+
     // Campaign name filter (partial match)
     if (filters.campaignName) {
-      activeFilters.push({field:"campaignName", type:"like", value:filters.campaignName});
+      activeFilters.push({
+        field: "campaignName",
+        type: "like",
+        value: filters.campaignName,
+      });
     }
-    
+
     // Exact match filters
     if (filters.region) {
-      activeFilters.push({field:"region", type:"=", value:filters.region});
+      activeFilters.push({ field: "region", type: "=", value: filters.region });
     }
     if (filters.status) {
-      activeFilters.push({field:"status", type:"=", value:filters.status});
+      activeFilters.push({ field: "status", type: "=", value: filters.status });
     }
     if (filters.programType) {
-      console.log("[Execution] Adding programType filter:", filters.programType);
-      activeFilters.push({field:"programType", type:"=", value:filters.programType});
+      console.log(
+        "[Execution] Adding programType filter:",
+        filters.programType,
+      );
+      activeFilters.push({
+        field: "programType",
+        type: "=",
+        value: filters.programType,
+      });
     }
     if (filters.owner) {
-      activeFilters.push({field:"owner", type:"=", value:filters.owner});
+      activeFilters.push({ field: "owner", type: "=", value: filters.owner });
     }
     if (filters.poRaised) {
-      activeFilters.push({field:"poRaised", type:"=", value:filters.poRaised});
+      activeFilters.push({
+        field: "poRaised",
+        type: "=",
+        value: filters.poRaised,
+      });
     }
-    
-    console.log("[Execution] Applying", activeFilters.length, "standard filters");
-    
+
+    console.log(
+      "[Execution] Applying",
+      activeFilters.length,
+      "standard filters",
+    );
+
     // Apply standard filters first
     if (activeFilters.length > 0) {
       executionTableInstance.setFilter(activeFilters);
     } else {
       executionTableInstance.clearFilter();
     }
-    
+
     // Apply Digital Motions filter separately as a custom function filter
     if (filters.digitalMotions) {
-      console.log("[Execution] Adding digitalMotions custom filter - showing only campaigns with digitalMotions === true");
-      
-      executionTableInstance.addFilter(function(data) {
+      console.log(
+        "[Execution] Adding digitalMotions custom filter - showing only campaigns with digitalMotions === true",
+      );
+
+      executionTableInstance.addFilter(function (data) {
         return data.digitalMotions === true;
       });
     }
-    
+
     const visibleRows = executionTableInstance.getDataCount(true);
     console.log("[Execution] Filters applied, showing", visibleRows, "rows");
   });
@@ -556,39 +607,48 @@ function syncGridsOnEdit(sourceTable, targetTable) {
 // Sync digital motions data from planning table to execution table
 function syncDigitalMotionsFromPlanning() {
   if (!executionTableInstance || !window.planningModule?.tableInstance) {
-    console.log("[Execution] Cannot sync digital motions - tables not available");
+    console.log(
+      "[Execution] Cannot sync digital motions - tables not available",
+    );
     return;
   }
 
   const planningData = window.planningModule.tableInstance.getData();
   const executionData = executionTableInstance.getData();
-  
+
   let updatedCount = 0;
-  
+
   // Update execution table with digitalMotions values from planning table
-  executionData.forEach(execRow => {
-    const planningRow = planningData.find(planRow => 
-      (planRow.id && planRow.id === execRow.id) || 
-      (planRow.campaignName === execRow.campaignName)
+  executionData.forEach((execRow) => {
+    const planningRow = planningData.find(
+      (planRow) =>
+        (planRow.id && planRow.id === execRow.id) ||
+        planRow.campaignName === execRow.campaignName,
     );
-    
+
     if (planningRow && planningRow.digitalMotions !== execRow.digitalMotions) {
       // Find the row in the execution table and update it
-      const execTableRow = executionTableInstance.getRows().find(row => {
+      const execTableRow = executionTableInstance.getRows().find((row) => {
         const rowData = row.getData();
-        return (rowData.id && rowData.id === execRow.id) || 
-               (rowData.campaignName === execRow.campaignName);
+        return (
+          (rowData.id && rowData.id === execRow.id) ||
+          rowData.campaignName === execRow.campaignName
+        );
       });
-      
+
       if (execTableRow) {
         execTableRow.update({ digitalMotions: planningRow.digitalMotions });
         updatedCount++;
       }
     }
   });
-  
+
   if (updatedCount > 0) {
-    console.log("[Execution] Synced", updatedCount, "rows with updated digital motions data");
+    console.log(
+      "[Execution] Synced",
+      updatedCount,
+      "rows with updated digital motions data",
+    );
   }
 }
 
@@ -603,29 +663,35 @@ window.executionModule = {
   initializeExecutionFilters,
   syncDigitalMotionsFromPlanning,
   // Debug function for Digital Motions filter
-  debugDigitalMotions: function() {
+  debugDigitalMotions: function () {
     console.log("=== EXECUTION DIGITAL MOTIONS DEBUG ===");
-    
+
     if (!executionTableInstance) {
       console.log("ERROR: No execution table instance");
       return;
     }
-    
+
     const allData = executionTableInstance.getData();
     console.log("Total execution records:", allData.length);
-    
-    const digitalMotionsRecords = allData.filter(row => row.digitalMotions === true);
-    console.log("Records with digitalMotions === true:", digitalMotionsRecords.length);
-    
-    console.log("Sample records with digitalMotions:", 
-      digitalMotionsRecords.slice(0, 3).map(r => ({
+
+    const digitalMotionsRecords = allData.filter(
+      (row) => row.digitalMotions === true,
+    );
+    console.log(
+      "Records with digitalMotions === true:",
+      digitalMotionsRecords.length,
+    );
+
+    console.log(
+      "Sample records with digitalMotions:",
+      digitalMotionsRecords.slice(0, 3).map((r) => ({
         campaignName: r.campaignName,
         digitalMotions: r.digitalMotions,
         region: r.region,
-        status: r.status
-      }))
+        status: r.status,
+      })),
     );
-    
+
     const button = document.getElementById("executionDigitalMotionsFilter");
     if (button) {
       console.log("Digital Motions button state:", button.dataset.active);
@@ -633,22 +699,22 @@ window.executionModule = {
     } else {
       console.log("ERROR: Digital Motions button not found");
     }
-    
+
     const visibleRows = executionTableInstance.getDataCount(true);
     console.log("Currently visible rows:", visibleRows);
-    
+
     // Test manual filter
     console.log("Testing manual digitalMotions filter...");
     executionTableInstance.clearFilter();
-    executionTableInstance.setFilter(function(data) {
+    executionTableInstance.setFilter(function (data) {
       return data.digitalMotions === true;
     });
-    
+
     const afterFilterRows = executionTableInstance.getDataCount(true);
     console.log("Rows after manual digitalMotions filter:", afterFilterRows);
-    
+
     console.log("=== END DEBUG ===");
-  }
+  },
 };
 
 // Export the execution table instance getter

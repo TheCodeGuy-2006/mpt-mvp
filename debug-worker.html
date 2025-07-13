@@ -1,292 +1,398 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>Worker Debug Test</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .result { margin: 10px 0; padding: 10px; border-radius: 4px; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        .info { background: #d1ecf1; color: #0c5460; }
-        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .result {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 4px;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .info {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Worker Debug Test</h1>
-    
+
     <div>
-        <h3>1. Check Saved Configuration</h3>
-        <button onclick="checkConfig()">Check Saved Config</button>
-        <div id="configResult"></div>
+      <h3>1. Check Saved Configuration</h3>
+      <button onclick="checkConfig()">Check Saved Config</button>
+      <div id="configResult"></div>
     </div>
 
     <div>
-        <h3>2. Test Worker Connection</h3>
-        <input type="text" id="workerUrl" placeholder="Enter Worker URL" style="width: 400px; padding: 8px;">
-        <button onclick="testWorker()">Test Worker</button>
-        <div id="workerResult"></div>
+      <h3>2. Test Worker Connection</h3>
+      <input
+        type="text"
+        id="workerUrl"
+        placeholder="Enter Worker URL"
+        style="width: 400px; padding: 8px"
+      />
+      <button onclick="testWorker()">Test Worker</button>
+      <div id="workerResult"></div>
     </div>
 
     <div>
-        <h3>3. Check Cloudflare Sync Module</h3>
-        <button onclick="checkModule()">Check Module</button>
-        <div id="moduleResult"></div>
+      <h3>3. Check Cloudflare Sync Module</h3>
+      <button onclick="checkModule()">Check Module</button>
+      <div id="moduleResult"></div>
     </div>
 
     <div>
-        <h3>4. Test Worker Save Operation</h3>
-        <button onclick="testSave()">Test Save to GitHub</button>
-        <div id="saveResult"></div>
+      <h3>4. Test Worker Save Operation</h3>
+      <button onclick="testSave()">Test Save to GitHub</button>
+      <div id="saveResult"></div>
     </div>
 
     <div>
-        <h3>5. Test Data API Endpoints</h3>
-        <button onclick="testDataEndpoints()">Test Data API</button>
-        <div id="dataApiResult"></div>
+      <h3>5. Test Data API Endpoints</h3>
+      <button onclick="testDataEndpoints()">Test Data API</button>
+      <div id="dataApiResult"></div>
     </div>
 
     <div>
-        <h3>6. Debug CORS Issues</h3>
-        <button onclick="testCORS()">Test CORS</button>
-        <div id="corsResult"></div>
+      <h3>6. Debug CORS Issues</h3>
+      <button onclick="testCORS()">Test CORS</button>
+      <div id="corsResult"></div>
     </div>
 
     <script>
-        function showResult(elementId, message, type) {
-            const element = document.getElementById(elementId);
-            element.innerHTML = `<div class="result ${type}">${message}</div>`;
+      function showResult(elementId, message, type) {
+        const element = document.getElementById(elementId);
+        element.innerHTML = `<div class="result ${type}">${message}</div>`;
+      }
+
+      function checkConfig() {
+        try {
+          const savedConfig = localStorage.getItem("githubSyncConfig");
+          if (savedConfig) {
+            const config = JSON.parse(savedConfig);
+            showResult(
+              "configResult",
+              `Found configuration:\n${JSON.stringify(config, null, 2)}`,
+              "success",
+            );
+
+            // Auto-fill the worker URL if found
+            if (config.workerEndpoint) {
+              document.getElementById("workerUrl").value =
+                config.workerEndpoint;
+            }
+          } else {
+            showResult(
+              "configResult",
+              "No saved configuration found. Please configure in the main app first.",
+              "error",
+            );
+          }
+        } catch (error) {
+          showResult(
+            "configResult",
+            `Error reading config: ${error.message}`,
+            "error",
+          );
+        }
+      }
+
+      async function testWorker() {
+        const workerUrl = document.getElementById("workerUrl").value.trim();
+        if (!workerUrl) {
+          showResult("workerResult", "Please enter a Worker URL", "error");
+          return;
         }
 
-        function checkConfig() {
-            try {
-                const savedConfig = localStorage.getItem('githubSyncConfig');
-                if (savedConfig) {
-                    const config = JSON.parse(savedConfig);
-                    showResult('configResult', `Found configuration:\n${JSON.stringify(config, null, 2)}`, 'success');
-                    
-                    // Auto-fill the worker URL if found
-                    if (config.workerEndpoint) {
-                        document.getElementById('workerUrl').value = config.workerEndpoint;
-                    }
-                } else {
-                    showResult('configResult', 'No saved configuration found. Please configure in the main app first.', 'error');
-                }
-            } catch (error) {
-                showResult('configResult', `Error reading config: ${error.message}`, 'error');
-            }
+        showResult("workerResult", "Testing Worker connection...", "info");
+
+        try {
+          // Clean URL (remove trailing slash)
+          const cleanUrl = workerUrl.replace(/\/$/, "");
+
+          // Test health endpoint
+          const response = await fetch(`${cleanUrl}/health`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            showResult(
+              "workerResult",
+              `✅ Worker is healthy!\n\nResponse:\n${JSON.stringify(result, null, 2)}`,
+              "success",
+            );
+          } else {
+            const errorText = await response.text();
+            showResult(
+              "workerResult",
+              `❌ Worker returned error ${response.status}:\n${errorText}`,
+              "error",
+            );
+          }
+        } catch (error) {
+          showResult(
+            "workerResult",
+            `❌ Connection failed:\n${error.message}`,
+            "error",
+          );
+        }
+      }
+
+      function checkModule() {
+        try {
+          if (window.cloudflareSyncModule) {
+            const config = window.cloudflareSyncModule.getAutoSaveConfig();
+            const endpoint = window.cloudflareSyncModule.getWorkerEndpoint();
+
+            showResult(
+              "moduleResult",
+              `✅ Cloudflare Sync Module is loaded!\n\n` +
+                `Endpoint: ${endpoint}\n` +
+                `Auto-save enabled: ${config.enabled}\n` +
+                `Debounce delay: ${config.debounceMs}ms`,
+              "success",
+            );
+          } else {
+            showResult(
+              "moduleResult",
+              "❌ Cloudflare Sync Module not found. Make sure cloudflare-sync.js is loaded.",
+              "error",
+            );
+          }
+        } catch (error) {
+          showResult(
+            "moduleResult",
+            `❌ Error checking module: ${error.message}`,
+            "error",
+          );
+        }
+      }
+
+      async function testSave() {
+        const workerUrl = document.getElementById("workerUrl").value.trim();
+        if (!workerUrl) {
+          showResult("saveResult", "Please enter a Worker URL first", "error");
+          return;
         }
 
-        async function testWorker() {
-            const workerUrl = document.getElementById('workerUrl').value.trim();
-            if (!workerUrl) {
-                showResult('workerResult', 'Please enter a Worker URL', 'error');
-                return;
-            }
+        showResult("saveResult", "Testing save operation...", "info");
 
-            showResult('workerResult', 'Testing Worker connection...', 'info');
+        try {
+          // Clean URL (remove trailing slash)
+          const cleanUrl = workerUrl.replace(/\/$/, "");
 
+          // Test with minimal data
+          const testData = [
+            {
+              id: "test-" + Date.now(),
+              name: "Test Save Operation",
+              timestamp: new Date().toISOString(),
+            },
+          ];
+
+          const response = await fetch(`${cleanUrl}/save`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              dataType: "planning",
+              data: testData,
+              options: { source: "debug-test" },
+            }),
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            showResult(
+              "saveResult",
+              `✅ Save test successful!\n\nResponse:\n${JSON.stringify(result, null, 2)}`,
+              "success",
+            );
+          } else {
+            const errorText = await response.text();
+            let errorData;
             try {
-                // Clean URL (remove trailing slash)
-                const cleanUrl = workerUrl.replace(/\/$/, '');
-                
-                // Test health endpoint
-                const response = await fetch(`${cleanUrl}/health`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    showResult('workerResult', `✅ Worker is healthy!\n\nResponse:\n${JSON.stringify(result, null, 2)}`, 'success');
-                } else {
-                    const errorText = await response.text();
-                    showResult('workerResult', `❌ Worker returned error ${response.status}:\n${errorText}`, 'error');
-                }
-            } catch (error) {
-                showResult('workerResult', `❌ Connection failed:\n${error.message}`, 'error');
+              errorData = JSON.parse(errorText);
+            } catch (e) {
+              errorData = { error: errorText };
             }
+
+            showResult(
+              "saveResult",
+              `❌ Save test failed (${response.status}):\n\n` +
+                `Error: ${errorData.error || "Unknown error"}\n` +
+                `Message: ${errorData.message || "No details"}\n` +
+                `Timestamp: ${errorData.timestamp || "N/A"}\n\n` +
+                `Full response:\n${JSON.stringify(errorData, null, 2)}`,
+              "error",
+            );
+          }
+        } catch (error) {
+          showResult(
+            "saveResult",
+            `❌ Save test failed:\n${error.message}`,
+            "error",
+          );
+        }
+      }
+
+      async function testDataEndpoints() {
+        const workerUrl = document.getElementById("workerUrl").value.trim();
+        if (!workerUrl) {
+          showResult(
+            "dataApiResult",
+            "Please enter a Worker URL first",
+            "error",
+          );
+          return;
         }
 
-        function checkModule() {
+        showResult("dataApiResult", "Testing data API endpoints...", "info");
+
+        try {
+          const cleanUrl = workerUrl.replace(/\/$/, "");
+          const endpoints = ["planning", "budgets", "calendar"];
+          let results = [];
+
+          for (const endpoint of endpoints) {
             try {
-                if (window.cloudflareSyncModule) {
-                    const config = window.cloudflareSyncModule.getAutoSaveConfig();
-                    const endpoint = window.cloudflareSyncModule.getWorkerEndpoint();
-                    
-                    showResult('moduleResult', 
-                        `✅ Cloudflare Sync Module is loaded!\n\n` +
-                        `Endpoint: ${endpoint}\n` +
-                        `Auto-save enabled: ${config.enabled}\n` +
-                        `Debounce delay: ${config.debounceMs}ms`, 'success');
-                } else {
-                    showResult('moduleResult', '❌ Cloudflare Sync Module not found. Make sure cloudflare-sync.js is loaded.', 'error');
-                }
-            } catch (error) {
-                showResult('moduleResult', `❌ Error checking module: ${error.message}`, 'error');
-            }
-        }
+              const response = await fetch(`${cleanUrl}/data/${endpoint}`, {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
 
-        async function testSave() {
-            const workerUrl = document.getElementById('workerUrl').value.trim();
-            if (!workerUrl) {
-                showResult('saveResult', 'Please enter a Worker URL first', 'error');
-                return;
-            }
-
-            showResult('saveResult', 'Testing save operation...', 'info');
-
-            try {
-                // Clean URL (remove trailing slash)
-                const cleanUrl = workerUrl.replace(/\/$/, '');
-                
-                // Test with minimal data
-                const testData = [
-                    { 
-                        id: 'test-' + Date.now(), 
-                        name: 'Test Save Operation',
-                        timestamp: new Date().toISOString()
-                    }
-                ];
-
-                const response = await fetch(`${cleanUrl}/save`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        dataType: 'planning',
-                        data: testData,
-                        options: { source: 'debug-test' }
-                    })
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    showResult('saveResult', `✅ Save test successful!\n\nResponse:\n${JSON.stringify(result, null, 2)}`, 'success');
-                } else {
-                    const errorText = await response.text();
-                    let errorData;
-                    try {
-                        errorData = JSON.parse(errorText);
-                    } catch (e) {
-                        errorData = { error: errorText };
-                    }
-                    
-                    showResult('saveResult', 
-                        `❌ Save test failed (${response.status}):\n\n` +
-                        `Error: ${errorData.error || 'Unknown error'}\n` +
-                        `Message: ${errorData.message || 'No details'}\n` +
-                        `Timestamp: ${errorData.timestamp || 'N/A'}\n\n` +
-                        `Full response:\n${JSON.stringify(errorData, null, 2)}`, 
-                        'error');
-                }
-            } catch (error) {
-                showResult('saveResult', `❌ Save test failed:\n${error.message}`, 'error');
-            }
-        }
-
-        async function testDataEndpoints() {
-            const workerUrl = document.getElementById('workerUrl').value.trim();
-            if (!workerUrl) {
-                showResult('dataApiResult', 'Please enter a Worker URL first', 'error');
-                return;
-            }
-
-            showResult('dataApiResult', 'Testing data API endpoints...', 'info');
-
-            try {
-                const cleanUrl = workerUrl.replace(/\/$/, '');
-                const endpoints = ['planning', 'budgets', 'calendar'];
-                let results = [];
-
-                for (const endpoint of endpoints) {
-                    try {
-                        const response = await fetch(`${cleanUrl}/data/${endpoint}`, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        });
-
-                        if (response.ok) {
-                            const data = await response.json();
-                            results.push(`✅ ${endpoint}: ${data.data ? data.data.length : 'N/A'} items`);
-                        } else {
-                            results.push(`❌ ${endpoint}: ${response.status} ${response.statusText}`);
-                        }
-                    } catch (error) {
-                        results.push(`❌ ${endpoint}: ${error.message}`);
-                    }
-                }
-
-                const successCount = results.filter(r => r.includes('✅')).length;
-                const totalCount = results.length;
-
-                showResult('dataApiResult', 
-                    `Data API Test Results (${successCount}/${totalCount} successful):\n\n` + 
-                    results.join('\n'), 
-                    successCount === totalCount ? 'success' : 'error'
+              if (response.ok) {
+                const data = await response.json();
+                results.push(
+                  `✅ ${endpoint}: ${data.data ? data.data.length : "N/A"} items`,
                 );
-            } catch (error) {
-                showResult('dataApiResult', `❌ Data API test failed: ${error.message}`, 'error');
-            }
-        }
-
-        async function testCORS() {
-            const workerUrl = document.getElementById('workerUrl').value.trim();
-            if (!workerUrl) {
-                showResult('corsResult', 'Please enter a Worker URL first', 'error');
-                return;
-            }
-
-            showResult('corsResult', 'Testing CORS configuration...', 'info');
-
-            try {
-                const cleanUrl = workerUrl.replace(/\/$/, '');
-                
-                // Test preflight request
-                const preflightResponse = await fetch(`${cleanUrl}/health`, {
-                    method: 'OPTIONS',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Origin': window.location.origin
-                    }
-                });
-
-                const corsHeaders = {
-                    'Access-Control-Allow-Origin': preflightResponse.headers.get('Access-Control-Allow-Origin'),
-                    'Access-Control-Allow-Methods': preflightResponse.headers.get('Access-Control-Allow-Methods'),
-                    'Access-Control-Allow-Headers': preflightResponse.headers.get('Access-Control-Allow-Headers'),
-                    'Access-Control-Max-Age': preflightResponse.headers.get('Access-Control-Max-Age')
-                };
-
-                let corsStatus = [];
-                corsStatus.push(`Preflight Status: ${preflightResponse.status}`);
-                corsStatus.push(`Allow-Origin: ${corsHeaders['Access-Control-Allow-Origin'] || 'Missing'}`);
-                corsStatus.push(`Allow-Methods: ${corsHeaders['Access-Control-Allow-Methods'] || 'Missing'}`);
-                corsStatus.push(`Allow-Headers: ${corsHeaders['Access-Control-Allow-Headers'] || 'Missing'}`);
-                corsStatus.push(`Max-Age: ${corsHeaders['Access-Control-Max-Age'] || 'Missing'}`);
-
-                const isGoodCORS = corsHeaders['Access-Control-Allow-Origin'] === '*' && 
-                                   corsHeaders['Access-Control-Allow-Methods'] && 
-                                   corsHeaders['Access-Control-Allow-Headers'];
-
-                showResult('corsResult', 
-                    `CORS Test Results:\n\n${corsStatus.join('\n')}\n\nStatus: ${isGoodCORS ? '✅ CORS is properly configured' : '❌ CORS may have issues'}`, 
-                    isGoodCORS ? 'success' : 'error'
+              } else {
+                results.push(
+                  `❌ ${endpoint}: ${response.status} ${response.statusText}`,
                 );
+              }
             } catch (error) {
-                showResult('corsResult', `❌ CORS test failed: ${error.message}`, 'error');
+              results.push(`❌ ${endpoint}: ${error.message}`);
             }
+          }
+
+          const successCount = results.filter((r) => r.includes("✅")).length;
+          const totalCount = results.length;
+
+          showResult(
+            "dataApiResult",
+            `Data API Test Results (${successCount}/${totalCount} successful):\n\n` +
+              results.join("\n"),
+            successCount === totalCount ? "success" : "error",
+          );
+        } catch (error) {
+          showResult(
+            "dataApiResult",
+            `❌ Data API test failed: ${error.message}`,
+            "error",
+          );
+        }
+      }
+
+      async function testCORS() {
+        const workerUrl = document.getElementById("workerUrl").value.trim();
+        if (!workerUrl) {
+          showResult("corsResult", "Please enter a Worker URL first", "error");
+          return;
         }
 
-        // Auto-check on load
-        window.addEventListener('load', () => {
-            checkConfig();
-            checkModule();
-        });
+        showResult("corsResult", "Testing CORS configuration...", "info");
+
+        try {
+          const cleanUrl = workerUrl.replace(/\/$/, "");
+
+          // Test preflight request
+          const preflightResponse = await fetch(`${cleanUrl}/health`, {
+            method: "OPTIONS",
+            headers: {
+              "Content-Type": "application/json",
+              Origin: window.location.origin,
+            },
+          });
+
+          const corsHeaders = {
+            "Access-Control-Allow-Origin": preflightResponse.headers.get(
+              "Access-Control-Allow-Origin",
+            ),
+            "Access-Control-Allow-Methods": preflightResponse.headers.get(
+              "Access-Control-Allow-Methods",
+            ),
+            "Access-Control-Allow-Headers": preflightResponse.headers.get(
+              "Access-Control-Allow-Headers",
+            ),
+            "Access-Control-Max-Age": preflightResponse.headers.get(
+              "Access-Control-Max-Age",
+            ),
+          };
+
+          let corsStatus = [];
+          corsStatus.push(`Preflight Status: ${preflightResponse.status}`);
+          corsStatus.push(
+            `Allow-Origin: ${corsHeaders["Access-Control-Allow-Origin"] || "Missing"}`,
+          );
+          corsStatus.push(
+            `Allow-Methods: ${corsHeaders["Access-Control-Allow-Methods"] || "Missing"}`,
+          );
+          corsStatus.push(
+            `Allow-Headers: ${corsHeaders["Access-Control-Allow-Headers"] || "Missing"}`,
+          );
+          corsStatus.push(
+            `Max-Age: ${corsHeaders["Access-Control-Max-Age"] || "Missing"}`,
+          );
+
+          const isGoodCORS =
+            corsHeaders["Access-Control-Allow-Origin"] === "*" &&
+            corsHeaders["Access-Control-Allow-Methods"] &&
+            corsHeaders["Access-Control-Allow-Headers"];
+
+          showResult(
+            "corsResult",
+            `CORS Test Results:\n\n${corsStatus.join("\n")}\n\nStatus: ${isGoodCORS ? "✅ CORS is properly configured" : "❌ CORS may have issues"}`,
+            isGoodCORS ? "success" : "error",
+          );
+        } catch (error) {
+          showResult(
+            "corsResult",
+            `❌ CORS test failed: ${error.message}`,
+            "error",
+          );
+        }
+      }
+
+      // Auto-check on load
+      window.addEventListener("load", () => {
+        checkConfig();
+        checkModule();
+      });
     </script>
-</body>
+  </body>
 </html>

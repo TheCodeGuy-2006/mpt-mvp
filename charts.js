@@ -12,7 +12,7 @@ function initializeChartJS() {
       console.log("Chart.js loaded");
       // Only render if data is available
       setTimeout(() => {
-        if (typeof renderBudgetsBarChart === 'function') {
+        if (typeof renderBudgetsBarChart === "function") {
           renderBudgetsBarChart();
         }
       }, 500);
@@ -21,7 +21,7 @@ function initializeChartJS() {
   } else {
     // Chart.js already loaded
     setTimeout(() => {
-      if (typeof renderBudgetsBarChart === 'function') {
+      if (typeof renderBudgetsBarChart === "function") {
         renderBudgetsBarChart();
       }
     }, 500);
@@ -829,7 +829,9 @@ function initRoiTabSwitching() {
   const dataTableTabBtn = document.getElementById("roiProgramTypeTabBtn");
   const quarterTabBtn = document.getElementById("roiQuarterTabBtn");
   const regionPanel = document.getElementById("roiRegionChartContainer");
-  const dataTablePanel = document.getElementById("roiProgramTypeChartContainer");
+  const dataTablePanel = document.getElementById(
+    "roiProgramTypeChartContainer",
+  );
   const quarterPanel = document.getElementById("roiQuarterChartContainer");
 
   if (

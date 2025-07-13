@@ -5,16 +5,19 @@
 ### 🔧 Cloudflare Worker Issues
 
 #### 404 Not Found Error
+
 ```
 GET https://mpt-mvp-sync.jordanradford.workers.dev//health 404 (Not Found)
 ```
 
 **Causes:**
+
 - Double slash in URL (`//health` instead of `/health`)
 - Worker not properly deployed
 - Incorrect Worker URL
 
 **Solutions:**
+
 1. **Check URL format:**
    - ❌ Wrong: `https://worker.workers.dev//health`
    - ✅ Correct: `https://worker.workers.dev/health`
@@ -30,9 +33,11 @@ GET https://mpt-mvp-sync.jordanradford.workers.dev//health 404 (Not Found)
    ```
 
 #### Worker Code Not Updated
+
 **Problem:** Worker still shows default "Hello World" response
 
 **Solution:**
+
 1. Go to Cloudflare Dashboard
 2. Click on your worker
 3. Delete ALL existing code
@@ -41,10 +46,12 @@ GET https://mpt-mvp-sync.jordanradford.workers.dev//health 404 (Not Found)
 6. Click **Save and Deploy**
 
 #### CORS Errors
+
 **Problem:** Browser blocks requests due to CORS policy
 
 **Solution:**
 The Worker includes CORS headers. If you see CORS errors:
+
 1. Check browser console for specific error details
 2. Verify Worker code includes CORS headers (it should)
 3. Try accessing Worker URL directly in browser
@@ -52,14 +59,17 @@ The Worker includes CORS headers. If you see CORS errors:
 ### 🔑 GitHub Token Issues
 
 #### 401 Unauthorized
+
 **Problem:** GitHub API returns 401 when Worker tries to access repository
 
 **Causes:**
+
 - Invalid or expired GitHub token
 - Token missing required permissions
 - Token not properly set in Cloudflare
 
 **Solutions:**
+
 1. **Check token permissions:**
    - Go to https://github.com/settings/tokens
    - Verify token has `repo` scope checked
@@ -77,9 +87,11 @@ The Worker includes CORS headers. If you see CORS errors:
    ```
 
 #### 403 Forbidden
+
 **Problem:** Token exists but lacks permissions
 
 **Solutions:**
+
 1. **Check repository access:**
    - Ensure your GitHub account has push access to the repository
    - For organization repos, check organization settings
@@ -89,13 +101,16 @@ The Worker includes CORS headers. If you see CORS errors:
    - Other scopes like `public_repo` may not be sufficient
 
 #### 404 Repository Not Found
+
 **Problem:** Worker can't find the repository
 
 **Solutions:**
+
 1. **Check repository configuration in Worker:**
+
    ```javascript
-   const REPO_OWNER = 'jordanradford';  // ← Your exact GitHub username
-   const REPO_NAME = 'mpt-mvp';         // ← Your exact repository name
+   const REPO_OWNER = "jordanradford"; // ← Your exact GitHub username
+   const REPO_NAME = "mpt-mvp"; // ← Your exact repository name
    ```
 
 2. **Verify repository exists:**
@@ -105,9 +120,11 @@ The Worker includes CORS headers. If you see CORS errors:
 ### 🌐 Frontend Connection Issues
 
 #### "Worker endpoint not configured"
+
 **Problem:** Frontend can't connect to Worker
 
 **Solutions:**
+
 1. **Configure Worker endpoint:**
    - Go to GitHub Sync tab
    - Enter Worker URL: `https://your-worker.workers.dev`
@@ -118,9 +135,11 @@ The Worker includes CORS headers. If you see CORS errors:
    - Don't include trailing slash
 
 #### Auto-save Not Working
+
 **Problem:** Changes aren't automatically saved
 
 **Solutions:**
+
 1. **Enable auto-save:**
    - GitHub Sync tab → Check "Enable Auto-Save"
    - Set appropriate delay (3-10 seconds)
@@ -137,9 +156,11 @@ The Worker includes CORS headers. If you see CORS errors:
 ### 📡 Network and Connectivity Issues
 
 #### Timeout Errors
+
 **Problem:** Requests to Worker timeout
 
 **Solutions:**
+
 1. **Check Cloudflare Worker status:**
    - Visit Cloudflare Status page
    - Try accessing Worker URL directly
@@ -153,9 +174,11 @@ The Worker includes CORS headers. If you see CORS errors:
    - Check Worker logs for timeout errors
 
 #### SSL/TLS Certificate Errors
+
 **Problem:** Browser shows certificate warnings
 
 **Solutions:**
+
 1. **Use HTTPS URLs:**
    - All Worker URLs should start with `https://`
    - Never use `http://` for Cloudflare Workers
@@ -167,9 +190,11 @@ The Worker includes CORS headers. If you see CORS errors:
 ### 💾 Data Saving Issues
 
 #### "Save failed" Messages
+
 **Problem:** Data saves fail with error messages
 
 **Solutions:**
+
 1. **Check Worker logs:**
    - Cloudflare Dashboard → Worker → Logs
    - Look for specific error messages
@@ -183,9 +208,11 @@ The Worker includes CORS headers. If you see CORS errors:
    - Gradually add more complex data
 
 #### Files Not Appearing in GitHub
+
 **Problem:** Saves seem successful but files don't update in repository
 
 **Solutions:**
+
 1. **Check repository branch:**
    - Worker saves to `main` branch by default
    - Verify you're looking at the correct branch
@@ -201,10 +228,13 @@ The Worker includes CORS headers. If you see CORS errors:
 ### 🔍 Debugging Steps
 
 #### Step 1: Health Check
+
 ```bash
 curl https://your-worker.workers.dev/health
 ```
+
 Expected response:
+
 ```json
 {
   "status": "healthy",
@@ -217,6 +247,7 @@ Expected response:
 ```
 
 #### Step 2: Test Save
+
 ```bash
 curl -X POST https://your-worker.workers.dev/save \
   -H "Content-Type: application/json" \
@@ -228,12 +259,14 @@ curl -X POST https://your-worker.workers.dev/save \
 ```
 
 #### Step 3: Check Browser Console
+
 1. Open browser Developer Tools (F12)
 2. Go to Console tab
 3. Look for red error messages
 4. Note any 404, 401, or 403 errors
 
 #### Step 4: Check Cloudflare Logs
+
 1. Cloudflare Dashboard → Workers & Pages
 2. Click on your worker
 3. Go to Logs tab
@@ -242,6 +275,7 @@ curl -X POST https://your-worker.workers.dev/save \
 ### 🚨 Emergency Fixes
 
 #### Reset Everything
+
 If nothing works, try this complete reset:
 
 1. **Delete and recreate Worker:**
@@ -278,6 +312,7 @@ If you're still having issues:
    - Exact steps to reproduce
 
 3. **Common debugging commands:**
+
    ```bash
    # Test Worker health
    curl -v https://your-worker.workers.dev/health

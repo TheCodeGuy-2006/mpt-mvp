@@ -2,9 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ "main", "MPT-MVP_01" ]  # Deploy from both main and your current branch
+    branches: ["main", "MPT-MVP_01"] # Deploy from both main and your current branch
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -25,15 +25,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      
+
       - name: Build
         run: |
           # No build process needed for static files
           echo "No build process required - serving static files directly"
-      
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
