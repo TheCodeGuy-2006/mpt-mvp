@@ -303,6 +303,21 @@ table#planTable td input[type="text"] {
 #planningGridButtons button:hover {
   background: #1565c0;
 }
+
+#addPlanningRow {
+  background: #28a745 !important;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#addPlanningRow:hover {
+  background: #218838 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
 #view-planning {
   width: 100vw;
   max-width: 1600px;
@@ -805,6 +820,144 @@ table#planTable td input[type="text"] {
   border-radius: 3px;
   opacity: 0;
   transition: opacity 0.2s;
+}
+
+/* Add Row Modal styles */
+#addRowModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+  overflow-y: auto;
+}
+
+#addRowModal .modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  margin: 20px;
+}
+
+#addRowModal h2 {
+  margin: 0;
+  color: #1976d2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#addRowModal h3 {
+  margin: 0 0 16px 0;
+  color: #1976d2;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 8px;
+}
+
+#addRowModal .form-group {
+  margin-bottom: 20px;
+}
+
+#addRowModal label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: #333;
+}
+
+#addRowModal input,
+#addRowModal select,
+#addRowModal textarea {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+#addRowModal input:focus,
+#addRowModal select:focus,
+#addRowModal textarea:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+#addRowModal .required {
+  color: red;
+}
+
+#addRowModal .form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+#addRowModal .full-width {
+  grid-column: 1 / -1;
+}
+
+#addRowModal .button-group {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+#addRowModal button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#addRowModal button:hover {
+  transform: translateY(-1px);
+}
+
+#addRowModal .btn-cancel {
+  background: #6c757d;
+  color: white;
+}
+
+#addRowModal .btn-cancel:hover {
+  background: #5a6268;
+}
+
+#addRowModal .btn-primary {
+  background: #28a745;
+  color: white;
+}
+
+#addRowModal .btn-primary:hover {
+  background: #218838;
+}
+
+#addRowModal .btn-close {
+  background: #f44336;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+#addRowModal .btn-close:hover {
+  background: #da190b;
 }
 
 /* Campaign modal styles */

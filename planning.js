@@ -616,22 +616,7 @@ function initPlanningGrid(rows) {
   if (addBtn) {
     addBtn.onclick = () => {
       console.log("Add Planning Row button clicked");
-      const newRow = planningTableInstance.addRow(
-        {
-          id: `program-${Date.now()}`,
-          status: "Planning",
-          __modified: true,
-        },
-        true,
-      ); // Add 'true' as second parameter to add at top
-
-      // Scroll to the new row and make it visible
-      setTimeout(() => {
-        if (newRow && newRow.scrollTo) {
-          newRow.scrollTo();
-          console.log("Scrolled to new planning row");
-        }
-      }, 100);
+      showAddRowModal();
     };
   }
 
@@ -662,6 +647,456 @@ function initPlanningGrid(rows) {
   window.planningTableInstance = planningTableInstance;
 
   return planningTableInstance;
+}
+
+// Show Add Row Modal
+function showAddRowModal() {
+  // Remove existing modal if any
+  const existingModal = document.getElementById("addRowModal");
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  const modalHtml = `
+    <div id="addRowModal" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1100;
+      overflow-y: auto;
+    ">
+      <div style="
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        margin: 20px;
+      ">
+        <div style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+          border-bottom: 2px solid #e3f2fd;
+          padding-bottom: 16px;
+        ">
+          <h2 style="margin: 0; color: #1976d2; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">➕</span>
+            Add New Campaign
+          </h2>
+          <button id="closeAddRowModal" style="
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+          ">✕</button>
+        </div>
+        
+        <form id="addRowForm" style="
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 20px;
+        ">
+          <!-- Row 1: Basic Info -->
+          <div style="grid-column: 1 / -1;">
+            <h3 style="margin: 0 0 16px 0; color: #1976d2; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
+              📋 Basic Information
+            </h3>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Campaign Name <span style="color: red;">*</span>
+            </label>
+            <input type="text" id="campaignName" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            " placeholder="Enter campaign name..." required />
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Program Type <span style="color: red;">*</span>
+            </label>
+            <select id="programType" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            " required>
+              <option value="">Select program type...</option>
+              ${programTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
+            </select>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Strategic Pillar
+            </label>
+            <select id="strategicPillars" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            ">
+              <option value="">Select strategic pillar...</option>
+              ${strategicPillars.map(pillar => `<option value="${pillar}">${pillar}</option>`).join('')}
+            </select>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Owner <span style="color: red;">*</span>
+            </label>
+            <select id="owner" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            " required>
+              <option value="">Select owner...</option>
+              ${names.map(name => `<option value="${name}">${name}</option>`).join('')}
+            </select>
+          </div>
+          
+          <!-- Row 2: Scheduling -->
+          <div style="grid-column: 1 / -1; margin-top: 20px;">
+            <h3 style="margin: 0 0 16px 0; color: #1976d2; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
+              📅 Scheduling & Location
+            </h3>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Quarter <span style="color: red;">*</span>
+            </label>
+            <select id="quarter" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            " required>
+              <option value="">Select quarter...</option>
+              ${quarterOptions.map(quarter => `<option value="${quarter}">${quarter}</option>`).join('')}
+            </select>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Fiscal Year <span style="color: red;">*</span>
+            </label>
+            <select id="fiscalYear" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            " required>
+              <option value="">Select fiscal year...</option>
+              <option value="FY25">FY25</option>
+              <option value="FY26">FY26</option>
+              <option value="FY27">FY27</option>
+            </select>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Region <span style="color: red;">*</span>
+            </label>
+            <select id="region" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            " required>
+              <option value="">Select region...</option>
+              ${regionOptions.map(region => `<option value="${region}">${region}</option>`).join('')}
+            </select>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Country
+            </label>
+            <select id="country" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            ">
+              <option value="">Select country...</option>
+              ${getAllCountries().map(country => `<option value="${country}">${country}</option>`).join('')}
+            </select>
+          </div>
+          
+          <!-- Row 3: Financial & Goals -->
+          <div style="grid-column: 1 / -1; margin-top: 20px;">
+            <h3 style="margin: 0 0 16px 0; color: #1976d2; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
+              💰 Financial & Goals
+            </h3>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Forecasted Cost ($)
+            </label>
+            <input type="number" id="forecastedCost" min="0" step="0.01" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            " placeholder="Enter forecasted cost..." />
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Expected Leads
+            </label>
+            <input type="number" id="expectedLeads" min="0" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            " placeholder="Enter expected leads..." />
+            <small style="color: #666; font-style: italic;">
+              KPIs will be calculated automatically based on this value
+            </small>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Revenue Play
+            </label>
+            <select id="revenuePlay" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            ">
+              <option value="">Select revenue play...</option>
+              ${revenuePlays.map(play => `<option value="${play}">${play}</option>`).join('')}
+            </select>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Status
+            </label>
+            <select id="status" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+            ">
+              ${statusOptions.map(status => `<option value="${status}" ${status === 'Planning' ? 'selected' : ''}>${status}</option>`).join('')}
+            </select>
+          </div>
+          
+          <!-- Description -->
+          <div style="grid-column: 1 / -1; margin-top: 20px;">
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
+              Description
+            </label>
+            <textarea id="description" rows="3" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              box-sizing: border-box;
+              resize: vertical;
+            " placeholder="Enter campaign description..."></textarea>
+          </div>
+          
+          <!-- Buttons -->
+          <div style="grid-column: 1 / -1; margin-top: 30px; display: flex; gap: 12px; justify-content: flex-end;">
+            <button type="button" id="cancelAddRow" style="
+              background: #6c757d;
+              color: white;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: bold;
+            ">Cancel</button>
+            <button type="submit" id="confirmAddRow" style="
+              background: #28a745;
+              color: white;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: bold;
+            ">✓ Add Campaign</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  // Add modal to page
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+
+  // Set up event listeners
+  setupAddRowModalEvents();
+}
+
+// Setup event listeners for add row modal
+function setupAddRowModalEvents() {
+  const modal = document.getElementById("addRowModal");
+  const form = document.getElementById("addRowForm");
+  const closeBtn = document.getElementById("closeAddRowModal");
+  const cancelBtn = document.getElementById("cancelAddRow");
+
+  // Close modal events
+  const closeModal = () => {
+    if (modal) modal.remove();
+  };
+
+  closeBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", closeModal);
+
+  // Close on backdrop click
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Close on Escape key
+  document.addEventListener("keydown", function escapeHandler(e) {
+    if (e.key === "Escape") {
+      closeModal();
+      document.removeEventListener("keydown", escapeHandler);
+    }
+  });
+
+  // Handle form submission
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    // Get form data
+    const formData = {
+      id: `program-${Date.now()}`,
+      campaignName: document.getElementById("campaignName").value,
+      programType: document.getElementById("programType").value,
+      strategicPillars: document.getElementById("strategicPillars").value,
+      owner: document.getElementById("owner").value,
+      quarter: document.getElementById("quarter").value,
+      fiscalYear: document.getElementById("fiscalYear").value,
+      region: document.getElementById("region").value,
+      country: document.getElementById("country").value,
+      forecastedCost: document.getElementById("forecastedCost").value ? Number(document.getElementById("forecastedCost").value) : 0,
+      expectedLeads: document.getElementById("expectedLeads").value ? Number(document.getElementById("expectedLeads").value) : 0,
+      revenuePlay: document.getElementById("revenuePlay").value,
+      status: document.getElementById("status").value || "Planning",
+      description: document.getElementById("description").value,
+      __modified: true,
+    };
+
+    // Validate required fields
+    const requiredFields = ['campaignName', 'programType', 'owner', 'quarter', 'fiscalYear', 'region'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+    
+    if (missingFields.length > 0) {
+      alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    // Calculate KPIs based on program type
+    if (formData.programType === "In-Account Events (1:1)") {
+      formData.expectedLeads = 0;
+      formData.mqlForecast = 0;
+      formData.sqlForecast = 0;
+      formData.oppsForecast = 0;
+      formData.pipelineForecast = formData.forecastedCost * 20;
+    } else if (formData.expectedLeads > 0) {
+      const kpiVals = kpis(formData.expectedLeads);
+      formData.mqlForecast = kpiVals.mql;
+      formData.sqlForecast = kpiVals.sql;
+      formData.oppsForecast = kpiVals.opps;
+      formData.pipelineForecast = kpiVals.pipeline;
+    }
+
+    // Add row to table
+    const newRow = planningTableInstance.addRow(formData, true);
+
+    // Scroll to the new row and make it visible
+    setTimeout(() => {
+      if (newRow && newRow.scrollTo) {
+        newRow.scrollTo();
+        console.log("Scrolled to new planning row");
+      }
+    }, 100);
+
+    // Trigger autosave
+    triggerPlanningAutosave(planningTableInstance);
+
+    // Close modal
+    closeModal();
+
+    // Show success message
+    const successMsg = document.createElement("div");
+    successMsg.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      z-index: 1200;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    successMsg.textContent = `✓ Campaign "${formData.campaignName}" added successfully!`;
+    document.body.appendChild(successMsg);
+
+    setTimeout(() => {
+      if (successMsg.parentNode) {
+        successMsg.remove();
+      }
+    }, 3000);
+  });
 }
 
 // PLANNING SAVE AND DOWNLOAD FUNCTIONS

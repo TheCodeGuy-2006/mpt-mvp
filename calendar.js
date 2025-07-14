@@ -151,6 +151,7 @@ function renderFilterControls() {
   if (!filterContainer) return;
 
   const filterOptions = getFilterOptions();
+  const regionLegend = getRegionColorLegend();
 
   filterContainer.innerHTML = `
     <div style="
@@ -173,6 +174,46 @@ function renderFilterControls() {
           margin-left: auto;
         ">Clear All</button>
       </h4>
+      
+      <!-- Region Color Legend -->
+      ${regionLegend.length > 0 ? `
+        <div style="
+          background: #f8f9fa;
+          padding: 12px;
+          border-radius: 6px;
+          margin-bottom: 16px;
+          border-left: 4px solid #1976d2;
+        ">
+          <h5 style="margin: 0 0 8px 0; color: #1976d2; font-size: 14px;">🎨 Region Color Guide:</h5>
+          <div style="
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+          ">
+            ${regionLegend.map(item => `
+              <div style="
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                background: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                border: 1px solid #e0e0e0;
+              ">
+                <div style="
+                  width: 16px;
+                  height: 16px;
+                  background: ${item.color};
+                  border-radius: 3px;
+                  border: 1px solid rgba(0,0,0,0.1);
+                "></div>
+                <span style="font-size: 13px; font-weight: 500; color: #333;">${item.region}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
       
       <div style="
         display: grid;
@@ -417,6 +458,45 @@ function getStatusColor(status) {
   return colors[status] || "#607d8b";
 }
 
+// Get region color for campaigns
+function getRegionColor(region) {
+  const colors = {
+    "APAC": "#1e88e5",      // Blue
+    "EMEA": "#43a047",      // Green  
+    "Americas": "#f4511e",  // Orange/Red
+    "JP & Korea": "#8e24aa", // Purple
+    "Global": "#546e7a",    // Blue Grey
+    "NA": "#fb8c00",        // Orange
+    "LATAM": "#d81b60",     // Pink
+    "ANZ": "#00acc1",       // Cyan
+    "India": "#7cb342",     // Light Green
+    "China": "#ff7043",     // Deep Orange
+  };
+  return colors[region] || "#757575"; // Default grey for unknown regions
+}
+
+// Get region colors for the legend
+function getRegionColorLegend() {
+  const campaigns = getCampaignData().filter((c) => c.fiscalYear === currentFY);
+  const regionsInUse = new Set();
+  
+  campaigns.forEach((campaign) => {
+    if (campaign.region) {
+      regionsInUse.add(campaign.region);
+    }
+  });
+  
+  const legend = [];
+  regionsInUse.forEach((region) => {
+    legend.push({
+      region: region,
+      color: getRegionColor(region)
+    });
+  });
+  
+  return legend.sort((a, b) => a.region.localeCompare(b.region));
+}
+
 // Render Financial Year tabs
 function renderFYTabs() {
   const fyTabsContainer = document.getElementById("fyTabs");
@@ -519,9 +599,18 @@ function showCampaignDetails(
             : ""
         }
         
-        <h3 style="margin-top: 0; color: #1976d2;">${campaign.campaignName || "Untitled Campaign"}</h3>
+        <h3 style="margin-top: 0; color: #1976d2; display: flex; align-items: center; gap: 8px;">
+          <div style="
+            width: 12px;
+            height: 12px;
+            background: ${getRegionColor(campaign.region)};
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.2);
+          "></div>
+          ${campaign.campaignName || "Untitled Campaign"}
+        </h3>
         <div style="margin: 12px 0;">
-          <strong>Region:</strong> ${campaign.region || "Not specified"}<br>
+          <strong>Region:</strong> <span style="color: ${getRegionColor(campaign.region)}; font-weight: bold;">${campaign.region || "Not specified"}</span><br>
           <strong>Country:</strong> ${campaign.country || "Not specified"}<br>
           <strong>Owner:</strong> ${campaign.owner || "Unassigned"}<br>
           <strong>Status:</strong> <span style="color: ${getStatusColor(campaign.status)}; font-weight: bold;">${campaign.status || "Planning"}</span><br>
@@ -682,13 +771,14 @@ function showMonthDetails(monthInfo, monthCampaigns) {
                   .map(
                     (campaign, index) => `
               <div class="month-campaign-card" data-campaign-index="${index}" style="
-                background: ${getStatusColor(campaign.status)};
+                background: ${getRegionColor(campaign.region)};
                 color: white;
                 padding: 16px;
                 border-radius: 8px;
                 cursor: pointer;
                 transition: transform 0.2s, box-shadow 0.2s;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                border-left: 4px solid ${getStatusColor(campaign.status)};
               ">
                 <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold;">
                   ${campaign.campaignName || "Untitled Campaign"}
@@ -900,7 +990,7 @@ function renderCalendar() {
         const campaign = monthCampaigns[i];
         const campaignDiv = document.createElement("div");
         campaignDiv.style.cssText = `
-          background: ${getStatusColor(campaign.status)};
+          background: ${getRegionColor(campaign.region)};
           color: white;
           padding: 6px 8px;
           margin: 4px 0;
@@ -910,6 +1000,7 @@ function renderCalendar() {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          border-left: 3px solid ${getStatusColor(campaign.status)};
         `;
 
         campaignDiv.innerHTML = `
