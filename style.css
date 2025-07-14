@@ -674,590 +674,180 @@ table#planTable td input[type="text"] {
   font-style: italic;
 }
 
-/* Filter grid responsive */
-@media (max-width: 768px) {
-  #calendarFilters > div > div:first-child {
-    grid-template-columns: 1fr;
-  }
-
-  #calendarFilters > div > div:last-child {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
-}
-
-/* Financial Year tabs */
-#fyTabs button {
-  background: white;
-  color: #1976d2;
-  border: 2px solid #1976d2;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: normal;
-  transition: all 0.2s;
-  margin: 0 4px;
-}
-
-#fyTabs button:hover {
-  background: #e3f2fd;
-}
-
-#fyTabs button.active {
-  background: #1976d2;
-  color: white;
-  font-weight: bold;
-}
-
-/* Campaign cards in calendar */
-.campaign-card {
-  background: #1976d2;
-  color: white;
-  padding: 8px;
-  margin: 8px 0;
-  border-radius: 6px;
-  cursor: pointer;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.campaign-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.campaign-card h4 {
-  margin: 0 0 4px 0;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.campaign-card .details {
-  font-size: 12px;
-  opacity: 0.9;
-  line-height: 1.3;
-}
-
-/* Month containers in calendar grid */
-.month-container {
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
-  background: white;
-  height: 300px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.2s;
+/* Filter container styles */
+.filter-container {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+  padding: 20px;
+  margin-bottom: 24px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-}
-
-.month-container:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: #1976d2;
-}
-
-.month-header {
-  margin: 0 0 16px 0;
-  color: #1976d2;
-  text-align: center;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #e3f2fd;
-  flex-shrink: 0;
-}
-
-.month-count {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 12px;
-  font-weight: bold;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-/* Campaign preview in month boxes */
-.campaign-preview {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
-
-.campaign-preview-item {
-  background: #1976d2;
-  color: white;
-  padding: 6px 8px;
-  margin: 4px 0;
-  border-radius: 4px;
-  font-size: 12px;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.more-campaigns-indicator {
-  color: #666;
-  font-size: 11px;
-  font-style: italic;
-  text-align: center;
-  margin-top: 8px;
-  padding: 4px;
-  background: #f5f5f5;
-  border-radius: 3px;
-}
-
-.click-hint {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  color: #999;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 2px 6px;
-  border-radius: 3px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-/* Add Row Modal styles */
-#addRowModal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1100;
-  overflow-y: auto;
-}
-
-#addRowModal .modal-content {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 85vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  margin: 20px;
-}
-
-#addRowModal h2 {
-  margin: 0;
-  color: #1976d2;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#addRowModal h3 {
-  margin: 0 0 16px 0;
-  color: #1976d2;
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 8px;
-}
-
-#addRowModal .form-group {
-  margin-bottom: 20px;
-}
-
-#addRowModal label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: bold;
-  color: #333;
-}
-
-#addRowModal input,
-#addRowModal select,
-#addRowModal textarea {
-  width: 100%;
-  padding: 10px;
-  border: 2px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease;
-}
-
-#addRowModal input:focus,
-#addRowModal select:focus,
-#addRowModal textarea:focus {
-  outline: none;
-  border-color: #1976d2;
-  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
-}
-
-#addRowModal .required {
-  color: red;
-}
-
-#addRowModal .form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-#addRowModal .full-width {
-  grid-column: 1 / -1;
-}
-
-#addRowModal .button-group {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 30px;
-}
-
-#addRowModal button {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-#addRowModal button:hover {
-  transform: translateY(-1px);
-}
-
-#addRowModal .btn-cancel {
-  background: #6c757d;
-  color: white;
-}
-
-#addRowModal .btn-cancel:hover {
-  background: #5a6268;
-}
-
-#addRowModal .btn-primary {
-  background: #28a745;
-  color: white;
-}
-
-#addRowModal .btn-primary:hover {
-  background: #218838;
-}
-
-#addRowModal .btn-close {
-  background: #f44336;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 16px;
-}
-
-#addRowModal .btn-close:hover {
-  background: #da190b;
-}
-
-/* Campaign modal styles */
-#campaignModal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-#campaignModal .modal-content {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  max-width: 500px;
-  width: 90%;
-  max-height: 80%;
-  overflow-y: auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-#campaignModal h3 {
-  margin-top: 0;
-  color: #1976d2;
-}
-
-#campaignModal button {
-  background: #1976d2;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 16px;
-}
-
-/* Month details modal */
-#monthModal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-#monthModal .modal-content {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
-  width: 90%;
-  max-width: 800px;
-  height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-#monthModal h2 {
-  margin: 0;
-  color: #1976d2;
-}
-
-#monthModal .close-btn {
-  background: #f44336;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-#monthModal .campaign-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 16px;
 }
 
-#monthModal .campaign-card-large {
-  color: white;
-  padding: 16px;
+.filter-row {
+  display: grid;
+  gap: 16px;
+  align-items: center;
+}
+
+.filter-row-main {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.filter-row-secondary {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  padding-top: 8px;
+  border-top: 1px solid #e3f2fd;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-group label {
+  font-weight: 500;
+  color: #1976d2;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.filter-input,
+.filter-select {
+  padding: 10px 12px;
   border-radius: 8px;
-  cursor: pointer;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-#monthModal .campaign-card-large:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-
-/* Responsive calendar */
-@media (max-width: 768px) {
-  #calendarGrid {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-
-  .month-container {
-    height: 250px !important;
-  }
-
-  #fyTabs {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  #fyTabs button {
-    margin: 4px;
-    font-size: 14px;
-  }
-
-  #monthModal .modal-content {
-    width: 95%;
-    height: 85vh;
-    padding: 20px;
-  }
-
-  #monthModal .campaign-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 1024px) {
-  #calendarGrid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  #monthModal .campaign-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  }
-}
-
-/* ROI Data Table Styling */
-#roiDataTable {
-  width: 100% !important;
-  height: 400px !important;
-  min-height: 400px !important;
-}
-
-#roiDataTable .tabulator {
-  width: 100% !important;
-  height: 100% !important;
-  border: 1px solid #e3f2fd;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  background: white;
-}
-
-#roiDataTable .tabulator-header {
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
-  color: white;
-  font-weight: 700;
-  font-size: 1.1rem;
-  border-bottom: none;
-  height: 50px;
-}
-
-#roiDataTable .tabulator-col {
-  background: transparent;
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-#roiDataTable .tabulator-col:last-child {
-  border-right: none;
-}
-
-#roiDataTable .tabulator-col-title {
-  color: white;
-  font-weight: 700;
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 14px 12px;
-}
-
-#roiDataTable .tabulator-row {
-  border-bottom: 1px solid #f0f4f8;
+  border: 1px solid #90caf9;
+  font-size: 1rem;
+  background: #ffffff;
   transition: all 0.2s ease;
+  min-width: 0; /* Allow flex items to shrink */
+  width: 100%;
 }
 
-#roiDataTable .tabulator-row:hover {
-  background: #f8fafe;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
 }
 
-#roiDataTable .tabulator-row:nth-child(even) {
-  background: #fafbfc;
+.filter-input:hover,
+.filter-select:hover {
+  border-color: #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
 }
 
-#roiDataTable .tabulator-row:nth-child(even):hover {
-  background: #f8fafe;
+.filter-input::placeholder {
+  color: #90a4ae;
 }
 
-#roiDataTable .tabulator-cell {
-  padding: 14px 12px;
+.filter-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  grid-column: 1 / -1; /* Span full width */
+  margin-top: 8px;
+}
+
+.filter-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
   font-size: 0.95rem;
-  border-right: 1px solid #f0f4f8;
-}
-
-#roiDataTable .tabulator-cell:last-child {
-  border-right: none;
-}
-
-#roiProgramTypeChartContainer {
-  padding: 24px !important;
-  background: #fafbfc;
-}
-
-/* ROI Info Box Hover Effects */
-#roiTotalSpendBox:hover,
-#roiTotalPipelineBox:hover,
-#roiTotalLeadsBox:hover,
-#roiTotalMqlBox:hover,
-#roiTotalForecastedCostBox:hover,
-#roiRemainingBudgetBox:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  cursor: pointer;
-}
-
-/* Specific hover effects for budget boxes */
-#roiRemainingBudgetBox:hover {
-  border-color: #2e7d32;
-  background: #e0f2e1;
-}
-
-/* Custom hover effect for forecasted budget usage box */
-div[style*="background: #fff3e0"]:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
-  cursor: pointer !important;
-  border-color: #f57c00 !important;
-  background: #fef3e2 !important;
-}
-
-/* Responsive design for smaller screens */
-@media (max-width: 1200px) {
-  #roiTopRow {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  #roiTopRow > div:last-child {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  div[style*="grid-template-columns: repeat(3, 1fr)"] {
-    grid-template-columns: repeat(1, 1fr) !important;
-  }
-}
-
-@media (max-width: 768px) {
-  #roiTopRow > div:last-child {
-    grid-template-columns: repeat(1, 1fr);
-  }
-}
-
-/* Execution filter buttons hover effects */
-#executionClearFilters:hover {
-  background: #757575 !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(117, 117, 117, 0.3);
+  font-weight: 500;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-#executionDigitalMotionsFilter:hover {
+.filter-btn-digital {
+  background: #4caf50;
+  color: white;
+  border: 1px solid #45a049;
+}
+
+.filter-btn-digital:hover {
+  background: #45a049;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-  transition: all 0.2s ease;
 }
 
-/* General execution filter button hover effects */
-#view-execution select:hover {
-  border-color: #1976d2;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
-  transition: all 0.2s ease;
+.filter-btn-clear {
+  background: #9e9e9e;
+  color: white;
+  border: 1px solid #757575;
 }
 
-#view-execution input:hover {
-  border-color: #1976d2;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
-  transition: all 0.2s ease;
+.filter-btn-clear:hover {
+  background: #757575;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(117, 117, 117, 0.3);
+}
+
+/* ===== RESPONSIVE FILTER LAYOUT ===== */
+@media (max-width: 1200px) {
+  .filter-row-main,
+  .filter-row-secondary {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-container {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .filter-row-main,
+  .filter-row-secondary {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  
+  .filter-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .filter-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-row-main,
+  .filter-row-secondary {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-group {
+    gap: 4px;
+  }
+  
+  .filter-input,
+  .filter-select {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ===== PLANNING SPECIFIC OVERRIDES ===== */
+#planningFilters .filter-btn-clear {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+#planningFilters .filter-btn-clear:hover {
+  background: #e0e0e0;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
