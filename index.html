@@ -145,6 +145,25 @@
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
           <label
+            for="planningStrategicPillarFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Strategic Pillar:</label
+          >
+          <select
+            id="planningStrategicPillarFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Strategic Pillars)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label
             for="planningOwnerFilter"
             style="font-weight: 500; color: #1976d2"
             >Owner:</label
@@ -219,6 +238,188 @@
     </section>
     <section id="view-execution" style="display: none">
       <h2>Execution Tracking</h2>
+      
+      <!-- Execution Filters -->
+      <div
+        style="
+          background: #fff;
+          border-radius: 12px;
+          box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+          padding: 20px;
+          margin-bottom: 20px;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 16px;
+          align-items: center;
+        "
+      >
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label
+            for="executionCampaignNameFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Campaign Name:</label
+          >
+          <input
+            type="text"
+            id="executionCampaignNameFilter"
+            placeholder="Search campaigns..."
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          />
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label
+            for="executionRegionFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Region:</label
+          >
+          <select
+            id="executionRegionFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Regions)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label
+            for="executionQuarterFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Quarter:</label
+          >
+          <select
+            id="executionQuarterFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Quarters)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label
+            for="executionStatusFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Status:</label
+          >
+          <select
+            id="executionStatusFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Statuses)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label
+            for="executionProgramTypeFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Program Type:</label
+          >
+          <select
+            id="executionProgramTypeFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Program Types)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label
+            for="executionStrategicPillarFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Strategic Pillar:</label
+          >
+          <select
+            id="executionStrategicPillarFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Strategic Pillars)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label
+            for="executionOwnerFilter"
+            style="font-weight: 500; color: #1976d2"
+            >Owner:</label
+          >
+          <select
+            id="executionOwnerFilter"
+            style="
+              padding: 8px 12px;
+              border-radius: 6px;
+              border: 1px solid #90caf9;
+              font-size: 1rem;
+              min-width: 150px;
+            "
+          >
+            <option value="">(All Owners)</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center">
+          <button
+            id="executionDigitalMotionsFilter"
+            style="
+              padding: 8px 16px;
+              background: #4caf50;
+              color: white;
+              border: 1px solid #45a049;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 0.95rem;
+              font-weight: 500;
+            "
+          >
+            🚀 Digital Motions
+          </button>
+          <button
+            id="executionClearFilters"
+            style="
+              padding: 8px 16px;
+              background: #9e9e9e;
+              color: white;
+              border: 1px solid #757575;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 0.95rem;
+              font-weight: 500;
+            "
+          >
+            Clear Filters
+          </button>
+        </div>
+      </div>
+      
       <div id="executionGrid"></div>
     </section>
     <section id="view-budgets" style="display: none">

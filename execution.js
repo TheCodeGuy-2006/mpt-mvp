@@ -221,101 +221,115 @@ function setupExecutionFilters() {
     "Paid ads",
     "Operational/Infrastructure/Swag",
   ];
+  const strategicPillars = window.planningModule?.constants?.strategicPillars || [
+    "Account Growth and Product Adoption",
+    "Pipeline Acceleration & Executive Engagement", 
+    "Brand Awareness & Top of Funnel Demand Generation",
+    "New Logo Acquisition",
+  ];
+  const quarterOptions = window.planningModule?.constants?.quarterOptions || [
+    "Q1 July",
+    "Q1 August", 
+    "Q1 September",
+    "Q2 October",
+    "Q2 November",
+    "Q2 December",
+    "Q3 January",
+    "Q3 February",
+    "Q3 March",
+    "Q4 April",
+    "Q4 May",
+    "Q4 June",
+  ];
   const names = window.planningModule?.constants?.names || [
     "Shruti Narang",
     "Beverly Leung",
     "Giorgia Parham",
     "Tomoko Tanaka",
   ];
-  const yesNo = window.planningModule?.constants?.yesNo || ["Yes", "No"];
 
   console.log("[Execution] Setting up filters with constants:", {
     programTypes: programTypes.length,
+    strategicPillars: strategicPillars.length,
+    quarterOptions: quarterOptions.length,
     names: names.length,
     regionOptions: regionOptions.length,
     statusOptions: statusOptions.length,
   });
 
-  // Create comprehensive filter UI matching planning tab
-  const execFiltersDiv = document.createElement("div");
-  execFiltersDiv.id = "execFiltersDiv";
-  execFiltersDiv.style.margin = "0 0 16px 0";
-  execFiltersDiv.style.background = "#f8f9fa";
-  execFiltersDiv.style.padding = "16px";
-  execFiltersDiv.style.borderRadius = "8px";
-  execFiltersDiv.style.border = "1px solid #e0e0e0";
-  execFiltersDiv.innerHTML = `
-    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <label for="executionCampaignNameFilter" style="font-weight: 500; white-space: nowrap;">Campaign Name:</label>
-        <input type="text" id="executionCampaignNameFilter" placeholder="Search campaigns..." 
-               style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem; min-width: 200px;" />
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <label for="executionRegionFilter" style="font-weight: 500; white-space: nowrap;">Region:</label>
-        <select id="executionRegionFilter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem;">
-          <option value="">(All Regions)</option>
-          ${regionOptions.map((r) => `<option value="${r}">${r}</option>`).join("")}
-        </select>
-      </div>
-    </div>
-    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <label for="executionStatusFilter" style="font-weight: 500; white-space: nowrap;">Status:</label>
-        <select id="executionStatusFilter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem;">
-          <option value="">(All Statuses)</option>
-          ${statusOptions.map((s) => `<option value="${s}">${s}</option>`).join("")}
-        </select>
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <label for="executionProgramTypeFilter" style="font-weight: 500; white-space: nowrap;">Program Type:</label>
-        <select id="executionProgramTypeFilter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem;">
-          <option value="">(All Types)</option>
-          ${programTypes.map((type) => `<option value="${type}">${type}</option>`).join("")}
-        </select>
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <label for="executionOwnerFilter" style="font-weight: 500; white-space: nowrap;">Owner:</label>
-        <select id="executionOwnerFilter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem;">
-          <option value="">(All Owners)</option>
-          ${names.map((owner) => `<option value="${owner}">${owner}</option>`).join("")}
-        </select>
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <label for="executionPOFilter" style="font-weight: 500; white-space: nowrap;">PO Raised:</label>
-        <select id="executionPOFilter" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1rem;">
-          <option value="">(All)</option>
-          ${yesNo.map((v) => `<option value="${v}">${v}</option>`).join("")}
-        </select>
-      </div>
-      <button id="executionDigitalMotionsFilter" type="button" data-active="false"
-              style="padding: 8px 16px; border-radius: 6px; border: 2px solid #1976d2; background: white; color: #1976d2; font-weight: 500; cursor: pointer; transition: all 0.2s;">
-        Digital Motions
-      </button>
-      <button id="executionClearFilters" type="button"
-              style="padding: 8px 16px; border-radius: 6px; border: 1px solid #666; background: white; color: #666; font-weight: 500; cursor: pointer; margin-left: 8px;">
-        Clear All Filters
-      </button>
-    </div>
-  `;
+  // Populate filter dropdowns using the HTML elements already in index.html
+  populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names);
+  
+  // Setup filter event listeners
+  setupExecutionFilterLogic();
+}
 
-  const execGridSection = document.getElementById("view-execution");
-  if (execGridSection) {
-    // Check if filters already exist to avoid duplication
-    const existingFilters = document.getElementById("execFiltersDiv");
-    if (!existingFilters) {
-      const h2 = execGridSection.querySelector("h2");
-      if (h2 && execGridSection.contains(h2)) {
-        h2.insertAdjacentElement("afterend", execFiltersDiv);
-      } else {
-        execGridSection.insertBefore(
-          execFiltersDiv,
-          execGridSection.firstChild,
-        );
-      }
+// Function to populate execution filter dropdowns
+function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names) {
+  // Region filter
+  const regionSelect = document.getElementById("executionRegionFilter");
+  if (regionSelect && regionSelect.children.length <= 1) {
+    regionOptions.forEach((region) => {
+      const option = document.createElement("option");
+      option.value = region;
+      option.textContent = region;
+      regionSelect.appendChild(option);
+    });
+  }
 
-      setupExecutionFilterLogic();
-    }
+  // Quarter filter
+  const quarterSelect = document.getElementById("executionQuarterFilter");
+  if (quarterSelect && quarterSelect.children.length <= 1) {
+    quarterOptions.forEach((quarter) => {
+      const option = document.createElement("option");
+      option.value = quarter;
+      option.textContent = quarter;
+      quarterSelect.appendChild(option);
+    });
+  }
+
+  // Status filter
+  const statusSelect = document.getElementById("executionStatusFilter");
+  if (statusSelect && statusSelect.children.length <= 1) {
+    statusOptions.forEach((status) => {
+      const option = document.createElement("option");
+      option.value = status;
+      option.textContent = status;
+      statusSelect.appendChild(option);
+    });
+  }
+
+  // Program Type filter
+  const programTypeSelect = document.getElementById("executionProgramTypeFilter");
+  if (programTypeSelect && programTypeSelect.children.length <= 1) {
+    programTypes.forEach((type) => {
+      const option = document.createElement("option");
+      option.value = type;
+      option.textContent = type;
+      programTypeSelect.appendChild(option);
+    });
+  }
+
+  // Strategic Pillar filter
+  const strategicPillarSelect = document.getElementById("executionStrategicPillarFilter");
+  if (strategicPillarSelect && strategicPillarSelect.children.length <= 1) {
+    strategicPillars.forEach((pillar) => {
+      const option = document.createElement("option");
+      option.value = pillar;
+      option.textContent = pillar;
+      strategicPillarSelect.appendChild(option);
+    });
+  }
+
+  // Owner filter
+  const ownerSelect = document.getElementById("executionOwnerFilter");
+  if (ownerSelect && ownerSelect.children.length <= 1) {
+    names.forEach((owner) => {
+      const option = document.createElement("option");
+      option.value = owner;
+      option.textContent = owner;
+      ownerSelect.appendChild(option);
+    });
   }
 }
 
@@ -348,12 +362,15 @@ function setupExecutionFilterLogic() {
     "executionCampaignNameFilter",
   );
   const regionSelect = document.getElementById("executionRegionFilter");
+  const quarterSelect = document.getElementById("executionQuarterFilter");
   const statusSelect = document.getElementById("executionStatusFilter");
   const programTypeSelect = document.getElementById(
     "executionProgramTypeFilter",
   );
+  const strategicPillarSelect = document.getElementById(
+    "executionStrategicPillarFilter",
+  );
   const ownerSelect = document.getElementById("executionOwnerFilter");
-  const poSelect = document.getElementById("executionPOFilter");
   const digitalMotionsButton = document.getElementById(
     "executionDigitalMotionsFilter",
   );
@@ -362,19 +379,21 @@ function setupExecutionFilterLogic() {
   if (
     !campaignNameInput ||
     !regionSelect ||
+    !quarterSelect ||
     !statusSelect ||
     !programTypeSelect ||
+    !strategicPillarSelect ||
     !ownerSelect ||
-    !poSelect ||
     !digitalMotionsButton
   ) {
     console.error("[Execution] Missing filter elements:", {
       campaignNameInput: !!campaignNameInput,
       regionSelect: !!regionSelect,
+      quarterSelect: !!quarterSelect,
       statusSelect: !!statusSelect,
       programTypeSelect: !!programTypeSelect,
+      strategicPillarSelect: !!strategicPillarSelect,
       ownerSelect: !!ownerSelect,
-      poSelect: !!poSelect,
       digitalMotionsButton: !!digitalMotionsButton,
     });
     return;
@@ -396,10 +415,11 @@ function setupExecutionFilterLogic() {
 
   [
     regionSelect,
+    quarterSelect,
     statusSelect,
     programTypeSelect,
+    strategicPillarSelect,
     ownerSelect,
-    poSelect,
   ].forEach((select) => {
     if (!select.hasAttribute("data-listener-attached")) {
       select.addEventListener("change", applyExecutionFilters);
@@ -437,11 +457,13 @@ function setupExecutionFilterLogic() {
     clearButton.addEventListener("click", () => {
       console.log("[Execution] Clearing all filters");
       campaignNameInput.value = "";
+      campaignNameInput.value = "";
       regionSelect.value = "";
+      quarterSelect.value = "";
       statusSelect.value = "";
       programTypeSelect.value = "";
+      strategicPillarSelect.value = "";
       ownerSelect.value = "";
-      poSelect.value = "";
       digitalMotionsButton.dataset.active = "false";
       updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
 
@@ -468,21 +490,24 @@ function getExecutionFilterValues() {
     campaignName:
       document.getElementById("executionCampaignNameFilter")?.value || "",
     region: document.getElementById("executionRegionFilter")?.value || "",
+    quarter: document.getElementById("executionQuarterFilter")?.value || "",
     status: document.getElementById("executionStatusFilter")?.value || "",
     programType:
       document.getElementById("executionProgramTypeFilter")?.value || "",
+    strategicPillar:
+      document.getElementById("executionStrategicPillarFilter")?.value || "",
     owner: document.getElementById("executionOwnerFilter")?.value || "",
-    poRaised: document.getElementById("executionPOFilter")?.value || "",
     digitalMotions: digitalMotionsActive,
   };
 
   console.log("[Execution] getExecutionFilterValues:", {
     campaignName: filterValues.campaignName,
     region: filterValues.region,
+    quarter: filterValues.quarter,
     status: filterValues.status,
     programType: filterValues.programType,
+    strategicPillar: filterValues.strategicPillar,
     owner: filterValues.owner,
-    poRaised: filterValues.poRaised,
     digitalMotions: filterValues.digitalMotions,
     digitalMotionsButtonState: digitalMotionsButton?.dataset.active,
   });
@@ -523,6 +548,9 @@ function applyExecutionFilters() {
     if (filters.region) {
       activeFilters.push({ field: "region", type: "=", value: filters.region });
     }
+    if (filters.quarter) {
+      activeFilters.push({ field: "quarter", type: "=", value: filters.quarter });
+    }
     if (filters.status) {
       activeFilters.push({ field: "status", type: "=", value: filters.status });
     }
@@ -537,15 +565,19 @@ function applyExecutionFilters() {
         value: filters.programType,
       });
     }
+    if (filters.strategicPillar) {
+      console.log(
+        "[Execution] Adding strategicPillar filter:",
+        filters.strategicPillar,
+      );
+      activeFilters.push({
+        field: "strategicPillars",
+        type: "=",
+        value: filters.strategicPillar,
+      });
+    }
     if (filters.owner) {
       activeFilters.push({ field: "owner", type: "=", value: filters.owner });
-    }
-    if (filters.poRaised) {
-      activeFilters.push({
-        field: "poRaised",
-        type: "=",
-        value: filters.poRaised,
-      });
     }
 
     console.log(

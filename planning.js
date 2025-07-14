@@ -641,7 +641,6 @@ function initPlanningGrid(rows) {
   }
 
   setupPlanningSave(planningTableInstance, rows);
-  setupPlanningDownload(planningTableInstance);
 
   // Update global reference for data refreshing
   window.planningTableInstance = planningTableInstance;
@@ -1204,23 +1203,6 @@ function setupPlanningSave(table, rows) {
   };
 }
 
-function setupPlanningDownload(table) {
-  let btn = document.getElementById("downloadPlanningAll");
-  if (!btn) {
-    btn = document.createElement("button");
-    btn.id = "downloadPlanningAll";
-    btn.textContent = "Download All as JSON";
-    btn.style.margin = "12px 0 12px 12px";
-    document
-      .getElementById("view-planning")
-      .insertBefore(btn, document.getElementById("planningGrid"));
-  }
-  btn.onclick = () => {
-    const data = table.getData();
-    downloadJSON(data, "planning-all.json");
-  };
-}
-
 // Utility: Download JSON as file
 function downloadJSON(obj, filename) {
   const blob = new Blob([JSON.stringify(obj, null, 2)], {
@@ -1417,6 +1399,9 @@ function populatePlanningFilters() {
   const programTypeSelect = document.getElementById(
     "planningProgramTypeFilter",
   );
+  const strategicPillarSelect = document.getElementById(
+    "planningStrategicPillarFilter",
+  );
   const ownerSelect = document.getElementById("planningOwnerFilter");
   const digitalMotionsButton = document.getElementById(
     "planningDigitalMotionsFilter",
@@ -1428,6 +1413,7 @@ function populatePlanningFilters() {
     !quarterSelect ||
     !statusSelect ||
     !programTypeSelect ||
+    !strategicPillarSelect ||
     !ownerSelect ||
     !digitalMotionsButton
   ) {
@@ -1437,6 +1423,7 @@ function populatePlanningFilters() {
       quarterSelect: !!quarterSelect,
       statusSelect: !!statusSelect,
       programTypeSelect: !!programTypeSelect,
+      strategicPillarSelect: !!strategicPillarSelect,
       ownerSelect: !!ownerSelect,
       digitalMotionsButton: !!digitalMotionsButton,
     });
@@ -1519,6 +1506,15 @@ function populatePlanningFilters() {
     });
   }
 
+  if (strategicPillarSelect.children.length <= 1) {
+    strategicPillars.forEach((pillar) => {
+      const option = document.createElement("option");
+      option.value = pillar;
+      option.textContent = pillar;
+      strategicPillarSelect.appendChild(option);
+    });
+  }
+
   if (ownerSelect.children.length <= 1) {
     names.forEach((owner) => {
       const option = document.createElement("option");
@@ -1539,6 +1535,7 @@ function populatePlanningFilters() {
     quarterSelect,
     statusSelect,
     programTypeSelect,
+    strategicPillarSelect,
     ownerSelect,
   ].forEach((select) => {
     if (!select.hasAttribute("data-listener-attached")) {
@@ -1581,6 +1578,7 @@ function populatePlanningFilters() {
       quarterSelect.value = "";
       statusSelect.value = "";
       programTypeSelect.value = "";
+      strategicPillarSelect.value = "";
       ownerSelect.value = "";
       digitalMotionsButton.dataset.active = "false";
       updateDigitalMotionsButtonVisual(digitalMotionsButton);
@@ -1603,6 +1601,8 @@ function getPlanningFilterValues() {
     status: document.getElementById("planningStatusFilter")?.value || "",
     programType:
       document.getElementById("planningProgramTypeFilter")?.value || "",
+    strategicPillar:
+      document.getElementById("planningStrategicPillarFilter")?.value || "",
     owner: document.getElementById("planningOwnerFilter")?.value || "",
     digitalMotions: digitalMotionsActive,
   };
@@ -1698,6 +1698,9 @@ function applyPlanningFilters() {
     if (filters.programType) {
       filterFunctions.push((data) => data.programType === filters.programType);
     }
+    if (filters.strategicPillar) {
+      filterFunctions.push((data) => data.strategicPillars === filters.strategicPillar);
+    }
     if (filters.owner) {
       filterFunctions.push((data) => data.owner === filters.owner);
     }
@@ -1735,7 +1738,6 @@ window.planningModule = {
   loadPlanning,
   initPlanningGrid,
   setupPlanningSave,
-  setupPlanningDownload,
   getAllCountries,
   getCountryOptionsForRegion,
   populatePlanningFilters,

@@ -298,10 +298,13 @@ table#planTable td input[type="text"] {
   font-weight: 500;
   cursor: pointer;
   box-shadow: 0 1px 4px rgba(25, 118, 210, 0.08);
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 #planningGridButtons button:hover {
   background: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.25);
+  transition: all 0.2s ease;
 }
 
 #addPlanningRow {
@@ -1230,4 +1233,31 @@ div[style*="background: #fff3e0"]:hover {
   #roiTopRow > div:last-child {
     grid-template-columns: repeat(1, 1fr);
   }
+}
+
+/* Execution filter buttons hover effects */
+#executionClearFilters:hover {
+  background: #757575 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(117, 117, 117, 0.3);
+  transition: all 0.2s ease;
+}
+
+#executionDigitalMotionsFilter:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  transition: all 0.2s ease;
+}
+
+/* General execution filter button hover effects */
+#view-execution select:hover {
+  border-color: #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+  transition: all 0.2s ease;
+}
+
+#view-execution input:hover {
+  border-color: #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+  transition: all 0.2s ease;
 }
