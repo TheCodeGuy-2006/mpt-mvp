@@ -283,32 +283,109 @@
       </div>
     </section>
     <section id="view-github-sync" style="display: none">
-      <div id="githubSync"></div>
+      <div id="githubSync">
+        <div id="githubSyncLocked" style="text-align: center; padding: 40px;">
+          <h3>🔒 GitHub Sync Access Restricted</h3>
+          <p>This section requires administrator permissions.</p>
+          <p>Please click the "GitHub Sync" tab to authenticate.</p>
+        </div>
+        <div id="githubSyncUnlocked" style="display: none;">
+          <h3>✅ GitHub Sync Unlocked</h3>
+          <p>GitHub synchronization features are now available.</p>
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h4>Available Actions:</h4>
+            <ul>
+              <li>Sync planning data to GitHub</li>
+              <li>Export execution data</li>
+              <li>Download ROI reports</li>
+              <li>Backup budget configurations</li>
+            </ul>
+          </div>
+          <div style="margin: 20px 0;">
+            <button onclick="syncToGithub()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 6px; margin-right: 10px; cursor: pointer;">
+              🔄 Sync to GitHub
+            </button>
+            <button onclick="exportData()" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 6px; margin-right: 10px; cursor: pointer;">
+              📁 Export Data
+            </button>
+            <button onclick="downloadReports()" style="background: #6f42c1; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">
+              📊 Download Reports
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Password Modal for GitHub Sync -->
+      <div
+        id="githubSyncPasswordModal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.4);
+          z-index: 1000;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <div
+          style="
+            background: #fff;
+            padding: 32px 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 16px #0002;
+            min-width: 320px;
+            max-width: 90vw;
+            margin: auto;
+          "
+        >
+          <h3 style="margin-top: 0">Unlock GitHub Sync</h3>
+          <p>Enter password to access GitHub synchronization features:</p>
+          <input
+            id="githubSyncPasswordInput"
+            type="password"
+            style="width: 100%; padding: 8px; margin-bottom: 12px"
+            placeholder="Password"
+          />
+          <div
+            style="color: #d32f2f; min-height: 20px"
+            id="githubSyncPasswordError"
+          ></div>
+          <button id="githubSyncPasswordSubmit" style="margin-right: 8px">
+            Unlock
+          </button>
+          <button id="githubSyncPasswordCancel">Cancel</button>
+        </div>
+      </div>
     </section>
     <section id="view-budget-setup" style="display: none">
-      <table id="planTable" border="1" cellpadding="6">
-        <thead>
-          <tr>
-            <th>Region</th>
-            <th>Plan (USD)</th>
-            <th></th>
-            <!-- Delete column header -->
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="text" value="ANZ" disabled /></td>
-            <td><input type="number" value="500000" disabled /></td>
-          </tr>
-          <tr>
-            <td><input type="text" value="SAARC" disabled /></td>
-            <td><input type="number" value="300000" disabled /></td>
-          </tr>
-        </tbody>
-      </table>
-      <div style="display: flex; gap: 12px; margin-top: 12px">
-        <button id="addRegionRow" disabled>+ Add Region</button>
-        <button id="saveAnnualBudget" disabled>Save Annual Budget</button>
+      <div id="annualBudgetContainer">
+        <table id="planTable" border="1" cellpadding="6">
+          <thead>
+            <tr>
+              <th>Region</th>
+              <th>Plan (USD)</th>
+              <th></th>
+              <!-- Delete column header -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="text" value="ANZ" disabled /></td>
+              <td><input type="number" value="500000" disabled /></td>
+            </tr>
+            <tr>
+              <td><input type="text" value="SAARC" disabled /></td>
+              <td><input type="number" value="300000" disabled /></td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="annualBudgetButtons">
+          <button id="addRegionRow" disabled>+ Add Region</button>
+          <button id="saveAnnualBudget" disabled>Save Annual Budget</button>
+        </div>
       </div>
       <!-- Password Modal for Annual Budget Edit -->
       <div

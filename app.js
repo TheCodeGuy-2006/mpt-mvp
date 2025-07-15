@@ -564,6 +564,8 @@ async function loadProgrammeData() {
 // Ensure grid and button handlers are set up every time user navigates to Programme Grid
 window.addEventListener("hashchange", () => {
   if (location.hash === "#grid") loadProgrammes();
+  // Call route function for all hash changes to handle tab switching
+  route();
 });
 
 // Show the section whose ID matches the current hash
@@ -702,6 +704,30 @@ function route() {
       console.log("[route] Handled calendar routing");
     }
   }
+  
+  // Handle GitHub Sync password protection separately
+  if (hash === "#github-sync") {
+    if (!githubSyncUnlocked) {
+      showGithubSyncPasswordModal((success) => {
+        if (success) {
+          console.log("[route] GitHub Sync unlocked");
+          // Re-route to show the actual content
+          route();
+        } else {
+          console.log("[route] GitHub Sync access denied, redirecting to planning");
+          location.hash = "#planning";
+        }
+      });
+      return; // Don't show content until password is verified
+    } else {
+      // Already unlocked, show unlocked content
+      const lockedDiv = document.getElementById("githubSyncLocked");
+      const unlockedDiv = document.getElementById("githubSyncUnlocked");
+      if (lockedDiv) lockedDiv.style.display = "none";
+      if (unlockedDiv) unlockedDiv.style.display = "block";
+      console.log("[route] GitHub Sync already unlocked, showing content");
+    }
+  }
 }
 
 // Update active tab highlighting in navigation
@@ -720,22 +746,66 @@ function updateActiveTab(hash) {
   console.log(`[updateActiveTab] Set active tab for hash: ${hash}`);
 }
 
-// Ensure route() is called on every hash change for tab navigation
-window.addEventListener("hashchange", route);
+// --- GitHub Sync Permission Lock ---
+let githubSyncUnlocked = false;
 
-// Utility: Download JSON as file
-function downloadJSON(obj, filename) {
-  const blob = new Blob([JSON.stringify(obj, null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+function showGithubSyncPasswordModal(callback) {
+  const modal = document.getElementById("githubSyncPasswordModal");
+  const input = document.getElementById("githubSyncPasswordInput");
+  const error = document.getElementById("githubSyncPasswordError");
+  const submit = document.getElementById("githubSyncPasswordSubmit");
+  const cancel = document.getElementById("githubSyncPasswordCancel");
+  if (!modal || !input || !submit || !cancel) return;
+  error.textContent = "";
+  input.value = "";
+  modal.style.display = "flex";
+  input.focus();
+  function closeModal() {
+    modal.style.display = "none";
+    submit.onclick = null;
+    cancel.onclick = null;
+    input.onkeydown = null;
+  }
+  submit.onclick = function () {
+    if (input.value === "git") {
+      githubSyncUnlocked = true;
+      closeModal();
+      // Show unlocked content
+      const lockedDiv = document.getElementById("githubSyncLocked");
+      const unlockedDiv = document.getElementById("githubSyncUnlocked");
+      if (lockedDiv) lockedDiv.style.display = "none";
+      if (unlockedDiv) unlockedDiv.style.display = "block";
+      callback(true);
+    } else {
+      error.textContent = "Incorrect password.";
+      input.value = "";
+      input.focus();
+    }
+  };
+  cancel.onclick = function () {
+    closeModal();
+    callback(false);
+  };
+  input.onkeydown = function (e) {
+    if (e.key === "Enter") submit.onclick();
+    if (e.key === "Escape") cancel.onclick();
+  };
+}
+
+// GitHub Sync functionality placeholders
+function syncToGithub() {
+  alert("Sync to GitHub functionality - This would sync your data to a GitHub repository.");
+  console.log("GitHub sync initiated");
+}
+
+function exportData() {
+  alert("Export Data functionality - This would export all your planning and execution data.");
+  console.log("Data export initiated");
+}
+
+function downloadReports() {
+  alert("Download Reports functionality - This would generate and download ROI and budget reports.");
+  console.log("Report download initiated");
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
