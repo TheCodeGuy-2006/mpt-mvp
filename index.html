@@ -12,13 +12,22 @@
   </head>
   <body>
     <nav>
-      <a href="#planning">Planning</a>| <a href="#execution">Execution</a>|
-      <a href="#budgets">Budgets</a>| <a href="#calendar">Calendar</a>|
-      <a href="#roi">ROI</a>| <a href="#github-sync">GitHub Sync</a>
+      <a href="#planning">Planning</a>
+      <span class="nav-separator">|</span>
+      <a href="#execution">Execution</a>
+      <span class="nav-separator">|</span>
+      <a href="#budgets">Budgets</a>
+      <span class="nav-separator">|</span>
+      <a href="#calendar">Calendar</a>
+      <span class="nav-separator">|</span>
+      <a href="#roi">ROI</a>
+      <span class="nav-separator">|</span>
+      <a href="#github-sync">GitHub Sync</a>
       <a
         href="https://github.com/"
         target="_blank"
         aria-label="GitHub"
+        class="github-link"
         style="padding: 0; margin: 0"
       >
         <svg class="github-logo" viewBox="0 0 24 24" aria-hidden="true">
@@ -275,10 +284,6 @@
       <div id="githubSync"></div>
     </section>
     <section id="view-budget-setup" style="display: none">
-      <p>
-        Enter the approved annual budget (Plan) for each region, then click
-        “Save Plan”.
-      </p>
       <table id="planTable" border="1" cellpadding="6">
         <thead>
           <tr>

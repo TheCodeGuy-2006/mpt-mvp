@@ -71,7 +71,9 @@ function getCampaignsForMonth(month, year) {
   const campaigns = getCampaignData();
   return campaigns.filter((campaign) => {
     if (!campaign.quarter || !campaign.fiscalYear) return false;
-    if (campaign.fiscalYear !== currentFY) return false;
+    
+    // Skip fiscal year filter if "All Years" is selected
+    if (currentFY !== "All Years" && campaign.fiscalYear !== currentFY) return false;
 
     const campaignDate = parseQuarterToDate(
       campaign.quarter,
@@ -111,7 +113,10 @@ function getCampaignsForMonth(month, year) {
 
 // Get unique filter options from campaign data
 function getFilterOptions() {
-  const campaigns = getCampaignData().filter((c) => c.fiscalYear === currentFY);
+  // Filter campaigns based on current FY selection
+  const campaigns = currentFY === "All Years" 
+    ? getCampaignData() 
+    : getCampaignData().filter((c) => c.fiscalYear === currentFY);
 
   const options = {
     regions: new Set(),
@@ -510,6 +515,29 @@ function renderFYTabs() {
 
   fyTabsContainer.innerHTML = "";
 
+  // Add "All Years" tab first
+  const allYearsTab = document.createElement("button");
+  allYearsTab.textContent = "All Years";
+  allYearsTab.style.cssText = `
+    padding: 8px 16px;
+    margin: 0 4px;
+    border: 2px solid #1976d2;
+    background: ${currentFY === "All Years" ? "#1976d2" : "white"};
+    color: ${currentFY === "All Years" ? "white" : "#1976d2"};
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: ${currentFY === "All Years" ? "bold" : "normal"};
+    transition: all 0.2s;
+  `;
+
+  allYearsTab.addEventListener("click", () => {
+    currentFY = "All Years";
+    renderCalendar();
+  });
+
+  fyTabsContainer.appendChild(allYearsTab);
+
+  // Add individual FY tabs
   availableFYs.forEach((fy) => {
     const tab = document.createElement("button");
     tab.textContent = fy;
@@ -867,29 +895,57 @@ function renderCalendar() {
   // Clear previous calendar
   calendarGrid.innerHTML = "";
 
-  // Get all campaigns for current FY
-  const campaigns = getCampaignData().filter((c) => c.fiscalYear === currentFY);
+  // Handle "All Years" vs specific fiscal year
+  let months = [];
+  
+  if (currentFY === "All Years") {
+    // For "All Years", create a comprehensive view across all available fiscal years
+    const allFYs = getAvailableFYs();
+    if (allFYs.length === 0) {
+      allFYs.push("FY25"); // Fallback
+    }
+    
+    // Create months for all fiscal years
+    allFYs.forEach(fy => {
+      const fyMonths = [
+        { name: `July ${fy}`, month: 6, year: getFYStartYear(fy), fy: fy },
+        { name: `August ${fy}`, month: 7, year: getFYStartYear(fy), fy: fy },
+        { name: `September ${fy}`, month: 8, year: getFYStartYear(fy), fy: fy },
+        { name: `October ${fy}`, month: 9, year: getFYStartYear(fy), fy: fy },
+        { name: `November ${fy}`, month: 10, year: getFYStartYear(fy), fy: fy },
+        { name: `December ${fy}`, month: 11, year: getFYStartYear(fy), fy: fy },
+        { name: `January ${fy}`, month: 0, year: getFYStartYear(fy) + 1, fy: fy },
+        { name: `February ${fy}`, month: 1, year: getFYStartYear(fy) + 1, fy: fy },
+        { name: `March ${fy}`, month: 2, year: getFYStartYear(fy) + 1, fy: fy },
+        { name: `April ${fy}`, month: 3, year: getFYStartYear(fy) + 1, fy: fy },
+        { name: `May ${fy}`, month: 4, year: getFYStartYear(fy) + 1, fy: fy },
+        { name: `June ${fy}`, month: 5, year: getFYStartYear(fy) + 1, fy: fy },
+      ];
+      months = months.concat(fyMonths);
+    });
+  } else {
+    // Create a 12-month grid for the specific fiscal year
+    months = [
+      { name: "July", month: 6, year: getFYStartYear(currentFY), fy: currentFY },
+      { name: "August", month: 7, year: getFYStartYear(currentFY), fy: currentFY },
+      { name: "September", month: 8, year: getFYStartYear(currentFY), fy: currentFY },
+      { name: "October", month: 9, year: getFYStartYear(currentFY), fy: currentFY },
+      { name: "November", month: 10, year: getFYStartYear(currentFY), fy: currentFY },
+      { name: "December", month: 11, year: getFYStartYear(currentFY), fy: currentFY },
+      { name: "January", month: 0, year: getFYStartYear(currentFY) + 1, fy: currentFY },
+      { name: "February", month: 1, year: getFYStartYear(currentFY) + 1, fy: currentFY },
+      { name: "March", month: 2, year: getFYStartYear(currentFY) + 1, fy: currentFY },
+      { name: "April", month: 3, year: getFYStartYear(currentFY) + 1, fy: currentFY },
+      { name: "May", month: 4, year: getFYStartYear(currentFY) + 1, fy: currentFY },
+      { name: "June", month: 5, year: getFYStartYear(currentFY) + 1, fy: currentFY },
+    ];
+  }
 
-  // Create a 12-month grid for the fiscal year
-  const months = [
-    { name: "July", month: 6, year: getFYStartYear(currentFY) },
-    { name: "August", month: 7, year: getFYStartYear(currentFY) },
-    { name: "September", month: 8, year: getFYStartYear(currentFY) },
-    { name: "October", month: 9, year: getFYStartYear(currentFY) },
-    { name: "November", month: 10, year: getFYStartYear(currentFY) },
-    { name: "December", month: 11, year: getFYStartYear(currentFY) },
-    { name: "January", month: 0, year: getFYStartYear(currentFY) + 1 },
-    { name: "February", month: 1, year: getFYStartYear(currentFY) + 1 },
-    { name: "March", month: 2, year: getFYStartYear(currentFY) + 1 },
-    { name: "April", month: 3, year: getFYStartYear(currentFY) + 1 },
-    { name: "May", month: 4, year: getFYStartYear(currentFY) + 1 },
-    { name: "June", month: 5, year: getFYStartYear(currentFY) + 1 },
-  ];
-
-  // Set grid to 4 columns (3 months per row)
+  // Set grid layout - adjust columns based on number of months
+  const gridColumns = currentFY === "All Years" && months.length > 12 ? 4 : 3;
   calendarGrid.style.cssText = `
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(${gridColumns}, 1fr);
     gap: 16px;
     padding: 16px;
   `;

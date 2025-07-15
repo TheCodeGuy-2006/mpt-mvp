@@ -14,17 +14,67 @@ nav {
   padding: 18px 32px 18px 18px;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
   position: relative;
+  gap: 4px;
 }
 nav a {
   color: #fff;
   text-decoration: none;
   font-weight: 500;
-  margin-right: 24px;
+  margin-right: 0;
   font-size: 1.08rem;
-  transition: color 0.2s;
+  transition: all 0.3s ease;
+  padding: 8px 16px;
+  border-radius: 6px;
+  position: relative;
 }
 nav a:hover {
   color: #90caf9;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+nav a.active {
+  background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
+  color: #1976d2 !important;
+  font-weight: 700;
+  padding: 10px 20px;
+  margin: 0 4px;
+  position: relative;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 2px solid #90caf9;
+  transform: translateY(-2px);
+}
+nav a.active:before {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 4px;
+  background: linear-gradient(90deg, #42a5f5, #90caf9, #42a5f5);
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(66, 165, 245, 0.4);
+}
+nav a.active:hover {
+  color: #1976d2 !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.nav-separator {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 8px;
+  font-weight: 300;
+  transition: opacity 0.3s ease;
+  font-size: 1.2rem;
+}
+nav a.active + .nav-separator,
+.nav-separator + nav a.active {
+  opacity: 0.3;
 }
 .github-logo {
   position: absolute;
@@ -104,13 +154,14 @@ h2 {
   margin: 18px auto 0 auto;
 }
 table#planTable {
-  width: 580px;
+  width: 520px;
+  max-width: 90%;
   margin-left: auto;
   margin-right: auto;
   font-size: 1.25rem;
   min-height: 220px;
   border-collapse: collapse;
-  margin: 18px 0 24px 0;
+  margin: 18px auto 24px auto;
   background: #f6faff;
   border-radius: 8px;
   overflow: hidden;
@@ -189,8 +240,8 @@ table#planTable td input[type="text"] {
   box-shadow: none !important;
 }
 #planningGrid {
-  width: 100%;
-  max-width: 100vw;
+  width: 98%;
+  max-width: 1800px;
   min-width: 0;
   display: block;
   margin: 0 auto;
@@ -207,15 +258,15 @@ table#planTable td input[type="text"] {
 #planningGrid .tabulator,
 #planningGrid .tabulator-tableholder,
 #planningGrid .tabulator-header {
-  min-width: 1800px !important;
-  width: max-content !important;
+  min-width: 1400px !important;
+  width: 100% !important;
   max-width: none !important;
   box-sizing: border-box;
   background: #fff;
 }
 #planningGrid .tabulator {
-  min-width: 2400px !important;
-  width: max-content !important;
+  min-width: 1400px !important;
+  width: 100% !important;
   max-width: none !important;
   background: #fff;
 }
@@ -403,8 +454,8 @@ table#planTable td input[type="text"] {
   white-space: pre-line;
 }
 #executionGrid {
-  width: 100%;
-  max-width: 100vw;
+  width: 98%;
+  max-width: 1800px;
   min-width: 0;
   display: block;
   margin: 0 auto;
@@ -421,15 +472,15 @@ table#planTable td input[type="text"] {
 #executionGrid .tabulator,
 #executionGrid .tabulator-tableholder,
 #executionGrid .tabulator-header {
-  min-width: 1800px !important;
-  width: max-content !important;
+  min-width: 1400px !important;
+  width: 100% !important;
   max-width: none !important;
   box-sizing: border-box;
   background: #fff;
 }
 #executionGrid .tabulator {
-  min-width: 2400px !important;
-  width: max-content !important;
+  min-width: 1400px !important;
+  width: 100% !important;
   max-width: none !important;
   background: #fff;
 }
@@ -587,12 +638,32 @@ table#planTable td input[type="text"] {
     max-width: none;
   }
   nav {
-    flex-direction: column;
-    align-items: flex-end;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
     padding: 12px 8px;
+    gap: 2px;
+  }
+  nav a {
+    font-size: 0.95rem;
+    padding: 6px 12px;
+    margin: 2px 0;
+  }
+  nav a.active {
+    padding: 8px 14px;
+    margin: 2px;
+    font-size: 0.95rem;
+  }
+  .nav-separator {
+    margin: 0 4px;
+    font-size: 1rem;
   }
   .github-logo {
     right: 8px;
+    top: 8px;
+    transform: none;
+    position: absolute;
   }
 }
 #executionGrid .tabulator-header {
@@ -846,12 +917,14 @@ table#planTable td input[type="text"] {
 
 /* ===== ROI DATA TABLE STYLES ===== */
 #roiDataTable {
-  width: 100% !important;
+  width: 95% !important;
+  max-width: 1400px !important;
   height: 450px !important;
   min-height: 450px !important;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(25, 118, 210, 0.12);
+  margin: 0 auto;
 }
 
 #roiDataTable .tabulator {
@@ -1047,26 +1120,58 @@ div[style*="max-width: 1200px"] {
 }
 
 @media (max-width: 1200px) {
+  #planningGrid .tabulator,
+  #planningGrid .tabulator-tableholder,
+  #planningGrid .tabulator-header,
+  #executionGrid .tabulator,
+  #executionGrid .tabulator-tableholder,
+  #executionGrid .tabulator-header {
+    min-width: 1200px !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+  
+  #planningGrid,
+  #executionGrid {
+    width: 100%;
+    max-width: 100%;
+  }
+  
   #roiDataTable {
-    height: 400px !important;
+    width: 98% !important;
+    max-width: 1200px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  #planningGrid .tabulator,
+  #planningGrid .tabulator-tableholder,
+  #planningGrid .tabulator-header,
+  #executionGrid .tabulator,
+  #executionGrid .tabulator-tableholder,
+  #executionGrid .tabulator-header {
+    min-width: 1000px !important;
+    width: 100% !important;
+    max-width: none !important;
   }
   
-  #roiDataTable .tabulator-col {
-    min-width: 110px !important;
+  #planningGrid,
+  #executionGrid {
+    width: 100%;
+    max-width: 100%;
   }
   
-  #roiDataTable .tabulator-col[data-field="campaignName"] {
-    min-width: 160px !important;
-  }
-  
-  #roiDataTable .tabulator-col[data-field="details"] {
-    min-width: 200px !important;
+  table#planTable {
+    width: 450px;
+    max-width: 95%;
   }
 }
 
 @media (max-width: 768px) {
   #roiDataTable {
     height: 350px !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
   
   #roiDataTable .tabulator-col-title {
@@ -1077,5 +1182,27 @@ div[style*="max-width: 1200px"] {
   #roiDataTable .tabulator-cell {
     padding: 10px 8px !important;
     font-size: 0.9rem;
+  }
+  
+  #planningGrid .tabulator,
+  #planningGrid .tabulator-tableholder,
+  #planningGrid .tabulator-header,
+  #executionGrid .tabulator,
+  #executionGrid .tabulator-tableholder,
+  #executionGrid .tabulator-header {
+    min-width: 800px !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+  
+  #planningGrid,
+  #executionGrid {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  table#planTable {
+    width: 400px;
+    max-width: 100%;
   }
 }

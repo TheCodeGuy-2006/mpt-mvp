@@ -574,6 +574,10 @@ function route() {
     (sec) => sec.id,
   );
   console.log("[route] All section IDs:", allSections);
+  
+  // Update active tab highlighting
+  updateActiveTab(hash);
+  
   // Hide all sections first
   document.querySelectorAll("section").forEach((sec) => {
     sec.style.display = "none";
@@ -698,6 +702,22 @@ function route() {
       console.log("[route] Handled calendar routing");
     }
   }
+}
+
+// Update active tab highlighting in navigation
+function updateActiveTab(hash) {
+  // Remove active class from all navigation links
+  document.querySelectorAll('nav a:not(.github-link)').forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  // Add active class to current tab
+  const currentTab = document.querySelector(`nav a[href="${hash}"]`);
+  if (currentTab) {
+    currentTab.classList.add('active');
+  }
+  
+  console.log(`[updateActiveTab] Set active tab for hash: ${hash}`);
 }
 
 // Ensure route() is called on every hash change for tab navigation
