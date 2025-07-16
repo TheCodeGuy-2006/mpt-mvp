@@ -440,6 +440,9 @@ function renderBudgetsRegionCharts() {
 
 // ROI by Region Chart
 function renderRoiByRegionChart() {
+  // Get current ROI filter state
+  const filters = window.roiModule ? window.roiModule.getFilterState ? window.roiModule.getFilterState() : {} : {};
+  
   // Define the specific regions to display
   const targetRegions = ["JP & Korea", "South APAC", "SAARC"];
 
@@ -454,6 +457,16 @@ function renderRoiByRegionChart() {
   if (window.executionTableInstance) {
     const data = window.executionTableInstance.getData();
     data.forEach((row) => {
+      // Apply filters before processing data
+      if (filters.region && row.region !== filters.region) return;
+      if (filters.quarter && row.quarter !== filters.quarter) return;
+      if (filters.country && row.country !== filters.country) return;
+      if (filters.owner && row.owner !== filters.owner) return;
+      if (filters.status && row.status !== filters.status) return;
+      if (filters.programType && row.programType !== filters.programType) return;
+      if (filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) return;
+      if (filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) return;
+      
       const region = row.region;
       // Only process data for our target regions
       if (targetRegions.includes(region)) {
@@ -573,6 +586,10 @@ function renderRoiByProgramTypeChart() {
 
 // Forecasted vs Actual Performance Chart (replacing ROI by Quarter)
 function renderRoiByQuarterChart() {
+  // Get current ROI filter state
+  const filters = window.roiModule ? window.roiModule.getFilterState ? window.roiModule.getFilterState() : {} : {};
+  console.log("[Charts] renderRoiByQuarterChart - Current filters:", filters);
+  
   // Calculate totals from execution data
   let forecastedMql = 0;
   let actualMql = 0;
@@ -581,7 +598,22 @@ function renderRoiByQuarterChart() {
 
   if (window.executionTableInstance) {
     const data = window.executionTableInstance.getData();
+    console.log("[Charts] renderRoiByQuarterChart - Total data rows:", data.length);
+    
+    let processedRows = 0;
     data.forEach((row) => {
+      // Apply filters before processing data
+      if (filters.region && row.region !== filters.region) return;
+      if (filters.quarter && row.quarter !== filters.quarter) return;
+      if (filters.country && row.country !== filters.country) return;
+      if (filters.owner && row.owner !== filters.owner) return;
+      if (filters.status && row.status !== filters.status) return;
+      if (filters.programType && row.programType !== filters.programType) return;
+      if (filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) return;
+      if (filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) return;
+      
+      processedRows++;
+      
       // MQL data
       let fMql = row.mqlForecast || 0;
       if (typeof fMql === "string")
@@ -603,6 +635,11 @@ function renderRoiByQuarterChart() {
       if (typeof aLeads === "string")
         aLeads = Number(aLeads.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(aLeads)) actualLeads += Number(aLeads);
+    });
+    
+    console.log("[Charts] renderRoiByQuarterChart - Processed rows:", processedRows);
+    console.log("[Charts] renderRoiByQuarterChart - Calculated values:", {
+      forecastedMql, actualMql, forecastedLeads, actualLeads
     });
   }
 

@@ -159,34 +159,14 @@ function renderFilterControls() {
   const regionLegend = getRegionColorLegend();
 
   filterContainer.innerHTML = `
-    <div style="
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    ">
-      <h4 style="margin: 0 0 16px 0; color: #1976d2; display: flex; align-items: center; gap: 8px;">
-        🔍 Filter Campaigns
-        <button id="clearFilters" style="
-          background: #f44336;
-          color: white;
-          border: none;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 12px;
-          cursor: pointer;
-          margin-left: auto;
-        ">Clear All</button>
-      </h4>
-      
+    <div class="filter-container">
       <!-- Region Color Legend -->
       ${regionLegend.length > 0 ? `
         <div style="
           background: #f8f9fa;
           padding: 12px;
           border-radius: 6px;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
           border-left: 4px solid #1976d2;
         ">
           <h5 style="margin: 0 0 8px 0; color: #1976d2; font-size: 14px;">🎨 Region Color Guide:</h5>
@@ -220,15 +200,10 @@ function renderFilterControls() {
         </div>
       ` : ''}
       
-      <div style="
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-        align-items: end;
-      ">
-        <div>
-          <label style="display: block; margin-bottom: 4px; font-weight: bold; color: #333;">Region:</label>
-          <select id="filterRegion" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+      <div class="filter-row filter-row-main">
+        <div class="filter-group">
+          <label for="filterRegion">Region</label>
+          <select id="filterRegion" class="filter-select">
             <option value="">All Regions</option>
             ${filterOptions.regions
               .map(
@@ -239,9 +214,9 @@ function renderFilterControls() {
           </select>
         </div>
         
-        <div>
-          <label style="display: block; margin-bottom: 4px; font-weight: bold; color: #333;">Country:</label>
-          <select id="filterCountry" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <div class="filter-group">
+          <label for="filterCountry">Country</label>
+          <select id="filterCountry" class="filter-select">
             <option value="">All Countries</option>
             ${filterOptions.countries
               .map(
@@ -252,9 +227,9 @@ function renderFilterControls() {
           </select>
         </div>
         
-        <div>
-          <label style="display: block; margin-bottom: 4px; font-weight: bold; color: #333;">Owner:</label>
-          <select id="filterOwner" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <div class="filter-group">
+          <label for="filterOwner">Owner</label>
+          <select id="filterOwner" class="filter-select">
             <option value="">All Owners</option>
             ${filterOptions.owners
               .map(
@@ -265,9 +240,9 @@ function renderFilterControls() {
           </select>
         </div>
         
-        <div>
-          <label style="display: block; margin-bottom: 4px; font-weight: bold; color: #333;">Status:</label>
-          <select id="filterStatus" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <div class="filter-group">
+          <label for="filterStatus">Status</label>
+          <select id="filterStatus" class="filter-select">
             <option value="">All Statuses</option>
             ${filterOptions.statuses
               .map(
@@ -277,10 +252,12 @@ function renderFilterControls() {
               .join("")}
           </select>
         </div>
-        
-        <div>
-          <label style="display: block; margin-bottom: 4px; font-weight: bold; color: #333;">Program Type:</label>
-          <select id="filterProgramType" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+      </div>
+      
+      <div class="filter-row filter-row-secondary">
+        <div class="filter-group">
+          <label for="filterProgramType">Program Type</label>
+          <select id="filterProgramType" class="filter-select">
             <option value="">All Program Types</option>
             ${filterOptions.programTypes
               .map(
@@ -291,9 +268,9 @@ function renderFilterControls() {
           </select>
         </div>
         
-        <div>
-          <label style="display: block; margin-bottom: 4px; font-weight: bold; color: #333;">Strategic Pillars:</label>
-          <select id="filterStrategicPillars" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <div class="filter-group">
+          <label for="filterStrategicPillars">Strategic Pillars</label>
+          <select id="filterStrategicPillars" class="filter-select">
             <option value="">All Pillars</option>
             ${filterOptions.strategicPillars
               .map(
@@ -304,9 +281,9 @@ function renderFilterControls() {
           </select>
         </div>
         
-        <div>
-          <label style="display: block; margin-bottom: 4px; font-weight: bold; color: #333;">Revenue Play:</label>
-          <select id="filterRevenuePlay" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <div class="filter-group">
+          <label for="filterRevenuePlay">Revenue Play</label>
+          <select id="filterRevenuePlay" class="filter-select">
             <option value="">All Revenue Plays</option>
             ${filterOptions.revenuePlays
               .map(
@@ -318,9 +295,13 @@ function renderFilterControls() {
         </div>
       </div>
       
-      <div style="margin-top: 16px;">
-        <div id="filterSummary" style="color: #666; font-size: 14px;"></div>
+      <div class="filter-actions">
+        <button id="clearFilters" class="filter-btn filter-btn-clear">
+          Clear All Filters
+        </button>
       </div>
+      
+      <div id="filterSummary" style="margin-top: 8px; color: #666; font-size: 0.85rem; font-style: italic;"></div>
     </div>
   `;
 

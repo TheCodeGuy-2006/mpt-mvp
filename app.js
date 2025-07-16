@@ -673,12 +673,27 @@ function route() {
       hash === "#roi" &&
       typeof window.roiModule.updateRoiTotalSpend === "function"
     ) {
+      // Mark ROI tab as active for performance optimization
+      if (typeof window.roiModule.setRoiTabActive === "function") {
+        window.roiModule.setRoiTabActive(true);
+      }
+      
       setTimeout(() => {
         window.roiModule.populateRoiFilters();
         window.roiModule.updateRoiTotalSpend();
+        
+        // Ensure ROI data table is initialized when tab is viewed
+        if (typeof window.roiModule.ensureRoiDataTableInitialized === "function") {
+          window.roiModule.ensureRoiDataTableInitialized();
+        }
       }, 0);
       setTimeout(initRoiTabSwitching, 100); // Initialize tab switching when ROI tab is viewed
       console.log("[route] Updated ROI total spend");
+    } else {
+      // Mark ROI tab as inactive when switching to other tabs
+      if (typeof window.roiModule?.setRoiTabActive === "function") {
+        window.roiModule.setRoiTabActive(false);
+      }
     }
     if (hash === "#report" && window.reportTableInstance) {
       setTimeout(() => {
@@ -973,6 +988,13 @@ window.addEventListener("DOMContentLoaded", async () => {
     typeof window.roiModule.initializeRoiFunctionality === "function"
   ) {
     window.roiModule.initializeRoiFunctionality();
+    
+    // Pre-cache planning data for faster filter performance
+    setTimeout(() => {
+      if (typeof window.roiModule.preCachePlanningData === "function") {
+        window.roiModule.preCachePlanningData();
+      }
+    }, 1000); // Cache after initial load
   }
 
   // Initialize Planning filters
