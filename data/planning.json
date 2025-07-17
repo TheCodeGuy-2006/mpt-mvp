@@ -15,7 +15,12 @@
     "mqlForecast": 60,
     "sqlForecast": 36,
     "oppsForecast": 29,
-    "pipelineForecast": 1450000
+    "pipelineForecast": 1450000,
+    "mql": 60,
+    "sql": 36,
+    "opps": 29,
+    "pipeline": 1450000,
+    "id": "row_0_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -33,7 +38,12 @@
     "mqlForecast": 3,
     "sqlForecast": 2,
     "oppsForecast": 2,
-    "pipelineForecast": 100000
+    "pipelineForecast": 100000,
+    "mql": 3,
+    "sql": 2,
+    "opps": 2,
+    "pipeline": 100000,
+    "id": "row_1_1752722417590"
   },
   {
     "programType": "3P Sponsored Events",
@@ -51,7 +61,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_2_1752722417590"
   },
   {
     "programType": "Microsoft",
@@ -69,7 +84,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_3_1752722417590"
   },
   {
     "programType": "Microsoft",
@@ -87,7 +107,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_4_1752722417590"
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -105,7 +130,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_5_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -123,7 +153,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_6_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -141,7 +176,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_7_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -159,7 +199,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_8_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -177,7 +222,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_9_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -195,7 +245,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_10_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -213,7 +268,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_11_1752722417590"
   },
   {
     "programType": "Microsoft",
@@ -231,7 +291,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_12_1752722417590"
   },
   {
     "programType": "Localized Events",
@@ -249,7 +314,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_13_1752722417590"
   },
   {
     "programType": "3P Sponsored Events",
@@ -267,7 +337,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_14_1752722417590"
   },
   {
     "programType": "3P Sponsored Events",
@@ -285,7 +360,12 @@
     "mqlForecast": 35,
     "sqlForecast": 21,
     "oppsForecast": 17,
-    "pipelineForecast": 850000
+    "pipelineForecast": 850000,
+    "mql": 35,
+    "sql": 21,
+    "opps": 17,
+    "pipeline": 850000,
+    "id": "row_15_1752722417590"
   },
   {
     "programType": "Microsoft",
@@ -303,7 +383,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_16_1752722417590"
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -321,7 +406,12 @@
     "mqlForecast": 3,
     "sqlForecast": 2,
     "oppsForecast": 2,
-    "pipelineForecast": 100000
+    "pipelineForecast": 100000,
+    "mql": 3,
+    "sql": 2,
+    "opps": 2,
+    "pipeline": 100000,
+    "id": "row_17_1752722417590"
   },
   {
     "programType": "Localized Events",
@@ -339,7 +429,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_18_1752722417590"
   },
   {
     "programType": "Localized Events",
@@ -357,7 +452,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_19_1752722417590"
   },
   {
     "programType": "Localized Events",
@@ -375,7 +475,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_20_1752722417590"
   },
   {
     "programType": "Localized Events",
@@ -393,7 +498,12 @@
     "mqlForecast": 8,
     "sqlForecast": 5,
     "oppsForecast": 4,
-    "pipelineForecast": 200000
+    "pipelineForecast": 200000,
+    "mql": 8,
+    "sql": 5,
+    "opps": 4,
+    "pipeline": 200000,
+    "id": "row_21_1752722417590"
   },
   {
     "programType": "Localized Events",
@@ -411,7 +521,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_22_1752722417590"
   },
   {
     "programType": "Localized Events",
@@ -429,7 +544,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_23_1752722417590"
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -447,7 +567,12 @@
     "mqlForecast": 5,
     "sqlForecast": 3,
     "oppsForecast": 2,
-    "pipelineForecast": 100000
+    "pipelineForecast": 100000,
+    "mql": 5,
+    "sql": 3,
+    "opps": 2,
+    "pipeline": 100000,
+    "id": "row_24_1752722417590"
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -465,7 +590,12 @@
     "mqlForecast": 3,
     "sqlForecast": 2,
     "oppsForecast": 2,
-    "pipelineForecast": 100000
+    "pipelineForecast": 100000,
+    "mql": 3,
+    "sql": 2,
+    "opps": 2,
+    "pipeline": 100000,
+    "id": "row_25_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -483,7 +613,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_26_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -501,7 +636,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_27_1752722417590"
   },
   {
     "programType": "Localized Programs",
@@ -519,7 +659,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_28_1752722417590"
   },
   {
     "programType": "Localized Programs",
@@ -537,7 +682,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_29_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -555,7 +705,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 42860
+    "pipelineForecast": 42860,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_30_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -573,7 +728,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 30000
+    "pipelineForecast": 30000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_31_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -591,7 +751,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 80000
+    "pipelineForecast": 80000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_32_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -609,7 +774,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 80000
+    "pipelineForecast": 80000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_33_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -627,7 +797,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 80000
+    "pipelineForecast": 80000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_34_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -645,7 +820,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 80000
+    "pipelineForecast": 80000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_35_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -663,7 +843,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 80000
+    "pipelineForecast": 80000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_36_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -681,7 +866,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 80000
+    "pipelineForecast": 80000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_37_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -699,7 +889,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 80000
+    "pipelineForecast": 80000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_38_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -717,7 +912,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 80000
+    "pipelineForecast": 80000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_39_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -735,7 +935,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 80000
+    "pipelineForecast": 80000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_40_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -753,7 +958,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 80000
+    "pipelineForecast": 80000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_41_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -771,7 +981,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 320000
+    "pipelineForecast": 320000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_42_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -789,7 +1004,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 320000
+    "pipelineForecast": 320000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_43_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -807,7 +1027,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 320000
+    "pipelineForecast": 320000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_44_1752722417590"
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -825,7 +1050,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 320000
+    "pipelineForecast": 320000,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_45_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -843,7 +1073,12 @@
     "mqlForecast": 60,
     "sqlForecast": 36,
     "oppsForecast": 29,
-    "pipelineForecast": 1450000
+    "pipelineForecast": 1450000,
+    "mql": 60,
+    "sql": 36,
+    "opps": 29,
+    "pipeline": 1450000,
+    "id": "row_46_1752722417590"
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -861,7 +1096,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_47_1752722417590"
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -879,7 +1119,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_48_1752722417590"
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -897,7 +1142,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_49_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -915,7 +1165,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_50_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -933,7 +1188,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_51_1752722417590"
   },
   {
     "programType": "Lunch & Learns and Workshops (1:few)",
@@ -951,7 +1211,12 @@
     "mqlForecast": 8,
     "sqlForecast": 5,
     "oppsForecast": 4,
-    "pipelineForecast": 200000
+    "pipelineForecast": 200000,
+    "mql": 8,
+    "sql": 5,
+    "opps": 4,
+    "pipeline": 200000,
+    "id": "row_52_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -969,7 +1234,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_53_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -987,7 +1257,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_54_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -1005,7 +1280,12 @@
     "mqlForecast": 21,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 21,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_55_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -1023,7 +1303,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_56_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -1041,7 +1326,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_57_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -1059,7 +1349,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_58_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -1077,7 +1372,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_59_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1095,7 +1395,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_60_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1113,7 +1418,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_61_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1131,7 +1441,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_62_1752722417590"
   },
   {
     "programType": "Exec Engagement Programs",
@@ -1149,7 +1464,12 @@
     "mqlForecast": 3,
     "sqlForecast": 2,
     "oppsForecast": 2,
-    "pipelineForecast": 100000
+    "pipelineForecast": 100000,
+    "mql": 3,
+    "sql": 2,
+    "opps": 2,
+    "pipeline": 100000,
+    "id": "row_63_1752722417590"
   },
   {
     "programType": "Exec Engagement Programs",
@@ -1167,7 +1487,12 @@
     "mqlForecast": 3,
     "sqlForecast": 2,
     "oppsForecast": 2,
-    "pipelineForecast": 100000
+    "pipelineForecast": 100000,
+    "mql": 3,
+    "sql": 2,
+    "opps": 2,
+    "pipeline": 100000,
+    "id": "row_64_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -1185,7 +1510,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_65_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1203,7 +1533,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_66_1752722417590"
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -1220,7 +1555,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_67_1752722417590"
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -1238,7 +1578,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_68_1752722417590"
   },
   {
     "programType": "Lunch & Learns and Workshops (1:few)",
@@ -1256,7 +1601,12 @@
     "mqlForecast": 8,
     "sqlForecast": 5,
     "oppsForecast": 4,
-    "pipelineForecast": 200000
+    "pipelineForecast": 200000,
+    "mql": 8,
+    "sql": 5,
+    "opps": 4,
+    "pipeline": 200000,
+    "id": "row_69_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -1274,7 +1624,12 @@
     "mqlForecast": 21,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 21,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_70_1752722417590"
   },
   {
     "programType": "Localized Events",
@@ -1292,7 +1647,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_71_1752722417590"
   },
   {
     "programType": "Localized Events",
@@ -1310,7 +1670,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_72_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -1328,7 +1693,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_73_1752722417590"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -1346,7 +1716,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_74_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1364,7 +1739,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_75_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1382,7 +1762,12 @@
     "mqlForecast": 7,
     "sqlForecast": 4,
     "oppsForecast": 3,
-    "pipelineForecast": 150000
+    "pipelineForecast": 150000,
+    "mql": 7,
+    "sql": 4,
+    "opps": 3,
+    "pipeline": 150000,
+    "id": "row_76_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1400,7 +1785,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_77_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1418,7 +1808,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_78_1752722417590"
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -1436,7 +1831,12 @@
     "mqlForecast": 2,
     "sqlForecast": 1,
     "oppsForecast": 1,
-    "pipelineForecast": 50000
+    "pipelineForecast": 50000,
+    "mql": 2,
+    "sql": 1,
+    "opps": 1,
+    "pipeline": 50000,
+    "id": "row_79_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1454,7 +1854,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_80_1752722417590"
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -1472,7 +1877,12 @@
     "mqlForecast": 2,
     "sqlForecast": 1,
     "oppsForecast": 1,
-    "pipelineForecast": 50000
+    "pipelineForecast": 50000,
+    "mql": 2,
+    "sql": 1,
+    "opps": 1,
+    "pipeline": 50000,
+    "id": "row_81_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1490,7 +1900,12 @@
     "mqlForecast": 18,
     "sqlForecast": 11,
     "oppsForecast": 9,
-    "pipelineForecast": 450000
+    "pipelineForecast": 450000,
+    "mql": 18,
+    "sql": 11,
+    "opps": 9,
+    "pipeline": 450000,
+    "id": "row_82_1752722417590"
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -1508,7 +1923,12 @@
     "mqlForecast": 2,
     "sqlForecast": 1,
     "oppsForecast": 1,
-    "pipelineForecast": 50000
+    "pipelineForecast": 50000,
+    "mql": 2,
+    "sql": 1,
+    "opps": 1,
+    "pipeline": 50000,
+    "id": "row_83_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1526,7 +1946,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 50,
+    "sql": 30,
+    "opps": 24,
+    "pipeline": 1200000,
+    "id": "row_84_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1544,7 +1969,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_85_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1562,7 +1992,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_86_1752722417590"
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1580,7 +2015,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_87_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -1598,7 +2038,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_88_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -1616,7 +2061,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_89_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -1634,7 +2084,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_90_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -1652,7 +2107,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_91_1752722417590"
   },
   {
     "programType": "User Groups",
@@ -1670,7 +2130,12 @@
     "mqlForecast": 18,
     "sqlForecast": 11,
     "oppsForecast": 9,
-    "pipelineForecast": 450000
+    "pipelineForecast": 450000,
+    "mql": 18,
+    "sql": 11,
+    "opps": 9,
+    "pipeline": 450000,
+    "id": "row_92_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1688,7 +2153,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_93_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1706,7 +2176,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_94_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1724,7 +2199,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_95_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1742,7 +2222,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_96_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1760,7 +2245,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_97_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1778,7 +2268,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_98_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1796,7 +2291,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_99_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1814,7 +2314,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_100_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1832,7 +2337,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_101_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1850,7 +2360,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_102_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1868,7 +2383,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_103_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1886,7 +2406,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_104_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1904,7 +2429,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_105_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1922,7 +2452,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_106_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1940,7 +2475,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_107_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1958,7 +2498,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_108_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1976,7 +2521,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_109_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -1994,7 +2544,12 @@
     "mqlForecast": 15,
     "sqlForecast": 9,
     "oppsForecast": 7,
-    "pipelineForecast": 350000
+    "pipelineForecast": 350000,
+    "mql": 15,
+    "sql": 9,
+    "opps": 7,
+    "pipeline": 350000,
+    "id": "row_110_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -2012,7 +2567,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_111_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -2030,7 +2590,12 @@
     "mqlForecast": 20,
     "sqlForecast": 12,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 20,
+    "sql": 12,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_112_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -2048,7 +2613,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_113_1752722417590"
   },
   {
     "programType": "Webinars",
@@ -2066,6 +2636,623 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_114_1752722417590"
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Pipeline Acceleration & Executive Engagement",
+    "revenuePlay": "Secure all developer workloads with the power of AI",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "South APAC",
+    "country": "ASEAN",
+    "owner": "Giorgia Parham",
+    "description": "FSI Digital Transformation with AI Security (Localized Webinar, Content, Email)",
+    "forecastedCost": 0,
+    "expectedLeads": 350,
+    "status": "Planning",
+    "mqlForecast": 35,
+    "sqlForecast": 21,
+    "oppsForecast": 17,
+    "pipelineForecast": 850000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "South APAC",
+    "country": "ASEAN",
+    "owner": "Giorgia Parham",
+    "description": "Major Account ABM: Tailored content hub, personalised emails, webinars, relationship showcase etc",
+    "forecastedCost": 0,
+    "expectedLeads": 80,
+    "status": "Planning",
+    "mqlForecast": 8,
+    "sqlForecast": 5,
+    "oppsForecast": 4,
+    "pipelineForecast": 200000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "New Logo Acquisition",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q3 - March",
+    "region": "South APAC",
+    "country": "ASEAN",
+    "owner": "Giorgia Parham",
+    "description": "New Logo Acquisition: AI-Powered Productivity for SMEs (Webinar, Email, Foundational Content)",
+    "forecastedCost": 0,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "South APAC",
+    "country": "Australia",
+    "owner": "Giorgia Parham",
+    "description": "Major Account ABM: Tailored content hub, personalised emails, webinars, relationship showcase etc",
+    "forecastedCost": 0,
+    "expectedLeads": 80,
+    "status": "Planning",
+    "mqlForecast": 8,
+    "sqlForecast": 5,
+    "oppsForecast": 4,
+    "pipelineForecast": 200000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Pipeline Acceleration & Executive Engagement",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q2 - October",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Executive Fireside Interview Series: Tech Talks (Quarterly digital interviews with APAC thought leaders/CxOs)",
+    "forecastedCost": 3500,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Pipeline Acceleration & Executive Engagement",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q2 - November",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Executive Fireside Interview Series: Tech Talks (Quarterly digital interviews with APAC thought leaders/CxOs)",
+    "forecastedCost": 3500,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Pipeline Acceleration & Executive Engagement",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q3 - February",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Executive Fireside Interview Series: Tech Talks (Quarterly digital interviews with APAC thought leaders/CxOs)",
+    "forecastedCost": 3500,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Targeted Paid Ads & Content Syndication",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Content Syndication - Webinar RSVPs - cost included in webinar program line",
+    "forecastedCost": 0,
+    "expectedLeads": 100,
+    "status": "Planning",
+    "mqlForecast": 10,
+    "sqlForecast": 6,
+    "oppsForecast": 5,
     "pipelineForecast": 250000
+  },
+  {
+    "programType": "Targeted Paid Ads & Content Syndication",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Content Syndication - Programmatic display advertising",
+    "forecastedCost": 5000,
+    "expectedLeads": 2000,
+    "status": "Planning",
+    "mqlForecast": 200,
+    "sqlForecast": 120,
+    "oppsForecast": 96,
+    "pipelineForecast": 4800000
+  },
+  {
+    "programType": "Targeted Paid Ads & Content Syndication",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Content Syndication - Profiled Leads",
+    "forecastedCost": 10000,
+    "expectedLeads": 223,
+    "status": "Planning",
+    "mqlForecast": 22,
+    "sqlForecast": 13,
+    "oppsForecast": 10,
+    "pipelineForecast": 500000
+  },
+  {
+    "programType": "Targeted Paid Ads & Content Syndication",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q3 - February",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Content Syndication - Webinar RSVPs - cost included in webinar program line",
+    "forecastedCost": 0,
+    "expectedLeads": 100,
+    "status": "Planning",
+    "mqlForecast": 10,
+    "sqlForecast": 6,
+    "oppsForecast": 5,
+    "pipelineForecast": 250000
+  },
+  {
+    "programType": "Targeted Paid Ads & Content Syndication",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q3 - February",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Content Syndication - Programmatic display advertising",
+    "forecastedCost": 5000,
+    "expectedLeads": 2000,
+    "status": "Planning",
+    "mqlForecast": 200,
+    "sqlForecast": 120,
+    "oppsForecast": 96,
+    "pipelineForecast": 4800000
+  },
+  {
+    "programType": "Targeted Paid Ads & Content Syndication",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q3 - February",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Content Syndication - Profiled Leads",
+    "forecastedCost": 10000,
+    "expectedLeads": 223,
+    "status": "Planning",
+    "mqlForecast": 22,
+    "sqlForecast": 13,
+    "oppsForecast": 10,
+    "pipelineForecast": 500000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - September",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Quarterly APAC Newsletter (Consolidated GitHub news & regional updates)",
+    "forecastedCost": 0,
+    "expectedLeads": 250,
+    "status": "Planning",
+    "mqlForecast": 25,
+    "sqlForecast": 15,
+    "oppsForecast": 12,
+    "pipelineForecast": 600000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "AI-Powered Dev: Drive Copilot Adoption (Always-On Digital Motion: Quarterly(+?) Webinars, Email support, Content, potential evolution of Copilot Fridays) -Includes content syndication",
+    "forecastedCost": 1300,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - September",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Quarterly Roadmap Webinar Support (Supporting Global Marketing team's roadmap updates)",
+    "forecastedCost": 1300,
+    "expectedLeads": 500,
+    "status": "Planning",
+    "mqlForecast": 50,
+    "sqlForecast": 30,
+    "oppsForecast": 24,
+    "pipelineForecast": 1200000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q2 - November",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Quarterly APAC Newsletter (Consolidated GitHub news & regional updates)",
+    "forecastedCost": 0,
+    "expectedLeads": 250,
+    "status": "Planning",
+    "mqlForecast": 25,
+    "sqlForecast": 15,
+    "oppsForecast": 12,
+    "pipelineForecast": 600000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q2 - December",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "AI-Powered Dev: Drive Copilot Adoption (Always-On Digital Motion: Quarterly(+?) Webinars, Email support, Content, potential evolution of Copilot Fridays) - Includes content syndication",
+    "forecastedCost": 1300,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q2 - December",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Quarterly Roadmap Webinar Support (Supporting Global Marketing team's roadmap updates) - Includes content syndication",
+    "forecastedCost": 1300,
+    "expectedLeads": 500,
+    "status": "Planning",
+    "mqlForecast": 50,
+    "sqlForecast": 30,
+    "oppsForecast": 24,
+    "pipelineForecast": 1200000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "Secure all developer workloads with the power of AI",
+    "fiscalYear": "FY26",
+    "quarter": "Q2 - October",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Secure Dev Workloads: Code Scanning & Secret Protection (Webinar, Email, Content) - Includes content syndication",
+    "forecastedCost": 1300,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Pipeline Acceleration & Executive Engagement",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Executive Fireside Interview Series: Tech Talks (Quarterly digital interviews with APAC thought leaders/CxOs)",
+    "forecastedCost": 3500,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q3 - March",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Quarterly APAC Newsletter (Consolidated GitHub news & regional updates)",
+    "forecastedCost": 0,
+    "expectedLeads": 250,
+    "status": "Planning",
+    "mqlForecast": 25,
+    "sqlForecast": 15,
+    "oppsForecast": 12,
+    "pipelineForecast": 600000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q3 - February",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "AI-Powered Dev: Drive Copilot Adoption (Always-On Digital Motion: Quarterly(+?) Webinars, Email support, Content, potential evolution of Copilot Fridays) - Includes content syndication",
+    "forecastedCost": 1300,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q3 - March",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Quarterly Roadmap Webinar Support (Supporting Global Marketing team's roadmap updates)",
+    "forecastedCost": 1300,
+    "expectedLeads": 500,
+    "status": "Planning",
+    "mqlForecast": 50,
+    "sqlForecast": 30,
+    "oppsForecast": 24,
+    "pipelineForecast": 1200000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q4 - June",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Quarterly APAC Newsletter (Consolidated GitHub news & regional updates)",
+    "forecastedCost": 0,
+    "expectedLeads": 250,
+    "status": "Planning",
+    "mqlForecast": 25,
+    "sqlForecast": 15,
+    "oppsForecast": 12,
+    "pipelineForecast": 600000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q4 - May",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "AI-Powered Dev: Drive Copilot Adoption (Always-On Digital Motion: Quarterly(+?) Webinars, Email support, Content, potential evolution of Copilot Fridays) - Includes content syndication",
+    "forecastedCost": 1300,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q4 - May",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Quarterly Roadmap Webinar Support (Supporting Global Marketing team's roadmap updates) - Includes content syndication",
+    "forecastedCost": 1300,
+    "expectedLeads": 500,
+    "status": "Planning",
+    "mqlForecast": 50,
+    "sqlForecast": 30,
+    "oppsForecast": 24,
+    "pipelineForecast": 1200000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "Secure all developer workloads with the power of AI",
+    "fiscalYear": "FY26",
+    "quarter": "Q3 - March",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "Secure Dev Workloads: Code Scanning & Secret Protection (Webinar, Email, Content) - Includes content syndication",
+    "forecastedCost": 1300,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q4 - May",
+    "region": "X APAC English",
+    "country": "X APAC English",
+    "owner": "Giorgia Parham",
+    "description": "GitHub Enterprise Time Machine Report Campaign (Data-driven report, email, content)",
+    "forecastedCost": 5000,
+    "expectedLeads": 500,
+    "status": "Planning",
+    "mqlForecast": 50,
+    "sqlForecast": 30,
+    "oppsForecast": 24,
+    "pipelineForecast": 1200000
+  },
+  {
+    "programType": "Operational/Infrastructure/Swag",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - July",
+    "region": "X APAC Non English",
+    "country": "X APAC Non English",
+    "owner": "Giorgia Parham",
+    "description": "AI-Driven Asset Localization Support (Ongoing fund allocation for AI translation software - Azure Speech Studio)",
+    "forecastedCost": 3600,
+    "expectedLeads": 0,
+    "status": "Planning",
+    "mqlForecast": 0,
+    "sqlForecast": 0,
+    "oppsForecast": 0,
+    "pipelineForecast": 0
+  },
+  {
+    "programType": "Operational/Infrastructure/Swag",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "X APAC Non English",
+    "country": "X APAC Non English",
+    "owner": "Giorgia Parham",
+    "description": "AI-Driven Asset Localization Support (Ongoing fund allocation for AI translation software - Azure Speech Studio)",
+    "forecastedCost": 3600,
+    "expectedLeads": 0,
+    "status": "Planning",
+    "mqlForecast": 0,
+    "sqlForecast": 0,
+    "oppsForecast": 0,
+    "pipelineForecast": 0
+  },
+  {
+    "programType": "User Groups",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "SAARC",
+    "country": "X SAARC",
+    "owner": "Giorgia Parham",
+    "description": "India ITES Dev Community User Group (Virtual sessions)",
+    "forecastedCost": 0,
+    "expectedLeads": 300,
+    "status": "Planning",
+    "mqlForecast": 30,
+    "sqlForecast": 18,
+    "oppsForecast": 14,
+    "pipelineForecast": 700000
+  },
+  {
+    "programType": "Webinars",
+    "strategicPillars": "Pipeline Acceleration & Executive Engagement",
+    "revenuePlay": "Secure all developer workloads with the power of AI",
+    "fiscalYear": "FY26",
+    "quarter": "Q2 - November",
+    "region": "SAARC",
+    "country": "X SAARC",
+    "owner": "Giorgia Parham",
+    "description": "Gov/BFSI Secure Code & Scanning Best Practices (Webinar, Email)",
+    "forecastedCost": 1300,
+    "expectedLeads": 300,
+    "status": "Planning",
+    "mqlForecast": 30,
+    "sqlForecast": 18,
+    "oppsForecast": 14,
+    "pipelineForecast": 700000
+  },
+  {
+    "programType": "Localized Programs",
+    "strategicPillars": "New Logo Acquisition",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q3 - March",
+    "region": "SAARC",
+    "country": "X SAARC",
+    "owner": "Giorgia Parham",
+    "description": "Expand Reach: Copilot for Tier 2 Cities (Webinar, Email, Foundational Content)",
+    "forecastedCost": 0,
+    "expectedLeads": 400,
+    "status": "Planning",
+    "mqlForecast": 40,
+    "sqlForecast": 24,
+    "oppsForecast": 19,
+    "pipelineForecast": 950000
   }
 ]
