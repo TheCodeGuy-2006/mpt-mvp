@@ -1,6 +1,4 @@
 // roi.js - ROI and Reporting Module
-console.log("roi.js loaded");
-
 // Performance optimization: Cache and debounce
 let filterUpdateTimeout = null;
 let lastFilterState = null;
@@ -12,10 +10,8 @@ let roiInitialized = false;
 
 // Debounced filter update to prevent excessive calls
 function debouncedFilterUpdate() {
-  console.log("[ROI] debouncedFilterUpdate called");
   clearTimeout(filterUpdateTimeout);
   filterUpdateTimeout = setTimeout(() => {
-    console.log("[ROI] Executing debounced update");
     updateRoiTotalSpend();
     updateRoiDataTable();
     
@@ -23,10 +19,7 @@ function debouncedFilterUpdate() {
     const now = Date.now();
     if (now - lastChartUpdate > 300) {
       lastChartUpdate = now;
-      console.log("[ROI] Updating charts");
       updateRoiCharts();
-    } else {
-      console.log("[ROI] Skipping chart update due to throttling");
     }
   }, 150); // 150ms debounce delay
 }
@@ -233,14 +226,12 @@ function updateRoiTotalSpend() {
 
 // Throttled chart updates for better performance
 function updateRoiCharts() {
-  console.log("[ROI] updateRoiCharts called, isRoiTabActive:", isRoiTabActive);
   if (!isRoiTabActive) return;
   
   requestAnimationFrame(() => {
-    console.log("[ROI] Executing chart updates");
     renderRoiByRegionChart();
     renderRoiByProgramTypeChart();
-    renderRoiByQuarterChart(); // Added forecasted vs actual performance chart
+    renderRoiByQuarterChart();
   });
 }
 
@@ -286,11 +277,7 @@ updateRoiTotalSpend = function () {
 
   let totalSpend = 0;
   let totalPipeline = 0;
-  // Debug: log pipelineForecast values
-  console.log(
-    "[ROI] Filtered data for pipeline calculation:",
-    filteredData.map((r) => r.pipelineForecast),
-  );
+  
   totalSpend = filteredData.reduce((sum, row) => {
     let val = row.actualCost;
     if (typeof val === "string")
@@ -305,8 +292,6 @@ updateRoiTotalSpend = function () {
     if (!isNaN(val)) sum += Number(val);
     return sum;
   }, 0);
-  // Debug: log total pipeline
-  console.log("[ROI] Total pipeline calculated:", totalPipeline);
 
   const spendEl = document.getElementById("roiTotalSpendValue");
   if (spendEl) {
@@ -424,7 +409,6 @@ const _originalUpdateRoiDataTable = updateRoiDataTable;
 updateRoiDataTable = function () {
   const table = window.roiDataTableInstance;
   if (!table) {
-    console.log("ROI Data Table not initialized yet");
     return;
   }
   const filters = getRoiFilterValues();
@@ -443,9 +427,6 @@ updateRoiDataTable = function () {
     );
   });
   table.replaceData(filteredCampaigns);
-  console.log(
-    `ROI Data Table updated with ${filteredCampaigns.length} campaigns`,
-  );
 };
 // --- ROI FILTER LOGIC UPDATE END ---
 
@@ -569,7 +550,6 @@ function preCachePlanningData() {
   // Cache planning data if not already cached
   if (!cachedPlanningData && window.planningModule?.tableInstance) {
     cachedPlanningData = window.planningModule.tableInstance.getData();
-    console.log('[ROI] Pre-cached planning data:', cachedPlanningData.length, 'records');
   }
 }
 
@@ -749,7 +729,6 @@ function initializeRoiFunctionality() {
     // This improves initial page load performance
     if (window.location.hash === '#roi') {
       setTimeout(() => {
-        console.log("Attempting to initialize ROI Data Table...");
         window.roiDataTableInstance = initRoiDataTable();
       }, 300);
     }
@@ -759,7 +738,6 @@ function initializeRoiFunctionality() {
 // Lazy initialization of ROI data table
 function ensureRoiDataTableInitialized() {
   if (!window.roiDataTableInstance && isRoiTabActive) {
-    console.log("Lazy initializing ROI Data Table...");
     window.roiDataTableInstance = initRoiDataTable();
   }
   return window.roiDataTableInstance;
@@ -783,15 +761,11 @@ function setRoiTabActive(active) {
 
 // Initialize ROI Data Table
 function initRoiDataTable() {
-  console.log("Initializing ROI Data Table...");
-
   const tableContainer = document.getElementById("roiDataTable");
   if (!tableContainer) {
     console.error("ROI Data Table container not found");
     return null;
   }
-
-  console.log("Table container found:", tableContainer);
 
   if (typeof Tabulator === "undefined") {
     console.error("Tabulator library not loaded");
@@ -799,7 +773,7 @@ function initRoiDataTable() {
   }
 
   const campaigns = getCampaignDataForRoi();
-  console.log("Campaign data for ROI:", campaigns.length, "campaigns");
+  
   try {
     const table = new Tabulator(tableContainer, {
       data: campaigns,
@@ -926,7 +900,6 @@ function initRoiDataTable() {
 
     // Store the table instance globally for updates
     window.roiDataTableInstance = table;
-    console.log("ROI Data Table initialized successfully");
 
     return table;
   } catch (error) {
@@ -1049,7 +1022,6 @@ async function loadBudgetsData() {
   try {
     const response = await fetch("data/budgets.json");
     budgetsData = await response.json();
-    console.log("[ROI] Loaded budgets data:", budgetsData);
     return budgetsData;
   } catch (error) {
     console.error("[ROI] Error loading budgets data:", error);
@@ -1059,12 +1031,9 @@ async function loadBudgetsData() {
 
 // Update remaining budget calculation
 async function updateRemainingBudget(filters) {
-  console.log("[ROI] Updating remaining budget with filters:", filters);
-
   try {
     // Load budgets data
     const budgets = await loadBudgetsData();
-    console.log("[ROI] Budgets data loaded:", budgets);
 
     // Calculate total budget (apply region filter only for budget selection)
     let totalBudget = 0;
@@ -1074,7 +1043,6 @@ async function updateRemainingBudget(filters) {
         totalBudget += data.assignedBudget || 0;
       }
     }
-    console.log("[ROI] Total budget calculated:", totalBudget, "for region filter:", filters.region || "all regions");
 
     // Calculate total actual cost from execution data (apply ALL filters)
     let totalActualCost = 0;
@@ -1102,7 +1070,6 @@ async function updateRemainingBudget(filters) {
 
     // Calculate remaining budget
     const remainingBudget = totalBudget - totalActualCost;
-    console.log("[ROI] Remaining budget calculated:", remainingBudget);
 
     // Create filter description for label
     const activeFilters = [];
@@ -1173,7 +1140,6 @@ async function updateForecastedBudgetUsage(filters) {
         totalBudget += data.assignedBudget || 0;
       }
     }
-    console.log("[ROI] Total budget calculated:", totalBudget, "for region filter:", filters.region || "all regions");
 
     // Calculate total forecasted cost from planning data (apply ALL filters)
     let totalForecastedCost = 0;

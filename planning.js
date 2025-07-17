@@ -1,26 +1,22 @@
 import { kpis } from "./src/calc.js";
 
-console.log("planning.js loaded");
-
 // PLANNING TAB CONSTANTS AND DATA
-// Performance monitoring for large datasets
+// Simplified performance monitoring
 const planningPerformance = {
   startTime: null,
   endTime: null,
   
   start(operation) {
     this.startTime = performance.now();
-    console.log(`[Planning Performance] Starting ${operation}...`);
   },
   
   end(operation) {
     this.endTime = performance.now();
     const duration = this.endTime - this.startTime;
-    console.log(`[Planning Performance] ${operation} completed in ${duration.toFixed(2)}ms`);
     
-    // Show warning for slow operations
-    if (duration > 2000) {
-      console.warn(`[Planning Performance] Slow operation detected: ${operation} took ${duration.toFixed(2)}ms`);
+    // Only warn for very slow operations
+    if (duration > 5000) {
+      console.warn(`Slow operation: ${operation} took ${duration.toFixed(2)}ms`);
     }
     
     return duration;
@@ -163,18 +159,11 @@ function getAllCountries() {
   return Array.from(new Set(all));
 }
 
-// Patch: For now, allow all countries for any region (as array, not object)
+// Patch: For now, allow all countries for any region
 function getCountryOptionsForRegion(region) {
   const allCountries = getAllCountries();
-  if (allCountries.length > 0) {
-    return allCountries;
-  }
-  return ["(No countries available)"];
+  return allCountries.length > 0 ? allCountries : ["(No countries available)"];
 }
-
-// Patch: Debug country dropdown
-window.debugCountryOptions = countryOptionsByRegion;
-window.debugGetCountryOptionsForRegion = getCountryOptionsForRegion;
 
 // PLANNING DATA LOADING
 // Web Worker for heavy data processing
@@ -196,17 +185,15 @@ function initPlanningWorker() {
             planningDataCache = data;
             isDataLoading = false;
             hideLoadingIndicator();
-            console.log("✅ Worker completed data processing:", data.length, "rows");
             break;
           case 'APPLY_FILTERS_COMPLETE':
-            console.log(`🔍 Filter results: ${data.length}/${e.data.originalCount} rows (${e.data.duration.toFixed(2)}ms)`);
             if (planningTableInstance) {
               planningTableInstance.setData(data);
             }
             hideLoadingIndicator();
             break;
           case 'ERROR':
-            console.error("❌ Worker error:", error);
+            console.error("Worker error:", error);
             isDataLoading = false;
             hideLoadingIndicator();
             break;
@@ -214,13 +201,11 @@ function initPlanningWorker() {
       };
       
       planningWorker.onerror = function(error) {
-        console.error("❌ Worker initialization error:", error);
+        console.error("Worker error:", error);
         planningWorker = null;
       };
       
-      console.log("🔧 Planning worker initialized");
     } catch (error) {
-      console.warn("⚠️ Could not initialize worker:", error);
       planningWorker = null;
     }
   }
@@ -232,7 +217,6 @@ function cleanupPlanningWorker() {
   if (planningWorker) {
     planningWorker.terminate();
     planningWorker = null;
-    console.log("🛑 Planning worker terminated");
   }
 }
 
@@ -281,15 +265,13 @@ function processRowsInBatches(rows, batchSize = 100, callback) {
 
 // Load planning data via Worker API for real-time updates
 async function loadPlanning(retryCount = 0, useCache = true) {
-  // Return cached data if available and not forcing refresh
+  // Return cached data if available
   if (useCache && planningDataCache && planningDataCache.length > 0) {
-    console.log("📋 Using cached planning data:", planningDataCache.length, "rows");
     return planningDataCache;
   }
 
   // Prevent multiple simultaneous loads
   if (isDataLoading) {
-    console.log("⏳ Data already loading, waiting...");
     while (isDataLoading) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
@@ -300,55 +282,26 @@ async function loadPlanning(retryCount = 0, useCache = true) {
   planningPerformance.start('data loading');
   
   try {
-    // Try to load via Worker API first (real-time, no caching issues)
     let rows;
 
     try {
-      // Use Worker API endpoint instead of raw GitHub files
+      // Use Worker API endpoint
       const workerEndpoint =
         window.cloudflareSyncModule?.getWorkerEndpoint() ||
         "https://mpt-mvp-sync.jordanradford.workers.dev";
       const workerUrl = `${workerEndpoint}/data/planning`;
 
-      console.log(
-        `Fetching planning data via Worker API (attempt ${retryCount + 1}):`,
-        workerUrl,
-      );
-
       const response = await fetch(workerUrl, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
-
-      console.log(
-        "Worker API response - status:",
-        response.status,
-        response.statusText,
-        "URL:",
-        response.url,
-      );
 
       if (response.ok) {
         const result = await response.json();
         rows = result.data;
-        console.log(
-          "✅ Loaded planning data via Worker API:",
-          rows.length,
-          "rows",
-          `(source: ${result.source})`,
-        );
 
-        // Validate that we got actual data
-        if (rows && rows.length > 0) {
-          console.log("✅ Worker API data validation passed");
-        } else {
-          console.warn("⚠️ Worker API returned empty data");
+        if (!rows || rows.length === 0) {
           if (retryCount < 2) {
-            console.log(
-              `Retrying Worker API fetch in ${(retryCount + 1) * 2} seconds...`,
-            );
             await new Promise((resolve) =>
               setTimeout(resolve, (retryCount + 1) * 2000),
             );
@@ -356,49 +309,18 @@ async function loadPlanning(retryCount = 0, useCache = true) {
           }
         }
       } else {
-        throw new Error(
-          `Worker API failed: ${response.status} ${response.statusText}`,
-        );
+        throw new Error(`Worker API failed: ${response.status} ${response.statusText}`);
       }
     } catch (workerError) {
-      console.warn(
-        "Worker API failed, falling back to local file:",
-        workerError,
-      );
-
       // Fallback: Try local file
       try {
         const r = await fetch("data/planning.json");
-        console.log(
-          "Fallback: Fetching local data/planning.json, status:",
-          r.status,
-          r.statusText,
-          r.url,
-        );
         if (!r.ok) throw new Error("Failed to fetch planning.json");
         rows = await r.json();
-        console.log(
-          "📁 Loaded planning data from local file:",
-          rows.length,
-          "rows",
-        );
-
-        // Show a message to the user about the Worker API being unavailable
-        if (retryCount === 0) {
-          console.warn(
-            "⚠️ Worker API unavailable - using local data. Real-time sync disabled.",
-          );
-          // You might want to show a notification to the user here
-        }
       } catch (localError) {
-        console.error("Local file also failed:", localError);
-        throw new Error(
-          "Failed to load planning data from both Worker API and local file",
-        );
+        throw new Error("Failed to load planning data from both Worker API and local file");
       }
     }
-
-    console.log("Processing loaded planning data:", rows.length, "rows");
     
     // Show loading indicator for large datasets
     if (rows.length > 500) {
@@ -407,8 +329,6 @@ async function loadPlanning(retryCount = 0, useCache = true) {
     
     // Use Web Worker for heavy processing if available and dataset is large
     if (rows.length > 200 && initPlanningWorker()) {
-      console.log("🔧 Using Web Worker for data processing...");
-      
       return new Promise((resolve) => {
         const handleWorkerMessage = (e) => {
           if (e.data.type === 'PROCESS_PLANNING_DATA_COMPLETE') {
@@ -429,7 +349,6 @@ async function loadPlanning(retryCount = 0, useCache = true) {
       });
     } else {
       // Fallback to main thread processing for smaller datasets
-      console.log("📋 Processing data on main thread...");
       await processRowsInBatches(rows, 100, (row, i) => {
         if (typeof row.expectedLeads === "number") {
           Object.assign(row, kpis(row.expectedLeads));
@@ -440,12 +359,9 @@ async function loadPlanning(retryCount = 0, useCache = true) {
       });
     }
     
-    // Hide loading indicator
     hideLoadingIndicator();
-    
     planningPerformance.end('data processing');
     
-    // Cache the processed data
     planningDataCache = rows;
     isDataLoading = false;
     
@@ -458,8 +374,9 @@ async function loadPlanning(retryCount = 0, useCache = true) {
   }
 }
 
-// PLANNING GRID INITIALIZATION
-let planningTableInstance = null;
+// Make globally accessible for data refreshing
+window.planningTableInstance = null;
+window.loadPlanning = loadPlanning;
 let planningDataCache = null;
 let isGridInitialized = false;
 let isDataLoading = false;
@@ -608,18 +525,11 @@ function hideLoadingIndicator() {
   if (indicator) indicator.remove();
 }
 
-// Make globally accessible for data refreshing
-window.planningTableInstance = planningTableInstance;
-window.loadPlanning = loadPlanning;
-
 // Lazy initialization function for planning grid
 async function initPlanningGridLazy() {
   if (isGridInitialized && planningTableInstance) {
-    console.log("📋 Planning grid already initialized, skipping...");
     return planningTableInstance;
   }
-
-  console.log("🚀 Lazy initializing planning grid...");
   
   const perfTracker = window.performanceMonitor?.startTracking('planning-grid-init');
   
@@ -642,7 +552,6 @@ async function initPlanningGridLazy() {
 
 function initPlanningGrid(rows) {
   planningPerformance.start('grid initialization');
-  console.log("Initializing Planning Grid with rows:", rows);
   
   // Initialize data store
   planningDataStore.setData(rows);
@@ -728,45 +637,34 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: programTypes },
         width: 200,
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           const r = cell.getRow();
           const rowData = r.getData();
 
-          // Much longer debounce for expensive operations
-          clearTimeout(rowData._updateTimeout);
-          rowData._updateTimeout = setTimeout(() => {
-            // Special logic for In-Account Events (1:1)
-            if (cell.getValue() === "In-Account Events (1:1)") {
+          // Special logic for In-Account Events (1:1)
+          if (cell.getValue() === "In-Account Events (1:1)") {
+            r.update({
+              expectedLeads: 0,
+              mqlForecast: 0,
+              sqlForecast: 0,
+              oppsForecast: 0,
+              pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
+            });
+          } else {
+            // For other program types, recalculate based on expected leads
+            if (typeof rowData.expectedLeads === "number" && rowData.expectedLeads > 0) {
+              const kpiVals = kpis(rowData.expectedLeads);
               r.update({
-                expectedLeads: 0,
-                mqlForecast: 0,
-                sqlForecast: 0,
-                oppsForecast: 0,
-                pipelineForecast: rowData.forecastedCost
-                  ? Number(rowData.forecastedCost) * 20
-                  : 0,
+                mqlForecast: kpiVals.mql,
+                sqlForecast: kpiVals.sql,
+                oppsForecast: kpiVals.opps,
+                pipelineForecast: kpiVals.pipeline,
               });
-            } else {
-              // For other program types, recalculate based on expected leads
-              if (
-                typeof rowData.expectedLeads === "number" &&
-                rowData.expectedLeads > 0
-              ) {
-                const kpiVals = kpis(rowData.expectedLeads);
-                r.update({
-                  mqlForecast: kpiVals.mql,
-                  sqlForecast: kpiVals.sql,
-                  oppsForecast: kpiVals.opps,
-                  pipelineForecast: kpiVals.pipeline,
-                });
-              }
             }
-            rowData.__modified = true;
-
-            // Trigger autosave with much longer debouncing
-            debouncedAutosave();
-          }, 1000); // Much longer debounce
-        },
+          }
+          rowData.__modified = true;
+          debouncedAutosave();
+        }, 1000),
       },
       {
         title: "Strategic Pillar",
@@ -837,71 +735,55 @@ function initPlanningGrid(rows) {
           if (v === null || v === undefined || v === "") return "";
           return "$" + Number(v).toLocaleString();
         },
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           const r = cell.getRow();
           const rowData = r.getData();
 
-          // Much longer debounce for expensive operations
-          clearTimeout(rowData._updateTimeout);
-          rowData._updateTimeout = setTimeout(() => {
-            // Special logic for In-Account Events (1:1) - recalculate pipeline based on cost
-            if (rowData.programType === "In-Account Events (1:1)") {
-              r.update({
-                expectedLeads: 0,
-                mqlForecast: 0,
-                sqlForecast: 0,
-                oppsForecast: 0,
-                pipelineForecast: cell.getValue()
-                  ? Number(cell.getValue()) * 20
-                  : 0,
-              });
-            }
-            rowData.__modified = true;
-
-            // Trigger autosave with much longer debouncing
-            debouncedAutosave();
-          }, 1000);
-        },
+          // Special logic for In-Account Events (1:1) - recalculate pipeline based on cost
+          if (rowData.programType === "In-Account Events (1:1)") {
+            r.update({
+              expectedLeads: 0,
+              mqlForecast: 0,
+              sqlForecast: 0,
+              oppsForecast: 0,
+              pipelineForecast: cell.getValue() ? Number(cell.getValue()) * 20 : 0,
+            });
+          }
+          rowData.__modified = true;
+          debouncedAutosave();
+        }, 1000),
       },
       {
         title: "Expected Leads",
         field: "expectedLeads",
         editor: "number",
         width: 150,
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           const r = cell.getRow();
           const rowData = r.getData();
 
-          // Much longer debounce for expensive operations
-          clearTimeout(rowData._updateTimeout);
-          rowData._updateTimeout = setTimeout(() => {
-            // Special logic for In-Account Events (1:1) - ignore expected leads, use forecasted cost
-            if (rowData.programType === "In-Account Events (1:1)") {
-              r.update({
-                expectedLeads: 0,
-                mqlForecast: 0,
-                sqlForecast: 0,
-                oppsForecast: 0,
-                pipelineForecast: rowData.forecastedCost
-                  ? Number(rowData.forecastedCost) * 20
-                  : 0,
-              });
-            } else {
-              // Normal KPI calculation for other program types
-              const kpiVals = kpis(cell.getValue());
-              r.update({
-                mqlForecast: kpiVals.mql,
-                sqlForecast: kpiVals.sql,
-                oppsForecast: kpiVals.opps,
-                pipelineForecast: kpiVals.pipeline,
-              });
-            }
-            rowData.__modified = true;
-
-            // Trigger autosave with much longer debouncing
-            debouncedAutosave();
-          }, 1000);
-        },
+          // Special logic for In-Account Events (1:1) - ignore expected leads, use forecasted cost
+          if (rowData.programType === "In-Account Events (1:1)") {
+            r.update({
+              expectedLeads: 0,
+              mqlForecast: 0,
+              sqlForecast: 0,
+              oppsForecast: 0,
+              pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
+            });
+          } else {
+            // Normal KPI calculation for other program types
+            const kpiVals = kpis(cell.getValue());
+            r.update({
+              mqlForecast: kpiVals.mql,
+              sqlForecast: kpiVals.sql,
+              oppsForecast: kpiVals.opps,
+              pipelineForecast: kpiVals.pipeline,
+            });
+          }
+          rowData.__modified = true;
+          debouncedAutosave();
+        }, 1000),
       },
       { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
       { title: "SQL", field: "sqlForecast", editable: false, width: 90 },
@@ -930,16 +812,11 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: statusOptions },
         width: 130,
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           const rowData = cell.getRow().getData();
-          
-          // Much longer debounce for expensive operations
-          clearTimeout(rowData._updateTimeout);
-          rowData._updateTimeout = setTimeout(() => {
-            rowData.__modified = true;
-            debouncedAutosave();
-          }, 1000);
-        },
+          rowData.__modified = true;
+          debouncedAutosave();
+        }, 1000),
       },
       {
         title: "PO raised",
@@ -1019,20 +896,14 @@ function initPlanningGrid(rows) {
 
   // Wire up Add Row and Delete Row buttons for Planning grid
   const addBtn = document.getElementById("addPlanningRow");
-  console.log("addPlanningRow button:", addBtn);
   if (addBtn) {
-    addBtn.onclick = () => {
-      console.log("Add Planning Row button clicked");
-      showAddRowModal();
-    };
+    addBtn.onclick = () => showAddRowModal();
   }
 
   const delBtn = document.getElementById("deletePlanningRow");
-  console.log("deletePlanningRow button:", delBtn);
   if (delBtn) {
     delBtn.textContent = "Delete Highlighted Rows";
     delBtn.onclick = () => {
-      console.log("Delete Planning Row button clicked");
       const rows = planningTableInstance.getRows();
       let deleted = 0;
       rows.forEach((row) => {
@@ -1049,7 +920,7 @@ function initPlanningGrid(rows) {
 
   setupPlanningSave(planningTableInstance, rows);
 
-  // Update global reference for data refreshing
+  // Update global reference
   window.planningTableInstance = planningTableInstance;
 
   planningPerformance.end('grid initialization');
@@ -1864,73 +1735,34 @@ function updateDigitalMotionsButtonVisual(button) {
 }
 
 function populatePlanningFilters() {
-  const campaignNameInput = document.getElementById(
-    "planningCampaignNameFilter",
-  );
+  const campaignNameInput = document.getElementById("planningCampaignNameFilter");
   const regionSelect = document.getElementById("planningRegionFilter");
   const quarterSelect = document.getElementById("planningQuarterFilter");
   const statusSelect = document.getElementById("planningStatusFilter");
-  const programTypeSelect = document.getElementById(
-    "planningProgramTypeFilter",
-  );
-  const strategicPillarSelect = document.getElementById(
-    "planningStrategicPillarFilter",
-  );
+  const programTypeSelect = document.getElementById("planningProgramTypeFilter");
+  const strategicPillarSelect = document.getElementById("planningStrategicPillarFilter");
   const ownerSelect = document.getElementById("planningOwnerFilter");
-  const digitalMotionsButton = document.getElementById(
-    "planningDigitalMotionsFilter",
-  );
+  const digitalMotionsButton = document.getElementById("planningDigitalMotionsFilter");
 
-  if (
-    !campaignNameInput ||
-    !regionSelect ||
-    !quarterSelect ||
-    !statusSelect ||
-    !programTypeSelect ||
-    !strategicPillarSelect ||
-    !ownerSelect ||
-    !digitalMotionsButton
-  ) {
-    console.error("[Planning] Missing filter elements:", {
-      campaignNameInput: !!campaignNameInput,
-      regionSelect: !!regionSelect,
-      quarterSelect: !!quarterSelect,
-      statusSelect: !!statusSelect,
-      programTypeSelect: !!programTypeSelect,
-      strategicPillarSelect: !!strategicPillarSelect,
-      ownerSelect: !!ownerSelect,
-      digitalMotionsButton: !!digitalMotionsButton,
-    });
+  if (!campaignNameInput || !regionSelect || !quarterSelect || !statusSelect || 
+      !programTypeSelect || !strategicPillarSelect || !ownerSelect || !digitalMotionsButton) {
     return;
   }
 
-  // Initialize Digital Motions button state (preserve existing state if already set)
+  // Initialize Digital Motions button state
   if (!digitalMotionsButton.hasAttribute("data-active")) {
     digitalMotionsButton.dataset.active = "false";
-    console.log("[Planning] Initialized Digital Motions button state to false");
-  } else {
-    console.log(
-      "[Planning] Preserving existing Digital Motions button state:",
-      digitalMotionsButton.dataset.active,
-    );
   }
 
-  // Update button visual state to match data attribute
   updateDigitalMotionsButtonVisual(digitalMotionsButton);
 
-  // Reapply filters if any are currently active (after navigation)
+  // Reapply filters if any are currently active
   const currentFilters = getPlanningFilterValues();
-  const hasActiveFilters =
-    currentFilters.campaignName ||
-    currentFilters.region ||
-    currentFilters.quarter ||
-    currentFilters.status ||
-    currentFilters.programType ||
-    currentFilters.owner ||
-    currentFilters.digitalMotions;
+  const hasActiveFilters = currentFilters.campaignName || currentFilters.region || 
+    currentFilters.quarter || currentFilters.status || currentFilters.programType || 
+    currentFilters.owner || currentFilters.digitalMotions;
 
   if (hasActiveFilters) {
-    console.log("[Planning] Reapplying active filters after navigation");
     applyPlanningFilters();
   }
 

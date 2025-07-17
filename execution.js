@@ -1,9 +1,20 @@
-console.log("execution.js loaded");
-
 // EXECUTION TAB MODULE
 
 // Execution table instance
 let executionTableInstance = null;
+
+// Debounce utility for performance optimization
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 // EXECUTION GRID INITIALIZATION
 function initExecutionGrid(rows) {
@@ -16,11 +27,36 @@ function initExecutionGrid(rows) {
   ];
   const yesNo = window.planningModule?.constants?.yesNo || ["Yes", "No"];
 
+  // Performance optimizations for large datasets
+  const performanceConfig = {
+    // Virtual DOM for handling large datasets efficiently
+    virtualDom: true,
+    virtualDomBuffer: 15,
+    
+    // Pagination to improve initial load
+    pagination: "local",
+    paginationSize: 25,
+    paginationSizeSelector: [10, 25, 50, 100],
+    
+    // Optimized rendering
+    renderHorizontal: "virtual",
+    renderVertical: "virtual",
+    
+    // Disable expensive features for large datasets
+    invalidOptionWarnings: false,
+    autoResize: false,
+    responsiveLayout: false,
+    
+    // Reduce column calculations
+    columnCalcs: false,
+  };
+
   const table = new Tabulator("#executionGrid", {
     data: rows,
     reactiveData: true,
     selectableRows: 1,
     layout: "fitColumns",
+    ...performanceConfig,
     rowFormatter: function (row) {
       // Visual indicator for shipped
       if (row.getData().status === "Shipped") {
@@ -77,18 +113,18 @@ function initExecutionGrid(rows) {
         field: "status",
         editor: "list",
         editorParams: { values: statusOptions },
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           cell.getRow().getData().__modified = true;
-        },
+        }, 500),
       },
       {
         title: "PO Raised",
         field: "poRaised",
         editor: "list",
         editorParams: { values: yesNo },
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           cell.getRow().getData().__modified = true;
-        },
+        }, 500),
       },
       {
         title: "Forecasted Cost",
@@ -109,27 +145,27 @@ function initExecutionGrid(rows) {
           if (v === null || v === undefined || v === "") return "";
           return "$" + Number(v).toLocaleString();
         },
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           cell.getRow().getData().__modified = true;
-        },
+        }, 500),
       },
       { title: "Expected Leads", field: "expectedLeads" },
       {
         title: "Actual Leads",
         field: "actualLeads",
         editor: "number",
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           cell.getRow().getData().__modified = true;
-        },
+        }, 500),
       },
       { title: "MQL", field: "mqlForecast", editable: false },
       {
         title: "Actual MQLs",
         field: "actualMQLs",
         editor: "number",
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           cell.getRow().getData().__modified = true;
-        },
+        }, 500),
       },
       { title: "SQL", field: "sqlForecast", editable: false },
       { title: "Opps", field: "oppsForecast", editable: false },
@@ -248,14 +284,7 @@ function setupExecutionFilters() {
     "Tomoko Tanaka",
   ];
 
-  console.log("[Execution] Setting up filters with constants:", {
-    programTypes: programTypes.length,
-    strategicPillars: strategicPillars.length,
-    quarterOptions: quarterOptions.length,
-    names: names.length,
-    regionOptions: regionOptions.length,
-    statusOptions: statusOptions.length,
-  });
+  // Set up filters with constants from planning module
 
   // Populate filter dropdowns using the HTML elements already in index.html
   populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names);
@@ -386,20 +415,10 @@ function setupExecutionFilterLogic() {
     !ownerSelect ||
     !digitalMotionsButton
   ) {
-    console.error("[Execution] Missing filter elements:", {
-      campaignNameInput: !!campaignNameInput,
-      regionSelect: !!regionSelect,
-      quarterSelect: !!quarterSelect,
-      statusSelect: !!statusSelect,
-      programTypeSelect: !!programTypeSelect,
-      strategicPillarSelect: !!strategicPillarSelect,
-      ownerSelect: !!ownerSelect,
-      digitalMotionsButton: !!digitalMotionsButton,
-    });
     return;
   }
 
-  console.log("[Execution] Setting up filter logic with table instance ready");
+  // Set up filter logic with table instance ready
 
   // Initialize Digital Motions button state
   if (!digitalMotionsButton.hasAttribute("data-active")) {
@@ -409,7 +428,7 @@ function setupExecutionFilterLogic() {
 
   // Set up event listeners for all filters (only if not already attached)
   if (!campaignNameInput.hasAttribute("data-listener-attached")) {
-    campaignNameInput.addEventListener("input", applyExecutionFilters);
+    campaignNameInput.addEventListener("input", debounce(applyExecutionFilters, 300));
     campaignNameInput.setAttribute("data-listener-attached", "true");
   }
 
@@ -422,7 +441,7 @@ function setupExecutionFilterLogic() {
     ownerSelect,
   ].forEach((select) => {
     if (!select.hasAttribute("data-listener-attached")) {
-      select.addEventListener("change", applyExecutionFilters);
+      select.addEventListener("change", debounce(applyExecutionFilters, 150));
       select.setAttribute("data-listener-attached", "true");
     }
   });
@@ -434,19 +453,9 @@ function setupExecutionFilterLogic() {
       const isActive = currentState === "true";
       const newState = !isActive;
 
-      console.log("[Execution] Digital Motions button clicked:", {
-        currentState,
-        isActive,
-        newState,
-      });
-
       digitalMotionsButton.dataset.active = newState.toString();
       updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
 
-      console.log(
-        "[Execution] About to apply filters with Digital Motions state:",
-        newState,
-      );
       applyExecutionFilters();
     });
     digitalMotionsButton.setAttribute("data-listener-attached", "true");
@@ -455,7 +464,6 @@ function setupExecutionFilterLogic() {
   // Clear filters button
   if (clearButton) {
     clearButton.addEventListener("click", () => {
-      console.log("[Execution] Clearing all filters");
       campaignNameInput.value = "";
       campaignNameInput.value = "";
       regionSelect.value = "";
@@ -470,7 +478,6 @@ function setupExecutionFilterLogic() {
       // Clear all table filters first
       if (executionTableInstance) {
         executionTableInstance.clearFilter();
-        console.log("[Execution] Cleared table filters");
       }
 
       // Then apply the empty filter state to ensure consistency
@@ -500,18 +507,6 @@ function getExecutionFilterValues() {
     digitalMotions: digitalMotionsActive,
   };
 
-  console.log("[Execution] getExecutionFilterValues:", {
-    campaignName: filterValues.campaignName,
-    region: filterValues.region,
-    quarter: filterValues.quarter,
-    status: filterValues.status,
-    programType: filterValues.programType,
-    strategicPillar: filterValues.strategicPillar,
-    owner: filterValues.owner,
-    digitalMotions: filterValues.digitalMotions,
-    digitalMotionsButtonState: digitalMotionsButton?.dataset.active,
-  });
-
   return filterValues;
 }
 
@@ -525,7 +520,6 @@ function applyExecutionFilters() {
   }
 
   const filters = getExecutionFilterValues();
-  console.log("[Execution] Applying filters:", filters);
 
   // Use requestAnimationFrame to reduce forced reflow
   requestAnimationFrame(() => {
@@ -555,10 +549,6 @@ function applyExecutionFilters() {
       activeFilters.push({ field: "status", type: "=", value: filters.status });
     }
     if (filters.programType) {
-      console.log(
-        "[Execution] Adding programType filter:",
-        filters.programType,
-      );
       activeFilters.push({
         field: "programType",
         type: "=",
@@ -566,10 +556,6 @@ function applyExecutionFilters() {
       });
     }
     if (filters.strategicPillar) {
-      console.log(
-        "[Execution] Adding strategicPillar filter:",
-        filters.strategicPillar,
-      );
       activeFilters.push({
         field: "strategicPillars",
         type: "=",
@@ -580,12 +566,6 @@ function applyExecutionFilters() {
       activeFilters.push({ field: "owner", type: "=", value: filters.owner });
     }
 
-    console.log(
-      "[Execution] Applying",
-      activeFilters.length,
-      "standard filters",
-    );
-
     // Apply standard filters first
     if (activeFilters.length > 0) {
       executionTableInstance.setFilter(activeFilters);
@@ -595,17 +575,12 @@ function applyExecutionFilters() {
 
     // Apply Digital Motions filter separately as a custom function filter
     if (filters.digitalMotions) {
-      console.log(
-        "[Execution] Adding digitalMotions custom filter - showing only campaigns with digitalMotions === true",
-      );
-
       executionTableInstance.addFilter(function (data) {
         return data.digitalMotions === true;
       });
     }
 
     const visibleRows = executionTableInstance.getDataCount(true);
-    console.log("[Execution] Filters applied, showing", visibleRows, "rows");
   });
 }
 
@@ -639,9 +614,6 @@ function syncGridsOnEdit(sourceTable, targetTable) {
 // Sync digital motions data from planning table to execution table
 function syncDigitalMotionsFromPlanning() {
   if (!executionTableInstance || !window.planningModule?.tableInstance) {
-    console.log(
-      "[Execution] Cannot sync digital motions - tables not available",
-    );
     return;
   }
 
@@ -674,14 +646,6 @@ function syncDigitalMotionsFromPlanning() {
       }
     }
   });
-
-  if (updatedCount > 0) {
-    console.log(
-      "[Execution] Synced",
-      updatedCount,
-      "rows with updated digital motions data",
-    );
-  }
 }
 
 // EXPORT EXECUTION MODULE FUNCTIONS
@@ -694,59 +658,6 @@ window.executionModule = {
   getExecutionFilterValues,
   initializeExecutionFilters,
   syncDigitalMotionsFromPlanning,
-  // Debug function for Digital Motions filter
-  debugDigitalMotions: function () {
-    console.log("=== EXECUTION DIGITAL MOTIONS DEBUG ===");
-
-    if (!executionTableInstance) {
-      console.log("ERROR: No execution table instance");
-      return;
-    }
-
-    const allData = executionTableInstance.getData();
-    console.log("Total execution records:", allData.length);
-
-    const digitalMotionsRecords = allData.filter(
-      (row) => row.digitalMotions === true,
-    );
-    console.log(
-      "Records with digitalMotions === true:",
-      digitalMotionsRecords.length,
-    );
-
-    console.log(
-      "Sample records with digitalMotions:",
-      digitalMotionsRecords.slice(0, 3).map((r) => ({
-        campaignName: r.campaignName,
-        digitalMotions: r.digitalMotions,
-        region: r.region,
-        status: r.status,
-      })),
-    );
-
-    const button = document.getElementById("executionDigitalMotionsFilter");
-    if (button) {
-      console.log("Digital Motions button state:", button.dataset.active);
-      console.log("Button element:", button);
-    } else {
-      console.log("ERROR: Digital Motions button not found");
-    }
-
-    const visibleRows = executionTableInstance.getDataCount(true);
-    console.log("Currently visible rows:", visibleRows);
-
-    // Test manual filter
-    console.log("Testing manual digitalMotions filter...");
-    executionTableInstance.clearFilter();
-    executionTableInstance.setFilter(function (data) {
-      return data.digitalMotions === true;
-    });
-
-    const afterFilterRows = executionTableInstance.getDataCount(true);
-    console.log("Rows after manual digitalMotions filter:", afterFilterRows);
-
-    console.log("=== END DEBUG ===");
-  },
 };
 
 // Export the execution table instance getter
@@ -755,7 +666,3 @@ Object.defineProperty(window.executionModule, "tableInstance", {
     return executionTableInstance;
   },
 });
-
-console.log(
-  "Execution module initialized and exported to window.executionModule",
-);
