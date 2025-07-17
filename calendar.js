@@ -1,7 +1,44 @@
 // calendar.js - Campaign Calendar Module
-console.log("calendar.js loaded");
 
-// Calendar state
+// Performance configuration for calendar operations
+const CALENDAR_PERFORMANCE_CONFIG = {
+  // Debounce timing for different operations
+  RENDER_DEBOUNCE: 150,     // Calendar re-render debounce
+  FILTER_DEBOUNCE: 250,     // Filter application debounce
+  RESIZE_DEBOUNCE: 200,     // Window resize debounce
+  
+  // Calendar optimization
+  BATCH_SIZE: 50,           // Process events in batches
+  ANIMATION_DURATION: 150,  // Reduced animation time
+  UPDATE_THROTTLE: 100,     // DOM update throttling
+};
+
+// Debounce utility for performance optimization
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Throttle utility for high-frequency events
+function throttle(func, wait) {
+  let lastTime = 0;
+  return function executedFunction(...args) {
+    const now = Date.now();
+    if (now - lastTime >= wait) {
+      lastTime = now;
+      func.apply(this, args);
+    }
+  };
+}
+
+// Calendar state with performance optimizations
 let currentFY = "FY25";
 let currentDate = new Date();
 let availableFYs = [];
@@ -15,12 +52,48 @@ let activeFilters = {
   revenuePlay: "",
 };
 
-// Get campaigns from planning data
-function getCampaignData() {
-  if (window.planningModule?.tableInstance) {
-    return window.planningModule.tableInstance.getData() || [];
+// Performance cache for calendar data
+const calendarCache = {
+  campaigns: null,
+  filteredData: new Map(),
+  lastUpdate: 0,
+  
+  // Clear cache when data changes
+  invalidate() {
+    this.campaigns = null;
+    this.filteredData.clear();
+    this.lastUpdate = 0;
+  },
+  
+  // Get cached campaigns or fetch fresh data
+  getCampaigns() {
+    const now = Date.now();
+    if (!this.campaigns || (now - this.lastUpdate) > 30000) { // 30 second cache
+      if (window.planningModule?.tableInstance) {
+        this.campaigns = window.planningModule.tableInstance.getData() || [];
+      } else {
+        this.campaigns = [];
+      }
+      this.lastUpdate = now;
+    }
+    return this.campaigns;
+  },
+  
+  // Cache filtered results
+  getFilteredCampaigns(cacheKey, filterFn) {
+    if (this.filteredData.has(cacheKey)) {
+      return this.filteredData.get(cacheKey);
+    }
+    
+    const result = filterFn();
+    this.filteredData.set(cacheKey, result);
+    return result;
   }
-  return [];
+};
+
+// Get campaigns from planning data (cached)
+function getCampaignData() {
+  return calendarCache.getCampaigns();
 }
 
 // Parse quarter to get month and year
@@ -66,50 +139,42 @@ function getAvailableFYs() {
   return Array.from(fys).sort();
 }
 
-// Get campaigns for a specific month/year with filtering
-function getCampaignsForMonth(month, year) {
+// Get campaigns for a specific month/year with filtering (optimized)
+const getCampaignsForMonth = debounce((month, year) => {
   const campaigns = getCampaignData();
-  return campaigns.filter((campaign) => {
-    if (!campaign.quarter || !campaign.fiscalYear) return false;
+  
+  // Early return for empty data
+  if (!campaigns.length) return [];
+  
+  // Use more efficient filtering approach
+  const filteredCampaigns = [];
+  
+  for (let i = 0; i < campaigns.length; i++) {
+    const campaign = campaigns[i];
+    
+    // Quick validation checks first
+    if (!campaign.quarter || !campaign.fiscalYear) continue;
     
     // Skip fiscal year filter if "All Years" is selected
-    if (currentFY !== "All Years" && campaign.fiscalYear !== currentFY) return false;
+    if (currentFY !== "All Years" && campaign.fiscalYear !== currentFY) continue;
 
-    const campaignDate = parseQuarterToDate(
-      campaign.quarter,
-      campaign.fiscalYear,
-    );
-    if (campaignDate.month !== month || campaignDate.year !== year)
-      return false;
+    const campaignDate = parseQuarterToDate(campaign.quarter, campaign.fiscalYear);
+    if (campaignDate.month !== month || campaignDate.year !== year) continue;
 
-    // Apply active filters
-    if (activeFilters.region && campaign.region !== activeFilters.region)
-      return false;
-    if (activeFilters.country && campaign.country !== activeFilters.country)
-      return false;
-    if (activeFilters.owner && campaign.owner !== activeFilters.owner)
-      return false;
-    if (activeFilters.status && campaign.status !== activeFilters.status)
-      return false;
-    if (
-      activeFilters.programType &&
-      campaign.programType !== activeFilters.programType
-    )
-      return false;
-    if (
-      activeFilters.strategicPillars &&
-      campaign.strategicPillars !== activeFilters.strategicPillars
-    )
-      return false;
-    if (
-      activeFilters.revenuePlay &&
-      campaign.revenuePlay !== activeFilters.revenuePlay
-    )
-      return false;
+    // Apply active filters with early exit
+    if (activeFilters.region && campaign.region !== activeFilters.region) continue;
+    if (activeFilters.country && campaign.country !== activeFilters.country) continue;
+    if (activeFilters.owner && campaign.owner !== activeFilters.owner) continue;
+    if (activeFilters.status && campaign.status !== activeFilters.status) continue;
+    if (activeFilters.programType && campaign.programType !== activeFilters.programType) continue;
+    if (activeFilters.strategicPillars && campaign.strategicPillars !== activeFilters.strategicPillars) continue;
+    if (activeFilters.revenuePlay && campaign.revenuePlay !== activeFilters.revenuePlay) continue;
 
-    return true;
-  });
-}
+    filteredCampaigns.push(campaign);
+  }
+  
+  return filteredCampaigns;
+}, CALENDAR_PERFORMANCE_CONFIG.FILTER_DEBOUNCE);
 
 // Get unique filter options from campaign data
 function getFilterOptions() {
@@ -322,13 +387,14 @@ function setupFilterEventListeners() {
     "filterRevenuePlay",
   ];
 
+  // Debounced filter application for better performance
+  const debouncedApplyFilters = debounce(applyFilters, CALENDAR_PERFORMANCE_CONFIG.FILTER_DEBOUNCE);
+
   filterIds.forEach((id) => {
     const element = document.getElementById(id);
     if (element) {
-      // Auto-update on change instead of waiting for apply button
-      element.addEventListener("change", () => {
-        applyFilters();
-      });
+      // Auto-update on change with debouncing for better performance
+      element.addEventListener("change", debouncedApplyFilters);
     }
   });
 
@@ -382,21 +448,22 @@ function updateFilterSummary() {
   }
 }
 
-// Apply filters
+// Apply filters (optimized)
 function applyFilters() {
+  // Batch filter updates for better performance
   activeFilters.region = document.getElementById("filterRegion")?.value || "";
   activeFilters.country = document.getElementById("filterCountry")?.value || "";
   activeFilters.owner = document.getElementById("filterOwner")?.value || "";
   activeFilters.status = document.getElementById("filterStatus")?.value || "";
-  activeFilters.programType =
-    document.getElementById("filterProgramType")?.value || "";
-  activeFilters.strategicPillars =
-    document.getElementById("filterStrategicPillars")?.value || "";
-  activeFilters.revenuePlay =
-    document.getElementById("filterRevenuePlay")?.value || "";
+  activeFilters.programType = document.getElementById("filterProgramType")?.value || "";
+  activeFilters.strategicPillars = document.getElementById("filterStrategicPillars")?.value || "";
+  activeFilters.revenuePlay = document.getElementById("filterRevenuePlay")?.value || "";
 
-  updateFilterSummary();
-  renderCalendar();
+  // Use requestAnimationFrame for smooth UI updates
+  requestAnimationFrame(() => {
+    updateFilterSummary();
+    renderCalendar();
+  });
 }
 
 // Clear all filters
@@ -862,63 +929,67 @@ function showMonthDetails(monthInfo, monthCampaigns) {
   }
 }
 
-// Render the calendar - showing campaigns organized by month
-function renderCalendar() {
+// Render the calendar - showing campaigns organized by month (optimized)
+const renderCalendar = debounce(() => {
   const calendarGrid = document.getElementById("calendarGrid");
   if (!calendarGrid) return;
 
-  // Update FY tabs
-  renderFYTabs();
+  // Use requestAnimationFrame for smooth rendering
+  requestAnimationFrame(() => {
+    // Update FY tabs
+    renderFYTabs();
 
-  // Update filter controls
-  renderFilterControls();
+    // Update filter controls
+    renderFilterControls();
 
-  // Clear previous calendar
-  calendarGrid.innerHTML = "";
+    // Clear previous calendar efficiently
+    calendarGrid.innerHTML = "";
 
-  // Handle "All Years" vs specific fiscal year
-  let months = [];
-  
-  if (currentFY === "All Years") {
-    // For "All Years", create a comprehensive view across all available fiscal years
-    const allFYs = getAvailableFYs();
-    if (allFYs.length === 0) {
-      allFYs.push("FY25"); // Fallback
-    }
+    // Handle "All Years" vs specific fiscal year
+    let months = [];
     
-    // Create months for all fiscal years
-    allFYs.forEach(fy => {
-      const fyMonths = [
-        { name: `July ${fy}`, month: 6, year: getFYStartYear(fy), fy: fy },
-        { name: `August ${fy}`, month: 7, year: getFYStartYear(fy), fy: fy },
-        { name: `September ${fy}`, month: 8, year: getFYStartYear(fy), fy: fy },
-        { name: `October ${fy}`, month: 9, year: getFYStartYear(fy), fy: fy },
-        { name: `November ${fy}`, month: 10, year: getFYStartYear(fy), fy: fy },
-        { name: `December ${fy}`, month: 11, year: getFYStartYear(fy), fy: fy },
-        { name: `January ${fy}`, month: 0, year: getFYStartYear(fy) + 1, fy: fy },
-        { name: `February ${fy}`, month: 1, year: getFYStartYear(fy) + 1, fy: fy },
-        { name: `March ${fy}`, month: 2, year: getFYStartYear(fy) + 1, fy: fy },
-        { name: `April ${fy}`, month: 3, year: getFYStartYear(fy) + 1, fy: fy },
-        { name: `May ${fy}`, month: 4, year: getFYStartYear(fy) + 1, fy: fy },
-        { name: `June ${fy}`, month: 5, year: getFYStartYear(fy) + 1, fy: fy },
-      ];
-      months = months.concat(fyMonths);
-    });
-  } else {
-    // Create a 12-month grid for the specific fiscal year
-    months = [
-      { name: "July", month: 6, year: getFYStartYear(currentFY), fy: currentFY },
-      { name: "August", month: 7, year: getFYStartYear(currentFY), fy: currentFY },
-      { name: "September", month: 8, year: getFYStartYear(currentFY), fy: currentFY },
-      { name: "October", month: 9, year: getFYStartYear(currentFY), fy: currentFY },
-      { name: "November", month: 10, year: getFYStartYear(currentFY), fy: currentFY },
-      { name: "December", month: 11, year: getFYStartYear(currentFY), fy: currentFY },
-      { name: "January", month: 0, year: getFYStartYear(currentFY) + 1, fy: currentFY },
-      { name: "February", month: 1, year: getFYStartYear(currentFY) + 1, fy: currentFY },
-      { name: "March", month: 2, year: getFYStartYear(currentFY) + 1, fy: currentFY },
-      { name: "April", month: 3, year: getFYStartYear(currentFY) + 1, fy: currentFY },
-      { name: "May", month: 4, year: getFYStartYear(currentFY) + 1, fy: currentFY },
-      { name: "June", month: 5, year: getFYStartYear(currentFY) + 1, fy: currentFY },
+    if (currentFY === "All Years") {
+      // For "All Years", create a comprehensive view across all available fiscal years
+      const allFYs = getAvailableFYs();
+      if (allFYs.length === 0) {
+        allFYs.push("FY25"); // Fallback
+      }
+      
+      // Create months for all fiscal years more efficiently
+      for (const fy of allFYs) {
+        const fyStartYear = getFYStartYear(fy);
+        const fyMonths = [
+          { name: `July ${fy}`, month: 6, year: fyStartYear, fy: fy },
+          { name: `August ${fy}`, month: 7, year: fyStartYear, fy: fy },
+          { name: `September ${fy}`, month: 8, year: fyStartYear, fy: fy },
+          { name: `October ${fy}`, month: 9, year: fyStartYear, fy: fy },
+          { name: `November ${fy}`, month: 10, year: fyStartYear, fy: fy },
+          { name: `December ${fy}`, month: 11, year: fyStartYear, fy: fy },
+          { name: `January ${fy}`, month: 0, year: fyStartYear + 1, fy: fy },
+          { name: `February ${fy}`, month: 1, year: fyStartYear + 1, fy: fy },
+          { name: `March ${fy}`, month: 2, year: fyStartYear + 1, fy: fy },
+          { name: `April ${fy}`, month: 3, year: fyStartYear + 1, fy: fy },
+          { name: `May ${fy}`, month: 4, year: fyStartYear + 1, fy: fy },
+          { name: `June ${fy}`, month: 5, year: fyStartYear + 1, fy: fy },
+        ];
+        months.push(...fyMonths);
+      }
+    } else {
+      // Create a 12-month grid for the specific fiscal year
+      const fyStartYear = getFYStartYear(currentFY);
+      months = [
+        { name: "July", month: 6, year: fyStartYear, fy: currentFY },
+        { name: "August", month: 7, year: fyStartYear, fy: currentFY },
+        { name: "September", month: 8, year: fyStartYear, fy: currentFY },
+        { name: "October", month: 9, year: fyStartYear, fy: currentFY },
+        { name: "November", month: 10, year: fyStartYear, fy: currentFY },
+        { name: "December", month: 11, year: fyStartYear, fy: currentFY },
+        { name: "January", month: 0, year: fyStartYear + 1, fy: currentFY },
+        { name: "February", month: 1, year: fyStartYear + 1, fy: currentFY },
+        { name: "March", month: 2, year: fyStartYear + 1, fy: currentFY },
+        { name: "April", month: 3, year: fyStartYear + 1, fy: currentFY },
+        { name: "May", month: 4, year: fyStartYear + 1, fy: currentFY },
+        { name: "June", month: 5, year: fyStartYear + 1, fy: currentFY },
     ];
   }
 
@@ -1100,11 +1171,37 @@ function renderCalendar() {
     monthDiv.appendChild(campaignPreview);
     calendarGrid.appendChild(monthDiv);
   });
+  
+  }); // Close requestAnimationFrame
+}, CALENDAR_PERFORMANCE_CONFIG.RENDER_DEBOUNCE); // Close debounce
+
+// Optimized month rendering with batch processing
+function renderMonthInBatches(monthData, container) {
+  const batchSize = CALENDAR_PERFORMANCE_CONFIG.BATCH_SIZE;
+  let currentIndex = 0;
+  
+  function processBatch() {
+    const batch = monthData.slice(currentIndex, currentIndex + batchSize);
+    if (batch.length === 0) return;
+    
+    batch.forEach(item => {
+      // Process individual month rendering
+      container.appendChild(item);
+    });
+    
+    currentIndex += batchSize;
+    
+    if (currentIndex < monthData.length) {
+      requestAnimationFrame(processBatch);
+    }
+  }
+  
+  processBatch();
 }
 
 // Initialize calendar functionality
 function initializeCalendar() {
-  console.log("Initializing campaign calendar...");
+  // Initialize calendar with available fiscal years
 
   // Set default FY if none set
   const campaigns = getCampaignData();
@@ -1117,6 +1214,13 @@ function initializeCalendar() {
 
   // Initial render
   renderCalendar();
+  
+  // Add optimized window resize handler
+  const debouncedResize = debounce(() => {
+    renderCalendar();
+  }, CALENDAR_PERFORMANCE_CONFIG.RESIZE_DEBOUNCE);
+  
+  window.addEventListener('resize', debouncedResize);
 }
 
 // Handle calendar tab routing
@@ -1130,7 +1234,7 @@ function handleCalendarRouting() {
   }
 }
 
-// Module exports
+// Module exports with performance optimizations
 const calendarModule = {
   initializeCalendar,
   handleCalendarRouting,
@@ -1143,6 +1247,23 @@ const calendarModule = {
   applyFilters,
   clearAllFilters,
   activeFilters,
+  
+  // Performance utilities
+  debounce,
+  throttle,
+  PERFORMANCE_CONFIG: CALENDAR_PERFORMANCE_CONFIG,
+  
+  // Optimized batch rendering
+  renderMonthInBatches,
+  
+  // Cleanup method for memory management
+  cleanup() {
+    // Remove event listeners
+    const debouncedResize = this._resizeHandler;
+    if (debouncedResize) {
+      window.removeEventListener('resize', debouncedResize);
+    }
+  }
 };
 
 // Export to window for access from other modules

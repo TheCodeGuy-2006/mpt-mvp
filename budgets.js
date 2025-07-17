@@ -1,5 +1,29 @@
 // budgets.js - Budget Management Module
-console.log("budgets.js loaded");
+
+// Performance configuration for budget operations
+const BUDGETS_PERFORMANCE_CONFIG = {
+  // Debounce timing for different operations
+  INPUT_DEBOUNCE: 300,      // Text input debounce
+  CALCULATION_DEBOUNCE: 150, // Budget calculation debounce
+  SAVE_DEBOUNCE: 1000,      // Auto-save debounce
+  
+  // UI optimization
+  ANIMATION_DURATION: 200,   // Reduced animation time
+  UPDATE_BATCH_SIZE: 50,     // Process updates in batches
+};
+
+// Debounce utility for performance optimization
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 // Load budgets data via Worker API for real-time updates
 async function loadBudgets(retryCount = 0) {
@@ -14,11 +38,6 @@ async function loadBudgets(retryCount = 0) {
         "https://mpt-mvp-sync.jordanradford.workers.dev";
       const workerUrl = `${workerEndpoint}/data/budgets`;
 
-      console.log(
-        `Fetching budgets data via Worker API (attempt ${retryCount + 1}):`,
-        workerUrl,
-      );
-
       const response = await fetch(workerUrl, {
         method: "GET",
         headers: {
@@ -26,31 +45,15 @@ async function loadBudgets(retryCount = 0) {
         },
       });
 
-      console.log(
-        "Worker API budgets response - status:",
-        response.status,
-        response.statusText,
-        "URL:",
-        response.url,
-      );
-
       if (response.ok) {
         const result = await response.json();
         budgets = result.data;
-        console.log(
-          "✅ Loaded budgets data via Worker API",
-          `(source: ${result.source})`,
-        );
 
         // Validate that we got actual data
         if (budgets && Object.keys(budgets).length > 0) {
-          console.log("✅ Worker API budgets data validation passed");
+          // Worker API budgets data validation passed
         } else {
-          console.warn("⚠️ Worker API returned empty budgets data");
           if (retryCount < 2) {
-            console.log(
-              `Retrying Worker API budgets fetch in ${(retryCount + 1) * 2} seconds...`,
-            );
             await new Promise((resolve) =>
               setTimeout(resolve, (retryCount + 1) * 2000),
             );
@@ -63,30 +66,15 @@ async function loadBudgets(retryCount = 0) {
         );
       }
     } catch (workerError) {
-      console.warn(
-        "Worker API budgets failed, falling back to local file:",
-        workerError,
-      );
-
       // Fallback: Try local file
       try {
         const r = await fetch("data/budgets.json");
-        console.log(
-          "Fallback: Fetching local data/budgets.json, status:",
-          r.status,
-          r.statusText,
-          r.url,
-        );
         if (!r.ok) throw new Error("Failed to fetch budgets.json");
         budgets = await r.json();
-        console.log("📁 Loaded budgets data from local file");
 
         // Show a message to the user about the Worker API being unavailable
         if (retryCount === 0) {
-          console.warn(
-            "⚠️ Worker API unavailable - using local data. Real-time sync disabled.",
-          );
-          // You might want to show a notification to the user here
+          // Worker API unavailable - using local data. Real-time sync disabled.
         }
       } catch (localError) {
         console.error("Local file also failed:", localError);
@@ -108,30 +96,39 @@ function initBudgetsTable(budgets, rows) {
   const table = new Tabulator("#budgetsTable", {
     data: budgets,
     layout: "fitColumns",
+    
+    // Performance optimizations
+    virtualDom: true,
+    virtualDomBuffer: 10, // Smaller buffer for budget table
+    pagination: false,    // Budget data is typically small
+    progressiveLoad: false,
+    autoResize: false,
+    responsiveLayout: false,
+    
     columns: [
       {
         title: "Region",
         field: "region",
         editor: "input",
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           triggerBudgetsAutosave(cell.getTable());
-        },
+        }, BUDGETS_PERFORMANCE_CONFIG.INPUT_DEBOUNCE),
       },
       {
         title: "Assigned Budget",
         field: "assignedBudget",
         editor: "number",
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           triggerBudgetsAutosave(cell.getTable());
-        },
+        }, BUDGETS_PERFORMANCE_CONFIG.INPUT_DEBOUNCE),
       },
       {
         title: "Notes",
         field: "notes",
         editor: "input",
-        cellEdited: (cell) => {
+        cellEdited: debounce((cell) => {
           triggerBudgetsAutosave(cell.getTable());
-        },
+        }, BUDGETS_PERFORMANCE_CONFIG.INPUT_DEBOUNCE),
       },
       {
         title: "Utilisation",
@@ -144,26 +141,39 @@ function initBudgetsTable(budgets, rows) {
       },
     ],
   });
-  // Use rows (from planning.json) instead of fetching individual files
-  import("./src/calc.js").then(({ regionMetrics }) => {
-    const budgetsObj = {};
-    budgets.forEach(
-      (b) => (budgetsObj[b.region] = { assignedBudget: b.assignedBudget }),
-    );
-    const metrics = regionMetrics(rows, budgetsObj);
-    table.getRows().forEach((row) => {
-      const region = row.getData().region;
-      if (metrics[region]) {
-        row.update({
-          utilisation: `${metrics[region].forecast} / ${metrics[region].plan}`,
+  
+  // Debounced utilization calculation for better performance
+  const updateUtilization = debounce(async () => {
+    try {
+      const { regionMetrics } = await import("./src/calc.js");
+      const budgetsObj = {};
+      budgets.forEach(
+        (b) => (budgetsObj[b.region] = { assignedBudget: b.assignedBudget }),
+      );
+      const metrics = regionMetrics(rows, budgetsObj);
+      
+      // Use requestAnimationFrame for smooth UI updates
+      requestAnimationFrame(() => {
+        table.getRows().forEach((row) => {
+          const region = row.getData().region;
+          if (metrics[region]) {
+            row.update({
+              utilisation: `${metrics[region].forecast} / ${metrics[region].plan}`,
+            });
+            if (metrics[region].forecast > metrics[region].plan) {
+              row.getElement().style.background = "#ffebee";
+              row.getElement().style.color = "#b71c1c";
+            }
+          }
         });
-        if (metrics[region].forecast > metrics[region].plan) {
-          row.getElement().style.background = "#ffebee";
-          row.getElement().style.color = "#b71c1c";
-        }
-      }
-    });
-  });
+      });
+    } catch (error) {
+      console.error("Error calculating utilization:", error);
+    }
+  }, BUDGETS_PERFORMANCE_CONFIG.CALCULATION_DEBOUNCE);
+  
+  // Initialize utilization calculation
+  updateUtilization();
 
   // Make globally accessible for data refreshing
   window.budgetsTableInstance = table;
@@ -173,9 +183,8 @@ function initBudgetsTable(budgets, rows) {
 }
 
 // Autosave functionality for budgets
-function triggerBudgetsAutosave(table) {
+const debouncedBudgetsAutosave = debounce((table) => {
   if (!window.cloudflareSyncModule) {
-    console.log("Cloudflare sync module not available");
     return;
   }
 
@@ -183,6 +192,11 @@ function triggerBudgetsAutosave(table) {
   window.cloudflareSyncModule.scheduleSave("budgets", data, {
     source: "budgets-autosave",
   });
+}, BUDGETS_PERFORMANCE_CONFIG.SAVE_DEBOUNCE);
+
+// Legacy function name for compatibility
+function triggerBudgetsAutosave(table) {
+  debouncedBudgetsAutosave(table);
 }
 
 // Setup Annual Budget Plan save functionality
@@ -218,24 +232,15 @@ function setupAnnualBudgetSave() {
         };
       });
 
-      console.log(
-        "Saving annual budget data:",
-        Object.keys(obj).length,
-        "regions",
-      );
-
       // Try Worker first, then backend fallback
       if (window.cloudflareSyncModule) {
         // Primary: Save to Worker
         window.cloudflareSyncModule
           .saveToWorker("budgets", obj, { source: "annual-budget-save" })
           .then((result) => {
-            console.log("Annual budget Worker save successful:", result);
             alert("✅ Annual budget saved to GitHub!");
           })
           .catch((error) => {
-            console.warn("Worker save failed, trying backend:", error);
-
             // Fallback: Save to backend
             fetch("http://localhost:3000/save-budgets", {
               method: "POST",
@@ -445,15 +450,21 @@ function initializeAnnualBudgetPlan(budgets) {
       if (input) {
         input.type = "text";
         input.classList.add("plan-usd-input");
-        input.addEventListener("blur", function () {
+        
+        // Debounced input handlers for better performance
+        const debouncedBlur = debounce(() => {
           let val = input.value.replace(/[^\d.]/g, "");
           val = val ? Number(val) : 0;
           input.value = `$${val.toLocaleString()}`;
-        });
-        input.addEventListener("focus", function () {
+        }, BUDGETS_PERFORMANCE_CONFIG.CALCULATION_DEBOUNCE);
+        
+        const debouncedFocus = debounce(() => {
           let val = input.value.replace(/[^\d.]/g, "");
           input.value = val;
-        });
+        }, BUDGETS_PERFORMANCE_CONFIG.CALCULATION_DEBOUNCE);
+        
+        input.addEventListener("blur", debouncedBlur);
+        input.addEventListener("focus", debouncedFocus);
       }
     };
   }
@@ -490,12 +501,51 @@ if (!window._originalAnnualBudgetSave) {
 }
 
 // Setup CSV download functionality for budgets
-// Module exports
+// Module exports with performance optimizations
 const budgetsModule = {
   loadBudgets,
   initBudgetsTable,
   setupAnnualBudgetSave,
   initializeAnnualBudgetPlan,
+  
+  // Performance utilities
+  debounce,
+  PERFORMANCE_CONFIG: BUDGETS_PERFORMANCE_CONFIG,
+  
+  // Cached calculation system for better performance
+  _calculationCache: new Map(),
+  
+  // Method to clear calculation cache when data changes
+  clearCalculationCache() {
+    this._calculationCache.clear();
+  },
+  
+  // Optimized utilization calculation with caching
+  async calculateUtilizationOptimized(budgets, rows) {
+    const cacheKey = JSON.stringify({
+      budgets: budgets.map(b => ({ region: b.region, budget: b.assignedBudget })),
+      rowCount: rows.length
+    });
+    
+    if (this._calculationCache.has(cacheKey)) {
+      return this._calculationCache.get(cacheKey);
+    }
+    
+    try {
+      const { regionMetrics } = await import("./src/calc.js");
+      const budgetsObj = {};
+      budgets.forEach(
+        (b) => (budgetsObj[b.region] = { assignedBudget: b.assignedBudget }),
+      );
+      const metrics = regionMetrics(rows, budgetsObj);
+      
+      this._calculationCache.set(cacheKey, metrics);
+      return metrics;
+    } catch (error) {
+      console.error("Error in optimized utilization calculation:", error);
+      return {};
+    }
+  }
 };
 
 // Export to window for access from other modules
