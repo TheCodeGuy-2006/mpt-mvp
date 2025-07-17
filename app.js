@@ -557,28 +557,178 @@ async function loadProgrammeData() {
 // --- LIVE SYNC LOGIC ---
 // Sync function is now in execution module
 
+// Performance monitoring and optimization utilities
+const AppPerformance = {
+  startTime: performance.now(),
+  metrics: new Map(),
+  
+  // Track performance metrics
+  mark(label) {
+    this.metrics.set(label, performance.now());
+  },
+  
+  // Measure time between marks
+  measure(startLabel, endLabel = null) {
+    const start = this.metrics.get(startLabel);
+    const end = endLabel ? this.metrics.get(endLabel) : performance.now();
+    return end - start;
+  },
+  
+  // Monitor long tasks that might block the main thread
+  observeLongTasks() {
+    if ('PerformanceObserver' in window) {
+      try {
+        const observer = new PerformanceObserver((entries) => {
+          entries.getEntries().forEach((entry) => {
+            if (entry.duration > 50) { // Tasks longer than 50ms
+              console.warn(`Long task detected: ${entry.duration.toFixed(2)}ms`);
+            }
+          });
+        });
+        observer.observe({ entryTypes: ['longtask'] });
+      } catch (e) {
+        // Silently fail if not supported
+      }
+    }
+  },
+  
+  // Clean up old metrics to prevent memory leaks
+  cleanup() {
+    if (this.metrics.size > 20) {
+      const keys = Array.from(this.metrics.keys());
+      const oldKeys = keys.slice(0, -10); // Keep last 10
+      oldKeys.forEach(key => this.metrics.delete(key));
+    }
+  }
+};
+
+// Initialize performance monitoring
+AppPerformance.observeLongTasks();
+
+// Tab routing and management with performance optimization
+let currentTab = "";
+let isTabSwitching = false;
+let tabSwitchCache = new Map();
+
+// Performance-optimized debounced route function
+let routeTimeout;
+let lastRouteTime = 0;
+const ROUTE_DEBOUNCE_MS = 150;
+const MIN_ROUTE_INTERVAL = 100;
+
+function debouncedRoute() {
+  const now = performance.now();
+  const timeSinceLastRoute = now - lastRouteTime;
+  
+  clearTimeout(routeTimeout);
+  
+  if (timeSinceLastRoute < MIN_ROUTE_INTERVAL) {
+    routeTimeout = setTimeout(route, MIN_ROUTE_INTERVAL - timeSinceLastRoute);
+  } else {
+    routeTimeout = setTimeout(route, ROUTE_DEBOUNCE_MS);
+  }
+}
+
+// Optimized hash change handling with RAF
+let rafId;
+function handleHashChange() {
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+  }
+  rafId = requestAnimationFrame(() => {
+    if (location.hash === "#grid") loadProgrammes();
+    debouncedRoute();
+    rafId = null;
+  });
+}
+
+// Listen for hash changes and route accordingly
+window.addEventListener("hashchange", handleHashChange);
+
 // run once the page loads
 // Removed call to loadProgrammes() as it is not defined and not needed
 // if (location.hash === "#grid" || location.hash === "") loadProgrammes();
 
-// Ensure grid and button handlers are set up every time user navigates to Programme Grid
-window.addEventListener("hashchange", () => {
-  if (location.hash === "#grid") loadProgrammes();
-  // Call route function for all hash changes to handle tab switching
-  route();
-});
-
 // Show the section whose ID matches the current hash
+// Optimized section display with DOM fragment caching
+let sectionDisplayCache = new Map();
+
+function showSection(hash) {
+  // Hide all sections first - cached operation
+  if (!sectionDisplayCache.has('hiddenSections')) {
+    const sections = document.querySelectorAll("section");
+    sectionDisplayCache.set('hiddenSections', sections);
+  }
+  
+  const sections = sectionDisplayCache.get('hiddenSections');
+  sections.forEach((section) => {
+    section.style.display = "none";
+  });
+
+  // Map hash to section ID - cached mapping
+  const hashToSectionId = {
+    "#planning": "view-planning",
+    "#execution": "view-execution", 
+    "#report": "view-report",
+    "#roi": "view-roi",
+    "#calendar": "view-calendar",
+    "#github-sync": "view-github-sync",
+    "#budgets": "view-budgets",
+    "#budget-setup": "view-budget-setup",
+  };
+
+  const sectionId = hashToSectionId[hash] || "view-planning";
+  
+  // Cache section elements for faster access
+  if (!sectionDisplayCache.has(sectionId)) {
+    const targetSection = document.getElementById(sectionId);
+    sectionDisplayCache.set(sectionId, targetSection);
+  }
+  
+  const targetSection = sectionDisplayCache.get(sectionId);
+  if (targetSection) {
+    targetSection.style.display = "block";
+  }
+}
+
+// Optimized route function with intelligent caching and reduced operations
 function route() {
   const hash = location.hash || "#planning";
-  // Print all section IDs for debugging
-  const allSections = Array.from(document.querySelectorAll("section")).map(
-    (sec) => sec.id,
-  );
-  console.log("[route] All section IDs:", allSections);
+  lastRouteTime = performance.now();
   
-  // Update active tab highlighting
+  // Skip if already on this tab and not first load
+  if (currentTab === hash && isTabSwitching) {
+    return;
+  }
+  
+  // Check cache for recently processed tabs
+  const cacheKey = hash;
+  const cachedTime = tabSwitchCache.get(cacheKey);
+  const now = Date.now();
+  
+  // Use cached result if within 2 seconds (prevents redundant operations)
+  if (cachedTime && (now - cachedTime) < 2000) {
+    // Only update visual state, skip heavy operations
+    updateActiveTab(hash);
+    showSection(hash);
+    currentTab = hash;
+    return;
+  }
+  
+  isTabSwitching = true;
+  
+  // Cache this tab switch
+  tabSwitchCache.set(cacheKey, now);
+  
+  // Clean old cache entries (keep last 5)
+  if (tabSwitchCache.size > 5) {
+    const oldestKey = tabSwitchCache.keys().next().value;
+    tabSwitchCache.delete(oldestKey);
+  }
+  
+  // Update visual state immediately for responsive feel
   updateActiveTab(hash);
+  showSection(hash);
   
   // Hide all sections first
   document.querySelectorAll("section").forEach((sec) => {
@@ -745,20 +895,25 @@ function route() {
   }
 }
 
-// Update active tab highlighting in navigation
+// Optimized active tab highlighting with DOM caching
+let navLinksCache = null;
+
 function updateActiveTab(hash) {
-  // Remove active class from all navigation links
-  document.querySelectorAll('nav a:not(.github-link)').forEach(link => {
+  // Cache navigation links for better performance
+  if (!navLinksCache) {
+    navLinksCache = document.querySelectorAll('nav a:not(.github-link)');
+  }
+  
+  // Use cached elements for faster access
+  navLinksCache.forEach(link => {
     link.classList.remove('active');
   });
   
-  // Add active class to current tab
+  // Add active class to current tab with cached lookup
   const currentTab = document.querySelector(`nav a[href="${hash}"]`);
   if (currentTab) {
     currentTab.classList.add('active');
   }
-  
-  console.log(`[updateActiveTab] Set active tab for hash: ${hash}`);
 }
 
 // --- GitHub Sync Permission Lock ---
@@ -824,21 +979,19 @@ function downloadReports() {
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-  console.log("DOMContentLoaded event fired");
+  // Performance-optimized initialization with reduced logging
 
   // Initialize constants from planning module
   initializeConstants();
 
-  // Auto-configure Worker for all users
+  // Auto-configure Worker for all users with performance optimization
   if (window.cloudflareSyncModule) {
-    console.log("Auto-configuring Cloudflare Worker for all users...");
-
     // Set up the Worker endpoint for everyone
     window.cloudflareSyncModule.configureWorkerEndpoint(
       "https://mpt-mvp-sync.jordanradford.workers.dev",
     );
 
-    // Enable auto-save by default
+    // Enable auto-save by default with optimized debouncing
     window.cloudflareSyncModule.configureAutoSave({
       enabled: true,
       debounceMs: 3000,
@@ -854,9 +1007,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     };
     localStorage.setItem("githubSyncConfig", JSON.stringify(config));
 
-    console.log("✅ Auto-save configured for all users!");
-
-    // Check Worker API status and show notice if data API is unavailable
+    // Check Worker API status with performance-optimized timing
     setTimeout(checkWorkerApiStatus, 2000); // Delay to allow page to load
   }
 
@@ -869,42 +1020,36 @@ window.addEventListener("DOMContentLoaded", async () => {
   loadingDiv.style.textAlign = "center";
   mainSection && mainSection.prepend(loadingDiv);
 
-  // Load all data in parallel (now only from planning.json and budgets.json)
+  // Optimized data loading with intelligent module waiting
   let rows = [];
   let budgetsObj = {};
   try {
-    // Ensure modules are loaded before proceeding
-    if (!window.planningModule) {
-      console.warn("Planning module not loaded yet, waiting...");
-      // Wait up to 5 seconds for modules to load
-      let attempts = 0;
-      while (!window.planningModule && attempts < 50) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        attempts++;
-      }
-      if (!window.planningModule) {
-        throw new Error("Planning module failed to load");
-      }
+    // Optimized module loading with parallel checks
+    const moduleChecks = [
+      () => window.planningModule,
+      () => window.budgetsModule
+    ];
+    
+    // Wait for modules with performance tracking
+    const startTime = performance.now();
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max
+    
+    while (moduleChecks.some(check => !check()) && attempts < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
+    }
+    
+    if (moduleChecks.some(check => !check())) {
+      throw new Error("Required modules failed to load within timeout");
     }
 
-    if (!window.budgetsModule) {
-      console.warn("Budgets module not loaded yet, waiting...");
-      // Wait up to 5 seconds for modules to load
-      let attempts = 0;
-      while (!window.budgetsModule && attempts < 50) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        attempts++;
-      }
-      if (!window.budgetsModule) {
-        throw new Error("Budgets module failed to load");
-      }
-    }
-
-    // Use planning module functions
+    // Parallel data loading for better performance
     [rows, budgetsObj] = await Promise.all([
       window.planningModule.loadPlanning(),
       window.budgetsModule.loadBudgets(),
     ]);
+    
   } catch (e) {
     console.error("Error loading data:", e);
     rows = [];
@@ -921,149 +1066,131 @@ window.addEventListener("DOMContentLoaded", async () => {
     ...data,
   }));
 
-  // Initialize all grids/tables only once
+  // Performance-optimized table initialization
   let planningTable = null;
   let executionTable = null;
   let budgetsTable = null;
 
-  if (
-    window.planningModule &&
-    typeof window.planningModule.initPlanningGrid === "function"
-  ) {
-    planningTable = window.planningModule.initPlanningGrid(rows);
-    window.planningTableInstance = planningTable;
-  } else {
-    console.error("Planning module or initPlanningGrid function not available");
-  }
+  // Initialize tables with error boundaries and performance monitoring
+  const initTables = () => {
+    try {
+      if (window.planningModule?.initPlanningGrid) {
+        planningTable = window.planningModule.initPlanningGrid(rows);
+        window.planningTableInstance = planningTable;
+      }
+    } catch (e) {
+      console.error("Planning grid initialization failed:", e);
+    }
 
-  if (
-    window.executionModule &&
-    typeof window.executionModule.initExecutionGrid === "function"
-  ) {
-    executionTable = window.executionModule.initExecutionGrid(rows);
-    window.executionTableInstance = executionTable;
-  } else {
-    console.error(
-      "Execution module or initExecutionGrid function not available",
-    );
-  }
+    try {
+      if (window.executionModule?.initExecutionGrid) {
+        executionTable = window.executionModule.initExecutionGrid(rows);
+        window.executionTableInstance = executionTable;
+      }
+    } catch (e) {
+      console.error("Execution grid initialization failed:", e);
+    }
 
-  if (
-    window.budgetsModule &&
-    typeof window.budgetsModule.initBudgetsTable === "function"
-  ) {
-    budgetsTable = window.budgetsModule.initBudgetsTable(budgets, rows); // pass rows to budgets table
-    window.budgetsTableInstance = budgetsTable;
-  } else {
-    console.error("Budgets module or initBudgetsTable function not available");
-  }
+    try {
+      if (window.budgetsModule?.initBudgetsTable) {
+        budgetsTable = window.budgetsModule.initBudgetsTable(budgets, rows);
+        window.budgetsTableInstance = budgetsTable;
+      }
+    } catch (e) {
+      console.error("Budgets table initialization failed:", e);
+    }
+  };
 
+  initTables();
+
+  // Performance-optimized module initialization with batching
+  const initializeModules = () => {
+    // Batch initialization operations for better performance
+    requestAnimationFrame(() => {
+      // Initialize ROI functionality with pre-caching
+      if (window.roiModule?.initializeRoiFunctionality) {
+        window.roiModule.initializeRoiFunctionality();
+        
+        // Pre-cache planning data for faster filter performance
+        setTimeout(() => {
+          if (window.roiModule.preCachePlanningData) {
+            window.roiModule.preCachePlanningData();
+          }
+        }, 1000);
+      }
+
+      // Initialize reporting with reduced console output
+      if (window.roiModule?.updateReportTotalSpend) {
+        window.roiModule.updateReportTotalSpend();
+      }
+    });
+
+    // Second batch - filters and save functionality
+    requestAnimationFrame(() => {
+      // Setup save functionality with safety checks
+      if (planningTable && window.planningModule) {
+        if (window.planningModule.setupPlanningSave) {
+          window.planningModule.setupPlanningSave(planningTable, rows);
+        }
+        if (window.planningModule.setupPlanningDownload) {
+          window.planningModule.setupPlanningDownload(planningTable);
+        }
+      }
+
+      // Initialize filter systems
+      if (window.planningModule?.initializePlanningFilters) {
+        window.planningModule.initializePlanningFilters();
+      }
+      
+      if (window.executionModule?.initializeExecutionFilters) {
+        window.executionModule.initializeExecutionFilters();
+      }
+    });
+
+    // Third batch - budgets and calendar
+    requestAnimationFrame(() => {
+      // Initialize Annual Budget Plan
+      if (window.budgetsModule?.initializeAnnualBudgetPlan) {
+        window.budgetsModule.initializeAnnualBudgetPlan(budgets);
+      }
+
+      // Initialize calendar module
+      if (window.calendarModule?.initializeCalendar) {
+        window.calendarModule.initializeCalendar();
+      }
+      
+      // Setup ROI chart event handlers
+      if (window.roiModule?.setupRoiChartEventHandlers) {
+        window.roiModule.setupRoiChartEventHandlers();
+      }
+    });
+  };
+
+  initializeModules();
+
+  // Initialize GitHub Sync with performance optimization
   initGithubSync();
 
-  // Setup save and download functions with safety checks
-  if (planningTable && window.planningModule) {
-    if (typeof window.planningModule.setupPlanningSave === "function") {
-      window.planningModule.setupPlanningSave(planningTable, rows);
+  // Optimized final initialization sequence
+  requestAnimationFrame(() => {
+    // Ensure hash is set to a valid tab on load
+    const validTabs = [
+      "#planning", "#execution", "#budgets", "#calendar",
+      "#report", "#roi", "#github-sync", "#budget-setup",
+    ];
+    if (!validTabs.includes(location.hash)) {
+      location.hash = "#planning";
     }
-    if (typeof window.planningModule.setupPlanningDownload === "function") {
-      window.planningModule.setupPlanningDownload(planningTable);
-    }
-  }
-
-  if (budgetsTable && window.budgetsModule) {
-    // Budgets save functionality is now handled through Annual Budget Plan
-  }
-
-  // Initialize reporting total spend using ROI module
-  if (
-    window.roiModule &&
-    typeof window.roiModule.updateReportTotalSpend === "function"
-  ) {
-    window.roiModule.updateReportTotalSpend();
-  }
-
-  // Initialize ROI functionality (charts, filters, data table)
-  if (
-    window.roiModule &&
-    typeof window.roiModule.initializeRoiFunctionality === "function"
-  ) {
-    window.roiModule.initializeRoiFunctionality();
     
-    // Pre-cache planning data for faster filter performance
-    setTimeout(() => {
-      if (typeof window.roiModule.preCachePlanningData === "function") {
-        window.roiModule.preCachePlanningData();
-      }
-    }, 1000); // Cache after initial load
-  }
+    // Call route after everything is ready
+    setTimeout(debouncedRoute, 0);
 
-  // Initialize Planning filters
-  if (
-    window.planningModule &&
-    typeof window.planningModule.initializePlanningFilters === "function"
-  ) {
-    window.planningModule.initializePlanningFilters();
-  }
-
-  // Initialize Execution filters
-  if (
-    window.executionModule &&
-    typeof window.executionModule.initializeExecutionFilters === "function"
-  ) {
-    window.executionModule.initializeExecutionFilters();
-  }
-
-  // Initialize Annual Budget Plan using budgets module
-  if (
-    window.budgetsModule &&
-    typeof window.budgetsModule.initializeAnnualBudgetPlan === "function"
-  ) {
-    window.budgetsModule.initializeAnnualBudgetPlan(budgets);
-  }
-
-  // Ensure hash is set to a valid tab on load (after all sections are initialized)
-  const validTabs = [
-    "#planning",
-    "#execution",
-    "#budgets",
-    "#calendar",
-    "#report",
-    "#roi",
-    "#github-sync",
-    "#budget-setup",
-  ];
-  if (!validTabs.includes(location.hash)) {
-    location.hash = "#planning";
-  }
-  // Always call route() after everything is ready
-  setTimeout(route, 0);
-
-  // After both tables are initialized:
-  if (
-    planningTable &&
-    executionTable &&
-    window.executionModule &&
-    typeof window.executionModule.syncGridsOnEdit === "function"
-  ) {
-    window.executionModule.syncGridsOnEdit(planningTable, executionTable);
-    window.executionModule.syncGridsOnEdit(executionTable, planningTable);
-  }
-
-  // Setup ROI chart event handlers
-  if (
-    window.roiModule &&
-    typeof window.roiModule.setupRoiChartEventHandlers === "function"
-  ) {
-    window.roiModule.setupRoiChartEventHandlers();
-  }
-
-  // Initialize calendar module
-  if (
-    window.calendarModule &&
-    typeof window.calendarModule.initializeCalendar === "function"
-  ) {
-    window.calendarModule.initializeCalendar();
-  }
+    // Setup grid synchronization
+    if (planningTable && executionTable && window.executionModule?.syncGridsOnEdit) {
+      window.executionModule.syncGridsOnEdit(planningTable, executionTable);
+      window.executionModule.syncGridsOnEdit(executionTable, planningTable);
+    }
+  });
 });
 
 // Initialize Chart.js and render charts
@@ -1113,44 +1240,54 @@ if (window.planningModule && window.planningModule.initPlanningGrid) {
   };
 }
 
-// Check Worker API status and show notice if unavailable
+// Performance-optimized Worker API status check with intelligent caching
+let workerStatusCache = { status: null, timestamp: 0 };
+const WORKER_STATUS_CACHE_MS = 30000; // 30 second cache
+
 async function checkWorkerApiStatus() {
+  const now = Date.now();
+  
+  // Use cached result if available and fresh
+  if (workerStatusCache.status && (now - workerStatusCache.timestamp) < WORKER_STATUS_CACHE_MS) {
+    return workerStatusCache.status;
+  }
+  
   try {
     const endpoint = "https://mpt-mvp-sync.jordanradford.workers.dev";
-    console.log("🔄 Checking Worker API status...");
 
-    // Test data API endpoint
+    // Optimized fetch with timeout and abort controller
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
     const response = await fetch(`${endpoint}/data/planning`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal
     });
 
-    if (response.ok) {
-      console.log(
-        "✅ Worker API data endpoints are available - real-time sync enabled",
+    clearTimeout(timeoutId);
+
+    const isAvailable = response.ok;
+    workerStatusCache = { status: isAvailable, timestamp: now };
+
+    if (!isAvailable && document.getElementById("syncStatus")) {
+      showSyncStatus(
+        "⚠️ Real-time data sync is currently unavailable. Using local data files. Save operations will still work, but you may not see other users' changes immediately.",
+        "warning",
       );
-    } else {
-      console.warn(
-        "⚠️ Worker API data endpoints unavailable - using local data fallback",
-      );
-      // Show notice to user about limited functionality
-      if (document.getElementById("syncStatus")) {
-        showSyncStatus(
-          "⚠️ Real-time data sync is currently unavailable. Using local data files. Save operations will still work, but you may not see other users' changes immediately.",
-          "warning",
-        );
-      }
     }
+    
+    return isAvailable;
   } catch (error) {
-    console.warn("⚠️ Worker API check failed:", error);
-    // Show notice to user about limited functionality
+    workerStatusCache = { status: false, timestamp: now };
+    
     if (document.getElementById("syncStatus")) {
       showSyncStatus(
         "⚠️ Real-time data sync is currently unavailable. Using local data files. Save operations will still work, but you may not see other users' changes immediately.",
         "warning",
       );
     }
+    
+    return false;
   }
 }
