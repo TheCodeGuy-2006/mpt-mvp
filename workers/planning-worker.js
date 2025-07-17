@@ -95,13 +95,7 @@ function applyFilters(rows, filters) {
   const startTime = performance.now();
   
   const filteredRows = rows.filter(row => {
-    // Campaign name filter
-    if (filters.campaignName) {
-      const campaignName = row.campaignName;
-      if (!campaignName || !campaignName.toLowerCase().includes(filters.campaignName.toLowerCase())) {
-        return false;
-      }
-    }
+    // Campaign name filter removed
     
     // Digital Motions filter
     if (filters.digitalMotions && row.digitalMotions !== true) {

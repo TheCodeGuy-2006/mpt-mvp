@@ -85,34 +85,34 @@
       const testData = [
         {
           id: "test-1",
-          campaignName: "Digital Bootcamp",
+          programType: "User Groups",
           digitalMotions: true,
           programType: "Localized Programs",
           region: "SAARC",
         },
         {
           id: "test-2",
-          campaignName: "Digital Teaching",
+          programType: "Webinars",
           digitalMotions: true,
           programType: "In-Account Events",
           region: "SAARC",
         },
         {
           id: "test-3",
-          campaignName: "Regular Campaign",
+          programType: "3P Sponsored Events",
           digitalMotions: false,
           programType: "Webinars",
           region: "EMEA",
         },
         {
           id: "test-4",
-          campaignName: "Another Regular Campaign",
+          programType: "Flagship Events (Galaxy, Universe Recaps) 1:Many",
           programType: "User Groups",
           region: "EMEA",
         },
         {
           id: "test-5",
-          campaignName: "AR Test",
+          programType: "Lunch & Learns and Workshops (1:few)",
           digitalMotions: true,
           programType: "3P sponsored events",
           region: "JP & Korea",
@@ -172,7 +172,7 @@
           "  Digital Motions details:",
           digitalMotionsRows.map((r) => ({
             id: r.id,
-            campaignName: r.campaignName,
+            programType: r.programType,
             digitalMotions: r.digitalMotions,
           })),
         );

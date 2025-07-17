@@ -587,7 +587,7 @@ function createFullscreenOverlay(region, assignedBudget, forecastedCost, actualC
       `;
 
       const campaignName = document.createElement("div");
-      campaignName.textContent = r.campaignName ? r.campaignName : `Campaign ${index + 1}`;
+      campaignName.textContent = `${index + 1}. ${r.programType ? r.programType : `Program ${index + 1}`}`;
       campaignName.style.cssText = `
         font-weight: 600;
         color: #333;

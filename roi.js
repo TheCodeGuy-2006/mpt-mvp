@@ -797,7 +797,7 @@ function initRoiDataTable() {
           field: "campaignInfo",
           formatter: (cell) => {
             const data = cell.getData();
-            const name = data.campaignName || "Untitled Campaign";
+            const name = data.displayName || data.programType || "Untitled Program";
             const type = data.programType || "No Type";
             return `
             <div style="line-height: 1.4;">
@@ -808,8 +808,8 @@ function initRoiDataTable() {
           },
           width: 220,
           sorter: (a, b) => {
-            const nameA = (a.campaignName || "").toLowerCase();
-            const nameB = (b.campaignName || "").toLowerCase();
+            const nameA = (a.programType || "").toLowerCase();
+            const nameB = (b.programType || "").toLowerCase();
             return nameA.localeCompare(nameB);
           },
         },
@@ -916,7 +916,7 @@ function getCampaignDataForRoi() {
 
   const planningData = window.planningModule.tableInstance.getData();
 
-  return planningData.map((campaign) => {
+  return planningData.map((campaign, index) => {
     const actualCost = Number(campaign.actualCost) || 0;
     const pipelineForecast = Number(campaign.pipelineForecast) || 0;
     
@@ -927,7 +927,8 @@ function getCampaignDataForRoi() {
     }
 
     return {
-      campaignName: campaign.campaignName || "Untitled Campaign",
+      campaignName: campaign.programType || "Untitled Program",
+      displayName: `${index + 1}. ${campaign.programType || "Untitled Program"}`,
       programType: campaign.programType || "No Type",
       forecastedCost: Number(campaign.forecastedCost) || 0,
       actualCost: actualCost,

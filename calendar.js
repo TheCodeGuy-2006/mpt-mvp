@@ -69,12 +69,37 @@ const calendarCache = {
   getCampaigns() {
     const now = Date.now();
     if (!this.campaigns || (now - this.lastUpdate) > 30000) { // 30 second cache
-      if (window.planningModule?.tableInstance) {
-        this.campaigns = window.planningModule.tableInstance.getData() || [];
-      } else {
-        this.campaigns = [];
+      // Try multiple ways to access planning data
+      let rawCampaigns = [];
+      
+      // First try: direct access to planningTableInstance
+      if (window.planningTableInstance && typeof window.planningTableInstance.getData === 'function') {
+        rawCampaigns = window.planningTableInstance.getData() || [];
+        console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningTableInstance`);
       }
+      // Second try: access through planningModule
+      else if (window.planningModule?.tableInstance && typeof window.planningModule.tableInstance.getData === 'function') {
+        rawCampaigns = window.planningModule.tableInstance.getData() || [];
+        console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningModule.tableInstance`);
+      }
+      // Fallback: try to load from cached data
+      else if (window.planningDataCache && Array.isArray(window.planningDataCache)) {
+        rawCampaigns = window.planningDataCache;
+        console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningDataCache`);
+      }
+      else {
+        console.warn('Calendar: No planning data source available');
+        rawCampaigns = [];
+      }
+      
+      // Add index numbers to campaigns for display
+      this.campaigns = rawCampaigns.map((campaign, index) => ({
+        ...campaign,
+        index: index + 1
+      }));
+      
       this.lastUpdate = now;
+      console.log(`Calendar: Cached ${this.campaigns.length} campaigns with index numbers`);
     }
     return this.campaigns;
   },
@@ -139,8 +164,8 @@ function getAvailableFYs() {
   return Array.from(fys).sort();
 }
 
-// Get campaigns for a specific month/year with filtering (optimized)
-const getCampaignsForMonth = debounce((month, year) => {
+// Get campaigns for a specific month/year with filtering (internal, non-debounced)
+function getCampaignsForMonthInternal(month, year) {
   const campaigns = getCampaignData();
   
   // Early return for empty data
@@ -174,6 +199,11 @@ const getCampaignsForMonth = debounce((month, year) => {
   }
   
   return filteredCampaigns;
+}
+
+// Get campaigns for a specific month/year with filtering (optimized, debounced for UI)
+const getCampaignsForMonth = debounce((month, year) => {
+  return getCampaignsForMonthInternal(month, year);
 }, CALENDAR_PERFORMANCE_CONFIG.FILTER_DEBOUNCE);
 
 // Get unique filter options from campaign data
@@ -413,33 +443,44 @@ function updateFilterSummary() {
   const activeCount = Object.values(activeFilters).filter(
     (f) => f !== "",
   ).length;
-  const totalCampaigns = getCampaignData().filter(
+  
+  const campaigns = getCampaignData();
+  const totalCampaigns = campaigns.filter(
     (c) => c.fiscalYear === currentFY,
   ).length;
 
   // Count filtered campaigns
   let filteredCount = 0;
-  const months = [
-    { month: 6, year: getFYStartYear(currentFY) },
-    { month: 7, year: getFYStartYear(currentFY) },
-    { month: 8, year: getFYStartYear(currentFY) },
-    { month: 9, year: getFYStartYear(currentFY) },
-    { month: 10, year: getFYStartYear(currentFY) },
-    { month: 11, year: getFYStartYear(currentFY) },
-    { month: 0, year: getFYStartYear(currentFY) + 1 },
-    { month: 1, year: getFYStartYear(currentFY) + 1 },
-    { month: 2, year: getFYStartYear(currentFY) + 1 },
-    { month: 3, year: getFYStartYear(currentFY) + 1 },
-    { month: 4, year: getFYStartYear(currentFY) + 1 },
-    { month: 5, year: getFYStartYear(currentFY) + 1 },
-  ];
+  
+  // Only calculate if we have valid fiscal year
+  if (currentFY && currentFY !== "") {
+    const months = [
+      { month: 6, year: getFYStartYear(currentFY) },
+      { month: 7, year: getFYStartYear(currentFY) },
+      { month: 8, year: getFYStartYear(currentFY) },
+      { month: 9, year: getFYStartYear(currentFY) },
+      { month: 10, year: getFYStartYear(currentFY) },
+      { month: 11, year: getFYStartYear(currentFY) },
+      { month: 0, year: getFYStartYear(currentFY) + 1 },
+      { month: 1, year: getFYStartYear(currentFY) + 1 },
+      { month: 2, year: getFYStartYear(currentFY) + 1 },
+      { month: 3, year: getFYStartYear(currentFY) + 1 },
+      { month: 4, year: getFYStartYear(currentFY) + 1 },
+      { month: 5, year: getFYStartYear(currentFY) + 1 },
+    ];
 
-  months.forEach((monthInfo) => {
-    filteredCount += getCampaignsForMonth(
-      monthInfo.month,
-      monthInfo.year,
-    ).length;
-  });
+    months.forEach((monthInfo) => {
+      try {
+        const monthCampaigns = getCampaignsForMonthInternal(
+          monthInfo.month,
+          monthInfo.year,
+        );
+        filteredCount += (monthCampaigns && monthCampaigns.length) || 0;
+      } catch (error) {
+        console.warn('Error getting campaigns for month:', monthInfo, error);
+      }
+    });
+  }
 
   if (activeCount === 0) {
     summary.textContent = `Showing all ${totalCampaigns} campaigns`;
@@ -683,7 +724,7 @@ function showCampaignDetails(
             border-radius: 50%;
             border: 1px solid rgba(0,0,0,0.2);
           "></div>
-          ${campaign.campaignName || "Untitled Campaign"}
+          ${campaign.programType || "Untitled Program"} (#${campaign.index || 1})
         </h3>
         <div style="margin: 12px 0;">
           <strong>Region:</strong> <span style="color: ${getRegionColor(campaign.region)}; font-weight: bold;">${campaign.region || "Not specified"}</span><br>
@@ -857,7 +898,7 @@ function showMonthDetails(monthInfo, monthCampaigns) {
                 border-left: 4px solid ${getStatusColor(campaign.status)};
               ">
                 <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold;">
-                  ${campaign.campaignName || "Untitled Campaign"}
+                  ${campaign.programType || "Untitled Program"} (#${campaign.index || 1})
                 </h4>
                 <div style="font-size: 14px; opacity: 0.95; line-height: 1.4;">
                   <div style="margin-bottom: 4px;">📍 ${campaign.region || "No Region"} • ${campaign.country || "No Country"}</div>
@@ -1003,7 +1044,7 @@ const renderCalendar = debounce(() => {
   `;
 
   months.forEach((monthInfo) => {
-    const monthCampaigns = getCampaignsForMonth(
+    const monthCampaigns = getCampaignsForMonthInternal(
       monthInfo.month,
       monthInfo.year,
     );
@@ -1113,7 +1154,7 @@ const renderCalendar = debounce(() => {
 
         campaignDiv.innerHTML = `
           <div style="font-weight: bold; margin-bottom: 2px;">
-            ${campaign.campaignName || "Untitled Campaign"}
+            ${campaign.programType || "Untitled Program"} (#${campaign.index || 1})
           </div>
           <div style="font-size: 10px; opacity: 0.9;">
             ${campaign.region || "No Region"} • ${campaign.owner || "Unassigned"}
@@ -1201,15 +1242,21 @@ function renderMonthInBatches(monthData, container) {
 
 // Initialize calendar functionality
 function initializeCalendar() {
+  console.log('🗓️ Initializing calendar...');
+  
   // Initialize calendar with available fiscal years
-
-  // Set default FY if none set
   const campaigns = getCampaignData();
+  console.log(`Calendar: Found ${campaigns.length} campaigns during initialization`);
+  
   if (campaigns.length > 0) {
     const availableFYs = getAvailableFYs();
+    console.log(`Calendar: Available fiscal years: ${availableFYs.join(', ')}`);
     if (availableFYs.length > 0 && !availableFYs.includes(currentFY)) {
       currentFY = availableFYs[0];
+      console.log(`Calendar: Set current FY to ${currentFY}`);
     }
+  } else {
+    console.warn('Calendar: No campaigns found during initialization - will retry when planning data loads');
   }
 
   // Initial render
@@ -1221,6 +1268,32 @@ function initializeCalendar() {
   }, CALENDAR_PERFORMANCE_CONFIG.RESIZE_DEBOUNCE);
   
   window.addEventListener('resize', debouncedResize);
+  
+  // Add a periodic check for planning data if not available initially
+  if (campaigns.length === 0) {
+    const dataCheckInterval = setInterval(() => {
+      const newCampaigns = getCampaignData();
+      if (newCampaigns.length > 0) {
+        console.log(`🗓️ Calendar: Planning data now available with ${newCampaigns.length} campaigns - refreshing calendar`);
+        clearInterval(dataCheckInterval);
+        
+        // Update available fiscal years
+        const availableFYs = getAvailableFYs();
+        if (availableFYs.length > 0 && !availableFYs.includes(currentFY)) {
+          currentFY = availableFYs[0];
+        }
+        
+        // Force cache invalidation and re-render
+        calendarCache.invalidate();
+        renderCalendar();
+      }
+    }, 2000); // Check every 2 seconds
+    
+    // Stop checking after 30 seconds
+    setTimeout(() => {
+      clearInterval(dataCheckInterval);
+    }, 30000);
+  }
 }
 
 // Handle calendar tab routing
@@ -1247,6 +1320,67 @@ const calendarModule = {
   applyFilters,
   clearAllFilters,
   activeFilters,
+  
+  // Debug functions
+  debugCalendarState() {
+    console.log('🔍 Calendar Debug State:');
+    console.log(`- Current FY: ${currentFY}`);
+    console.log(`- Planning table instance:`, window.planningTableInstance);
+    console.log(`- Planning module:`, window.planningModule);
+    console.log(`- Planning data cache:`, window.planningDataCache);
+    
+    const campaigns = getCampaignData();
+    console.log(`- Campaign count: ${campaigns.length}`);
+    if (campaigns.length > 0) {
+      console.log(`- Sample campaign:`, campaigns[0]);
+      console.log(`- Available fiscal years:`, getAvailableFYs());
+      
+      // Test getCampaignsForMonthInternal for July 2024 (FY25)
+      const julyCampaigns = getCampaignsForMonthInternal(6, 2024);
+      console.log(`- July 2024 campaigns: ${julyCampaigns.length}`);
+    }
+    
+    const calendarGrid = document.getElementById("calendarGrid");
+    console.log(`- Calendar grid element:`, calendarGrid);
+    console.log(`- Calendar grid innerHTML length:`, calendarGrid?.innerHTML?.length || 0);
+    
+    // Test filter summary
+    try {
+      updateFilterSummary();
+      console.log('- Filter summary update: SUCCESS');
+    } catch (error) {
+      console.log('- Filter summary update: ERROR', error);
+    }
+    
+    return {
+      currentFY,
+      campaignCount: campaigns.length,
+      availableFYs: getAvailableFYs(),
+      hasCalendarGrid: !!calendarGrid,
+      planningTableInstance: !!window.planningTableInstance,
+      planningModule: !!window.planningModule
+    };
+  },
+  
+  // Force refresh function
+  forceRefresh() {
+    console.log('🔄 Force refreshing calendar...');
+    calendarCache.invalidate();
+    const campaigns = getCampaignData();
+    console.log(`Refreshed: ${campaigns.length} campaigns found`);
+    renderCalendar();
+  },
+  
+  // Test month campaigns function
+  testMonth(month = 6, year = 2024) {
+    console.log(`🧪 Testing month ${month}/${year}:`);
+    const campaigns = getCampaignsForMonthInternal(month, year);
+    console.log(`Found ${campaigns.length} campaigns:`);
+    campaigns.forEach((c, i) => {
+      console.log(`  ${i + 1}. ${c.programType} (#${c.index}) - ${c.quarter} ${c.fiscalYear}`);
+    });
+    return campaigns;
+  },
   
   // Performance utilities
   debounce,

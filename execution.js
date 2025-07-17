@@ -66,14 +66,24 @@ function initExecutionGrid(rows) {
       }
     },
     columns: [
+      // Sequential number column
       {
-        title: "Campaign Name",
-        field: "campaignName",
-        editor: false,
-        width: 160,
+        title: "#",
+        field: "rowNumber",
+        formatter: function (cell) {
+          const row = cell.getRow();
+          const table = row.getTable();
+          const allRows = table.getRows();
+          const index = allRows.indexOf(row);
+          return index + 1;
+        },
+        width: 50,
+        hozAlign: "center",
+        headerSort: false,
+        frozen: true, // Keep this column visible when scrolling horizontally
       },
       {
-        title: "Details",
+        title: "Program Type",
         field: "details",
         width: 240,
         editable: false,
@@ -387,9 +397,6 @@ function setupExecutionFilterLogic() {
     return;
   }
 
-  const campaignNameInput = document.getElementById(
-    "executionCampaignNameFilter",
-  );
   const regionSelect = document.getElementById("executionRegionFilter");
   const quarterSelect = document.getElementById("executionQuarterFilter");
   const statusSelect = document.getElementById("executionStatusFilter");
@@ -406,7 +413,6 @@ function setupExecutionFilterLogic() {
   const clearButton = document.getElementById("executionClearFilters");
 
   if (
-    !campaignNameInput ||
     !regionSelect ||
     !quarterSelect ||
     !statusSelect ||
@@ -427,11 +433,6 @@ function setupExecutionFilterLogic() {
   updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
 
   // Set up event listeners for all filters (only if not already attached)
-  if (!campaignNameInput.hasAttribute("data-listener-attached")) {
-    campaignNameInput.addEventListener("input", debounce(applyExecutionFilters, 300));
-    campaignNameInput.setAttribute("data-listener-attached", "true");
-  }
-
   [
     regionSelect,
     quarterSelect,
@@ -464,8 +465,6 @@ function setupExecutionFilterLogic() {
   // Clear filters button
   if (clearButton) {
     clearButton.addEventListener("click", () => {
-      campaignNameInput.value = "";
-      campaignNameInput.value = "";
       regionSelect.value = "";
       quarterSelect.value = "";
       statusSelect.value = "";
@@ -494,8 +493,6 @@ function getExecutionFilterValues() {
   const digitalMotionsActive = digitalMotionsButton?.dataset.active === "true";
 
   const filterValues = {
-    campaignName:
-      document.getElementById("executionCampaignNameFilter")?.value || "",
     region: document.getElementById("executionRegionFilter")?.value || "",
     quarter: document.getElementById("executionQuarterFilter")?.value || "",
     status: document.getElementById("executionStatusFilter")?.value || "",
@@ -528,15 +525,6 @@ function applyExecutionFilters() {
 
     // Apply filters using Tabulator's built-in filter system
     const activeFilters = [];
-
-    // Campaign name filter (partial match)
-    if (filters.campaignName) {
-      activeFilters.push({
-        field: "campaignName",
-        type: "like",
-        value: filters.campaignName,
-      });
-    }
 
     // Exact match filters
     if (filters.region) {
@@ -596,14 +584,14 @@ function initializeExecutionFilters() {
 function syncGridsOnEdit(sourceTable, targetTable) {
   sourceTable.on("cellEdited", function (cell) {
     const rowData = cell.getRow().getData();
-    // Find the matching row in the target table by unique id (use 'id' or 'campaignName' as fallback)
+    // Find the matching row in the target table by unique id
     let match;
     if (rowData.id) {
       match = targetTable.getRows().find((r) => r.getData().id === rowData.id);
     } else {
       match = targetTable
         .getRows()
-        .find((r) => r.getData().campaignName === rowData.campaignName);
+        .find((r) => r.getData().id === rowData.id);
     }
     if (match) {
       match.update({ ...rowData });
@@ -626,8 +614,7 @@ function syncDigitalMotionsFromPlanning() {
   executionData.forEach((execRow) => {
     const planningRow = planningData.find(
       (planRow) =>
-        (planRow.id && planRow.id === execRow.id) ||
-        planRow.campaignName === execRow.campaignName,
+        (planRow.id && planRow.id === execRow.id),
     );
 
     if (planningRow && planningRow.digitalMotions !== execRow.digitalMotions) {
@@ -635,8 +622,7 @@ function syncDigitalMotionsFromPlanning() {
       const execTableRow = executionTableInstance.getRows().find((row) => {
         const rowData = row.getData();
         return (
-          (rowData.id && rowData.id === execRow.id) ||
-          rowData.campaignName === execRow.campaignName
+          (rowData.id && rowData.id === execRow.id)
         );
       });
 

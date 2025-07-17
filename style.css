@@ -239,9 +239,11 @@ table#planTable td input[type="text"] {
   min-width: 0;
   display: block;
   margin: 0 auto;
-  max-height: 600px;
-  height: 600px;
-  overflow-x: auto !important;
+  /* Remove fixed height to allow virtual DOM to calculate properly */
+  min-height: 400px;
+  height: calc(100vh - 300px); /* Dynamic height based on viewport */
+  max-height: calc(100vh - 250px); /* Ensure it doesn't exceed viewport */
+  overflow-x: auto !important; /* Ensure horizontal scrolling works */
   overflow-y: auto !important;
   border-radius: 10px;
   box-shadow: 0 2px 16px rgba(25, 118, 210, 0.1);
@@ -252,17 +254,19 @@ table#planTable td input[type="text"] {
 #planningGrid .tabulator,
 #planningGrid .tabulator-tableholder,
 #planningGrid .tabulator-header {
-  min-width: 1400px !important;
-  width: 100% !important;
+  min-width: 2000px !important; /* Increased from 1400px for more columns */
+  width: auto !important; /* Changed from 100% to auto for proper horizontal scrolling */
   max-width: none !important;
   box-sizing: border-box;
   background: #fff;
+  overflow-x: visible !important; /* Ensure content can extend beyond container */
 }
 #planningGrid .tabulator {
-  min-width: 1400px !important;
-  width: 100% !important;
+  min-width: 2000px !important; /* Increased from 1400px */
+  width: auto !important; /* Changed from 100% to auto */
   max-width: none !important;
   background: #fff;
+  overflow-x: visible !important;
 }
 #planningGrid {
   display: block;

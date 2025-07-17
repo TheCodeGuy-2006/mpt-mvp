@@ -435,15 +435,7 @@ class PlanningDataStore {
     const startTime = performance.now();
     
     this.filteredData = this.data.filter(row => {
-      // Campaign name filter
-      if (filters.campaignName) {
-        const campaignName = row.campaignName;
-        if (!campaignName || !campaignName.toLowerCase().includes(filters.campaignName.toLowerCase())) {
-          return false;
-        }
-      }
-      
-      // Digital Motions filter
+    // Campaign name filter removed      // Digital Motions filter
       if (filters.digitalMotions && row.digitalMotions !== true) {
         return false;
       }
@@ -556,57 +548,98 @@ function initPlanningGrid(rows) {
   // Initialize data store
   planningDataStore.setData(rows);
   
-  // Performance optimizations for large datasets
+  // Performance optimizations for large datasets with fixed virtual DOM
   const performanceConfig = {
-    // Virtual DOM for handling large datasets efficiently
+    // Adjust virtual DOM settings for better visibility
     virtualDom: true,
-    virtualDomBuffer: 15, // Much smaller buffer for faster rendering
+    virtualDomBuffer: 50, // Larger buffer to show more rows initially
+    
+    // Remove explicit height to use CSS height for proper virtual DOM calculation
+    // height: "calc(100vh - 300px)", // Let CSS handle this
     
     // Pagination to improve initial load
     pagination: "local",
-    paginationSize: 25, // Smaller page size for faster rendering
-    paginationSizeSelector: [10, 25, 50, 100, "all"],
+    paginationSize: 50, // Larger page size for better user experience
+    paginationSizeSelector: [25, 50, 100, 200, "all"],
     paginationCounter: "rows",
     
-    // Optimized rendering - disable progressive loading for faster initial render
-    progressiveLoad: false,
+    // Enable progressive loading for smoother experience
+    progressiveLoad: "scroll",
+    progressiveLoadDelay: 100,
     
-    // Optimized rendering
-    renderHorizontal: "virtual",
-    renderVertical: "virtual",
+    // Fix horizontal scrolling - disable virtual horizontal rendering
+    renderHorizontal: "basic", // Changed from "virtual" to "basic" for better column visibility
+    renderVertical: "virtual", // Keep vertical virtual for performance
     
-    // Disable expensive features for large datasets
-    invalidOptionWarnings: false,
+    // Enable auto-resize for proper viewport calculation
+    autoResize: true,
+    responsiveLayout: false, // Disable to allow horizontal scrolling
     
-    // Reduce redraws and disable auto-resize
-    autoResize: false,
-    responsiveLayout: false,
+    // Enable proper data loading indicators
+    dataLoaderLoading: "<div style='padding:20px; text-align:center;'>Loading...</div>",
+    dataLoaderError: "<div style='padding:20px; text-align:center; color:red;'>Error loading data</div>",
     
-    // Faster data processing
-    dataLoaderLoading: false,
-    dataLoaderError: false,
-    
-    // Reduce column calculations
+    // Reduce column calculations only if not needed
     columnCalcs: false,
     
-    // Debounced data updates with longer delay
+    // Optimized scroll handling
+    scrollToRowPosition: "center",
+    scrollToRowIfVisible: false,
+    
+    // Debounced data updates with reasonable delay
     dataChanged: debounce(() => {
       console.log("Planning data changed");
-    }, 1000), // Much longer debounce
+    }, 500), // Shorter debounce for better responsiveness
   };
   
   planningTableInstance = new Tabulator("#planningGrid", {
     data: rows,
     reactiveData: true,
     selectableRows: 1,
-    layout: "fitColumns",
+    layout: "fitData", // Changed from "fitColumns" to "fitData" for better horizontal scrolling
     initialSort: [
       { column: "id", dir: "desc" }, // Sort by ID descending so newer rows appear at top
     ],
     
     // Apply performance optimizations
     ...performanceConfig,
+    
+    // Add table built callback to ensure proper rendering
+    tableBuilt: function() {
+      // Force a redraw after table is built to ensure virtual DOM is properly calculated
+      setTimeout(() => {
+        this.redraw(true);
+        // Scroll to top to ensure we see the first rows
+        this.scrollToRow(1, "top", false);
+      }, 100);
+    },
+    
+    // Add data loaded callback
+    dataLoaded: function(data) {
+      console.log(`Planning grid loaded with ${data.length} rows`);
+      // Ensure virtual DOM recalculates after data load
+      setTimeout(() => {
+        this.redraw(true);
+      }, 50);
+    },
+    
     columns: [
+      // Sequential number column
+      {
+        title: "#",
+        field: "rowNumber",
+        formatter: function (cell) {
+          const row = cell.getRow();
+          const table = row.getTable();
+          const allRows = table.getRows();
+          const index = allRows.indexOf(row);
+          return index + 1;
+        },
+        width: 50,
+        hozAlign: "center",
+        headerSort: false,
+        frozen: true, // Keep this column visible when scrolling horizontally
+      },
       // Select row button (circle)
       {
         title: "",
@@ -624,12 +657,6 @@ function initPlanningGrid(rows) {
           cell.getTable().redraw(true);
         },
         headerSort: false,
-      },
-      {
-        title: "Campaign Name",
-        field: "campaignName",
-        editor: "input",
-        width: 160,
       },
       {
         title: "Program Type",
@@ -923,6 +950,32 @@ function initPlanningGrid(rows) {
   // Update global reference
   window.planningTableInstance = planningTableInstance;
 
+  // Add window resize handler for proper virtual DOM recalculation
+  const resizeHandler = debounce(() => {
+    if (planningTableInstance) {
+      planningTableInstance.redraw(true);
+    }
+  }, 250);
+  
+  window.addEventListener('resize', resizeHandler);
+  
+  // Add visibility change handler to redraw when tab becomes visible
+  const visibilityHandler = () => {
+    if (!document.hidden && planningTableInstance) {
+      setTimeout(() => {
+        planningTableInstance.redraw(true);
+      }, 100);
+    }
+  };
+  
+  document.addEventListener('visibilitychange', visibilityHandler);
+  
+  // Store cleanup function for later use
+  planningTableInstance._cleanup = () => {
+    window.removeEventListener('resize', resizeHandler);
+    document.removeEventListener('visibilitychange', visibilityHandler);
+  };
+
   planningPerformance.end('grid initialization');
   
   return planningTableInstance;
@@ -995,20 +1048,6 @@ function showAddRowModal() {
             <h3 style="margin: 0 0 16px 0; color: #1976d2; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
               📋 Basic Information
             </h3>
-          </div>
-          
-          <div>
-            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
-              Campaign Name <span style="color: red;">*</span>
-            </label>
-            <input type="text" id="campaignName" style="
-              width: 100%;
-              padding: 10px;
-              border: 2px solid #ddd;
-              border-radius: 6px;
-              font-size: 14px;
-              box-sizing: border-box;
-            " placeholder="Enter campaign name..." required />
           </div>
           
           <div>
@@ -1296,7 +1335,6 @@ function setupAddRowModalEvents() {
     // Get form data
     const formData = {
       id: `program-${Date.now()}`,
-      campaignName: document.getElementById("campaignName").value,
       programType: document.getElementById("programType").value,
       strategicPillars: document.getElementById("strategicPillars").value,
       owner: document.getElementById("owner").value,
@@ -1313,7 +1351,7 @@ function setupAddRowModalEvents() {
     };
 
     // Validate required fields
-    const requiredFields = ['campaignName', 'programType', 'owner', 'quarter', 'fiscalYear', 'region'];
+    const requiredFields = ['programType', 'owner', 'quarter', 'fiscalYear', 'region'];
     const missingFields = requiredFields.filter(field => !formData[field]);
     
     if (missingFields.length > 0) {
@@ -1367,7 +1405,7 @@ function setupAddRowModalEvents() {
       font-weight: bold;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     `;
-    successMsg.textContent = `✓ Campaign "${formData.campaignName}" added successfully!`;
+    successMsg.textContent = `✓ Campaign "${formData.programType}" added successfully!`;
     document.body.appendChild(successMsg);
 
     setTimeout(() => {
@@ -1541,7 +1579,6 @@ document
 
           // Map column names from CSV to expected field names
           const columnMapping = {
-            campaignName: "campaignName",
             campaignType: "programType", // CSV uses campaignType, grid uses programType
             strategicPillars: "strategicPillars",
             revenuePlay: "revenuePlay",
@@ -1734,8 +1771,39 @@ function updateDigitalMotionsButtonVisual(button) {
   }
 }
 
+// Function to ensure planning grid is properly rendered and visible
+function ensurePlanningGridVisible() {
+  if (planningTableInstance) {
+    // Force recalculation of virtual DOM and redraw
+    requestAnimationFrame(() => {
+      // First, recalculate the table height and dimensions
+      planningTableInstance.recalc();
+      
+      // Force recalculation of column widths for horizontal scrolling
+      planningTableInstance.redraw(true);
+      
+      // Ensure we're scrolled to a visible position
+      const data = planningTableInstance.getData();
+      if (data && data.length > 0) {
+        // Scroll to first row to ensure visibility
+        setTimeout(() => {
+          planningTableInstance.scrollToRow(1, "top", false);
+        }, 50);
+      }
+      
+      // Final recalculation after everything is settled
+      setTimeout(() => {
+        if (planningTableInstance) {
+          // Force column width recalculation for horizontal scrolling
+          planningTableInstance.recalc();
+          planningTableInstance.redraw(true);
+        }
+      }, 150);
+    });
+  }
+}
+
 function populatePlanningFilters() {
-  const campaignNameInput = document.getElementById("planningCampaignNameFilter");
   const regionSelect = document.getElementById("planningRegionFilter");
   const quarterSelect = document.getElementById("planningQuarterFilter");
   const statusSelect = document.getElementById("planningStatusFilter");
@@ -1744,7 +1812,7 @@ function populatePlanningFilters() {
   const ownerSelect = document.getElementById("planningOwnerFilter");
   const digitalMotionsButton = document.getElementById("planningDigitalMotionsFilter");
 
-  if (!campaignNameInput || !regionSelect || !quarterSelect || !statusSelect || 
+  if (!regionSelect || !quarterSelect || !statusSelect || 
       !programTypeSelect || !strategicPillarSelect || !ownerSelect || !digitalMotionsButton) {
     return;
   }
@@ -1758,7 +1826,7 @@ function populatePlanningFilters() {
 
   // Reapply filters if any are currently active
   const currentFilters = getPlanningFilterValues();
-  const hasActiveFilters = currentFilters.campaignName || currentFilters.region || 
+  const hasActiveFilters = currentFilters.region || 
     currentFilters.quarter || currentFilters.status || currentFilters.programType || 
     currentFilters.owner || currentFilters.digitalMotions;
 
@@ -1831,11 +1899,6 @@ function populatePlanningFilters() {
   }
 
   // Set up event listeners for all filters (only if not already attached)
-  if (!campaignNameInput.hasAttribute("data-listener-attached")) {
-    campaignNameInput.addEventListener("input", applyPlanningFilters);
-    campaignNameInput.setAttribute("data-listener-attached", "true");
-  }
-
   [
     regionSelect,
     quarterSelect,
@@ -1879,7 +1942,6 @@ function populatePlanningFilters() {
   const clearButton = document.getElementById("planningClearFilters");
   if (clearButton) {
     clearButton.addEventListener("click", () => {
-      campaignNameInput.value = "";
       regionSelect.value = "";
       quarterSelect.value = "";
       statusSelect.value = "";
@@ -1900,8 +1962,6 @@ function getPlanningFilterValues() {
   const digitalMotionsActive = digitalMotionsButton?.dataset.active === "true";
 
   const filterValues = {
-    campaignName:
-      document.getElementById("planningCampaignNameFilter")?.value || "",
     region: document.getElementById("planningRegionFilter")?.value || "",
     quarter: document.getElementById("planningQuarterFilter")?.value || "",
     status: document.getElementById("planningStatusFilter")?.value || "",
@@ -1973,6 +2033,7 @@ window.planningModule = {
   initializePlanningFilters,
   cleanupPlanningGrid,
   clearPlanningCache,
+  ensurePlanningGridVisible, // Add grid visibility function
   initPlanningWorker,
   cleanupPlanningWorker,
   // State getters

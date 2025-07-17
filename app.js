@@ -787,12 +787,16 @@ function route() {
       window.planningModule.tableInstance
     ) {
       setTimeout(() => {
-        window.planningModule.tableInstance.redraw(true);
-        console.log("[route] Redrew planning grid");
+        // Use the enhanced grid visibility function
+        if (typeof window.planningModule.ensurePlanningGridVisible === "function") {
+          window.planningModule.ensurePlanningGridVisible();
+        } else {
+          // Fallback to standard redraw
+          window.planningModule.tableInstance.redraw(true);
+        }
+        
         // Initialize filters when planning tab is shown
-        if (
-          typeof window.planningModule.populatePlanningFilters === "function"
-        ) {
+        if (typeof window.planningModule.populatePlanningFilters === "function") {
           window.planningModule.populatePlanningFilters();
         }
       }, 0);
