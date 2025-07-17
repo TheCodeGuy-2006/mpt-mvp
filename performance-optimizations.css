@@ -1,0 +1,147 @@
+/* Performance Optimizations CSS */
+
+/* Reduce repaints and reflows */
+.tabulator {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Optimize table rendering */
+.tabulator-table {
+  contain: layout style paint;
+}
+
+.tabulator-cell {
+  contain: layout style;
+}
+
+/* Reduce layout thrashing */
+.tabulator-row {
+  contain: layout;
+}
+
+/* Optimize scrolling */
+.tabulator-tableHolder {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  contain: strict;
+}
+
+/* Optimize editor rendering */
+.tabulator-edit-select {
+  contain: layout style;
+}
+
+/* Reduce loading indicator repaints */
+#planningLoadingIndicator,
+#tabLoadingIndicator {
+  will-change: opacity;
+  transform: translateZ(0);
+}
+
+/* Optimize tab content */
+.tab-content {
+  contain: layout style paint;
+  will-change: transform;
+}
+
+.tab-content:not([style*="block"]) {
+  display: none !important;
+  visibility: hidden;
+}
+
+/* Optimize form elements */
+select, input, textarea {
+  contain: layout style;
+}
+
+/* Reduce button repaints */
+button {
+  contain: layout style;
+  will-change: auto;
+}
+
+/* Performance-focused animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Optimize modal rendering */
+#addRowModal {
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  contain: layout style paint;
+}
+
+/* Performance warning styles */
+#performanceWarning {
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+/* Reduce paint areas */
+.desc-tooltip {
+  contain: layout style paint;
+  will-change: transform;
+}
+
+/* Optimize filter controls */
+.filter-controls {
+  contain: layout style;
+}
+
+/* Performance optimizations for large lists */
+.tabulator-paginator {
+  contain: layout style;
+}
+
+/* GPU acceleration for smooth scrolling */
+.tabulator-virtual-scroll {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Optimize cell editors */
+.tabulator-editing {
+  contain: layout style;
+}
+
+/* Reduce reflows on resize */
+.tabulator-header {
+  contain: layout style;
+}
+
+/* Smooth transitions */
+.tab-transition {
+  transition: opacity 0.15s ease-out;
+}
+
+/* Optimize checkbox rendering */
+input[type="checkbox"] {
+  contain: layout style;
+  will-change: auto;
+}
+
+/* Memory-efficient styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Optimize focus styles */
+:focus {
+  outline-offset: -2px;
+}
+
+/* Reduce paint complexity */
+.simple-border {
+  border: 1px solid #ddd;
+}
+
+/* Performance hints for browsers */
+.performance-optimized {
+  contain: layout style paint;
+  will-change: auto;
+  transform: translateZ(0);
+}

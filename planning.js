@@ -3,6 +3,30 @@ import { kpis } from "./src/calc.js";
 console.log("planning.js loaded");
 
 // PLANNING TAB CONSTANTS AND DATA
+// Performance monitoring for large datasets
+const planningPerformance = {
+  startTime: null,
+  endTime: null,
+  
+  start(operation) {
+    this.startTime = performance.now();
+    console.log(`[Planning Performance] Starting ${operation}...`);
+  },
+  
+  end(operation) {
+    this.endTime = performance.now();
+    const duration = this.endTime - this.startTime;
+    console.log(`[Planning Performance] ${operation} completed in ${duration.toFixed(2)}ms`);
+    
+    // Show warning for slow operations
+    if (duration > 2000) {
+      console.warn(`[Planning Performance] Slow operation detected: ${operation} took ${duration.toFixed(2)}ms`);
+    }
+    
+    return duration;
+  }
+};
+
 const programTypes = [
   "User Groups",
   "Targeted paid ads & content sydication",
@@ -153,8 +177,128 @@ window.debugCountryOptions = countryOptionsByRegion;
 window.debugGetCountryOptionsForRegion = getCountryOptionsForRegion;
 
 // PLANNING DATA LOADING
+// Web Worker for heavy data processing
+let planningWorker = null;
+
+function initPlanningWorker() {
+  if (!planningWorker) {
+    try {
+      planningWorker = new Worker('workers/planning-worker.js');
+      
+      planningWorker.onmessage = function(e) {
+        const { type, data, progress, error } = e.data;
+        
+        switch (type) {
+          case 'PROGRESS':
+            showLoadingIndicator(`Processing... ${progress}%`);
+            break;
+          case 'PROCESS_PLANNING_DATA_COMPLETE':
+            planningDataCache = data;
+            isDataLoading = false;
+            hideLoadingIndicator();
+            console.log("✅ Worker completed data processing:", data.length, "rows");
+            break;
+          case 'APPLY_FILTERS_COMPLETE':
+            console.log(`🔍 Filter results: ${data.length}/${e.data.originalCount} rows (${e.data.duration.toFixed(2)}ms)`);
+            if (planningTableInstance) {
+              planningTableInstance.setData(data);
+            }
+            hideLoadingIndicator();
+            break;
+          case 'ERROR':
+            console.error("❌ Worker error:", error);
+            isDataLoading = false;
+            hideLoadingIndicator();
+            break;
+        }
+      };
+      
+      planningWorker.onerror = function(error) {
+        console.error("❌ Worker initialization error:", error);
+        planningWorker = null;
+      };
+      
+      console.log("🔧 Planning worker initialized");
+    } catch (error) {
+      console.warn("⚠️ Could not initialize worker:", error);
+      planningWorker = null;
+    }
+  }
+  
+  return planningWorker;
+}
+
+function cleanupPlanningWorker() {
+  if (planningWorker) {
+    planningWorker.terminate();
+    planningWorker = null;
+    console.log("🛑 Planning worker terminated");
+  }
+}
+
+// Debounce utility for performance optimization
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Batch processing utility for large datasets
+function processRowsInBatches(rows, batchSize = 100, callback) {
+  return new Promise((resolve) => {
+    let index = 0;
+    
+    function processBatch() {
+      const batch = rows.slice(index, index + batchSize);
+      if (batch.length === 0) {
+        resolve();
+        return;
+      }
+      
+      // Process batch
+      batch.forEach((row, i) => {
+        callback(row, index + i);
+      });
+      
+      index += batchSize;
+      
+      // Use requestAnimationFrame for non-blocking processing
+      requestAnimationFrame(() => {
+        // Add small delay to prevent UI freezing
+        setTimeout(processBatch, 0);
+      });
+    }
+    
+    processBatch();
+  });
+}
+
 // Load planning data via Worker API for real-time updates
-async function loadPlanning(retryCount = 0) {
+async function loadPlanning(retryCount = 0, useCache = true) {
+  // Return cached data if available and not forcing refresh
+  if (useCache && planningDataCache && planningDataCache.length > 0) {
+    console.log("📋 Using cached planning data:", planningDataCache.length, "rows");
+    return planningDataCache;
+  }
+
+  // Prevent multiple simultaneous loads
+  if (isDataLoading) {
+    console.log("⏳ Data already loading, waiting...");
+    while (isDataLoading) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return planningDataCache || [];
+  }
+
+  isDataLoading = true;
+  planningPerformance.start('data loading');
+  
   try {
     // Try to load via Worker API first (real-time, no caching issues)
     let rows;
@@ -255,34 +399,293 @@ async function loadPlanning(retryCount = 0) {
     }
 
     console.log("Processing loaded planning data:", rows.length, "rows");
-    // Ensure all rows have calculated fields before rendering
-    rows.forEach((row, i) => {
-      if (typeof row.expectedLeads === "number") {
-        Object.assign(row, kpis(row.expectedLeads));
-      }
-      if (!row.id) {
-        // Assign a unique id if missing
-        row.id = `row_${i}_${Date.now()}`;
-        console.warn("Row missing id at index", i, row);
-      }
-    });
+    
+    // Show loading indicator for large datasets
+    if (rows.length > 500) {
+      showLoadingIndicator("Processing " + rows.length + " campaigns...");
+    }
+    
+    // Use Web Worker for heavy processing if available and dataset is large
+    if (rows.length > 200 && initPlanningWorker()) {
+      console.log("🔧 Using Web Worker for data processing...");
+      
+      return new Promise((resolve) => {
+        const handleWorkerMessage = (e) => {
+          if (e.data.type === 'PROCESS_PLANNING_DATA_COMPLETE') {
+            planningWorker.removeEventListener('message', handleWorkerMessage);
+            planningDataCache = e.data.data;
+            isDataLoading = false;
+            planningPerformance.end('data processing');
+            resolve(e.data.data);
+          }
+        };
+        
+        planningWorker.addEventListener('message', handleWorkerMessage);
+        planningWorker.postMessage({
+          type: 'PROCESS_PLANNING_DATA',
+          data: rows,
+          options: { batchSize: 100 }
+        });
+      });
+    } else {
+      // Fallback to main thread processing for smaller datasets
+      console.log("📋 Processing data on main thread...");
+      await processRowsInBatches(rows, 100, (row, i) => {
+        if (typeof row.expectedLeads === "number") {
+          Object.assign(row, kpis(row.expectedLeads));
+        }
+        if (!row.id) {
+          row.id = `row_${i}_${Date.now()}`;
+        }
+      });
+    }
+    
+    // Hide loading indicator
+    hideLoadingIndicator();
+    
+    planningPerformance.end('data processing');
+    
+    // Cache the processed data
+    planningDataCache = rows;
+    isDataLoading = false;
+    
     return rows;
   } catch (e) {
     console.error("Error loading planning.json:", e);
+    isDataLoading = false;
     alert("Failed to fetch planning.json");
-    return [];
+    return planningDataCache || [];
   }
 }
 
 // PLANNING GRID INITIALIZATION
 let planningTableInstance = null;
+let planningDataCache = null;
+let isGridInitialized = false;
+let isDataLoading = false;
+
+// Lightweight data store for faster operations
+class PlanningDataStore {
+  constructor() {
+    this.data = [];
+    this.filteredData = [];
+    this.pendingUpdates = new Map();
+    this.updateQueue = [];
+  }
+  
+  setData(data) {
+    this.data = data;
+    this.filteredData = [...data];
+  }
+  
+  getData() {
+    return this.data;
+  }
+  
+  getFilteredData() {
+    return this.filteredData;
+  }
+  
+  // Queue updates to reduce immediate DOM operations
+  queueUpdate(rowId, updates) {
+    this.pendingUpdates.set(rowId, { ...this.pendingUpdates.get(rowId), ...updates });
+    
+    // Process queue after short delay
+    clearTimeout(this.queueTimer);
+    this.queueTimer = setTimeout(() => this.processUpdateQueue(), 100);
+  }
+  
+  processUpdateQueue() {
+    if (this.pendingUpdates.size === 0) return;
+    
+    // Apply all pending updates at once
+    this.pendingUpdates.forEach((updates, rowId) => {
+      const row = this.data.find(r => r.id === rowId);
+      if (row) {
+        Object.assign(row, updates);
+      }
+    });
+    
+    this.pendingUpdates.clear();
+    
+    // Update table if it exists
+    if (planningTableInstance && this.data.length > 0) {
+      planningTableInstance.replaceData(this.data);
+    }
+  }
+  
+  applyFilters(filters) {
+    const startTime = performance.now();
+    
+    this.filteredData = this.data.filter(row => {
+      // Campaign name filter
+      if (filters.campaignName) {
+        const campaignName = row.campaignName;
+        if (!campaignName || !campaignName.toLowerCase().includes(filters.campaignName.toLowerCase())) {
+          return false;
+        }
+      }
+      
+      // Digital Motions filter
+      if (filters.digitalMotions && row.digitalMotions !== true) {
+        return false;
+      }
+      
+      // Exact match filters
+      const exactMatchFields = ['region', 'quarter', 'status', 'programType', 'strategicPillars', 'owner'];
+      for (const field of exactMatchFields) {
+        if (filters[field] && row[field] !== filters[field]) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+    
+    const duration = performance.now() - startTime;
+    console.log(`🔍 Filter applied: ${this.filteredData.length}/${this.data.length} rows (${duration.toFixed(2)}ms)`);
+    
+    return this.filteredData;
+  }
+}
+
+const planningDataStore = new PlanningDataStore();
+
+// Loading indicator functions for large dataset processing
+function showLoadingIndicator(message = "Loading...") {
+  const existing = document.getElementById("planningLoadingIndicator");
+  if (existing) existing.remove();
+  
+  const indicator = document.createElement("div");
+  indicator.id = "planningLoadingIndicator";
+  indicator.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    z-index: 9999;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  `;
+  
+  indicator.innerHTML = `
+    <div style="
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff40;
+      border-top: 2px solid #ffffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    "></div>
+    ${message}
+  `;
+  
+  // Add CSS animation if not already present
+  if (!document.querySelector("#loadingSpinnerCSS")) {
+    const style = document.createElement("style");
+    style.id = "loadingSpinnerCSS";
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  document.body.appendChild(indicator);
+}
+
+function hideLoadingIndicator() {
+  const indicator = document.getElementById("planningLoadingIndicator");
+  if (indicator) indicator.remove();
+}
 
 // Make globally accessible for data refreshing
 window.planningTableInstance = planningTableInstance;
 window.loadPlanning = loadPlanning;
 
+// Lazy initialization function for planning grid
+async function initPlanningGridLazy() {
+  if (isGridInitialized && planningTableInstance) {
+    console.log("📋 Planning grid already initialized, skipping...");
+    return planningTableInstance;
+  }
+
+  console.log("🚀 Lazy initializing planning grid...");
+  
+  const perfTracker = window.performanceMonitor?.startTracking('planning-grid-init');
+  
+  try {
+    // Load data first
+    const rows = await loadPlanning();
+    
+    // Initialize grid with data
+    const table = await initPlanningGrid(rows);
+    isGridInitialized = true;
+    
+    return table;
+  } catch (error) {
+    console.error("Failed to initialize planning grid:", error);
+    throw error;
+  } finally {
+    perfTracker?.end();
+  }
+}
+
 function initPlanningGrid(rows) {
+  planningPerformance.start('grid initialization');
   console.log("Initializing Planning Grid with rows:", rows);
+  
+  // Initialize data store
+  planningDataStore.setData(rows);
+  
+  // Performance optimizations for large datasets
+  const performanceConfig = {
+    // Virtual DOM for handling large datasets efficiently
+    virtualDom: true,
+    virtualDomBuffer: 15, // Much smaller buffer for faster rendering
+    
+    // Pagination to improve initial load
+    pagination: "local",
+    paginationSize: 25, // Smaller page size for faster rendering
+    paginationSizeSelector: [10, 25, 50, 100, "all"],
+    paginationCounter: "rows",
+    
+    // Optimized rendering - disable progressive loading for faster initial render
+    progressiveLoad: false,
+    
+    // Optimized rendering
+    renderHorizontal: "virtual",
+    renderVertical: "virtual",
+    
+    // Disable expensive features for large datasets
+    invalidOptionWarnings: false,
+    
+    // Reduce redraws and disable auto-resize
+    autoResize: false,
+    responsiveLayout: false,
+    
+    // Faster data processing
+    dataLoaderLoading: false,
+    dataLoaderError: false,
+    
+    // Reduce column calculations
+    columnCalcs: false,
+    
+    // Debounced data updates with longer delay
+    dataChanged: debounce(() => {
+      console.log("Planning data changed");
+    }, 1000), // Much longer debounce
+  };
+  
   planningTableInstance = new Tabulator("#planningGrid", {
     data: rows,
     reactiveData: true,
@@ -291,6 +694,9 @@ function initPlanningGrid(rows) {
     initialSort: [
       { column: "id", dir: "desc" }, // Sort by ID descending so newer rows appear at top
     ],
+    
+    // Apply performance optimizations
+    ...performanceConfig,
     columns: [
       // Select row button (circle)
       {
@@ -326,36 +732,40 @@ function initPlanningGrid(rows) {
           const r = cell.getRow();
           const rowData = r.getData();
 
-          // Special logic for In-Account Events (1:1)
-          if (cell.getValue() === "In-Account Events (1:1)") {
-            r.update({
-              expectedLeads: 0,
-              mqlForecast: 0,
-              sqlForecast: 0,
-              oppsForecast: 0,
-              pipelineForecast: rowData.forecastedCost
-                ? Number(rowData.forecastedCost) * 20
-                : 0,
-            });
-          } else {
-            // For other program types, recalculate based on expected leads
-            if (
-              typeof rowData.expectedLeads === "number" &&
-              rowData.expectedLeads > 0
-            ) {
-              const kpiVals = kpis(rowData.expectedLeads);
+          // Much longer debounce for expensive operations
+          clearTimeout(rowData._updateTimeout);
+          rowData._updateTimeout = setTimeout(() => {
+            // Special logic for In-Account Events (1:1)
+            if (cell.getValue() === "In-Account Events (1:1)") {
               r.update({
-                mqlForecast: kpiVals.mql,
-                sqlForecast: kpiVals.sql,
-                oppsForecast: kpiVals.opps,
-                pipelineForecast: kpiVals.pipeline,
+                expectedLeads: 0,
+                mqlForecast: 0,
+                sqlForecast: 0,
+                oppsForecast: 0,
+                pipelineForecast: rowData.forecastedCost
+                  ? Number(rowData.forecastedCost) * 20
+                  : 0,
               });
+            } else {
+              // For other program types, recalculate based on expected leads
+              if (
+                typeof rowData.expectedLeads === "number" &&
+                rowData.expectedLeads > 0
+              ) {
+                const kpiVals = kpis(rowData.expectedLeads);
+                r.update({
+                  mqlForecast: kpiVals.mql,
+                  sqlForecast: kpiVals.sql,
+                  oppsForecast: kpiVals.opps,
+                  pipelineForecast: kpiVals.pipeline,
+                });
+              }
             }
-          }
-          rowData.__modified = true;
+            rowData.__modified = true;
 
-          // Trigger autosave
-          triggerPlanningAutosave(cell.getTable());
+            // Trigger autosave with much longer debouncing
+            debouncedAutosave();
+          }, 1000); // Much longer debounce
         },
       },
       {
@@ -370,34 +780,14 @@ function initPlanningGrid(rows) {
         field: "description",
         editor: "input",
         width: 180,
-        cellMouseOver: function (e, cell) {
-          if (!cell.getElement().classList.contains("tabulator-editing")) {
-            let tooltip = document.createElement("div");
-            tooltip.className = "desc-tooltip";
-            tooltip.innerText = cell.getValue();
-            tooltip.setAttribute(
-              "data-tooltip-for",
-              cell.getRow().getPosition() + "-" + cell.getField(),
-            );
-            document.body.appendChild(tooltip);
-            const rect = cell.getElement().getBoundingClientRect();
-            tooltip.style.left = rect.left + window.scrollX + 10 + "px";
-            tooltip.style.top = rect.top + window.scrollY + 30 + "px";
+        // Simplified tooltip - only show on click to reduce overhead
+        cellClick: function (e, cell) {
+          if (cell.getValue() && cell.getValue().length > 20) {
+            const tooltip = prompt("Description:", cell.getValue());
+            if (tooltip !== null && tooltip !== cell.getValue()) {
+              cell.setValue(tooltip);
+            }
           }
-        },
-        cellMouseOut: function (e, cell) {
-          const tooltips = document.querySelectorAll(".desc-tooltip");
-          tooltips.forEach((t) => t.remove());
-        },
-        cellEditing: function (cell) {
-          const selector =
-            '.desc-tooltip[data-tooltip-for="' +
-            cell.getRow().getPosition() +
-            "-" +
-            cell.getField() +
-            '"]';
-          const tooltips = document.querySelectorAll(selector);
-          tooltips.forEach((t) => t.remove());
         },
       },
       {
@@ -451,22 +841,26 @@ function initPlanningGrid(rows) {
           const r = cell.getRow();
           const rowData = r.getData();
 
-          // Special logic for In-Account Events (1:1) - recalculate pipeline based on cost
-          if (rowData.programType === "In-Account Events (1:1)") {
-            r.update({
-              expectedLeads: 0,
-              mqlForecast: 0,
-              sqlForecast: 0,
-              oppsForecast: 0,
-              pipelineForecast: cell.getValue()
-                ? Number(cell.getValue()) * 20
-                : 0,
-            });
-          }
-          rowData.__modified = true;
+          // Much longer debounce for expensive operations
+          clearTimeout(rowData._updateTimeout);
+          rowData._updateTimeout = setTimeout(() => {
+            // Special logic for In-Account Events (1:1) - recalculate pipeline based on cost
+            if (rowData.programType === "In-Account Events (1:1)") {
+              r.update({
+                expectedLeads: 0,
+                mqlForecast: 0,
+                sqlForecast: 0,
+                oppsForecast: 0,
+                pipelineForecast: cell.getValue()
+                  ? Number(cell.getValue()) * 20
+                  : 0,
+              });
+            }
+            rowData.__modified = true;
 
-          // Trigger autosave
-          triggerPlanningAutosave(cell.getTable());
+            // Trigger autosave with much longer debouncing
+            debouncedAutosave();
+          }, 1000);
         },
       },
       {
@@ -478,31 +872,35 @@ function initPlanningGrid(rows) {
           const r = cell.getRow();
           const rowData = r.getData();
 
-          // Special logic for In-Account Events (1:1) - ignore expected leads, use forecasted cost
-          if (rowData.programType === "In-Account Events (1:1)") {
-            r.update({
-              expectedLeads: 0,
-              mqlForecast: 0,
-              sqlForecast: 0,
-              oppsForecast: 0,
-              pipelineForecast: rowData.forecastedCost
-                ? Number(rowData.forecastedCost) * 20
-                : 0,
-            });
-          } else {
-            // Normal KPI calculation for other program types
-            const kpiVals = kpis(cell.getValue());
-            r.update({
-              mqlForecast: kpiVals.mql,
-              sqlForecast: kpiVals.sql,
-              oppsForecast: kpiVals.opps,
-              pipelineForecast: kpiVals.pipeline,
-            });
-          }
-          rowData.__modified = true;
+          // Much longer debounce for expensive operations
+          clearTimeout(rowData._updateTimeout);
+          rowData._updateTimeout = setTimeout(() => {
+            // Special logic for In-Account Events (1:1) - ignore expected leads, use forecasted cost
+            if (rowData.programType === "In-Account Events (1:1)") {
+              r.update({
+                expectedLeads: 0,
+                mqlForecast: 0,
+                sqlForecast: 0,
+                oppsForecast: 0,
+                pipelineForecast: rowData.forecastedCost
+                  ? Number(rowData.forecastedCost) * 20
+                  : 0,
+              });
+            } else {
+              // Normal KPI calculation for other program types
+              const kpiVals = kpis(cell.getValue());
+              r.update({
+                mqlForecast: kpiVals.mql,
+                sqlForecast: kpiVals.sql,
+                oppsForecast: kpiVals.opps,
+                pipelineForecast: kpiVals.pipeline,
+              });
+            }
+            rowData.__modified = true;
 
-          // Trigger autosave
-          triggerPlanningAutosave(cell.getTable());
+            // Trigger autosave with much longer debouncing
+            debouncedAutosave();
+          }, 1000);
         },
       },
       { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
@@ -533,10 +931,14 @@ function initPlanningGrid(rows) {
         editorParams: { values: statusOptions },
         width: 130,
         cellEdited: (cell) => {
-          cell.getRow().getData().__modified = true;
-
-          // Trigger autosave
-          triggerPlanningAutosave(cell.getTable());
+          const rowData = cell.getRow().getData();
+          
+          // Much longer debounce for expensive operations
+          clearTimeout(rowData._updateTimeout);
+          rowData._updateTimeout = setTimeout(() => {
+            rowData.__modified = true;
+            debouncedAutosave();
+          }, 1000);
         },
       },
       {
@@ -610,6 +1012,11 @@ function initPlanningGrid(rows) {
     ],
   });
 
+  // Create debounced autosave function for this table instance with longer delay
+  const debouncedAutosave = debounce(() => {
+    triggerPlanningAutosave(planningTableInstance);
+  }, 3000); // Much longer autosave delay
+
   // Wire up Add Row and Delete Row buttons for Planning grid
   const addBtn = document.getElementById("addPlanningRow");
   console.log("addPlanningRow button:", addBtn);
@@ -645,6 +1052,8 @@ function initPlanningGrid(rows) {
   // Update global reference for data refreshing
   window.planningTableInstance = planningTableInstance;
 
+  planningPerformance.end('grid initialization');
+  
   return planningTableInstance;
 }
 
@@ -1226,112 +1635,177 @@ document.getElementById("importCSVBtn").addEventListener("click", () => {
 
 document
   .getElementById("csvFileInput")
-  .addEventListener("change", function (e) {
+  .addEventListener("change", async function (e) {
     const file = e.target.files[0];
     if (!file) return;
+    
+    // Show loading indicator for large files
+    if (file.size > 100000) { // 100KB threshold
+      showLoadingIndicator("Processing CSV file...");
+    }
+    
     const reader = new FileReader();
-    reader.onload = function (event) {
-      const csv = event.target.result;
-      // Use Tabulator's built-in CSV parser if available, else fallback
-      let rows;
-      if (Tabulator.prototype.parseCSV) {
-        rows = Tabulator.prototype.parseCSV(csv);
-      } else {
-        rows = csvToObj(csv);
-      }
-      // Map CSV headers to table fields and clean up data
-      const mappedRows = rows.map((row) => {
-        const mappedRow = {};
+    reader.onload = async function (event) {
+      try {
+        const csv = event.target.result;
+        
+        // Use Tabulator's built-in CSV parser if available, else fallback
+        let rows;
+        if (Tabulator.prototype.parseCSV) {
+          rows = Tabulator.prototype.parseCSV(csv);
+        } else {
+          rows = csvToObj(csv);
+        }
+        
+        // Show progress for large imports
+        if (rows.length > 100) {
+          showLoadingIndicator(`Processing ${rows.length} rows...`);
+        }
+        
+        // Map CSV headers to table fields and clean up data in batches
+        const mappedRows = [];
+        
+        await processRowsInBatches(rows, 50, (row) => {
+          const mappedRow = {};
 
-        // Map column names from CSV to expected field names
-        const columnMapping = {
-          campaignName: "campaignName",
-          campaignType: "programType", // CSV uses campaignType, grid uses programType
-          strategicPillars: "strategicPillars",
-          revenuePlay: "revenuePlay",
-          fiscalYear: "fiscalYear",
-          quarterMonth: "quarter", // CSV uses quarterMonth, grid uses quarter
-          region: "region",
-          country: "country",
-          owner: "owner",
-          description: "description",
-          forecastedCost: "forecastedCost",
-          expectedLeads: "expectedLeads",
-          status: "status",
-        };
+          // Map column names from CSV to expected field names
+          const columnMapping = {
+            campaignName: "campaignName",
+            campaignType: "programType", // CSV uses campaignType, grid uses programType
+            strategicPillars: "strategicPillars",
+            revenuePlay: "revenuePlay",
+            fiscalYear: "fiscalYear",
+            quarterMonth: "quarter", // CSV uses quarterMonth, grid uses quarter
+            region: "region",
+            country: "country",
+            owner: "owner",
+            description: "description",
+            forecastedCost: "forecastedCost",
+            expectedLeads: "expectedLeads",
+            status: "status",
+          };
 
-        // Apply mapping and clean up values
-        Object.keys(row).forEach((csvField) => {
-          const gridField = columnMapping[csvField] || csvField;
-          let value = row[csvField];
+          // Apply mapping and clean up values
+          Object.keys(row).forEach((csvField) => {
+            const gridField = columnMapping[csvField] || csvField;
+            let value = row[csvField];
 
-          // Clean up specific fields
-          if (gridField === "forecastedCost") {
-            // Handle forecasted cost - remove commas, quotes, and convert to number
-            if (typeof value === "string") {
-              value = value.replace(/[",\s]/g, ""); // Remove commas, quotes, and spaces
-              value = value ? Number(value) : 0;
-            } else {
-              value = value ? Number(value) : 0;
+            // Clean up specific fields
+            if (gridField === "forecastedCost") {
+              // Handle forecasted cost - remove commas, quotes, and convert to number
+              if (typeof value === "string") {
+                value = value.replace(/[",\s]/g, ""); // Remove commas, quotes, and spaces
+                value = value ? Number(value) : 0;
+              } else {
+                value = value ? Number(value) : 0;
+              }
+            } else if (gridField === "expectedLeads") {
+              // Ensure expected leads is a number
+              if (typeof value === "string") {
+                value = value.replace(/[",\s]/g, ""); // Remove any formatting
+                value = value ? Number(value) : 0;
+              } else {
+                value = value ? Number(value) : 0;
+              }
+            } else if (gridField === "status") {
+              // Ensure status is a string and handle any numeric values
+              if (value && typeof value !== "string") {
+                value = String(value);
+              }
+              // If it's empty or undefined, default to 'Planning'
+              if (!value || value === "" || value === "undefined") {
+                value = "Planning";
+              }
             }
-          } else if (gridField === "expectedLeads") {
-            // Ensure expected leads is a number
-            if (typeof value === "string") {
-              value = value.replace(/[",\s]/g, ""); // Remove any formatting
-              value = value ? Number(value) : 0;
-            } else {
-              value = value ? Number(value) : 0;
-            }
-          } else if (gridField === "status") {
-            // Ensure status is a string and handle any numeric values
-            if (value && typeof value !== "string") {
-              value = String(value);
-            }
-            // If it's empty or undefined, default to 'Planning'
-            if (!value || value === "" || value === "undefined") {
-              value = "Planning";
-            }
-          }
 
-          // Only add non-empty values to avoid overwriting with empty strings
-          if (value !== "" && value !== undefined && value !== null) {
-            mappedRow[gridField] = value;
-          }
+            // Only add non-empty values to avoid overwriting with empty strings
+            if (value !== "" && value !== undefined && value !== null) {
+              mappedRow[gridField] = value;
+            }
+          });
+
+          mappedRows.push(mappedRow);
         });
 
-        return mappedRow;
-      });
+        // Process calculated fields in batches
+        await processRowsInBatches(mappedRows, 50, (row) => {
+          // Special logic for In-Account Events (1:1): no leads, pipeline = 20x forecasted cost
+          if (row.programType === "In-Account Events (1:1)") {
+            row.expectedLeads = 0;
+            row.mqlForecast = 0;
+            row.sqlForecast = 0;
+            row.oppsForecast = 0;
+            row.pipelineForecast = row.forecastedCost
+              ? Number(row.forecastedCost) * 20
+              : 0;
+          } else if (
+            typeof row.expectedLeads === "number" ||
+            (!isNaN(row.expectedLeads) &&
+              row.expectedLeads !== undefined &&
+              row.expectedLeads !== "")
+          ) {
+            const kpiVals = kpis(Number(row.expectedLeads));
+            row.mqlForecast = kpiVals.mql;
+            row.sqlForecast = kpiVals.sql;
+            row.oppsForecast = kpiVals.opps;
+            row.pipelineForecast = kpiVals.pipeline;
+          }
+        });
+        
+        if (planningTableInstance) {
+          // Add data progressively for better UX
+          const batchSize = 100;
+          for (let i = 0; i < mappedRows.length; i += batchSize) {
+            const batch = mappedRows.slice(i, i + batchSize);
+            planningTableInstance.addData(batch);
+            
+            // Update progress
+            if (mappedRows.length > 100) {
+              const progress = Math.round(((i + batch.length) / mappedRows.length) * 100);
+              showLoadingIndicator(`Importing... ${progress}%`);
+            }
+            
+            // Small delay to prevent UI freezing
+            if (i + batchSize < mappedRows.length) {
+              await new Promise(resolve => setTimeout(resolve, 10));
+            }
+          }
+          
+          // Update ROI metrics to reflect newly imported forecasted costs
+          if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
+            setTimeout(window.roiModule.updateRoiTotalSpend, 100); // Small delay to ensure data is fully loaded
+          }
+        }
+        
+        hideLoadingIndicator();
+        
+        // Show success message
+        const successMsg = document.createElement("div");
+        successMsg.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #28a745;
+          color: white;
+          padding: 12px 20px;
+          border-radius: 6px;
+          z-index: 1200;
+          font-weight: bold;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        successMsg.textContent = `✓ Successfully imported ${mappedRows.length} campaigns!`;
+        document.body.appendChild(successMsg);
 
-      // Before adding, update calculated fields for each row
-      mappedRows.forEach((row) => {
-        // Special logic for In-Account Events (1:1): no leads, pipeline = 20x forecasted cost
-        if (row.programType === "In-Account Events (1:1)") {
-          row.expectedLeads = 0;
-          row.mqlForecast = 0;
-          row.sqlForecast = 0;
-          row.oppsForecast = 0;
-          row.pipelineForecast = row.forecastedCost
-            ? Number(row.forecastedCost) * 20
-            : 0;
-        } else if (
-          typeof row.expectedLeads === "number" ||
-          (!isNaN(row.expectedLeads) &&
-            row.expectedLeads !== undefined &&
-            row.expectedLeads !== "")
-        ) {
-          const kpiVals = kpis(Number(row.expectedLeads));
-          row.mqlForecast = kpiVals.mql;
-          row.sqlForecast = kpiVals.sql;
-          row.oppsForecast = kpiVals.opps;
-          row.pipelineForecast = kpiVals.pipeline;
-        }
-      });
-      if (planningTableInstance) {
-        planningTableInstance.addData(mappedRows);
-        // Update ROI metrics to reflect newly imported forecasted costs
-        if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
-          setTimeout(window.roiModule.updateRoiTotalSpend, 100); // Small delay to ensure data is fully loaded
-        }
+        setTimeout(() => {
+          if (successMsg.parentNode) {
+            successMsg.remove();
+          }
+        }, 3000);
+        
+      } catch (error) {
+        hideLoadingIndicator();
+        console.error("CSV import error:", error);
+        alert("Failed to import CSV: " + error.message);
       }
     };
     reader.readAsText(file);
@@ -1630,99 +2104,20 @@ function applyPlanningFilters() {
   const filters = getPlanningFilterValues();
   console.log("[Planning] Applying filters:", filters);
 
-  // Debug: Show Digital Motions data in the table
+  // Use data store for faster filtering
+  const filteredData = planningDataStore.applyFilters(filters);
+  
+  // Update table with filtered data
+  planningTableInstance.setData(filteredData);
+
+  console.log("[Planning] Filters applied, showing", filteredData.length, "rows");
+
+  // Show helpful message when Digital Motions filter is active
   if (filters.digitalMotions) {
-    const allData = planningTableInstance.getData();
-    const digitalMotionsRows = allData.filter(
-      (row) => row.digitalMotions === true,
-    );
-    console.log("[Planning] Total rows:", allData.length);
     console.log(
-      "[Planning] Rows with digitalMotions=true:",
-      digitalMotionsRows.length,
-    );
-    console.log(
-      "[Planning] Digital Motions campaigns:",
-      digitalMotionsRows.map((r) => ({
-        id: r.id,
-        campaignName: r.campaignName,
-        digitalMotions: r.digitalMotions,
-      })),
+      "[Planning] Digital Motions filter active - showing only campaigns with digitalMotions: true",
     );
   }
-
-  // Use requestAnimationFrame to reduce forced reflow
-  requestAnimationFrame(() => {
-    // Clear existing filters first
-    planningTableInstance.clearFilter();
-
-    // Build filter functions array
-    const filterFunctions = [];
-
-    // Campaign name filter (case-insensitive partial match)
-    if (filters.campaignName) {
-      const searchTerm = filters.campaignName.toLowerCase();
-      filterFunctions.push((data) => {
-        const campaignName = (data.campaignName || "").toLowerCase();
-        return campaignName.includes(searchTerm);
-      });
-    }
-
-    // Digital Motions filter
-    if (filters.digitalMotions) {
-      console.log(
-        "[Planning] Digital Motions filter is active, adding filter function",
-      );
-      filterFunctions.push((data) => {
-        const hasDigitalMotions = data.digitalMotions === true;
-        if (!hasDigitalMotions) {
-          console.log(
-            "[Planning] Filtering out row without digitalMotions:",
-            data.campaignName || data.id,
-          );
-        }
-        return hasDigitalMotions;
-      });
-    }
-
-    // Standard exact match filters
-    if (filters.region) {
-      filterFunctions.push((data) => data.region === filters.region);
-    }
-    if (filters.quarter) {
-      filterFunctions.push((data) => data.quarter === filters.quarter);
-    }
-    if (filters.status) {
-      filterFunctions.push((data) => data.status === filters.status);
-    }
-    if (filters.programType) {
-      filterFunctions.push((data) => data.programType === filters.programType);
-    }
-    if (filters.strategicPillar) {
-      filterFunctions.push((data) => data.strategicPillars === filters.strategicPillar);
-    }
-    if (filters.owner) {
-      filterFunctions.push((data) => data.owner === filters.owner);
-    }
-
-    // Apply combined filter function if any filters are active
-    if (filterFunctions.length > 0) {
-      planningTableInstance.addFilter(function (data) {
-        // All filter functions must return true (AND logic)
-        return filterFunctions.every((fn) => fn(data));
-      });
-    }
-
-    const visibleRows = planningTableInstance.getDataCount(true);
-    console.log("[Planning] Filters applied, showing", visibleRows, "rows");
-
-    // Show helpful message when Digital Motions filter is active
-    if (filters.digitalMotions) {
-      console.log(
-        "[Planning] Digital Motions filter active - showing only campaigns with digitalMotions: true",
-      );
-    }
-  });
 }
 
 // Initialize planning filters when planning grid is ready
@@ -1737,12 +2132,21 @@ function initializePlanningFilters() {
 window.planningModule = {
   loadPlanning,
   initPlanningGrid,
+  initPlanningGridLazy,
   setupPlanningSave,
   getAllCountries,
   getCountryOptionsForRegion,
   populatePlanningFilters,
   applyPlanningFilters,
   initializePlanningFilters,
+  cleanupPlanningGrid,
+  clearPlanningCache,
+  initPlanningWorker,
+  cleanupPlanningWorker,
+  // State getters
+  getIsInitialized: () => isGridInitialized,
+  getIsLoading: () => isDataLoading,
+  getCacheSize: () => planningDataCache ? planningDataCache.length : 0,
   // Export constants for use by other modules
   constants: {
     programTypes,
@@ -1759,6 +2163,70 @@ window.planningModule = {
   },
 };
 
+// Register with tab manager if available
+if (window.tabManager) {
+  window.tabManager.registerTab(
+    'planning',
+    async () => {
+      // Tab initialization callback
+      console.log("🎯 Initializing planning tab via TabManager");
+      await initPlanningGridLazy();
+      populatePlanningFilters();
+    },
+    async () => {
+      // Tab cleanup callback
+      console.log("🧹 Cleaning up planning tab via TabManager");
+      cleanupPlanningGrid();
+    }
+  );
+  console.log("✅ Planning tab registered with TabManager");
+} else {
+  console.warn("⚠️ TabManager not available, using direct initialization");
+}
+
+// Memory management and cleanup functions
+function cleanupPlanningGrid() {
+  console.log("🧹 Cleaning up planning grid...");
+  
+  if (planningTableInstance) {
+    try {
+      // Clear any pending timeouts
+      const data = planningTableInstance.getData();
+      data.forEach(row => {
+        if (row._updateTimeout) {
+          clearTimeout(row._updateTimeout);
+          delete row._updateTimeout;
+        }
+      });
+      
+      // Destroy the table instance
+      planningTableInstance.destroy();
+      planningTableInstance = null;
+      isGridInitialized = false;
+      
+      console.log("✅ Planning grid cleaned up successfully");
+    } catch (error) {
+      console.warn("⚠️ Error during planning grid cleanup:", error);
+    }
+  }
+  
+  // Clean up worker
+  cleanupPlanningWorker();
+  
+  // Clean up loading indicators
+  hideLoadingIndicator();
+  
+  // Remove tooltips
+  const tooltips = document.querySelectorAll(".desc-tooltip");
+  tooltips.forEach((t) => t.remove());
+}
+
+// Clear cache function
+function clearPlanningCache() {
+  console.log("🗑️ Clearing planning data cache...");
+  planningDataCache = null;
+}
+
 // Export the planning table instance getter
 Object.defineProperty(window.planningModule, "tableInstance", {
   get: function () {
@@ -1770,15 +2238,25 @@ console.log(
   "Planning module initialized and exported to window.planningModule",
 );
 
-// Autosave functionality for planning
+// Autosave functionality for planning - optimized for large datasets
 function triggerPlanningAutosave(table) {
   if (!window.cloudflareSyncModule) {
     console.log("Cloudflare sync module not available");
     return;
   }
 
-  const data = table.getData();
-  window.cloudflareSyncModule.scheduleSave("planning", data, {
+  // Get only modified data to reduce payload size
+  const allData = table.getData();
+  const modifiedData = allData.filter(row => row.__modified);
+  
+  // For large datasets, prioritize saving modified rows
+  if (allData.length > 1000 && modifiedData.length < allData.length * 0.1) {
+    console.log(`Autosave: Only ${modifiedData.length} of ${allData.length} rows modified, saving all data`);
+  }
+  
+  window.cloudflareSyncModule.scheduleSave("planning", allData, {
     source: "planning-autosave",
+    modifiedCount: modifiedData.length,
+    totalCount: allData.length,
   });
 }
