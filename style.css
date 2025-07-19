@@ -895,6 +895,34 @@ table#planTable td input[type="text"] {
   overflow: hidden;
 }
 
+/* Filter instructions */
+.filter-instructions {
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: #1565c0;
+}
+
+.filter-instructions-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-instructions kbd {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 0.85rem;
+  font-family: monospace;
+  color: #333;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
 .filter-container::before {
   content: '';
   position: absolute;
@@ -966,6 +994,183 @@ table#planTable td input[type="text"] {
   width: 100%;
   height: 36px;
   box-sizing: border-box;
+}
+
+/* Multiselect specific styles */
+.filter-select[multiple] {
+  height: auto;
+  min-height: 36px;
+  max-height: 120px;
+  padding: 4px;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Custom multiselect container */
+.multiselect-container {
+  position: relative;
+  width: 100%;
+}
+
+.multiselect-display {
+  width: 100%;
+  height: 36px;
+  padding: 8px 30px 8px 10px;
+  border: 1px solid #c5d9f1;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.multiselect-display:hover {
+  border-color: #1976d2;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.1);
+}
+
+.multiselect-display.open {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.multiselect-display::after {
+  content: '▼';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: #666;
+  transition: transform 0.2s ease;
+}
+
+.multiselect-display.open::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.multiselect-placeholder {
+  color: #8ca3c7;
+  font-size: 0.85rem;
+}
+
+.multiselect-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.multiselect-tag {
+  background: #1976d2;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.multiselect-tag-remove {
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 4px;
+  padding: 0 2px;
+  border-radius: 2px;
+  transition: background 0.2s ease;
+}
+
+.multiselect-tag-remove:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.multiselect-count {
+  background: #666;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.multiselect-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #1976d2;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+}
+
+.multiselect-dropdown.open {
+  display: block;
+}
+
+.multiselect-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.multiselect-option:hover {
+  background: #e3f2fd;
+}
+
+.multiselect-option.selected {
+  background: #1976d2;
+  color: white;
+  font-weight: 500;
+}
+
+.multiselect-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  transition: all 0.2s ease;
+}
+
+.multiselect-option.selected .multiselect-checkbox {
+  background: white;
+  border-color: white;
+  color: #1976d2;
+}
+
+.multiselect-option:not(.selected) .multiselect-checkbox {
+  background: transparent;
+}
+
+/* Hide original select when custom multiselect is active */
+.filter-select.multiselect-hidden {
+  display: none;
 }
 
 .filter-input:focus,
