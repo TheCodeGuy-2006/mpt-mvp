@@ -41,230 +41,262 @@
       </a>
     </nav>
 
-    <section id="view-planning" style="display: none">
-      <!-- Planning Filters Section -->
-      <div id="planningFilters" class="filter-container">
-        <!-- Row 1: Search and Core Filters -->
-        <div class="filter-row filter-row-main">
-          <div class="filter-group">
-            <label for="planningRegionFilter">Region:</label>
-            <select id="planningRegionFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
+    <div class="main-container">
+      <section id="view-planning" style="display: none">
+        <div class="section-header">Planning & Campaign Management</div>
+        <div class="section-content">
+          <!-- Planning Filters Section -->
+          <div id="planningFilters" class="filter-container">
+            <div class="filter-content">
+              <!-- Row 1: Search and Core Filters -->
+              <div class="filter-row filter-row-main">
+                <div class="filter-group">
+                  <label for="planningRegionFilter">Region:</label>
+                  <select id="planningRegionFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="planningQuarterFilter">Quarter:</label>
+                  <select id="planningQuarterFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="planningStatusFilter">Status:</label>
+                  <select id="planningStatusFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Row 2: Secondary Filters -->
+              <div class="filter-row filter-row-secondary">
+                <div class="filter-group">
+                  <label for="planningProgramTypeFilter">Program Type:</label>
+                  <select id="planningProgramTypeFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="planningStrategicPillarFilter">Strategic Pillar:</label>
+                  <select id="planningStrategicPillarFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="planningOwnerFilter">Owner:</label>
+                  <select id="planningOwnerFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="filter-actions">
+                  <button id="planningDigitalMotionsFilter" class="filter-btn filter-btn-digital">
+                    🚀 Digital Motions
+                  </button>
+                  <button id="planningClearFilters" class="filter-btn filter-btn-clear">
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="filter-group">
-            <label for="planningQuarterFilter">Quarter:</label>
-            <select id="planningQuarterFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
+
+          <!-- Campaign Management Card -->
+          <div class="content-card spaced-element">
+            <div class="content-card-header">Campaign Management</div>
+            <div class="content-card-body">
+              <div class="button-group">
+                <button id="addPlanningRow">➕ Add Campaign</button>
+                <button id="deletePlanningRow">Delete Row</button>
+                <button id="importCSVBtn">Import Campaign</button>
+                <input
+                  type="file"
+                  id="csvFileInput"
+                  accept=".csv"
+                  style="display: none"
+                />
+                <button id="savePlanningRows" class="save-large">Save Changes</button>
+              </div>
+            </div>
           </div>
-          <div class="filter-group">
-            <label for="planningStatusFilter">Status:</label>
-            <select id="planningStatusFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
+
+          <!-- Planning Grid Card -->
+          <div class="content-card">
+            <div class="content-card-header">Campaign Overview</div>
+            <div class="content-card-body">
+              <div id="planningGrid"></div>
+            </div>
           </div>
         </div>
-        
-        <!-- Row 2: Secondary Filters -->
-        <div class="filter-row filter-row-secondary">
-          <div class="filter-group">
-            <label for="planningProgramTypeFilter">Program Type:</label>
-            <select id="planningProgramTypeFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="planningStrategicPillarFilter">Strategic Pillar:</label>
-            <select id="planningStrategicPillarFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="planningOwnerFilter">Owner:</label>
-            <select id="planningOwnerFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
+      </section>
+
+      <section id="view-execution" style="display: none">
+        <div class="section-header">Execution & Performance Tracking</div>
+        <div class="section-content">
+          <!-- Execution Filters -->
+          <div id="executionFilters" class="filter-container">
+            <div class="filter-content">
+              <!-- Row 1: Search and Core Filters -->
+              <div class="filter-row filter-row-main">
+                <div class="filter-group">
+                  <label for="executionRegionFilter">Region:</label>
+                  <select id="executionRegionFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="executionQuarterFilter">Quarter:</label>
+                  <select id="executionQuarterFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="executionStatusFilter">Status:</label>
+                  <select id="executionStatusFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Row 2: Secondary Filters -->
+              <div class="filter-row filter-row-secondary">
+                <div class="filter-group">
+                  <label for="executionProgramTypeFilter">Program Type:</label>
+                  <select id="executionProgramTypeFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="executionStrategicPillarFilter">Strategic Pillar:</label>
+                  <select id="executionStrategicPillarFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="executionOwnerFilter">Owner:</label>
+                  <select id="executionOwnerFilter" class="filter-select" multiple>
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="filter-actions">
+                  <button id="executionDigitalMotionsFilter" class="filter-btn filter-btn-digital">
+                    🚀 Digital Motions
+                  </button>
+                  <button id="executionClearFilters" class="filter-btn filter-btn-clear">
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
           
-          <!-- Action Buttons -->
-          <div class="filter-actions">
-            <button id="planningDigitalMotionsFilter" class="filter-btn filter-btn-digital">
-              🚀 Digital Motions
-            </button>
-            <button id="planningClearFilters" class="filter-btn filter-btn-clear">
-              Clear Filters
-            </button>
+          <!-- Execution Grid Card -->
+          <div class="content-card">
+            <div class="content-card-header">Campaign Execution Status</div>
+            <div class="content-card-body">
+              <div id="executionGrid"></div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div
-        id="planningGridButtons"
-        style="
-          display: flex;
-          gap: 12px;
-          margin-bottom: 18px;
-          align-items: center;
-          justify-content: space-between;
-        "
-      >
-        <div style="display: flex; gap: 12px; align-items: center">
-          <button id="addPlanningRow">➕ Add Campaign</button>
-          <button id="deletePlanningRow">Delete Row</button>
-          <button id="importCSVBtn">Import Campaign</button>
-          <input
-            type="file"
-            id="csvFileInput"
-            accept=".csv"
-            style="display: none"
-          />
-        </div>
-        <button id="savePlanningRows" class="save-large">Save Changes</button>
-      </div>
-      <div id="planningGrid"></div>
-    </section>
-    <section id="view-execution" style="display: none">
-      <!-- Execution Filters -->
-      <div id="executionFilters" class="filter-container">
-        <!-- Row 1: Search and Core Filters -->
-        <div class="filter-row filter-row-main">
-          <div class="filter-group">
-            <label for="executionRegionFilter">Region:</label>
-            <select id="executionRegionFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
+      <section id="view-budgets" style="display: none">
+        <div class="section-header">Budget Planning & Management</div>
+        <div class="section-content">
+          <!-- Budget Overview Card -->
+          <div class="content-card spaced-element">
+            <div class="content-card-header">Budget Overview by Region</div>
+            <div class="content-card-body">
+              <canvas id="budgetsBarChart" style="max-height: 300px"></canvas>
+            </div>
           </div>
-          <div class="filter-group">
-            <label for="executionQuarterFilter">Quarter:</label>
-            <select id="executionQuarterFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="executionStatusFilter">Status:</label>
-            <select id="executionStatusFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
-          </div>
-        </div>
-        
-        <!-- Row 2: Secondary Filters -->
-        <div class="filter-row filter-row-secondary">
-          <div class="filter-group">
-            <label for="executionProgramTypeFilter">Program Type:</label>
-            <select id="executionProgramTypeFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="executionStrategicPillarFilter">Strategic Pillar:</label>
-            <select id="executionStrategicPillarFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="executionOwnerFilter">Owner:</label>
-            <select id="executionOwnerFilter" class="filter-select" multiple>
-              <!-- Options populated dynamically -->
-            </select>
-          </div>
-          
-          <!-- Action Buttons -->
-          <div class="filter-actions">
-            <button id="executionDigitalMotionsFilter" class="filter-btn filter-btn-digital">
-              🚀 Digital Motions
-            </button>
-            <button id="executionClearFilters" class="filter-btn filter-btn-clear">
-              Clear Filters
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <div id="executionGrid"></div>
-    </section>
-    <section id="view-budgets" style="display: none">
-      <!-- Main Budget Overview Chart -->
-      <div
-        style="
-          background: #fff;
-          border-radius: 12px;
-          box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
-          padding: 20px;
-          margin-bottom: 24px;
-          max-width: 1200px;
-        "
-      >
-        <h3 style="margin: 0 0 16px 0; color: #1976d2">
-          Budget Overview by Region
-        </h3>
-        <canvas id="budgetsBarChart" style="max-height: 300px"></canvas>
-      </div>
 
-      <div
-        style="
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          margin-bottom: 8px;
-        "
-      >
-        <div
-          id="budgetsChartsContainer"
-          style="
-            display: flex;
-            flex-wrap: wrap;
-            gap: 32px 24px;
-            margin-bottom: 24px;
-          "
-        ></div>
-      </div>
-      <div id="budgetsTable"></div>
-    </section>
-    <section id="view-calendar" style="display: none">
-      <!-- Financial Year Tabs -->
-      <div style="margin-bottom: 20px">
-        <h3 style="margin-bottom: 10px">Financial Year:</h3>
-        <div id="fyTabs" style="display: flex; gap: 8px; flex-wrap: wrap">
-          <!-- FY tabs will be populated by JavaScript -->
+          <!-- Additional Charts Card -->
+          <div class="content-card spaced-element">
+            <div class="content-card-header">Budget Analysis</div>
+            <div class="content-card-body">
+              <div
+                id="budgetsChartsContainer"
+                style="
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 32px 24px;
+                "
+              ></div>
+            </div>
+          </div>
+
+          <!-- Budget Details Card -->
+          <div class="content-card">
+            <div class="content-card-header">Budget Details</div>
+            <div class="content-card-body">
+              <div id="budgetsTable"></div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+      <section id="view-calendar" style="display: none">
+        <div class="section-header">Campaign Calendar</div>
+        <div class="section-content">
+          <!-- Financial Year Selection Card -->
+          <div class="content-card spaced-element">
+            <div class="content-card-header">Financial Year Selection</div>
+            <div class="content-card-body">
+              <div id="fyTabs" style="display: flex; gap: 8px; flex-wrap: wrap">
+                <!-- FY tabs will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
 
-      <!-- Filter Controls -->
-      <div id="calendarFilters">
-        <!-- Filter controls will be populated by JavaScript -->
-      </div>
+          <!-- Calendar Filters Card -->
+          <div class="content-card spaced-element">
+            <div class="content-card-header">Calendar Filters</div>
+            <div class="content-card-body">
+              <div id="calendarFilters">
+                <!-- Filter controls will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
 
-      <!-- Calendar Container -->
-      <div
-        id="calendarContainer"
-        style="background: #f5f5f5; border-radius: 8px; padding: 16px"
-      >
-        <div id="calendarGrid">
-          <!-- Calendar grid will be populated by JavaScript -->
+          <!-- Calendar View Card -->
+          <div class="content-card spaced-element">
+            <div class="content-card-header">Campaign Timeline</div>
+            <div class="content-card-body">
+              <div
+                id="calendarContainer"
+                style="background: #f8fafc; border-radius: 8px; padding: 16px"
+              >
+                <div id="calendarGrid">
+                  <!-- Calendar grid will be populated by JavaScript -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instructions Card -->
+          <div class="content-card">
+            <div class="content-card-header">📅 How to Use the Calendar</div>
+            <div class="content-card-body">
+              <p style="margin-bottom: 12px;">
+                This calendar displays all campaigns from your planning data organized
+                by month. Switch between financial years using the tabs above, use
+                filters to narrow down campaigns, and click on any campaign to view
+                detailed information.
+              </p>
+              <ul style="margin: 0; padding-left: 20px;">
+                <li>Use the Financial Year tabs to switch between different periods</li>
+                <li>Apply filters to focus on specific regions, quarters, or campaign types</li>
+                <li>Click on campaign entries to see detailed information</li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <!-- Instructions -->
-      <div
-        style="
-          margin-top: 20px;
-          padding: 16px;
-          background: #e3f2fd;
-          border-radius: 6px;
-          color: #1976d2;
-        "
-      >
-        <h4 style="margin-top: 0">📅 Campaign Calendar View</h4>
-        <p style="margin-bottom: 0">
-          This calendar displays all campaigns from your planning data organized
-          by month. Switch between financial years using the tabs above, use
-          filters to narrow down campaigns, and click on any campaign to view
-          detailed information.
-        </p>
-      </div>
-    </section>
+      </section>
     <section id="view-github-sync" style="display: none">
       <div id="githubSync">
         <div id="githubSyncLocked" style="text-align: center; padding: 40px;">
@@ -298,27 +330,64 @@
         </div>
       </div>
       <!-- Password Modal for GitHub Sync -->
-      <div id="githubSyncPasswordModal" class="password-modal">
-        <div class="password-modal-content">
-          <h3>🔒 Unlock GitHub Sync</h3>
-          <p>Enter password to access GitHub synchronization features</p>
-          <input
-            id="githubSyncPasswordInput"
-            type="password"
-            class="password-modal-input"
-            placeholder="Enter password..."
-          />
-          <div class="password-modal-error" id="githubSyncPasswordError"></div>
-          <div class="password-modal-buttons">
-            <button id="githubSyncPasswordSubmit" class="password-modal-button primary">
-              Unlock Access
-            </button>
-            <button id="githubSyncPasswordCancel" class="password-modal-button secondary">
-              Cancel
-            </button>
+            <section id="view-github-sync" style="display: none">
+        <div class="section-header">GitHub Integration & Data Sync</div>
+        <div class="section-content">
+          <!-- GitHub Sync Content -->
+          <div id="githubSync">
+            <div class="content-card" id="githubSyncLocked" style="text-align: center; padding: 40px;">
+              <div class="content-card-header">🔒 GitHub Sync Access Restricted</div>
+              <div class="content-card-body">
+                <p>This section requires administrator permissions.</p>
+                <p>Please click the "GitHub Sync" tab to authenticate.</p>
+              </div>
+            </div>
+            
+            <div id="githubSyncUnlocked" style="display: none;">
+              <div class="content-card spaced-element">
+                <div class="content-card-header">✅ GitHub Sync Unlocked</div>
+                <div class="content-card-body">
+                  <p>GitHub synchronization features are now available.</p>
+                  
+                  <!-- Actions Card -->
+                  <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h4 style="margin-top: 0;">Available Actions:</h4>
+                    <ul style="margin: 0;">
+                      <li>Sync planning data to GitHub</li>
+                      <li>Export execution data</li>
+                      <li>Download ROI reports</li>
+                      <li>Backup budget configurations</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Password Modal -->
+          <div id="githubSyncPasswordModal" class="password-modal">
+            <div class="password-modal-content">
+              <h3>� GitHub Sync Authentication</h3>
+              <p>Enter administrator password to access GitHub sync features</p>
+              <input
+                id="githubSyncPasswordInput"
+                type="password"
+                class="password-modal-input"
+                placeholder="Enter password..."
+              />
+              <div class="password-modal-error" id="githubSyncPasswordError"></div>
+              <div class="password-modal-buttons">
+                <button id="githubSyncPasswordSubmit" class="password-modal-button primary">
+                  Unlock Access
+                </button>
+                <button id="githubSyncPasswordCancel" class="password-modal-button secondary">
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </section>
     <section id="view-budget-setup" style="display: none">
       <div id="annualBudgetContainer">
@@ -370,105 +439,128 @@
         </div>
       </div>
     </section>
-    <section id="view-roi" style="display: none">
-      <div id="roiFiltersDiv" class="filters-container">
-        <div class="filter-group">
-          <label for="roiRegionFilter">Filter by Region:</label>
-          <select id="roiRegionFilter" multiple data-placeholder="Regions">
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="roiQuarterFilter">Filter by Quarter:</label>
-          <select id="roiQuarterFilter" multiple data-placeholder="Quarters">
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="roiCountryFilter">Country:</label>
-          <select id="roiCountryFilter" multiple data-placeholder="Countries">
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="roiOwnerFilter">Owner:</label>
-          <select id="roiOwnerFilter" multiple data-placeholder="Owners">
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="roiStatusFilter">Status:</label>
-          <select id="roiStatusFilter" multiple data-placeholder="Statuses">
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="roiProgramTypeFilter">Program Type:</label>
-          <select id="roiProgramTypeFilter" multiple data-placeholder="Program Types">
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="roiStrategicPillarsFilter">Strategic Pillars:</label>
-          <select id="roiStrategicPillarsFilter" multiple data-placeholder="Strategic Pillars">
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="roiRevenuePlayFilter">Revenue Play:</label>
-          <select id="roiRevenuePlayFilter" multiple data-placeholder="Revenue Plays">
-          </select>
-        </div>
-        <button id="roiClearFilters" class="clear-filters-btn">
-          Clear Filters
-        </button>
-      </div>
-      <div class="roi-performance-container">
-        <!-- Top Section: ROI Gauge and Main Metrics -->
-        <div class="roi-top-section">
-          <!-- ROI Gauge Chart -->
-          <div class="roi-gauge-container">
-            <h4 class="roi-gauge-title">🎯 ROI Performance</h4>
-            <div class="roi-gauge-chart-wrapper">
-              <canvas id="roiGaugeChart"></canvas>
+      <section id="view-roi" style="display: none">
+        <div class="section-header">ROI Analysis & Performance Metrics</div>
+        <div class="section-content">
+          <!-- ROI Filters Card -->
+          <div class="content-card spaced-element">
+            <div class="content-card-header">Performance Filters</div>
+            <div class="content-card-body">
+              <div id="roiFiltersDiv" class="filters-container">
+                <div class="filter-row" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                  <div class="filter-group">
+                    <label for="roiRegionFilter">Filter by Region:</label>
+                    <select id="roiRegionFilter" multiple data-placeholder="Regions">
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label for="roiQuarterFilter">Filter by Quarter:</label>
+                    <select id="roiQuarterFilter" multiple data-placeholder="Quarters">
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label for="roiCountryFilter">Country:</label>
+                    <select id="roiCountryFilter" multiple data-placeholder="Countries">
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label for="roiOwnerFilter">Owner:</label>
+                    <select id="roiOwnerFilter" multiple data-placeholder="Owners">
+                    </select>
+                  </div>
+                </div>
+                <div class="filter-row" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px;">
+                  <div class="filter-group">
+                    <label for="roiStatusFilter">Status:</label>
+                    <select id="roiStatusFilter" multiple data-placeholder="Statuses">
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label for="roiProgramTypeFilter">Program Type:</label>
+                    <select id="roiProgramTypeFilter" multiple data-placeholder="Program Types">
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label for="roiStrategicPillarsFilter">Strategic Pillars:</label>
+                    <select id="roiStrategicPillarsFilter" multiple data-placeholder="Strategic Pillars">
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label for="roiRevenuePlayFilter">Revenue Play:</label>
+                    <select id="roiRevenuePlayFilter" multiple data-placeholder="Revenue Plays">
+                    </select>
+                  </div>
+                </div>
+                <div style="margin-top: 16px;">
+                  <button id="roiClearFilters" class="clear-filters-btn">
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Main ROI Metrics Grid -->
-          <div class="roi-metrics-grid">
-            <div class="roi-info-box costs">
-              <div class="roi-info-box-label">Total Costs</div>
-              <div id="roiTotalSpendValue" class="roi-info-box-value">$0</div>
-            </div>
+          <!-- ROI Performance Card -->
+          <div class="content-card">
+            <div class="content-card-header">Performance Dashboard</div>
+            <div class="content-card-body">
+              <div class="roi-performance-container">
+                <!-- Top Section: ROI Gauge and Main Metrics -->
+                <div class="roi-top-section">
+                  <!-- ROI Gauge Chart -->
+                  <div class="roi-gauge-container">
+                    <h4 class="roi-gauge-title">🎯 ROI Performance</h4>
+                    <div class="roi-gauge-chart-wrapper">
+                      <canvas id="roiGaugeChart"></canvas>
+                    </div>
+                  </div>
 
-            <div class="roi-info-box pipeline">
-              <div class="roi-info-box-label">Total Forecasted Pipeline</div>
-              <div id="roiTotalPipelineValue" class="roi-info-box-value">$0</div>
-            </div>
+                  <!-- Main ROI Metrics Grid -->
+                  <div class="roi-metrics-grid">
+                    <div class="roi-info-box costs">
+                      <div class="roi-info-box-label">Total Costs</div>
+                      <div id="roiTotalSpendValue" class="roi-info-box-value">$0</div>
+                    </div>
 
-            <div class="roi-info-box leads">
-              <div class="roi-info-box-label">Total Leads/Conversions</div>
-              <div id="roiTotalLeadsValue" class="roi-info-box-value">0</div>
-            </div>
+                    <div class="roi-info-box pipeline">
+                      <div class="roi-info-box-label">Total Forecasted Pipeline</div>
+                      <div id="roiTotalPipelineValue" class="roi-info-box-value">$0</div>
+                    </div>
 
-            <div class="roi-info-box mql">
-              <div class="roi-info-box-label">Total MQL</div>
-              <div id="roiTotalMqlValue" class="roi-info-box-value">0</div>
+                    <div class="roi-info-box leads">
+                      <div class="roi-info-box-label">Total Leads/Conversions</div>
+                      <div id="roiTotalLeadsValue" class="roi-info-box-value">0</div>
+                    </div>
+
+                    <div class="roi-info-box mql">
+                      <div class="roi-info-box-label">Total MQL</div>
+                      <div id="roiTotalMqlValue" class="roi-info-box-value">0</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bottom Metrics Row -->
+                <div class="roi-metrics-bottom">
+                  <div class="roi-info-box forecasted">
+                    <div class="roi-info-box-label">Total Forecasted Cost</div>
+                    <div id="roiTotalForecastedCostValue" class="roi-info-box-value">$0</div>
+                  </div>
+
+                  <div class="roi-info-box remaining">
+                    <div class="roi-info-box-label">Remaining Budget</div>
+                    <div id="roiRemainingBudgetValue" class="roi-info-box-value">$0</div>
+                  </div>
+
+                  <div class="roi-info-box usage">
+                    <div class="roi-info-box-label">Forecasted Budget Usage</div>
+                    <div id="roiForecastedBudgetValue" class="roi-info-box-value">$0</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        <!-- Bottom Metrics Row -->
-        <div class="roi-metrics-bottom">
-          <div class="roi-info-box forecasted">
-            <div class="roi-info-box-label">Total Forecasted Cost</div>
-            <div id="roiTotalForecastedCostValue" class="roi-info-box-value">$0</div>
-          </div>
-
-          <div class="roi-info-box remaining">
-            <div class="roi-info-box-label">Remaining Budget</div>
-            <div id="roiRemainingBudgetValue" class="roi-info-box-value">$0</div>
-          </div>
-
-          <div class="roi-info-box usage">
-            <div class="roi-info-box-label">Forecasted Budget Usage</div>
-            <div id="roiForecastedBudgetValue" class="roi-info-box-value">$0</div>
-          </div>
-        </div>
-      </div>
+      </section>
 
         <div id="roiChartTabsContainer" class="chart-tabs-container">
           <!-- Tab Navigation -->
@@ -502,17 +594,35 @@
               </div>
             </div>
 
-            <!-- Forecasted vs Actual Chart -->
-            <div id="roiQuarterChartContainer" class="roi-chart-panel">
-              <h3 class="chart-panel-title">Forecasted vs Actual Performance</h3>
-              <div class="chart-wrapper">
-                <canvas id="roiQuarterChart"></canvas>
+            </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ROI Charts Card -->
+          <div class="content-card">
+            <div class="content-card-header">Performance Analysis</div>
+            <div class="content-card-body">
+              <!-- Digital Motions ROI Chart -->
+              <div id="roiDigitalMotionsChartContainer" class="roi-chart-panel spaced-element">
+                <h3 class="chart-panel-title">Digital Motions ROI Analysis</h3>
+                <div class="chart-wrapper">
+                  <canvas id="roiDigitalMotionsChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Forecasted vs Actual Chart -->
+              <div id="roiQuarterChartContainer" class="roi-chart-panel">
+                <h3 class="chart-panel-title">Forecasted vs Actual Performance</h3>
+                <div class="chart-wrapper">
+                  <canvas id="roiQuarterChart"></canvas>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div> <!-- End main-container -->
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="charts.js"></script>

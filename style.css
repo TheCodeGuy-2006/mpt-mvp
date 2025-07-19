@@ -5,13 +5,23 @@ body {
   margin: 0;
   min-height: 100vh;
   overflow-x: hidden;
+  padding: 0;
 }
+
+/* Main container for all content */
+.main-container {
+  padding: 24px;
+  max-width: 2000px;
+  margin: 0 auto;
+  min-height: calc(100vh - 96px); /* Account for nav height */
+}
+
 nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: #1976d2;
-  padding: 18px 20px;
+  padding: 18px 24px;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
   position: relative;
   min-height: 60px;
@@ -89,36 +99,142 @@ nav a.active + .nav-separator,
   fill: #90caf9;
 }
 section {
-  padding: 24px 32px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 24px rgba(25, 118, 210, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.02);
+  margin-bottom: 24px;
+  padding: 0;
+  max-width: 100%;
+  border: 1px solid rgba(25, 118, 210, 0.06);
+  overflow: hidden;
+}
+
+/* Section headers */
+.section-header {
+  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  color: white;
+  padding: 20px 24px;
+  margin: 0;
+  border-radius: 16px 16px 0 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-header::before {
+  content: '📊';
+  font-size: 1.2em;
+}
+
+/* Section content areas */
+.section-content {
+  padding: 24px;
+}
+
+/* Card-based layout for grouped content */
+.content-card {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.07);
-  margin: 16px auto 0 auto;
-  max-width: 2000px;
-  width: 98vw;
+  box-shadow: 
+    0 2px 12px rgba(25, 118, 210, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(25, 118, 210, 0.08);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: 
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+}
+
+.content-card:hover {
+  box-shadow: 
+    0 4px 20px rgba(25, 118, 210, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.content-card-header {
+  background: linear-gradient(135deg, #f8fbff 0%, #e3f2fd 100%);
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(25, 118, 210, 0.1);
+  font-weight: 600;
+  color: #1976d2;
+  font-size: 1.1rem;
+}
+
+.content-card-body {
+  padding: 20px;
 }
 h2 {
   color: #1976d2;
   font-weight: 600;
+  margin: 0 0 20px 0;
+  padding: 0;
+  font-size: 1.5rem;
+}
+
+/* Consistent spacing for elements */
+.spaced-element {
+  margin-bottom: 20px;
+}
+
+.spaced-element:last-child {
+  margin-bottom: 0;
+}
+
+/* Button groups with proper spacing */
+.button-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.button-group:first-child {
   margin-top: 0;
+}
+
+.button-group:last-child {
+  margin-bottom: 0;
 }
 #gridButtons button,
 #savePlan {
   background: #1976d2;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 8px 18px;
-  margin-right: 10px;
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin: 0;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.08);
-  transition: background 0.2s;
+  box-shadow: 
+    0 2px 8px rgba(25, 118, 210, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
 }
+
 #gridButtons button:hover,
 #savePlan:hover {
   background: #1565c0;
+  box-shadow: 
+    0 4px 16px rgba(25, 118, 210, 0.16),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+#gridButtons {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+  flex-wrap: wrap;
 }
 #saveAnnualBudget {
   background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
@@ -191,15 +307,29 @@ table#planTable td input[type="text"] {
   font-size: 1.25rem;
 }
 /* Programme Grid Table Styling */
-#gridContainer .tabulator {
-  background: #f6faff;
-  border-radius: 10px;
-  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.1);
-  border: 1.5px solid #90caf9;
-  font-size: 1.13rem;
-  margin: 0 auto 24px auto;
+#gridContainer .tabulator,
+.content-card-body .tabulator {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 
+    0 2px 8px rgba(25, 118, 210, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(25, 118, 210, 0.08);
+  font-size: 1.1rem;
+  margin: 0;
   overflow: hidden;
 }
+
+.content-card-body .tabulator .tabulator-header {
+  background: linear-gradient(135deg, #f8fbff 0%, #e3f2fd 100%);
+  border-bottom: 2px solid rgba(25, 118, 210, 0.1);
+}
+
+.content-card-body .tabulator .tabulator-header .tabulator-col {
+  background: transparent;
+  border-right: 1px solid rgba(25, 118, 210, 0.08);
+}
+
 #gridContainer .tabulator-header {
   background: #1976d2;
   color: #fff;
@@ -929,16 +1059,49 @@ table#planTable td input[type="text"] {
 
 /* ===== UNIVERSAL FILTER CONTAINER STYLES ===== */
 .filter-container {
-  background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
-  border: 2px solid #e3f2fd;
-  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(25, 118, 210, 0.12);
+  border-radius: 16px;
   box-shadow: 
-    0 4px 16px rgba(25, 118, 210, 0.08),
-    0 1px 4px rgba(0, 0, 0, 0.02);
-  padding: 16px 20px 20px 20px;
-  margin-bottom: 20px;
+    0 4px 20px rgba(25, 118, 210, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.02);
+  padding: 0;
+  margin-bottom: 24px;
   position: relative;
   overflow: hidden;
+  transition: 
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+}
+
+.filter-container:hover {
+  box-shadow: 
+    0 6px 28px rgba(25, 118, 210, 0.12),
+    0 3px 12px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+/* Filter header */
+.filter-container::after {
+  content: 'Filters';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  color: white;
+  padding: 16px 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+  border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Filter content area */
+.filter-content {
+  padding: 80px 24px 24px 24px; /* Top padding accounts for header */
 }
 
 /* Filter instructions */
@@ -975,30 +1138,50 @@ table#planTable td input[type="text"] {
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 4px;
   background: linear-gradient(90deg, #1976d2, #42a5f5, #64b5f6);
-}
-
-.filter-container::after {
-  content: 'Filters';
-  position: absolute;
-  top: -1px;
-  left: 20px;
-  background: linear-gradient(135deg, #1976d2, #42a5f5);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 0 0 8px 8px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+  border-radius: 16px 16px 0 0;
 }
 
 .filter-row {
   display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.filter-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive filter grid */
+.filter-row-main {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.filter-row-secondary {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* Filter groups */
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-weight: 600;
+  color: #1976d2;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+/* Filter actions */
+.filter-actions {
+  display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: flex-end;
+  flex-wrap: wrap;
   margin-top: 12px;
 }
 
@@ -2402,4 +2585,101 @@ div[style*="max-width: 1200px"] {
   width: 100%;
   min-width: 100%;
   box-sizing: border-box;
+}
+
+/* ===== CARD-BASED LAYOUT IMPROVEMENTS ===== */
+
+/* Table responsive improvements */
+.content-card-body .tabulator {
+  min-height: 200px;
+}
+
+.content-card-body .tabulator .tabulator-table {
+  background: #fff;
+}
+
+/* Improved form spacing within cards */
+.content-card-body form {
+  margin: 0;
+}
+
+.content-card-body input,
+.content-card-body select,
+.content-card-body textarea {
+  margin-bottom: 12px;
+}
+
+.content-card-body input:last-child,
+.content-card-body select:last-child,
+.content-card-body textarea:last-child {
+  margin-bottom: 0;
+}
+
+/* Charts within cards */
+.content-card-body canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.content-card-body .chart-wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+/* Card-specific responsive improvements */
+@media (max-width: 768px) {
+  .main-container {
+    padding: 16px;
+  }
+  
+  .section-content {
+    padding: 16px;
+  }
+  
+  .content-card-body {
+    padding: 16px;
+  }
+  
+  .filter-content {
+    padding: 60px 16px 16px 16px;
+  }
+  
+  .filter-row-main,
+  .filter-row-secondary {
+    grid-template-columns: 1fr;
+  }
+  
+  .button-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .button-group button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-container {
+    padding: 12px;
+  }
+  
+  .section-header {
+    padding: 16px;
+    font-size: 1.2rem;
+  }
+  
+  .section-content {
+    padding: 12px;
+  }
+  
+  .content-card-body {
+    padding: 12px;
+  }
+  
+  .content-card-header {
+    padding: 12px 16px;
+    font-size: 1rem;
+  }
 }
