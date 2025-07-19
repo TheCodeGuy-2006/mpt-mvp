@@ -288,6 +288,7 @@ function initExecutionGrid(rows) {
           const owner = data.owner || "";
           const description = data.description || "";
           const programType = data.programType || "";
+          const quarter = data.quarter || "";
 
           // Create multi-line informative format
           let html =
@@ -295,6 +296,10 @@ function initExecutionGrid(rows) {
 
           if (region) {
             html += `<div style="font-weight: bold; color: #1976d2;">${region}</div>`;
+          }
+
+          if (quarter) {
+            html += `<div style="color: #e65100; font-weight: bold; margin-top: 2px;">${quarter}</div>`;
           }
 
           if (owner) {
@@ -785,9 +790,6 @@ function applyExecutionFilters() {
     if (filters.region.length > 0) {
       activeFilters.push({ field: "region", type: "in", value: filters.region });
     }
-    if (filters.quarter.length > 0) {
-      activeFilters.push({ field: "quarter", type: "in", value: filters.quarter });
-    }
     if (filters.status.length > 0) {
       activeFilters.push({ field: "status", type: "in", value: filters.status });
     }
@@ -812,8 +814,21 @@ function applyExecutionFilters() {
     // Apply standard filters first
     if (activeFilters.length > 0) {
       executionTableInstance.setFilter(activeFilters);
-    } else {
-      executionTableInstance.clearFilter();
+    }
+
+    // Add custom filters after standard filters
+    if (filters.quarter.length > 0) {
+      // Custom quarter filter to handle format mismatch between filter options and data
+      // Filter options: "Q1 July", Data format: "Q1 - July"
+      executionTableInstance.addFilter(function(data) {
+        if (!data.quarter) return false;
+        
+        return filters.quarter.some(filterQuarter => {
+          // Normalize both formats for comparison
+          const normalizeQuarter = (q) => q.replace(/\s*-\s*/g, ' ').trim();
+          return normalizeQuarter(data.quarter) === normalizeQuarter(filterQuarter);
+        });
+      });
     }
 
     // Apply Digital Motions filter separately as a custom function filter

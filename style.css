@@ -537,6 +537,52 @@ table#planTable td input[type="text"] {
   line-height: 1.3;
   padding: 0 4px;
 }
+
+/* Highlight editable columns in execution grid */
+#executionGrid .tabulator-col[tabulator-field="status"] .tabulator-col-title,
+#executionGrid .tabulator-col[tabulator-field="poRaised"] .tabulator-col-title,
+#executionGrid .tabulator-col[tabulator-field="actualCost"] .tabulator-col-title,
+#executionGrid .tabulator-col[tabulator-field="actualLeads"] .tabulator-col-title,
+#executionGrid .tabulator-col[tabulator-field="actualMQLs"] .tabulator-col-title {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%) !important;
+  border-left: 4px solid #4caf50 !important;
+  position: relative;
+}
+
+#executionGrid .tabulator-col[tabulator-field="status"] .tabulator-col-title::after,
+#executionGrid .tabulator-col[tabulator-field="poRaised"] .tabulator-col-title::after,
+#executionGrid .tabulator-col[tabulator-field="actualCost"] .tabulator-col-title::after,
+#executionGrid .tabulator-col[tabulator-field="actualLeads"] .tabulator-col-title::after,
+#executionGrid .tabulator-col[tabulator-field="actualMQLs"] .tabulator-col-title::after {
+  content: "✏️";
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Highlight editable cells in execution grid */
+#executionGrid .tabulator-cell[tabulator-field="status"],
+#executionGrid .tabulator-cell[tabulator-field="poRaised"],
+#executionGrid .tabulator-cell[tabulator-field="actualCost"],
+#executionGrid .tabulator-cell[tabulator-field="actualLeads"],
+#executionGrid .tabulator-cell[tabulator-field="actualMQLs"] {
+  background: #f8fdf8 !important;
+  border-left: 3px solid #4caf50 !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#executionGrid .tabulator-cell[tabulator-field="status"]:hover,
+#executionGrid .tabulator-cell[tabulator-field="poRaised"]:hover,
+#executionGrid .tabulator-cell[tabulator-field="actualCost"]:hover,
+#executionGrid .tabulator-cell[tabulator-field="actualLeads"]:hover,
+#executionGrid .tabulator-cell[tabulator-field="actualMQLs"]:hover {
+  background: #f0fdf0 !important;
+  border-left: 3px solid #388e3c !important;
+  box-shadow: inset 2px 0 4px rgba(76, 175, 80, 0.1);
+}
 /* Details column specific styles to prevent header row expansion */
 #executionGrid .tabulator-col[data-field="details"] .tabulator-col-content {
   height: 35px !important;
