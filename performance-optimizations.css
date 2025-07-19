@@ -1,5 +1,10 @@
 /* Performance Optimizations CSS */
 
+/* Global font family for performance elements */
+* {
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
 /* Reduce repaints and reflows */
 .tabulator {
   will-change: transform;

@@ -1,7 +1,7 @@
 body {
-  background: #f6faff;
-  color: #1a237e;
-  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f6f8fa;
+  color: #24292e;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   margin: 0;
   min-height: 100vh;
   overflow-x: hidden;
@@ -20,14 +20,15 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #1976d2;
+  background: #24292e;
   padding: 18px 24px;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: relative;
   min-height: 60px;
+  border-bottom: 1px solid #d0d7de;
 }
 nav a {
-  color: #fff;
+  color: #f0f6fc;
   text-decoration: none;
   font-weight: 500;
   margin-right: 0;
@@ -38,21 +39,19 @@ nav a {
   position: relative;
 }
 nav a:hover {
-  color: #90caf9;
-  background: rgba(255, 255, 255, 0.1);
+  color: #58a6ff;
+  background: rgba(240, 246, 252, 0.1);
   transform: translateY(-1px);
 }
 nav a.active {
-  background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
-  color: #1976d2 !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f6f8fa 100%);
+  color: #0969da !important;
   font-weight: 700;
   padding: 10px 16px;
   margin: 0 2px;
   position: relative;
-  box-shadow: 
-    0 3px 8px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  border: 2px solid #90caf9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 2px solid #0969da;
   transform: translateY(-1px);
   border-radius: 6px;
 }
@@ -64,20 +63,18 @@ nav a.active:before {
   transform: translateX(-50%);
   width: 80%;
   height: 3px;
-  background: linear-gradient(90deg, #42a5f5, #90caf9, #42a5f5);
+  background: linear-gradient(90deg, #0969da, #58a6ff, #0969da);
   border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(66, 165, 245, 0.3);
+  box-shadow: 0 1px 3px rgba(9, 105, 218, 0.3);
 }
 nav a.active:hover {
-  color: #1976d2 !important;
-  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+  color: #0969da !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f6f8fa 100%);
   transform: translateY(-1px);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .nav-separator {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(240, 246, 252, 0.7);
   margin: 0 8px;
   font-weight: 300;
   transition: opacity 0.3s ease;
@@ -90,37 +87,35 @@ nav a.active + .nav-separator,
 .github-logo {
   height: 32px;
   width: 32px;
-  fill: #fff;
+  fill: #f0f6fc;
   cursor: pointer;
   transition: fill 0.2s;
   flex-shrink: 0;
 }
 .github-logo:hover {
-  fill: #90caf9;
+  fill: #58a6ff;
 }
 section {
-  background: #fff;
+  background: #ffffff;
   border-radius: 16px;
-  box-shadow: 
-    0 4px 24px rgba(25, 118, 210, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 24px;
   padding: 0;
   max-width: 100%;
-  border: 1px solid rgba(25, 118, 210, 0.06);
+  border: 1px solid #d0d7de;
   overflow: hidden;
 }
 
 /* Section headers */
 .section-header {
-  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  background: linear-gradient(135deg, #24292e 0%, #6e7681 100%);
   color: white;
   padding: 20px 24px;
   margin: 0;
   border-radius: 16px 16px 0 0;
   font-size: 1.4rem;
   font-weight: 600;
-  border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #d0d7de;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -138,12 +133,10 @@ section {
 
 /* Card-based layout for grouped content */
 .content-card {
-  background: #fff;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 
-    0 2px 12px rgba(25, 118, 210, 0.06),
-    0 1px 4px rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(25, 118, 210, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #d0d7de;
   margin-bottom: 20px;
   overflow: hidden;
   transition: 
@@ -152,18 +145,16 @@ section {
 }
 
 .content-card:hover {
-  box-shadow: 
-    0 4px 20px rgba(25, 118, 210, 0.1),
-    0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
 
 .content-card-header {
-  background: linear-gradient(135deg, #f8fbff 0%, #e3f2fd 100%);
+  background: linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%);
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(25, 118, 210, 0.1);
+  border-bottom: 1px solid #d0d7de;
   font-weight: 600;
-  color: #1976d2;
+  color: #24292e;
   font-size: 1.1rem;
 }
 
@@ -171,7 +162,7 @@ section {
   padding: 20px;
 }
 h2 {
-  color: #1976d2;
+  color: #24292e;
   font-weight: 600;
   margin: 0 0 20px 0;
   padding: 0;
@@ -205,8 +196,8 @@ h2 {
 }
 #gridButtons button,
 #savePlan {
-  background: #1976d2;
-  color: #fff;
+  background: #0969da;
+  color: #ffffff;
   border: none;
   border-radius: 8px;
   padding: 12px 20px;
@@ -214,19 +205,16 @@ h2 {
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 
-    0 2px 8px rgba(25, 118, 210, 0.12),
-    0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
   border: 1px solid transparent;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 #gridButtons button:hover,
 #savePlan:hover {
-  background: #1565c0;
-  box-shadow: 
-    0 4px 16px rgba(25, 118, 210, 0.16),
-    0 2px 6px rgba(0, 0, 0, 0.12);
+  background: #0860ca;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
 
@@ -237,14 +225,14 @@ h2 {
   flex-wrap: wrap;
 }
 #saveAnnualBudget {
-  background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
-  color: #fff;
+  background: linear-gradient(90deg, #0969da 60%, #58a6ff 100%);
+  color: #ffffff;
   border: none;
   border-radius: 6px;
   padding: 10px 28px;
   font-size: 1.08rem;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   letter-spacing: 0.02em;
   cursor: pointer;
   margin: 0 8px;
@@ -252,10 +240,11 @@ h2 {
     background 0.2s,
     box-shadow 0.2s,
     transform 0.1s;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 #saveAnnualBudget:hover {
-  background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.16);
+  background: linear-gradient(90deg, #0860ca 60%, #0969da 100%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px) scale(1.03);
 }
 #view-budget-setup {
@@ -272,10 +261,10 @@ table#planTable {
   font-size: 1.25rem;
   min-height: 220px;
   border-collapse: collapse;
-  background: #f6faff;
+  background: #f6f8fa;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 1px 6px rgba(25, 118, 210, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 table#planTable th,
 table#planTable td {
@@ -284,81 +273,83 @@ table#planTable td {
   text-align: left;
 }
 table#planTable th {
-  background: #1976d2;
-  color: #fff;
+  background: #24292e;
+  color: #ffffff;
   font-weight: 600;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 table#planTable td input[type="number"] {
   width: 100%;
   padding: 6px 8px;
-  border: 1px solid #90caf9;
+  border: 1px solid #d0d7de;
   border-radius: 4px;
-  background: #fff;
-  color: #1a237e;
+  background: #ffffff;
+  color: #24292e;
   font-size: 1rem;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 table#planTable td input[type="text"] {
   width: 100%;
   padding: 6px 8px;
-  border: 1px solid #90caf9;
+  border: 1px solid #d0d7de;
   border-radius: 4px;
-  background: #fff;
-  color: #1a237e;
+  background: #ffffff;
+  color: #24292e;
   font-size: 1.25rem;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 /* Programme Grid Table Styling */
 #gridContainer .tabulator,
 .content-card-body .tabulator {
-  background: #fff;
+  background: #ffffff;
   border-radius: 8px;
-  box-shadow: 
-    0 2px 8px rgba(25, 118, 210, 0.06),
-    0 1px 3px rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(25, 118, 210, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #d0d7de;
   font-size: 1.1rem;
   margin: 0;
   overflow: hidden;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .content-card-body .tabulator .tabulator-header {
-  background: linear-gradient(135deg, #f8fbff 0%, #e3f2fd 100%);
-  border-bottom: 2px solid rgba(25, 118, 210, 0.1);
+  background: linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%);
+  border-bottom: 2px solid #d0d7de;
 }
 
 .content-card-body .tabulator .tabulator-header .tabulator-col {
   background: transparent;
-  border-right: 1px solid rgba(25, 118, 210, 0.08);
+  border-right: 1px solid #d0d7de;
 }
 
 #gridContainer .tabulator-header {
-  background: #1976d2;
-  color: #fff;
+  background: #24292e;
+  color: #ffffff;
   font-weight: 600;
-  border-bottom: 2px solid #90caf9;
+  border-bottom: 2px solid #d0d7de;
 }
 #gridContainer .tabulator-col {
-  background: #1976d2;
-  color: #fff;
+  background: #24292e;
+  color: #ffffff;
   font-weight: 500;
-  border-right: 1px solid #90caf9;
+  border-right: 1px solid #6e7681;
 }
 #gridContainer .tabulator-row {
-  background: #fff;
-  border-bottom: 1px solid #e3eafc;
+  background: #ffffff;
+  border-bottom: 1px solid #d0d7de;
   transition: background 0.2s;
 }
 #gridContainer .tabulator-row.tabulator-selected {
-  background: #e3f2fd;
+  background: #ddf4ff;
 }
 #gridContainer .tabulator-row:hover {
-  background: #e3f2fd;
+  background: #ddf4ff;
 }
 #gridContainer .tabulator-cell {
-  border-right: 1px solid #e3eafc;
+  border-right: 1px solid #d0d7de;
   padding: 14px 10px;
 }
 #gridContainer .tabulator-footer {
-  background: #f6faff !important;
+  background: #f6f8fa !important;
   color: transparent !important;
   border-top: none !important;
   box-shadow: none !important;
@@ -376,10 +367,11 @@ table#planTable td input[type="text"] {
   overflow-x: auto !important; /* Ensure horizontal scrolling works */
   overflow-y: auto !important;
   border-radius: 10px;
-  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: relative;
-  background: #fff;
+  background: #ffffff;
   box-sizing: border-box;
+  border: 1px solid #d0d7de;
 }
 #planningGrid .tabulator,
 #planningGrid .tabulator-tableholder,
@@ -388,20 +380,20 @@ table#planTable td input[type="text"] {
   width: auto !important; /* Changed from 100% to auto for proper horizontal scrolling */
   max-width: none !important;
   box-sizing: border-box;
-  background: #fff;
+  background: #ffffff;
   overflow-x: visible !important; /* Ensure content can extend beyond container */
 }
 #planningGrid .tabulator {
   min-width: 2000px !important; /* Increased from 1400px */
   width: auto !important; /* Changed from 100% to auto */
   max-width: none !important;
-  background: #fff;
+  background: #ffffff;
   overflow-x: visible !important;
 }
 #planningGrid {
   display: block;
   white-space: nowrap;
-  background: #fff;
+  background: #ffffff;
 }
 #planningGrid .tabulator {
   font-size: 1.05rem;
@@ -436,12 +428,12 @@ table#planTable td input[type="text"] {
 #planningGrid .tabulator-col {
   min-width: 110px;
   max-width: 300px;
-  background: #f5f5f5 !important;
-  color: #1a237e !important;
-  border-right: 1px solid #e3eafc;
+  background: #f6f8fa !important;
+  color: #24292e !important;
+  border-right: 1px solid #d0d7de;
 }
 #planningGrid .tabulator-col .tabulator-col-title {
-  color: #1a237e !important;
+  color: #24292e !important;
   background: transparent !important;
   white-space: normal !important;
   overflow: visible !important;
@@ -450,10 +442,11 @@ table#planTable td input[type="text"] {
   font-size: 1.1rem;
   line-height: 1.3;
   padding: 0 4px;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 #addRegionRow {
-  background: #1976d2;
-  color: #fff;
+  background: #0969da;
+  color: #ffffff;
   border: none;
   border-radius: 6px;
   padding: 8px 18px;
@@ -461,28 +454,30 @@ table#planTable td input[type="text"] {
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: background 0.2s;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 #addRegionRow:hover {
-  background: #1565c0;
+  background: #0860ca;
 }
 #planningGridButtons button {
-  background: #1976d2;
-  color: #fff;
+  background: #0969da;
+  color: #ffffff;
   border: none;
   border-radius: 6px;
   padding: 8px 18px;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 #planningGridButtons button:hover {
-  background: #1565c0;
+  background: #0860ca;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
 
@@ -511,27 +506,24 @@ table#planTable td input[type="text"] {
   padding: 12px 36px;
   font-weight: 700;
   border-radius: 10px;
-  background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
-  color: #fff;
+  background: linear-gradient(90deg, #0969da 60%, #58a6ff 100%);
+  color: #ffffff;
   border: none;
-  box-shadow:
-    0 4px 18px rgba(25, 118, 210, 0.13),
-    0 1.5px 6px rgba(66, 165, 245, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   letter-spacing: 0.03em;
   transition:
     background 0.22s,
     transform 0.18s,
     box-shadow 0.18s;
   outline: none;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 #savePlanningRows.save-large:hover,
 #savePlanningRows.save-large:focus {
-  background: linear-gradient(90deg, #2196f3 60%, #64b5f6 100%);
-  color: #fff;
+  background: linear-gradient(90deg, #0860ca 60%, #0969da 100%);
+  color: #ffffff;
   transform: scale(1.045);
-  box-shadow:
-    0 6px 24px rgba(33, 150, 243, 0.18),
-    0 2px 8px rgba(66, 165, 245, 0.13);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 #saveExecutionRows.save-large,
 #saveExecutionRows {
@@ -539,12 +531,10 @@ table#planTable td input[type="text"] {
   padding: 12px 36px;
   font-weight: 700;
   border-radius: 10px;
-  background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
-  color: #fff;
+  background: linear-gradient(90deg, #0969da 60%, #58a6ff 100%);
+  color: #ffffff;
   border: none;
-  box-shadow:
-    0 4px 18px rgba(25, 118, 210, 0.13),
-    0 1.5px 6px rgba(66, 165, 245, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   letter-spacing: 0.03em;
   transition:
     background 0.22s,
@@ -552,26 +542,25 @@ table#planTable td input[type="text"] {
     box-shadow 0.18s;
   outline: none;
   margin-bottom: 18px;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 #saveExecutionRows.save-large:hover,
 #saveExecutionRows:hover,
 #saveExecutionRows.save-large:focus,
 #saveExecutionRows:focus {
-  background: linear-gradient(90deg, #2196f3 60%, #64b5f6 100%);
-  color: #fff;
+  background: linear-gradient(90deg, #0860ca 60%, #0969da 100%);
+  color: #ffffff;
   transform: scale(1.045);
-  box-shadow:
-    0 6px 24px rgba(33, 150, 243, 0.18),
-    0 2px 8px rgba(66, 165, 245, 0.13);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .desc-tooltip {
   position: absolute;
   z-index: 9999;
-  background: #fff;
-  color: #1a237e;
-  border: 2px solid #1976d2;
+  background: #ffffff;
+  color: #24292e;
+  border: 2px solid #0969da;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.18);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 16px 20px;
   font-size: 1.15rem;
   max-width: 400px;
@@ -580,6 +569,7 @@ table#planTable td input[type="text"] {
   word-break: break-word;
   pointer-events: none;
   white-space: pre-line;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 #executionGrid {
   width: 98%;
@@ -592,10 +582,11 @@ table#planTable td input[type="text"] {
   overflow-x: auto !important;
   overflow-y: auto !important;
   border-radius: 10px;
-  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: relative;
-  background: #fff;
+  background: #ffffff;
   box-sizing: border-box;
+  border: 1px solid #d0d7de;
 }
 #executionGrid .tabulator,
 #executionGrid .tabulator-tableholder,
@@ -604,18 +595,18 @@ table#planTable td input[type="text"] {
   width: 100% !important;
   max-width: none !important;
   box-sizing: border-box;
-  background: #fff;
+  background: #ffffff;
 }
 #executionGrid .tabulator {
   min-width: 1400px !important;
   width: 100% !important;
   max-width: none !important;
-  background: #fff;
+  background: #ffffff;
 }
 #executionGrid {
   display: block;
   white-space: nowrap;
-  background: #fff;
+  background: #ffffff;
 }
 #executionGrid .tabulator {
   font-size: 1.05rem;
@@ -652,12 +643,12 @@ table#planTable td input[type="text"] {
 #executionGrid .tabulator-col {
   min-width: 110px;
   max-width: 300px;
-  background: #f5f5f5 !important;
-  color: #1a237e !important;
-  border-right: 1px solid #e3eafc;
+  background: #f6f8fa !important;
+  color: #24292e !important;
+  border-right: 1px solid #d0d7de;
 }
 #executionGrid .tabulator-col .tabulator-col-title {
-  color: #1a237e !important;
+  color: #24292e !important;
   background: transparent !important;
   white-space: normal !important;
   overflow: visible !important;
@@ -666,6 +657,7 @@ table#planTable td input[type="text"] {
   font-size: 1.1rem;
   line-height: 1.3;
   padding: 0 4px;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Highlight editable columns in execution grid */
@@ -674,8 +666,8 @@ table#planTable td input[type="text"] {
 #executionGrid .tabulator-col[tabulator-field="actualCost"] .tabulator-col-title,
 #executionGrid .tabulator-col[tabulator-field="actualLeads"] .tabulator-col-title,
 #executionGrid .tabulator-col[tabulator-field="actualMQLs"] .tabulator-col-title {
-  background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%) !important;
-  border-left: 4px solid #4caf50 !important;
+  background: linear-gradient(135deg, #dafbe1 0%, #f6f8fa 100%) !important;
+  border-left: 4px solid #1a7f37 !important;
   position: relative;
 }
 
@@ -698,8 +690,8 @@ table#planTable td input[type="text"] {
 #executionGrid .tabulator-cell[tabulator-field="actualCost"],
 #executionGrid .tabulator-cell[tabulator-field="actualLeads"],
 #executionGrid .tabulator-cell[tabulator-field="actualMQLs"] {
-  background: #f8fdf8 !important;
-  border-left: 3px solid #4caf50 !important;
+  background: #f6ffed !important;
+  border-left: 3px solid #1a7f37 !important;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -709,9 +701,9 @@ table#planTable td input[type="text"] {
 #executionGrid .tabulator-cell[tabulator-field="actualCost"]:hover,
 #executionGrid .tabulator-cell[tabulator-field="actualLeads"]:hover,
 #executionGrid .tabulator-cell[tabulator-field="actualMQLs"]:hover {
-  background: #f0fdf0 !important;
-  border-left: 3px solid #388e3c !important;
-  box-shadow: inset 2px 0 4px rgba(76, 175, 80, 0.1);
+  background: #d3f9d8 !important;
+  border-left: 3px solid #1a7f37 !important;
+  box-shadow: inset 2px 0 4px rgba(26, 127, 55, 0.1);
 }
 /* Details column specific styles to prevent header row expansion */
 #executionGrid .tabulator-col[data-field="details"] .tabulator-col-content {
@@ -739,7 +731,7 @@ table#planTable td input[type="text"] {
   transition: background 0.15s;
 }
 .plan-delete-btn:hover {
-  background: #ffebee;
+  background: #fff1f0;
 }
 #budgetsTable {
   display: none !important;
@@ -759,7 +751,7 @@ table#planTable td input[type="text"] {
 }
 .graph-fullscreen-btn:hover {
   opacity: 1;
-  background: #e3f2fd;
+  background: #ddf4ff;
 }
 #graphFullscreenOverlay {
   position: fixed;
@@ -774,7 +766,7 @@ table#planTable td input[type="text"] {
   z-index: 9999;
 }
 #graphFullscreenOverlay h2 {
-  color: #1976d2;
+  color: #0969da;
   margin: 0 0 18px 0;
 }
 #graphFullscreenOverlay button {
@@ -790,7 +782,7 @@ table#planTable td input[type="text"] {
 }
 #graphFullscreenOverlay button:hover {
   opacity: 1;
-  background: #e3f2fd;
+  background: #ddf4ff;
 }
 /* Chart styling */
 .chart-container {
@@ -809,37 +801,39 @@ table#planTable td input[type="text"] {
   width: 100%;
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   margin-top: 24px;
+  border: 1px solid #d0d7de;
 }
 
 .chart-tabs-nav {
   display: flex;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e3f2fd;
+  background: #f6f8fa;
+  border-bottom: 1px solid #d0d7de;
 }
 
 .roi-chart-tab {
   flex: 1;
   padding: 16px 24px;
   border: none;
-  background: #f5f5f5;
-  color: #666;
+  background: #f6f8fa;
+  color: #656d76;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .roi-chart-tab.active {
-  background: #1976d2;
+  background: #24292e;
   color: white;
 }
 
 .roi-chart-tab:hover:not(.active) {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: #ddf4ff;
+  color: #0969da;
 }
 
 .chart-content-area {
@@ -866,10 +860,11 @@ table#planTable td input[type="text"] {
 
 .chart-panel-title {
   margin: 0 0 24px 0;
-  color: #1976d2;
+  color: #24292e;
   font-size: 1.4rem;
   text-align: center;
   font-weight: 600;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .chart-wrapper {
@@ -989,15 +984,15 @@ table#planTable td input[type="text"] {
 #executionGrid .tabulator-header {
   position: sticky;
   top: 0;
-  background: #fff;
+  background: #ffffff;
   z-index: 10;
   height: 55px !important;
   min-height: 55px !important;
   max-height: 55px !important;
   padding-top: 4px;
   padding-bottom: 4px;
-  border-bottom: 2px solid #e3eafc;
-  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.04);
+  border-bottom: 2px solid #d0d7de;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 #executionGrid .tabulator-header .tabulator-col {
   min-width: 140px;
@@ -1040,8 +1035,8 @@ table#planTable td input[type="text"] {
 
 #calendarFilters select:focus {
   outline: none;
-  border-color: #1976d2;
-  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+  border-color: #0969da;
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.2);
 }
 
 #calendarFilters button {
@@ -1059,12 +1054,10 @@ table#planTable td input[type="text"] {
 
 /* ===== UNIVERSAL FILTER CONTAINER STYLES ===== */
 .filter-container {
-  background: #fff;
-  border: 1px solid rgba(25, 118, 210, 0.12);
+  background: #ffffff;
+  border: 1px solid #d0d7de;
   border-radius: 16px;
-  box-shadow: 
-    0 4px 20px rgba(25, 118, 210, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 0;
   margin-bottom: 24px;
   position: relative;
@@ -1075,9 +1068,7 @@ table#planTable td input[type="text"] {
 }
 
 .filter-container:hover {
-  box-shadow: 
-    0 6px 28px rgba(25, 118, 210, 0.12),
-    0 3px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
 
@@ -1088,15 +1079,16 @@ table#planTable td input[type="text"] {
   top: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  background: linear-gradient(135deg, #24292e, #6e7681);
   color: white;
   padding: 16px 24px;
   font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   border-radius: 16px 16px 0 0;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
-  border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #d0d7de;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Filter content area */
@@ -1106,13 +1098,13 @@ table#planTable td input[type="text"] {
 
 /* Filter instructions */
 .filter-instructions {
-  background: #e3f2fd;
-  border: 1px solid #bbdefb;
+  background: #ddf4ff;
+  border: 1px solid #54aeff;
   border-radius: 8px;
   padding: 10px 15px;
   margin-bottom: 15px;
   font-size: 0.9rem;
-  color: #1565c0;
+  color: #0969da;
 }
 
 .filter-instructions-text {
@@ -1122,14 +1114,14 @@ table#planTable td input[type="text"] {
 }
 
 .filter-instructions kbd {
-  background: #fff;
-  border: 1px solid #ccc;
+  background: #ffffff;
+  border: 1px solid #d0d7de;
   border-radius: 3px;
   padding: 2px 6px;
   font-size: 0.85rem;
-  font-family: monospace;
-  color: #333;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  color: #24292e;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .filter-container::before {
@@ -1139,7 +1131,7 @@ table#planTable td input[type="text"] {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #1976d2, #42a5f5, #64b5f6);
+  background: linear-gradient(90deg, #0969da, #58a6ff, #79c0ff);
   border-radius: 16px 16px 0 0;
 }
 
@@ -1171,9 +1163,10 @@ table#planTable td input[type="text"] {
 
 .filter-group label {
   font-weight: 600;
-  color: #1976d2;
+  color: #24292e;
   font-size: 0.95rem;
   margin-bottom: 4px;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Filter actions */
@@ -1204,18 +1197,19 @@ table#planTable td input[type="text"] {
 
 .filter-group label {
   font-weight: 600;
-  color: #1976d2;
+  color: #24292e;
   font-size: 0.8rem;
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .filter-input,
 .filter-select {
   padding: 8px 10px;
   border-radius: 6px;
-  border: 1px solid #c5d9f1;
+  border: 1px solid #d0d7de;
   font-size: 0.9rem;
   background: #ffffff;
   transition: all 0.2s ease;
@@ -1223,6 +1217,7 @@ table#planTable td input[type="text"] {
   width: 100%;
   height: 36px;
   box-sizing: border-box;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Multiselect specific styles */
@@ -1247,7 +1242,7 @@ table#planTable td input[type="text"] {
   min-height: 36px;
   height: auto;
   padding: 8px 30px 8px 10px;
-  border: 1px solid #c5d9f1;
+  border: 1px solid #d0d7de;
   border-radius: 6px;
   background: #ffffff;
   cursor: pointer;
@@ -1259,16 +1254,17 @@ table#planTable td input[type="text"] {
   position: relative;
   white-space: nowrap;
   overflow: visible;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .multiselect-display:hover {
-  border-color: #1976d2;
-  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.1);
+  border-color: #0969da;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .multiselect-display.open {
-  border-color: #1976d2;
-  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+  border-color: #0969da;
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.15);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -1289,7 +1285,7 @@ table#planTable td input[type="text"] {
 }
 
 .multiselect-placeholder {
-  color: #8ca3c7;
+  color: #656d76;
   font-size: 0.85rem;
 }
 
@@ -1302,7 +1298,7 @@ table#planTable td input[type="text"] {
 }
 
 .multiselect-tag {
-  background: #1976d2;
+  background: #0969da;
   color: white;
   padding: 2px 8px;
   border-radius: 12px;
@@ -1330,7 +1326,7 @@ table#planTable td input[type="text"] {
 }
 
 .multiselect-count {
-  background: #666;
+  background: #656d76;
   color: white;
   padding: 2px 6px;
   border-radius: 10px;
@@ -1345,14 +1341,14 @@ table#planTable td input[type="text"] {
   left: 0;
   right: 0;
   background: white;
-  border: 1px solid #1976d2;
+  border: 1px solid #0969da;
   border-top: none;
   border-radius: 0 0 6px 6px;
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
   display: none;
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .multiselect-dropdown.open {
@@ -1370,11 +1366,11 @@ table#planTable td input[type="text"] {
 }
 
 .multiselect-option:hover {
-  background: #e3f2fd;
+  background: #ddf4ff;
 }
 
 .multiselect-option.selected {
-  background: #1976d2;
+  background: #0969da;
   color: white;
   font-weight: 500;
 }
@@ -1382,7 +1378,7 @@ table#planTable td input[type="text"] {
 .multiselect-checkbox {
   width: 16px;
   height: 16px;
-  border: 2px solid #ccc;
+  border: 2px solid #d0d7de;
   border-radius: 3px;
   display: flex;
   align-items: center;
@@ -1394,7 +1390,7 @@ table#planTable td input[type="text"] {
 .multiselect-option.selected .multiselect-checkbox {
   background: white;
   border-color: white;
-  color: #1976d2;
+  color: #0969da;
 }
 
 .multiselect-option:not(.selected) .multiselect-checkbox {
@@ -1411,19 +1407,19 @@ table#planTable td input[type="text"] {
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
-  border-color: #1976d2;
-  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
-  background: #fafefe;
+  border-color: #0969da;
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.15);
+  background: #ffffff;
 }
 
 .filter-input:hover,
 .filter-select:hover {
-  border-color: #1976d2;
-  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.1);
+  border-color: #0969da;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .filter-input::placeholder {
-  color: #8ca3c7;
+  color: #656d76;
   font-size: 0.85rem;
 }
 
@@ -1435,7 +1431,7 @@ table#planTable td input[type="text"] {
   grid-column: 1 / -1;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e8f4fd;
+  border-top: 1px solid #d0d7de;
 }
 
 .filter-btn {
@@ -1451,32 +1447,33 @@ table#planTable td input[type="text"] {
   gap: 4px;
   height: 32px;
   letter-spacing: 0.3px;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .filter-btn-digital {
-  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  background: linear-gradient(135deg, #1a7f37, #2da44e);
   color: white;
-  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .filter-btn-digital:hover {
-  background: linear-gradient(135deg, #45a049, #4caf50);
+  background: linear-gradient(135deg, #148f3b, #1a7f37);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .filter-btn-clear {
-  background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
-  color: #666;
-  border: 1px solid #ddd;
+  background: linear-gradient(135deg, #f6f8fa, #eaeef2);
+  color: #656d76;
+  border: 1px solid #d0d7de;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .filter-btn-clear:hover {
-  background: linear-gradient(135deg, #e8e8e8, #ddd);
-  color: #333;
+  background: linear-gradient(135deg, #eaeef2, #d0d7de);
+  color: #24292e;
   transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* ===== RESPONSIVE FILTER LAYOUT ===== */
@@ -1567,15 +1564,15 @@ table#planTable td input[type="text"] {
 
 /* ===== PLANNING SPECIFIC OVERRIDES ===== */
 #planningFilters .filter-btn-clear {
-  background: #f5f5f5;
-  color: #333;
-  border: 1px solid #ccc;
+  background: #f6f8fa;
+  color: #24292e;
+  border: 1px solid #d0d7de;
 }
 
 #planningFilters .filter-btn-clear:hover {
-  background: #e0e0e0;
-  color: #333;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: #eaeef2;
+  color: #24292e;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* ===== ROI DATA TABLE STYLES ===== */
@@ -1593,16 +1590,16 @@ table#planTable td input[type="text"] {
 #roiDataTable .tabulator {
   width: 100% !important;
   height: 100% !important;
-  border: 2px solid #e3f2fd;
+  border: 2px solid #d0d7de;
   border-radius: 12px;
   overflow: hidden;
   background: white;
-  font-family: "Segoe UI", Arial, sans-serif;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Modern header styling */
 #roiDataTable .tabulator-header {
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  background: linear-gradient(135deg, #24292e 0%, #6e7681 100%);
   color: white;
   font-weight: 700;
   font-size: 1.1rem;
@@ -1639,6 +1636,7 @@ table#planTable td input[type="text"] {
   text-align: center;
   min-height: 60px !important;
   box-sizing: border-box;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Column content sizing */
@@ -1653,36 +1651,37 @@ table#planTable td input[type="text"] {
 
 /* Row styling */
 #roiDataTable .tabulator-row {
-  border-bottom: 1px solid #f0f4f8;
+  border-bottom: 1px solid #d0d7de;
   transition: all 0.3s ease;
   background: white;
 }
 
 #roiDataTable .tabulator-row:hover {
-  background: #f8fafe !important;
+  background: #f6f8fa !important;
   transform: translateY(-1px);
-  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 #roiDataTable .tabulator-row:nth-child(even) {
-  background: #fafbfc;
+  background: #f6f8fa;
 }
 
 #roiDataTable .tabulator-row:nth-child(even):hover {
-  background: #f8fafe !important;
+  background: #eaeef2 !important;
 }
 
 /* Cell styling */
 #roiDataTable .tabulator-cell {
   padding: 12px 8px !important;
   font-size: 0.9rem;
-  border-right: 1px solid #f0f4f8;
+  border-right: 1px solid #d0d7de;
   text-align: center;
   white-space: normal !important;
   overflow: visible !important;
   text-overflow: unset !important;
   word-wrap: break-word !important;
   line-height: 1.4;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 #roiDataTable .tabulator-cell:last-child {
@@ -1748,17 +1747,17 @@ table#planTable td input[type="text"] {
 }
 
 #roiDataTable .tabulator-tableholder::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f6f8fa;
   border-radius: 4px;
 }
 
 #roiDataTable .tabulator-tableholder::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #d0d7de;
   border-radius: 4px;
 }
 
 #roiDataTable .tabulator-tableholder::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #afb8c1;
 }
 
 /* ROI Table parent container adjustments */
@@ -1907,7 +1906,7 @@ div[style*="max-width: 1200px"] {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(15, 25, 45, 0.75);
+  background: rgba(31, 35, 40, 0.75);
   backdrop-filter: blur(8px);
   z-index: 1000;
   align-items: center;
@@ -1916,17 +1915,14 @@ div[style*="max-width: 1200px"] {
 }
 
 .password-modal-content {
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafe 100%);
+  background: linear-gradient(145deg, #ffffff 0%, #f6f8fa 100%);
   padding: 40px 32px;
   border-radius: 16px;
-  box-shadow: 
-    0 20px 60px rgba(25, 118, 210, 0.15),
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   min-width: 420px;
   max-width: 500px;
   width: 90vw;
-  border: 1px solid rgba(25, 118, 210, 0.1);
+  border: 1px solid #d0d7de;
   position: relative;
   transform: scale(0.95);
   animation: modalSlideIn 0.3s ease-out forwards;
@@ -1934,52 +1930,52 @@ div[style*="max-width: 1200px"] {
 
 .password-modal h3 {
   margin: 0 0 8px 0;
-  color: #1976d2;
+  color: #24292e;
   font-size: 1.4rem;
   font-weight: 700;
   text-align: center;
   letter-spacing: -0.02em;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .password-modal p {
   margin: 0 0 24px 0;
-  color: #546e7a;
+  color: #656d76;
   font-size: 1rem;
   text-align: center;
   line-height: 1.5;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .password-modal-input {
   width: 100%;
   padding: 16px 20px;
   margin-bottom: 20px;
-  border: 2px solid #e3f2fd;
+  border: 2px solid #d0d7de;
   border-radius: 12px;
   font-size: 1.1rem;
   background: #ffffff;
-  color: #1a237e;
+  color: #24292e;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.05);
-  font-family: inherit;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   box-sizing: border-box;
 }
 
 .password-modal-input:focus {
   outline: none;
-  border-color: #1976d2;
-  box-shadow: 
-    0 0 0 3px rgba(25, 118, 210, 0.1),
-    0 4px 16px rgba(25, 118, 210, 0.15);
-  background: #fafefe;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+  background: #ffffff;
 }
 
 .password-modal-input::placeholder {
-  color: #90a4ae;
+  color: #656d76;
   font-weight: 400;
 }
 
 .password-modal-error {
-  color: #d32f2f;
+  color: #d1242f;
   min-height: 24px;
   margin-bottom: 16px;
   font-size: 0.95rem;
@@ -2003,32 +1999,32 @@ div[style*="max-width: 1200px"] {
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 120px;
-  font-family: inherit;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   letter-spacing: 0.02em;
 }
 
 .password-modal-button.primary {
-  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  background: linear-gradient(135deg, #0969da 0%, #58a6ff 100%);
   color: white;
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .password-modal-button.primary:hover {
-  background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
-  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.4);
+  background: linear-gradient(135deg, #0860ca 0%, #0969da 100%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
 
 .password-modal-button.secondary {
-  background: #f5f5f5;
-  color: #546e7a;
-  border: 2px solid #e0e0e0;
+  background: #f6f8fa;
+  color: #656d76;
+  border: 2px solid #d0d7de;
 }
 
 .password-modal-button.secondary:hover {
-  background: #eeeeee;
-  border-color: #bdbdbd;
-  color: #37474f;
+  background: #eaeef2;
+  border-color: #afb8c1;
+  color: #24292e;
   transform: translateY(-1px);
 }
 
@@ -2101,14 +2097,12 @@ div[style*="max-width: 1200px"] {
 
 /* ROI Gauge Container */
 .roi-gauge-container {
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafe 100%);
+  background: linear-gradient(145deg, #ffffff 0%, #f6f8fa 100%);
   border-radius: 16px;
-  box-shadow: 
-    0 8px 32px rgba(25, 118, 210, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 24px 20px;
   text-align: center;
-  border: 1px solid rgba(25, 118, 210, 0.08);
+  border: 1px solid #d0d7de;
   position: relative;
   overflow: hidden;
   height: fit-content;
@@ -2121,15 +2115,16 @@ div[style*="max-width: 1200px"] {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #1976d2, #42a5f5, #64b5f6);
+  background: linear-gradient(90deg, #0969da, #58a6ff, #79c0ff);
 }
 
 .roi-gauge-title {
   margin: 0 0 16px 0;
-  color: #1976d2;
+  color: #24292e;
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .roi-gauge-chart-wrapper {
@@ -2158,11 +2153,9 @@ div[style*="max-width: 1200px"] {
 
 /* ROI Info Box Base Styles */
 .roi-info-box {
-  background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+  background: linear-gradient(145deg, #ffffff 0%, #f6f8fa 100%);
   border-radius: 12px;
-  box-shadow: 
-    0 4px 20px rgba(0, 0, 0, 0.06),
-    0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 20px 16px;
   text-align: center;
   min-height: 100px;
@@ -2170,16 +2163,14 @@ div[style*="max-width: 1200px"] {
   flex-direction: column;
   justify-content: center;
   transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid #d0d7de;
   position: relative;
   overflow: hidden;
 }
 
 .roi-info-box:hover {
   transform: translateY(-2px) scale(1.01);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .roi-info-box-label {
@@ -2189,88 +2180,89 @@ div[style*="max-width: 1200px"] {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   line-height: 1.2;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .roi-info-box-value {
   font-size: 1.4rem;
   font-weight: 800;
   line-height: 1;
-  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Color variants for different metrics */
 .roi-info-box.costs {
-  border-left: 4px solid #1976d2;
+  border-left: 4px solid #0969da;
 }
 .roi-info-box.costs .roi-info-box-label {
-  color: #1976d2;
+  color: #0969da;
 }
 .roi-info-box.costs .roi-info-box-value {
-  color: #0d47a1;
+  color: #0550ae;
 }
 
 .roi-info-box.pipeline {
-  border-left: 4px solid #4caf50;
+  border-left: 4px solid #1a7f37;
 }
 .roi-info-box.pipeline .roi-info-box-label {
-  color: #2e7d32;
+  color: #1a7f37;
 }
 .roi-info-box.pipeline .roi-info-box-value {
-  color: #1b5e20;
+  color: #116329;
 }
 
 .roi-info-box.leads {
-  border-left: 4px solid #ff9800;
+  border-left: 4px solid #bf8700;
 }
 .roi-info-box.leads .roi-info-box-label {
-  color: #ef6c00;
+  color: #bf8700;
 }
 .roi-info-box.leads .roi-info-box-value {
-  color: #e65100;
+  color: #9a6700;
 }
 
 .roi-info-box.mql {
-  border-left: 4px solid #9c27b0;
+  border-left: 4px solid #8250df;
 }
 .roi-info-box.mql .roi-info-box-label {
-  color: #7b1fa2;
+  color: #8250df;
 }
 .roi-info-box.mql .roi-info-box-value {
-  color: #4a148c;
+  color: #6f42c1;
 }
 
 .roi-info-box.forecasted {
-  border-left: 4px solid #ff5722;
+  border-left: 4px solid #d1242f;
 }
 .roi-info-box.forecasted .roi-info-box-label {
-  color: #d84315;
+  color: #d1242f;
 }
 .roi-info-box.forecasted .roi-info-box-value {
-  color: #bf360c;
+  color: #a40e26;
 }
 
 .roi-info-box.remaining {
-  background: linear-gradient(145deg, #e8f5e9 0%, #f1f8e9 100%);
-  border: 2px solid #4caf50;
-  border-left: 4px solid #2e7d32;
+  background: linear-gradient(145deg, #dafbe1 0%, #f6f8fa 100%);
+  border: 2px solid #1a7f37;
+  border-left: 4px solid #116329;
 }
 .roi-info-box.remaining .roi-info-box-label {
-  color: #1b5e20;
+  color: #116329;
 }
 .roi-info-box.remaining .roi-info-box-value {
-  color: #0d5016;
+  color: #0d1117;
 }
 
 .roi-info-box.usage {
-  background: linear-gradient(145deg, #fff8e1 0%, #fffbf0 100%);
-  border: 2px solid #ff9800;
-  border-left: 4px solid #ef6c00;
+  background: linear-gradient(145deg, #fff8c5 0%, #f6f8fa 100%);
+  border: 2px solid #bf8700;
+  border-left: 4px solid #9a6700;
 }
 .roi-info-box.usage .roi-info-box-label {
-  color: #e65100;
+  color: #9a6700;
 }
 .roi-info-box.usage .roi-info-box-value {
-  color: #bf360c;
+  color: #744500;
 }
 
 /* Responsive Design for ROI Section */
@@ -2377,12 +2369,10 @@ div[style*="max-width: 1200px"] {
 
 /* ===== ROI FILTERS SECTION ===== */
 .filters-container {
-  background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
-  border: 2px solid #e3f2fd;
+  background: linear-gradient(145deg, #ffffff 0%, #f6f8fa 100%);
+  border: 2px solid #d0d7de;
   border-radius: 12px;
-  box-shadow: 
-    0 4px 16px rgba(25, 118, 210, 0.08),
-    0 1px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 16px 20px 20px 20px;
   margin: 20px 0;
   position: relative;
@@ -2404,7 +2394,7 @@ div[style*="max-width: 1200px"] {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #1976d2, #42a5f5, #64b5f6);
+  background: linear-gradient(90deg, #0969da, #58a6ff, #79c0ff);
 }
 
 .filters-container::after {
@@ -2412,7 +2402,7 @@ div[style*="max-width: 1200px"] {
   position: absolute;
   top: -1px;
   left: 20px;
-  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  background: linear-gradient(135deg, #24292e, #6e7681);
   color: white;
   padding: 4px 12px;
   border-radius: 0 0 8px 8px;
@@ -2420,7 +2410,8 @@ div[style*="max-width: 1200px"] {
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .filters-container .filter-group {
@@ -2436,58 +2427,61 @@ div[style*="max-width: 1200px"] {
 
 .filters-container .filter-group label {
   font-weight: 600;
-  color: #1976d2;
+  color: #24292e;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .filters-container .filter-group select {
   display: none !important; /* Hide original selects when multiselect is active */
   padding: 8px 10px;
   border-radius: 6px;
-  border: 1px solid #c5d9f1;
+  border: 1px solid #d0d7de;
   font-size: 0.9rem;
   background: white;
   transition: all 0.2s ease;
   height: 36px;
   width: 100%;
   min-width: 140px;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .filters-container .filter-group select:focus {
   outline: none;
-  border-color: #1976d2;
-  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
-  background: #fafefe;
+  border-color: #0969da;
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.15);
+  background: #ffffff;
 }
 
 .filters-container .filter-group select:hover {
-  border-color: #1976d2;
-  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.1);
+  border-color: #0969da;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .clear-filters-btn {
   padding: 6px 16px;
-  background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
-  border: 1px solid #ddd;
+  background: linear-gradient(135deg, #f6f8fa, #eaeef2);
+  border: 1px solid #d0d7de;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
-  color: #666;
+  color: #656d76;
   transition: all 0.2s ease;
   font-weight: 600;
   height: 32px;
   margin-top: 8px;
   letter-spacing: 0.3px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .clear-filters-btn:hover {
-  background: linear-gradient(135deg, #e8e8e8, #ddd);
-  color: #333;
+  background: linear-gradient(135deg, #eaeef2, #d0d7de);
+  color: #24292e;
   transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive filters */

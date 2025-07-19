@@ -909,7 +909,7 @@ function initPlanningGrid(rows) {
         title: "",
         field: "delete",
         formatter: function () {
-          return '<button class="delete-row-btn" title="Delete"><span style="font-size:1.2em; color:#b71c1c;">🗑️</span></button>';
+          return '<button class="delete-row-btn" title="Delete"><span style="font-size:1.2em; color:#d1242f;">🗑️</span></button>';
         },
         width: 50,
         hozAlign: "center",
@@ -1027,12 +1027,12 @@ function showAddRowModal() {
           border-bottom: 2px solid #e3f2fd;
           padding-bottom: 16px;
         ">
-          <h2 style="margin: 0; color: #1976d2; display: flex; align-items: center; gap: 8px;">
+          <h2 style="margin: 0; color: #24292e; display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 24px;">➕</span>
             Add New Campaign
           </h2>
           <button id="closeAddRowModal" style="
-            background: #f44336;
+            background: #d1242f;
             color: white;
             border: none;
             padding: 8px 12px;
@@ -1050,14 +1050,14 @@ function showAddRowModal() {
         ">
           <!-- Row 1: Basic Info -->
           <div style="grid-column: 1 / -1;">
-            <h3 style="margin: 0 0 16px 0; color: #1976d2; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
+            <h3 style="margin: 0 0 16px 0; color: #24292e; border-bottom: 1px solid #d0d7de; padding-bottom: 8px;">
               📋 Basic Information
             </h3>
           </div>
           
           <div>
-            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333;">
-              Program Type <span style="color: red;">*</span>
+            <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #24292e;">
+              Program Type <span style="color: #d1242f;">*</span>
             </label>
             <select id="programType" style="
               width: 100%;
@@ -1408,7 +1408,7 @@ function setupAddRowModalEvents() {
       border-radius: 6px;
       z-index: 1200;
       font-weight: bold;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     `;
     successMsg.textContent = `✓ Campaign "${formData.programType}" added successfully!`;
     document.body.appendChild(successMsg);
@@ -1704,7 +1704,7 @@ document
           border-radius: 6px;
           z-index: 1200;
           font-weight: bold;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         `;
         successMsg.textContent = `✓ Successfully imported ${mappedRows.length} campaigns!`;
         document.body.appendChild(successMsg);
