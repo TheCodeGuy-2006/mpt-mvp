@@ -38,18 +38,213 @@ function throttle(func, wait) {
   };
 }
 
+// CALENDAR FILTER MULTISELECT FUNCTIONALITY
+
+// Custom multiselect implementation for calendar filters
+function createCalendarMultiselect(selectElement) {
+  const container = document.createElement('div');
+  container.className = 'multiselect-container';
+  
+  const display = document.createElement('div');
+  display.className = 'multiselect-display';
+  
+  const dropdown = document.createElement('div');
+  dropdown.className = 'multiselect-dropdown';
+  
+  // Get options from original select
+  const options = Array.from(selectElement.options).map(option => ({
+    value: option.value,
+    text: option.textContent,
+    selected: option.selected
+  }));
+  
+  let selectedValues = options.filter(opt => opt.selected).map(opt => opt.value);
+  
+  // Update display content
+  function updateDisplay() {
+    display.innerHTML = '';
+    
+    if (selectedValues.length === 0) {
+      const placeholder = document.createElement('span');
+      placeholder.className = 'multiselect-placeholder';
+      placeholder.textContent = `(All ${selectElement.getAttribute('data-placeholder') || 'Options'})`;
+      display.appendChild(placeholder);
+    } else if (selectedValues.length <= 2) {
+      const selectedContainer = document.createElement('div');
+      selectedContainer.className = 'multiselect-selected';
+      
+      selectedValues.forEach(value => {
+        const option = options.find(opt => opt.value === value);
+        if (option) {
+          const tag = document.createElement('span');
+          tag.className = 'multiselect-tag';
+          tag.innerHTML = `
+            ${option.text}
+            <span class="multiselect-tag-remove" data-value="${value}">×</span>
+          `;
+          selectedContainer.appendChild(tag);
+        }
+      });
+      
+      display.appendChild(selectedContainer);
+    } else {
+      const selectedContainer = document.createElement('div');
+      selectedContainer.className = 'multiselect-selected';
+      
+      // Show first item and count
+      const firstOption = options.find(opt => opt.value === selectedValues[0]);
+      if (firstOption) {
+        const tag = document.createElement('span');
+        tag.className = 'multiselect-tag';
+        tag.innerHTML = `
+          ${firstOption.text}
+          <span class="multiselect-tag-remove" data-value="${firstOption.value}">×</span>
+        `;
+        selectedContainer.appendChild(tag);
+      }
+      
+      const count = document.createElement('span');
+      count.className = 'multiselect-count';
+      count.textContent = `+${selectedValues.length - 1}`;
+      selectedContainer.appendChild(count);
+      
+      display.appendChild(selectedContainer);
+    }
+  }
+  
+  // Update dropdown content
+  function updateDropdown() {
+    dropdown.innerHTML = '';
+    
+    options.forEach(option => {
+      const optionElement = document.createElement('div');
+      optionElement.className = 'multiselect-option';
+      if (selectedValues.includes(option.value)) {
+        optionElement.classList.add('selected');
+      }
+      
+      optionElement.innerHTML = `
+        <div class="multiselect-checkbox">${selectedValues.includes(option.value) ? '✓' : ''}</div>
+        <span>${option.text}</span>
+      `;
+      
+      optionElement.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleOption(option.value);
+      });
+      
+      dropdown.appendChild(optionElement);
+    });
+  }
+  
+  // Toggle option selection
+  function toggleOption(value) {
+    const index = selectedValues.indexOf(value);
+    if (index === -1) {
+      selectedValues.push(value);
+    } else {
+      selectedValues.splice(index, 1);
+    }
+    
+    // Update original select
+    Array.from(selectElement.options).forEach(option => {
+      option.selected = selectedValues.includes(option.value);
+    });
+    
+    updateDisplay();
+    updateDropdown();
+    
+    // Trigger change event
+    selectElement.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  
+  // Handle tag removal
+  display.addEventListener('click', (e) => {
+    if (e.target.classList.contains('multiselect-tag-remove')) {
+      e.stopPropagation();
+      const value = e.target.getAttribute('data-value');
+      toggleOption(value);
+    } else {
+      // Toggle dropdown
+      const isOpen = dropdown.classList.contains('open');
+      closeAllCalendarMultiselects();
+      if (!isOpen) {
+        display.classList.add('open');
+        dropdown.classList.add('open');
+      }
+    }
+  });
+  
+  // Setup container
+  selectElement.parentNode.insertBefore(container, selectElement);
+  container.appendChild(display);
+  container.appendChild(dropdown);
+  selectElement.classList.add('multiselect-hidden');
+  
+  // Store reference for cleanup
+  selectElement._multiselectContainer = container;
+  
+  const multiselectAPI = {
+    updateDisplay,
+    updateDropdown,
+    getSelectedValues: () => selectedValues,
+    setSelectedValues: (values) => {
+      selectedValues = values.slice();
+      Array.from(selectElement.options).forEach(option => {
+        option.selected = selectedValues.includes(option.value);
+      });
+      updateDisplay();
+      updateDropdown();
+    },
+    destroy: () => {
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+      selectElement.classList.remove('multiselect-hidden');
+      delete selectElement._multiselectContainer;
+      delete selectElement._multiselectAPI;
+    }
+  };
+  
+  // Store API reference
+  selectElement._multiselectAPI = multiselectAPI;
+  
+  // Initial update
+  updateDisplay();
+  updateDropdown();
+  
+  return multiselectAPI;
+}
+
+// Close all calendar multiselects
+function closeAllCalendarMultiselects() {
+  document.querySelectorAll('#calendarFilters .multiselect-display.open').forEach(display => {
+    display.classList.remove('open');
+  });
+  document.querySelectorAll('#calendarFilters .multiselect-dropdown.open').forEach(dropdown => {
+    dropdown.classList.remove('open');
+  });
+}
+
+// Close calendar multiselects when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#calendarFilters .multiselect-container')) {
+    closeAllCalendarMultiselects();
+  }
+});
+
 // Calendar state with performance optimizations
 let currentFY = "FY25";
 let currentDate = new Date();
 let availableFYs = [];
 let activeFilters = {
-  region: "",
-  country: "",
-  owner: "",
-  status: "",
-  programType: "",
-  strategicPillars: "",
-  revenuePlay: "",
+  region: [],
+  country: [],
+  owner: [],
+  status: [],
+  programType: [],
+  strategicPillars: [],
+  revenuePlay: [],
 };
 
 // Performance cache for calendar data
@@ -186,14 +381,14 @@ function getCampaignsForMonthInternal(month, year) {
     const campaignDate = parseQuarterToDate(campaign.quarter, campaign.fiscalYear);
     if (campaignDate.month !== month || campaignDate.year !== year) continue;
 
-    // Apply active filters with early exit
-    if (activeFilters.region && campaign.region !== activeFilters.region) continue;
-    if (activeFilters.country && campaign.country !== activeFilters.country) continue;
-    if (activeFilters.owner && campaign.owner !== activeFilters.owner) continue;
-    if (activeFilters.status && campaign.status !== activeFilters.status) continue;
-    if (activeFilters.programType && campaign.programType !== activeFilters.programType) continue;
-    if (activeFilters.strategicPillars && campaign.strategicPillars !== activeFilters.strategicPillars) continue;
-    if (activeFilters.revenuePlay && campaign.revenuePlay !== activeFilters.revenuePlay) continue;
+    // Apply active filters with early exit - now working with arrays
+    if (activeFilters.region.length > 0 && !activeFilters.region.includes(campaign.region)) continue;
+    if (activeFilters.country.length > 0 && !activeFilters.country.includes(campaign.country)) continue;
+    if (activeFilters.owner.length > 0 && !activeFilters.owner.includes(campaign.owner)) continue;
+    if (activeFilters.status.length > 0 && !activeFilters.status.includes(campaign.status)) continue;
+    if (activeFilters.programType.length > 0 && !activeFilters.programType.includes(campaign.programType)) continue;
+    if (activeFilters.strategicPillars.length > 0 && !activeFilters.strategicPillars.includes(campaign.strategicPillars)) continue;
+    if (activeFilters.revenuePlay.length > 0 && !activeFilters.revenuePlay.includes(campaign.revenuePlay)) continue;
 
     filteredCampaigns.push(campaign);
   }
@@ -298,12 +493,11 @@ function renderFilterControls() {
       <div class="filter-row filter-row-main">
         <div class="filter-group">
           <label for="filterRegion">Region</label>
-          <select id="filterRegion" class="filter-select">
-            <option value="">All Regions</option>
+          <select id="filterRegion" class="filter-select" multiple data-placeholder="Regions">
             ${filterOptions.regions
               .map(
                 (region) =>
-                  `<option value="${region}" ${activeFilters.region === region ? "selected" : ""}>${region}</option>`,
+                  `<option value="${region}" ${activeFilters.region.includes(region) ? "selected" : ""}>${region}</option>`,
               )
               .join("")}
           </select>
@@ -311,12 +505,11 @@ function renderFilterControls() {
         
         <div class="filter-group">
           <label for="filterCountry">Country</label>
-          <select id="filterCountry" class="filter-select">
-            <option value="">All Countries</option>
+          <select id="filterCountry" class="filter-select" multiple data-placeholder="Countries">
             ${filterOptions.countries
               .map(
                 (country) =>
-                  `<option value="${country}" ${activeFilters.country === country ? "selected" : ""}>${country}</option>`,
+                  `<option value="${country}" ${activeFilters.country.includes(country) ? "selected" : ""}>${country}</option>`,
               )
               .join("")}
           </select>
@@ -324,12 +517,11 @@ function renderFilterControls() {
         
         <div class="filter-group">
           <label for="filterOwner">Owner</label>
-          <select id="filterOwner" class="filter-select">
-            <option value="">All Owners</option>
+          <select id="filterOwner" class="filter-select" multiple data-placeholder="Owners">
             ${filterOptions.owners
               .map(
                 (owner) =>
-                  `<option value="${owner}" ${activeFilters.owner === owner ? "selected" : ""}>${owner}</option>`,
+                  `<option value="${owner}" ${activeFilters.owner.includes(owner) ? "selected" : ""}>${owner}</option>`,
               )
               .join("")}
           </select>
@@ -337,12 +529,11 @@ function renderFilterControls() {
         
         <div class="filter-group">
           <label for="filterStatus">Status</label>
-          <select id="filterStatus" class="filter-select">
-            <option value="">All Statuses</option>
+          <select id="filterStatus" class="filter-select" multiple data-placeholder="Statuses">
             ${filterOptions.statuses
               .map(
                 (status) =>
-                  `<option value="${status}" ${activeFilters.status === status ? "selected" : ""}>${status}</option>`,
+                  `<option value="${status}" ${activeFilters.status.includes(status) ? "selected" : ""}>${status}</option>`,
               )
               .join("")}
           </select>
@@ -352,12 +543,11 @@ function renderFilterControls() {
       <div class="filter-row filter-row-secondary">
         <div class="filter-group">
           <label for="filterProgramType">Program Type</label>
-          <select id="filterProgramType" class="filter-select">
-            <option value="">All Program Types</option>
+          <select id="filterProgramType" class="filter-select" multiple data-placeholder="Program Types">
             ${filterOptions.programTypes
               .map(
                 (type) =>
-                  `<option value="${type}" ${activeFilters.programType === type ? "selected" : ""}>${type}</option>`,
+                  `<option value="${type}" ${activeFilters.programType.includes(type) ? "selected" : ""}>${type}</option>`,
               )
               .join("")}
           </select>
@@ -365,12 +555,11 @@ function renderFilterControls() {
         
         <div class="filter-group">
           <label for="filterStrategicPillars">Strategic Pillars</label>
-          <select id="filterStrategicPillars" class="filter-select">
-            <option value="">All Pillars</option>
+          <select id="filterStrategicPillars" class="filter-select" multiple data-placeholder="Strategic Pillars">
             ${filterOptions.strategicPillars
               .map(
                 (pillar) =>
-                  `<option value="${pillar}" ${activeFilters.strategicPillars === pillar ? "selected" : ""}>${pillar}</option>`,
+                  `<option value="${pillar}" ${activeFilters.strategicPillars.includes(pillar) ? "selected" : ""}>${pillar}</option>`,
               )
               .join("")}
           </select>
@@ -378,12 +567,11 @@ function renderFilterControls() {
         
         <div class="filter-group">
           <label for="filterRevenuePlay">Revenue Play</label>
-          <select id="filterRevenuePlay" class="filter-select">
-            <option value="">All Revenue Plays</option>
+          <select id="filterRevenuePlay" class="filter-select" multiple data-placeholder="Revenue Plays">
             ${filterOptions.revenuePlays
               .map(
                 (play) =>
-                  `<option value="${play}" ${activeFilters.revenuePlay === play ? "selected" : ""}>${play}</option>`,
+                  `<option value="${play}" ${activeFilters.revenuePlay.includes(play) ? "selected" : ""}>${play}</option>`,
               )
               .join("")}
           </select>
@@ -399,6 +587,23 @@ function renderFilterControls() {
       <div id="filterSummary" style="margin-top: 8px; color: #666; font-size: 0.85rem; font-style: italic;"></div>
     </div>
   `;
+
+  // Initialize custom multiselects
+  const selectElements = [
+    document.getElementById("filterRegion"),
+    document.getElementById("filterCountry"),
+    document.getElementById("filterOwner"),
+    document.getElementById("filterStatus"),
+    document.getElementById("filterProgramType"),
+    document.getElementById("filterStrategicPillars"),
+    document.getElementById("filterRevenuePlay")
+  ].filter(Boolean);
+
+  selectElements.forEach(select => {
+    if (!select._multiselectContainer) {
+      createCalendarMultiselect(select);
+    }
+  });
 
   // Set up filter event listeners
   setupFilterEventListeners();
@@ -491,14 +696,37 @@ function updateFilterSummary() {
 
 // Apply filters (optimized)
 function applyFilters() {
-  // Batch filter updates for better performance
-  activeFilters.region = document.getElementById("filterRegion")?.value || "";
-  activeFilters.country = document.getElementById("filterCountry")?.value || "";
-  activeFilters.owner = document.getElementById("filterOwner")?.value || "";
-  activeFilters.status = document.getElementById("filterStatus")?.value || "";
-  activeFilters.programType = document.getElementById("filterProgramType")?.value || "";
-  activeFilters.strategicPillars = document.getElementById("filterStrategicPillars")?.value || "";
-  activeFilters.revenuePlay = document.getElementById("filterRevenuePlay")?.value || "";
+  // Get current filter values from the multiselects
+  const regionFilter = document.getElementById("filterRegion");
+  const countryFilter = document.getElementById("filterCountry");
+  const ownerFilter = document.getElementById("filterOwner");
+  const statusFilter = document.getElementById("filterStatus");
+  const programTypeFilter = document.getElementById("filterProgramType");
+  const strategicPillarsFilter = document.getElementById("filterStrategicPillars");
+  const revenuePlayFilter = document.getElementById("filterRevenuePlay");
+
+  // Update activeFilters from multiselect values
+  if (regionFilter && regionFilter._multiselectContainer) {
+    activeFilters.region = Array.from(regionFilter.selectedOptions).map(option => option.value);
+  }
+  if (countryFilter && countryFilter._multiselectContainer) {
+    activeFilters.country = Array.from(countryFilter.selectedOptions).map(option => option.value);
+  }
+  if (ownerFilter && ownerFilter._multiselectContainer) {
+    activeFilters.owner = Array.from(ownerFilter.selectedOptions).map(option => option.value);
+  }
+  if (statusFilter && statusFilter._multiselectContainer) {
+    activeFilters.status = Array.from(statusFilter.selectedOptions).map(option => option.value);
+  }
+  if (programTypeFilter && programTypeFilter._multiselectContainer) {
+    activeFilters.programType = Array.from(programTypeFilter.selectedOptions).map(option => option.value);
+  }
+  if (strategicPillarsFilter && strategicPillarsFilter._multiselectContainer) {
+    activeFilters.strategicPillars = Array.from(strategicPillarsFilter.selectedOptions).map(option => option.value);
+  }
+  if (revenuePlayFilter && revenuePlayFilter._multiselectContainer) {
+    activeFilters.revenuePlay = Array.from(revenuePlayFilter.selectedOptions).map(option => option.value);
+  }
 
   // Use requestAnimationFrame for smooth UI updates
   requestAnimationFrame(() => {
@@ -510,16 +738,16 @@ function applyFilters() {
 // Clear all filters
 function clearAllFilters() {
   activeFilters = {
-    region: "",
-    country: "",
-    owner: "",
-    status: "",
-    programType: "",
-    strategicPillars: "",
-    revenuePlay: "",
+    region: [],
+    country: [],
+    owner: [],
+    status: [],
+    programType: [],
+    strategicPillars: [],
+    revenuePlay: [],
   };
 
-  // Reset all filter dropdowns
+  // Reset all filter dropdowns and their multiselect displays
   const filterIds = [
     "filterRegion",
     "filterCountry",
@@ -533,7 +761,21 @@ function clearAllFilters() {
   filterIds.forEach((id) => {
     const element = document.getElementById(id);
     if (element) {
+      // Clear select element
       element.value = "";
+      Array.from(element.options).forEach(option => option.selected = false);
+      
+      // Update multiselect display if it exists
+      if (element._multiselectContainer) {
+        const display = element._multiselectContainer.querySelector('.multiselect-display');
+        if (display) {
+          display.innerHTML = element.getAttribute('data-placeholder') || 'Select options...';
+        }
+        
+        // Update checkboxes in dropdown
+        const checkboxes = element._multiselectContainer.querySelectorAll('.multiselect-dropdown input[type="checkbox"]');
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+      }
     }
   });
 

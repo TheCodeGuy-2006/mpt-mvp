@@ -8,6 +8,199 @@ let lastChartUpdate = 0;
 let isRoiTabActive = false;
 let roiInitialized = false;
 
+// Custom multiselect implementation for ROI
+function createRoiMultiselect(selectElement) {
+  const container = document.createElement('div');
+  container.className = 'multiselect-container';
+  
+  const display = document.createElement('div');
+  display.className = 'multiselect-display';
+  
+  const dropdown = document.createElement('div');
+  dropdown.className = 'multiselect-dropdown';
+  
+  // Get options from original select
+  const options = Array.from(selectElement.options).map(option => ({
+    value: option.value,
+    text: option.textContent,
+    selected: option.selected
+  }));
+  
+  let selectedValues = options.filter(opt => opt.selected).map(opt => opt.value);
+  
+  // Update display content
+  function updateDisplay() {
+    display.innerHTML = '';
+    
+    if (selectedValues.length === 0) {
+      const placeholder = document.createElement('span');
+      placeholder.className = 'multiselect-placeholder';
+      placeholder.textContent = `(All ${selectElement.getAttribute('data-placeholder') || 'Options'})`;
+      display.appendChild(placeholder);
+    } else if (selectedValues.length <= 2) {
+      const selectedContainer = document.createElement('div');
+      selectedContainer.className = 'multiselect-selected';
+      
+      selectedValues.forEach(value => {
+        const option = options.find(opt => opt.value === value);
+        if (option) {
+          const tag = document.createElement('span');
+          tag.className = 'multiselect-tag';
+          tag.innerHTML = `
+            ${option.text}
+            <span class="multiselect-tag-remove" data-value="${value}">×</span>
+          `;
+          selectedContainer.appendChild(tag);
+        }
+      });
+      
+      display.appendChild(selectedContainer);
+    } else {
+      const selectedContainer = document.createElement('div');
+      selectedContainer.className = 'multiselect-selected';
+      
+      // Show first item and count
+      const firstOption = options.find(opt => opt.value === selectedValues[0]);
+      if (firstOption) {
+        const tag = document.createElement('span');
+        tag.className = 'multiselect-tag';
+        tag.innerHTML = `
+          ${firstOption.text}
+          <span class="multiselect-tag-remove" data-value="${firstOption.value}">×</span>
+        `;
+        selectedContainer.appendChild(tag);
+      }
+      
+      const count = document.createElement('span');
+      count.className = 'multiselect-count';
+      count.textContent = `+${selectedValues.length - 1}`;
+      selectedContainer.appendChild(count);
+      
+      display.appendChild(selectedContainer);
+    }
+  }
+  
+  // Update dropdown content
+  function updateDropdown() {
+    dropdown.innerHTML = '';
+    
+    options.forEach(option => {
+      const optionElement = document.createElement('div');
+      optionElement.className = 'multiselect-option';
+      if (selectedValues.includes(option.value)) {
+        optionElement.classList.add('selected');
+      }
+      
+      optionElement.innerHTML = `
+        <div class="multiselect-checkbox">${selectedValues.includes(option.value) ? '✓' : ''}</div>
+        <span>${option.text}</span>
+      `;
+      
+      optionElement.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleOption(option.value);
+      });
+      
+      dropdown.appendChild(optionElement);
+    });
+  }
+  
+  // Toggle option selection
+  function toggleOption(value) {
+    const index = selectedValues.indexOf(value);
+    if (index === -1) {
+      selectedValues.push(value);
+    } else {
+      selectedValues.splice(index, 1);
+    }
+    
+    // Update original select
+    Array.from(selectElement.options).forEach(option => {
+      option.selected = selectedValues.includes(option.value);
+    });
+    
+    updateDisplay();
+    updateDropdown();
+    
+    // Trigger change event
+    selectElement.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  
+  // Handle tag removal
+  display.addEventListener('click', (e) => {
+    if (e.target.classList.contains('multiselect-tag-remove')) {
+      e.stopPropagation();
+      const value = e.target.getAttribute('data-value');
+      toggleOption(value);
+    } else {
+      // Toggle dropdown
+      const isOpen = dropdown.classList.contains('open');
+      closeAllRoiMultiselects();
+      if (!isOpen) {
+        display.classList.add('open');
+        dropdown.classList.add('open');
+      }
+    }
+  });
+  
+  // Setup container
+  selectElement.parentNode.insertBefore(container, selectElement);
+  container.appendChild(display);
+  container.appendChild(dropdown);
+  selectElement.classList.add('multiselect-hidden');
+  
+  // Store reference for cleanup
+  selectElement._multiselectContainer = container;
+  
+  const multiselectAPI = {
+    updateDisplay,
+    updateDropdown,
+    getSelectedValues: () => selectedValues,
+    setSelectedValues: (values) => {
+      selectedValues = values.slice();
+      Array.from(selectElement.options).forEach(option => {
+        option.selected = selectedValues.includes(option.value);
+      });
+      updateDisplay();
+      updateDropdown();
+    },
+    destroy: () => {
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+      selectElement.classList.remove('multiselect-hidden');
+      delete selectElement._multiselectContainer;
+      delete selectElement._multiselectAPI;
+    }
+  };
+  
+  // Store API reference
+  selectElement._multiselectAPI = multiselectAPI;
+  
+  // Initial update
+  updateDisplay();
+  updateDropdown();
+  
+  return multiselectAPI;
+}
+
+// Close all ROI multiselects
+function closeAllRoiMultiselects() {
+  document.querySelectorAll('#roiFiltersDiv .multiselect-display.open').forEach(display => {
+    display.classList.remove('open');
+  });
+  document.querySelectorAll('#roiFiltersDiv .multiselect-dropdown.open').forEach(dropdown => {
+    dropdown.classList.remove('open');
+  });
+}
+
+// Close multiselects when clicking outside (only for ROI)
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#roiFiltersDiv .multiselect-container')) {
+    closeAllRoiMultiselects();
+  }
+});
+
 // Debounced filter update to prevent excessive calls
 function debouncedFilterUpdate() {
   clearTimeout(filterUpdateTimeout);
@@ -34,15 +227,24 @@ function hasFilterStateChanged() {
 
 // Get current filter state
 function getFilterState() {
+  // Helper function to get selected values from multiselect
+  const getSelectedValues = (elementId) => {
+    const element = document.getElementById(elementId);
+    if (element && element._multiselectContainer) {
+      return Array.from(element.selectedOptions).map(option => option.value);
+    }
+    return [];
+  };
+
   return {
-    region: document.getElementById("roiRegionFilter")?.value || "",
-    quarter: document.getElementById("roiQuarterFilter")?.value || "",
-    country: document.getElementById("roiCountryFilter")?.value || "",
-    owner: document.getElementById("roiOwnerFilter")?.value || "",
-    status: document.getElementById("roiStatusFilter")?.value || "",
-    programType: document.getElementById("roiProgramTypeFilter")?.value || "",
-    strategicPillars: document.getElementById("roiStrategicPillarsFilter")?.value || "",
-    revenuePlay: document.getElementById("roiRevenuePlayFilter")?.value || "",
+    region: getSelectedValues("roiRegionFilter"),
+    quarter: getSelectedValues("roiQuarterFilter"),
+    country: getSelectedValues("roiCountryFilter"),
+    owner: getSelectedValues("roiOwnerFilter"),
+    status: getSelectedValues("roiStatusFilter"),
+    programType: getSelectedValues("roiProgramTypeFilter"),
+    strategicPillars: getSelectedValues("roiStrategicPillarsFilter"),
+    revenuePlay: getSelectedValues("roiRevenuePlayFilter"),
   };
 }
 
@@ -69,16 +271,16 @@ function updateRoiTotalSpend() {
   if (window.executionModule.tableInstance) {
     const allData = window.executionModule.tableInstance.getData();
     
-    // Optimized filtering with early returns
+    // Optimized filtering with early returns and array support
     filteredData = allData.filter((row) => {
-      return (!filters.region || row.region === filters.region) &&
-             (!filters.quarter || row.quarter === filters.quarter) &&
-             (!filters.country || row.country === filters.country) &&
-             (!filters.owner || row.owner === filters.owner) &&
-             (!filters.status || row.status === filters.status) &&
-             (!filters.programType || row.programType === filters.programType) &&
-             (!filters.strategicPillars || row.strategicPillars === filters.strategicPillars) &&
-             (!filters.revenuePlay || row.revenuePlay === filters.revenuePlay);
+      return (filters.region.length === 0 || filters.region.includes(row.region)) &&
+             (filters.quarter.length === 0 || filters.quarter.includes(row.quarter)) &&
+             (filters.country.length === 0 || filters.country.includes(row.country)) &&
+             (filters.owner.length === 0 || filters.owner.includes(row.owner)) &&
+             (filters.status.length === 0 || filters.status.includes(row.status)) &&
+             (filters.programType.length === 0 || filters.programType.includes(row.programType)) &&
+             (filters.strategicPillars.length === 0 || filters.strategicPillars.includes(row.strategicPillars)) &&
+             (filters.revenuePlay.length === 0 || filters.revenuePlay.includes(row.revenuePlay));
     });
   }
 
@@ -238,16 +440,24 @@ function updateRoiCharts() {
 // --- ROI FILTER LOGIC UPDATE START ---
 // Update ROI Total Spend and Data Table to use all calendar filters
 function getRoiFilterValues() {
+  // Helper function to get selected values from multiselect
+  const getSelectedValues = (elementId) => {
+    const element = document.getElementById(elementId);
+    if (element && element._multiselectContainer) {
+      return Array.from(element.selectedOptions).map(option => option.value);
+    }
+    return [];
+  };
+
   return {
-    region: document.getElementById("roiRegionFilter")?.value || "",
-    quarter: document.getElementById("roiQuarterFilter")?.value || "",
-    country: document.getElementById("roiCountryFilter")?.value || "",
-    owner: document.getElementById("roiOwnerFilter")?.value || "",
-    status: document.getElementById("roiStatusFilter")?.value || "",
-    programType: document.getElementById("roiProgramTypeFilter")?.value || "",
-    strategicPillars:
-      document.getElementById("roiStrategicPillarsFilter")?.value || "",
-    revenuePlay: document.getElementById("roiRevenuePlayFilter")?.value || "",
+    region: getSelectedValues("roiRegionFilter"),
+    quarter: getSelectedValues("roiQuarterFilter"),
+    country: getSelectedValues("roiCountryFilter"),
+    owner: getSelectedValues("roiOwnerFilter"),
+    status: getSelectedValues("roiStatusFilter"),
+    programType: getSelectedValues("roiProgramTypeFilter"),
+    strategicPillars: getSelectedValues("roiStrategicPillarsFilter"),
+    revenuePlay: getSelectedValues("roiRevenuePlayFilter"),
   };
 }
 
@@ -262,15 +472,14 @@ updateRoiTotalSpend = function () {
       .getData()
       .filter((row) => {
         return (
-          (!filters.region || row.region === filters.region) &&
-          (!filters.quarter || row.quarter === filters.quarter) &&
-          (!filters.country || row.country === filters.country) &&
-          (!filters.owner || row.owner === filters.owner) &&
-          (!filters.status || row.status === filters.status) &&
-          (!filters.programType || row.programType === filters.programType) &&
-          (!filters.strategicPillars ||
-            row.strategicPillars === filters.strategicPillars) &&
-          (!filters.revenuePlay || row.revenuePlay === filters.revenuePlay)
+          (filters.region.length === 0 || filters.region.includes(row.region)) &&
+          (filters.quarter.length === 0 || filters.quarter.includes(row.quarter)) &&
+          (filters.country.length === 0 || filters.country.includes(row.country)) &&
+          (filters.owner.length === 0 || filters.owner.includes(row.owner)) &&
+          (filters.status.length === 0 || filters.status.includes(row.status)) &&
+          (filters.programType.length === 0 || filters.programType.includes(row.programType)) &&
+          (filters.strategicPillars.length === 0 || filters.strategicPillars.includes(row.strategicPillars)) &&
+          (filters.revenuePlay.length === 0 || filters.revenuePlay.includes(row.revenuePlay))
         );
       });
   }
@@ -415,15 +624,14 @@ updateRoiDataTable = function () {
   const campaigns = getCampaignDataForRoi();
   const filteredCampaigns = campaigns.filter((campaign) => {
     return (
-      (!filters.region || campaign.region === filters.region) &&
-      (!filters.quarter || campaign.quarter === filters.quarter) &&
-      (!filters.country || campaign.country === filters.country) &&
-      (!filters.owner || campaign.owner === filters.owner) &&
-      (!filters.status || campaign.status === filters.status) &&
-      (!filters.programType || campaign.programType === filters.programType) &&
-      (!filters.strategicPillars ||
-        campaign.strategicPillars === filters.strategicPillars) &&
-      (!filters.revenuePlay || campaign.revenuePlay === filters.revenuePlay)
+      (filters.region.length === 0 || filters.region.includes(campaign.region)) &&
+      (filters.quarter.length === 0 || filters.quarter.includes(campaign.quarter)) &&
+      (filters.country.length === 0 || filters.country.includes(campaign.country)) &&
+      (filters.owner.length === 0 || filters.owner.includes(campaign.owner)) &&
+      (filters.status.length === 0 || filters.status.includes(campaign.status)) &&
+      (filters.programType.length === 0 || filters.programType.includes(campaign.programType)) &&
+      (filters.strategicPillars.length === 0 || filters.strategicPillars.includes(campaign.strategicPillars)) &&
+      (filters.revenuePlay.length === 0 || filters.revenuePlay.includes(campaign.revenuePlay))
     );
   });
   table.replaceData(filteredCampaigns);
@@ -502,27 +710,30 @@ function populateRoiFilters() {
   }
 
   // Only populate if not already populated
-  populateSelect(regionSelect, cachedFilterOptions.regionOptions, regionSelect.children.length > 1);
-  populateSelect(quarterSelect, cachedFilterOptions.quarterOptions, quarterSelect.children.length > 1);
-  populateSelect(countrySelect, cachedFilterOptions.countryOptions, countrySelect.children.length > 1);
-  populateSelect(ownerSelect, cachedFilterOptions.ownerOptions, ownerSelect.children.length > 1);
-  populateSelect(statusSelect, cachedFilterOptions.statusOptions, statusSelect.children.length > 1);
-  populateSelect(programTypeSelect, cachedFilterOptions.programTypeOptions, programTypeSelect.children.length > 1);
-  populateSelect(strategicPillarsSelect, cachedFilterOptions.strategicPillarsOptions, strategicPillarsSelect.children.length > 1);
-  populateSelect(revenuePlaySelect, cachedFilterOptions.revenuePlayOptions, revenuePlaySelect.children.length > 1);
+  populateSelect(regionSelect, cachedFilterOptions.regionOptions, regionSelect.children.length > 0);
+  populateSelect(quarterSelect, cachedFilterOptions.quarterOptions, quarterSelect.children.length > 0);
+  populateSelect(countrySelect, cachedFilterOptions.countryOptions, countrySelect.children.length > 0);
+  populateSelect(ownerSelect, cachedFilterOptions.ownerOptions, ownerSelect.children.length > 0);
+  populateSelect(statusSelect, cachedFilterOptions.statusOptions, statusSelect.children.length > 0);
+  populateSelect(programTypeSelect, cachedFilterOptions.programTypeOptions, programTypeSelect.children.length > 0);
+  populateSelect(strategicPillarsSelect, cachedFilterOptions.strategicPillarsOptions, strategicPillarsSelect.children.length > 0);
+  populateSelect(revenuePlaySelect, cachedFilterOptions.revenuePlayOptions, revenuePlaySelect.children.length > 0);
+
+  // Initialize custom multiselects if not already done
+  const selectElements = [
+    regionSelect, quarterSelect, countrySelect, ownerSelect, 
+    statusSelect, programTypeSelect, strategicPillarsSelect, revenuePlaySelect
+  ];
+
+  selectElements.forEach(select => {
+    if (!select._multiselectContainer) {
+      createRoiMultiselect(select);
+    }
+  });
 
   // Set up event listeners for all filters (only once)
   if (!regionSelect.hasEventListener) {
-    [
-      regionSelect,
-      quarterSelect,
-      countrySelect,
-      ownerSelect,
-      statusSelect,
-      programTypeSelect,
-      strategicPillarsSelect,
-      revenuePlaySelect,
-    ].forEach((select) => {
+    selectElements.forEach((select) => {
       select.hasEventListener = true;
       select.addEventListener("change", debouncedFilterUpdate);
     });
@@ -532,10 +743,31 @@ function populateRoiFilters() {
     if (clearButton && !clearButton.hasEventListener) {
       clearButton.hasEventListener = true;
       clearButton.addEventListener("click", () => {
-        // Batch clear all filters
-        [regionSelect, quarterSelect, countrySelect, ownerSelect, 
-         statusSelect, programTypeSelect, strategicPillarsSelect, revenuePlaySelect]
-          .forEach(select => select.value = "");
+        // Clear all multiselects
+        selectElements.forEach(select => {
+          // Clear select element
+          Array.from(select.options).forEach(option => option.selected = false);
+          
+          // Update multiselect display if it exists
+          if (select._multiselectContainer) {
+            const display = select._multiselectContainer.querySelector('.multiselect-display');
+            if (display) {
+              const placeholder = document.createElement('span');
+              placeholder.className = 'multiselect-placeholder';
+              placeholder.textContent = `(All ${select.getAttribute('data-placeholder') || 'Options'})`;
+              display.innerHTML = '';
+              display.appendChild(placeholder);
+            }
+            
+            // Update checkboxes in dropdown
+            const checkboxes = select._multiselectContainer.querySelectorAll('.multiselect-dropdown .multiselect-option');
+            checkboxes.forEach(option => {
+              option.classList.remove('selected');
+              const checkbox = option.querySelector('.multiselect-checkbox');
+              if (checkbox) checkbox.textContent = '';
+            });
+          }
+        });
         
         // Reset filter state and force update
         lastFilterState = null;

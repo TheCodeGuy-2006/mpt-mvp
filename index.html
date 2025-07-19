@@ -131,20 +131,20 @@
         <div class="filter-row filter-row-main">
           <div class="filter-group">
             <label for="executionRegionFilter">Region:</label>
-            <select id="executionRegionFilter" class="filter-select">
-              <option value="">(All Regions)</option>
+            <select id="executionRegionFilter" class="filter-select" multiple>
+              <!-- Options populated dynamically -->
             </select>
           </div>
           <div class="filter-group">
             <label for="executionQuarterFilter">Quarter:</label>
-            <select id="executionQuarterFilter" class="filter-select">
-              <option value="">(All Quarters)</option>
+            <select id="executionQuarterFilter" class="filter-select" multiple>
+              <!-- Options populated dynamically -->
             </select>
           </div>
           <div class="filter-group">
             <label for="executionStatusFilter">Status:</label>
-            <select id="executionStatusFilter" class="filter-select">
-              <option value="">(All Statuses)</option>
+            <select id="executionStatusFilter" class="filter-select" multiple>
+              <!-- Options populated dynamically -->
             </select>
           </div>
         </div>
@@ -153,20 +153,20 @@
         <div class="filter-row filter-row-secondary">
           <div class="filter-group">
             <label for="executionProgramTypeFilter">Program Type:</label>
-            <select id="executionProgramTypeFilter" class="filter-select">
-              <option value="">(All Program Types)</option>
+            <select id="executionProgramTypeFilter" class="filter-select" multiple>
+              <!-- Options populated dynamically -->
             </select>
           </div>
           <div class="filter-group">
             <label for="executionStrategicPillarFilter">Strategic Pillar:</label>
-            <select id="executionStrategicPillarFilter" class="filter-select">
-              <option value="">(All Strategic Pillars)</option>
+            <select id="executionStrategicPillarFilter" class="filter-select" multiple>
+              <!-- Options populated dynamically -->
             </select>
           </div>
           <div class="filter-group">
             <label for="executionOwnerFilter">Owner:</label>
-            <select id="executionOwnerFilter" class="filter-select">
-              <option value="">(All Owners)</option>
+            <select id="executionOwnerFilter" class="filter-select" multiple>
+              <!-- Options populated dynamically -->
             </select>
           </div>
           
@@ -374,50 +374,42 @@
       <div id="roiFiltersDiv" class="filters-container">
         <div class="filter-group">
           <label for="roiRegionFilter">Filter by Region:</label>
-          <select id="roiRegionFilter">
-            <option value="">(All Regions)</option>
+          <select id="roiRegionFilter" multiple data-placeholder="Regions">
           </select>
         </div>
         <div class="filter-group">
           <label for="roiQuarterFilter">Filter by Quarter:</label>
-          <select id="roiQuarterFilter">
-            <option value="">(All Quarters)</option>
+          <select id="roiQuarterFilter" multiple data-placeholder="Quarters">
           </select>
         </div>
         <div class="filter-group">
           <label for="roiCountryFilter">Country:</label>
-          <select id="roiCountryFilter">
-            <option value="">(All Countries)</option>
+          <select id="roiCountryFilter" multiple data-placeholder="Countries">
           </select>
         </div>
         <div class="filter-group">
           <label for="roiOwnerFilter">Owner:</label>
-          <select id="roiOwnerFilter">
-            <option value="">(All Owners)</option>
+          <select id="roiOwnerFilter" multiple data-placeholder="Owners">
           </select>
         </div>
         <div class="filter-group">
           <label for="roiStatusFilter">Status:</label>
-          <select id="roiStatusFilter">
-            <option value="">(All Statuses)</option>
+          <select id="roiStatusFilter" multiple data-placeholder="Statuses">
           </select>
         </div>
         <div class="filter-group">
           <label for="roiProgramTypeFilter">Program Type:</label>
-          <select id="roiProgramTypeFilter">
-            <option value="">(All Program Types)</option>
+          <select id="roiProgramTypeFilter" multiple data-placeholder="Program Types">
           </select>
         </div>
         <div class="filter-group">
           <label for="roiStrategicPillarsFilter">Strategic Pillars:</label>
-          <select id="roiStrategicPillarsFilter">
-            <option value="">(All Pillars)</option>
+          <select id="roiStrategicPillarsFilter" multiple data-placeholder="Strategic Pillars">
           </select>
         </div>
         <div class="filter-group">
           <label for="roiRevenuePlayFilter">Revenue Play:</label>
-          <select id="roiRevenuePlayFilter">
-            <option value="">(All Revenue Plays)</option>
+          <select id="roiRevenuePlayFilter" multiple data-placeholder="Revenue Plays">
           </select>
         </div>
         <button id="roiClearFilters" class="clear-filters-btn">
@@ -519,9 +511,6 @@
             </div>
           </div>
         </div>
-      </div>
-      <div id="roiContent">
-        <!-- ROI content will go here -->
       </div>
     </section>
 

@@ -16,6 +16,201 @@ function debounce(func, wait) {
   };
 }
 
+// EXECUTION FILTER MULTISELECT FUNCTIONALITY
+
+// Custom multiselect implementation for execution filters
+function createExecutionMultiselect(selectElement) {
+  const container = document.createElement('div');
+  container.className = 'multiselect-container';
+  
+  const display = document.createElement('div');
+  display.className = 'multiselect-display';
+  
+  const dropdown = document.createElement('div');
+  dropdown.className = 'multiselect-dropdown';
+  
+  // Get options from original select
+  const options = Array.from(selectElement.options).map(option => ({
+    value: option.value,
+    text: option.textContent,
+    selected: option.selected
+  }));
+  
+  let selectedValues = options.filter(opt => opt.selected).map(opt => opt.value);
+  
+  // Update display content
+  function updateDisplay() {
+    display.innerHTML = '';
+    
+    if (selectedValues.length === 0) {
+      const placeholder = document.createElement('span');
+      placeholder.className = 'multiselect-placeholder';
+      placeholder.textContent = `(All ${selectElement.getAttribute('data-placeholder') || 'Options'})`;
+      display.appendChild(placeholder);
+    } else if (selectedValues.length <= 2) {
+      const selectedContainer = document.createElement('div');
+      selectedContainer.className = 'multiselect-selected';
+      
+      selectedValues.forEach(value => {
+        const option = options.find(opt => opt.value === value);
+        if (option) {
+          const tag = document.createElement('span');
+          tag.className = 'multiselect-tag';
+          tag.innerHTML = `
+            ${option.text}
+            <span class="multiselect-tag-remove" data-value="${value}">×</span>
+          `;
+          selectedContainer.appendChild(tag);
+        }
+      });
+      
+      display.appendChild(selectedContainer);
+    } else {
+      const selectedContainer = document.createElement('div');
+      selectedContainer.className = 'multiselect-selected';
+      
+      // Show first item and count
+      const firstOption = options.find(opt => opt.value === selectedValues[0]);
+      if (firstOption) {
+        const tag = document.createElement('span');
+        tag.className = 'multiselect-tag';
+        tag.innerHTML = `
+          ${firstOption.text}
+          <span class="multiselect-tag-remove" data-value="${firstOption.value}">×</span>
+        `;
+        selectedContainer.appendChild(tag);
+      }
+      
+      const count = document.createElement('span');
+      count.className = 'multiselect-count';
+      count.textContent = `+${selectedValues.length - 1}`;
+      selectedContainer.appendChild(count);
+      
+      display.appendChild(selectedContainer);
+    }
+  }
+  
+  // Update dropdown content
+  function updateDropdown() {
+    dropdown.innerHTML = '';
+    
+    options.forEach(option => {
+      const optionElement = document.createElement('div');
+      optionElement.className = 'multiselect-option';
+      if (selectedValues.includes(option.value)) {
+        optionElement.classList.add('selected');
+      }
+      
+      optionElement.innerHTML = `
+        <div class="multiselect-checkbox">${selectedValues.includes(option.value) ? '✓' : ''}</div>
+        <span>${option.text}</span>
+      `;
+      
+      optionElement.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleOption(option.value);
+      });
+      
+      dropdown.appendChild(optionElement);
+    });
+  }
+  
+  // Toggle option selection
+  function toggleOption(value) {
+    const index = selectedValues.indexOf(value);
+    if (index === -1) {
+      selectedValues.push(value);
+    } else {
+      selectedValues.splice(index, 1);
+    }
+    
+    // Update original select
+    Array.from(selectElement.options).forEach(option => {
+      option.selected = selectedValues.includes(option.value);
+    });
+    
+    updateDisplay();
+    updateDropdown();
+    
+    // Trigger change event
+    selectElement.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  
+  // Handle tag removal
+  display.addEventListener('click', (e) => {
+    if (e.target.classList.contains('multiselect-tag-remove')) {
+      e.stopPropagation();
+      const value = e.target.getAttribute('data-value');
+      toggleOption(value);
+    } else {
+      // Toggle dropdown
+      const isOpen = dropdown.classList.contains('open');
+      closeAllExecutionMultiselects();
+      if (!isOpen) {
+        display.classList.add('open');
+        dropdown.classList.add('open');
+      }
+    }
+  });
+  
+  // Setup container
+  selectElement.parentNode.insertBefore(container, selectElement);
+  container.appendChild(display);
+  container.appendChild(dropdown);
+  selectElement.classList.add('multiselect-hidden');
+  
+  // Store reference for cleanup
+  selectElement._multiselectContainer = container;
+  
+  const multiselectAPI = {
+    updateDisplay,
+    updateDropdown,
+    getSelectedValues: () => selectedValues,
+    setSelectedValues: (values) => {
+      selectedValues = values.slice();
+      Array.from(selectElement.options).forEach(option => {
+        option.selected = selectedValues.includes(option.value);
+      });
+      updateDisplay();
+      updateDropdown();
+    },
+    destroy: () => {
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+      selectElement.classList.remove('multiselect-hidden');
+      delete selectElement._multiselectContainer;
+      delete selectElement._multiselectAPI;
+    }
+  };
+  
+  // Store API reference
+  selectElement._multiselectAPI = multiselectAPI;
+  
+  // Initial update
+  updateDisplay();
+  updateDropdown();
+  
+  return multiselectAPI;
+}
+
+// Close all execution multiselects
+function closeAllExecutionMultiselects() {
+  document.querySelectorAll('#executionFilters .multiselect-display.open').forEach(display => {
+    display.classList.remove('open');
+  });
+  document.querySelectorAll('#executionFilters .multiselect-dropdown.open').forEach(dropdown => {
+    dropdown.classList.remove('open');
+  });
+}
+
+// Close execution multiselects when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#executionFilters .multiselect-container')) {
+    closeAllExecutionMultiselects();
+  }
+});
+
 // EXECUTION GRID INITIALIZATION
 function initExecutionGrid(rows) {
   // Get constants from planning module for consistency
@@ -305,9 +500,23 @@ function setupExecutionFilters() {
 
 // Function to populate execution filter dropdowns
 function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names) {
-  // Region filter
+  // Set placeholder attributes for custom multiselects
   const regionSelect = document.getElementById("executionRegionFilter");
-  if (regionSelect && regionSelect.children.length <= 1) {
+  const quarterSelect = document.getElementById("executionQuarterFilter");
+  const statusSelect = document.getElementById("executionStatusFilter");
+  const programTypeSelect = document.getElementById("executionProgramTypeFilter");
+  const strategicPillarSelect = document.getElementById("executionStrategicPillarFilter");
+  const ownerSelect = document.getElementById("executionOwnerFilter");
+
+  if (regionSelect) regionSelect.setAttribute('data-placeholder', 'Regions');
+  if (quarterSelect) quarterSelect.setAttribute('data-placeholder', 'Quarters');
+  if (statusSelect) statusSelect.setAttribute('data-placeholder', 'Statuses');
+  if (programTypeSelect) programTypeSelect.setAttribute('data-placeholder', 'Program Types');
+  if (strategicPillarSelect) strategicPillarSelect.setAttribute('data-placeholder', 'Strategic Pillars');
+  if (ownerSelect) ownerSelect.setAttribute('data-placeholder', 'Owners');
+
+  // Region filter
+  if (regionSelect && regionSelect.children.length === 0) {
     regionOptions.forEach((region) => {
       const option = document.createElement("option");
       option.value = region;
@@ -317,8 +526,7 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
   }
 
   // Quarter filter
-  const quarterSelect = document.getElementById("executionQuarterFilter");
-  if (quarterSelect && quarterSelect.children.length <= 1) {
+  if (quarterSelect && quarterSelect.children.length === 0) {
     quarterOptions.forEach((quarter) => {
       const option = document.createElement("option");
       option.value = quarter;
@@ -328,8 +536,7 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
   }
 
   // Status filter
-  const statusSelect = document.getElementById("executionStatusFilter");
-  if (statusSelect && statusSelect.children.length <= 1) {
+  if (statusSelect && statusSelect.children.length === 0) {
     statusOptions.forEach((status) => {
       const option = document.createElement("option");
       option.value = status;
@@ -339,8 +546,7 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
   }
 
   // Program Type filter
-  const programTypeSelect = document.getElementById("executionProgramTypeFilter");
-  if (programTypeSelect && programTypeSelect.children.length <= 1) {
+  if (programTypeSelect && programTypeSelect.children.length === 0) {
     programTypes.forEach((type) => {
       const option = document.createElement("option");
       option.value = type;
@@ -350,8 +556,7 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
   }
 
   // Strategic Pillar filter
-  const strategicPillarSelect = document.getElementById("executionStrategicPillarFilter");
-  if (strategicPillarSelect && strategicPillarSelect.children.length <= 1) {
+  if (strategicPillarSelect && strategicPillarSelect.children.length === 0) {
     strategicPillars.forEach((pillar) => {
       const option = document.createElement("option");
       option.value = pillar;
@@ -361,8 +566,7 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
   }
 
   // Owner filter
-  const ownerSelect = document.getElementById("executionOwnerFilter");
-  if (ownerSelect && ownerSelect.children.length <= 1) {
+  if (ownerSelect && ownerSelect.children.length === 0) {
     names.forEach((owner) => {
       const option = document.createElement("option");
       option.value = owner;
@@ -370,6 +574,18 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
       ownerSelect.appendChild(option);
     });
   }
+
+  // Initialize custom multiselects if not already done
+  const selectElements = [
+    regionSelect, quarterSelect, statusSelect, 
+    programTypeSelect, strategicPillarSelect, ownerSelect
+  ].filter(Boolean);
+
+  selectElements.forEach(select => {
+    if (!select._multiselectContainer) {
+      createExecutionMultiselect(select);
+    }
+  });
 }
 
 // Helper function to update Digital Motions button visual state
@@ -433,14 +649,16 @@ function setupExecutionFilterLogic() {
   updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
 
   // Set up event listeners for all filters (only if not already attached)
-  [
+  const selectElements = [
     regionSelect,
     quarterSelect,
     statusSelect,
     programTypeSelect,
     strategicPillarSelect,
     ownerSelect,
-  ].forEach((select) => {
+  ];
+
+  selectElements.forEach((select) => {
     if (!select.hasAttribute("data-listener-attached")) {
       select.addEventListener("change", debounce(applyExecutionFilters, 150));
       select.setAttribute("data-listener-attached", "true");
@@ -463,14 +681,29 @@ function setupExecutionFilterLogic() {
   }
 
   // Clear filters button
-  if (clearButton) {
+  if (clearButton && !clearButton.hasAttribute("data-listener-attached")) {
     clearButton.addEventListener("click", () => {
-      regionSelect.value = "";
-      quarterSelect.value = "";
-      statusSelect.value = "";
-      programTypeSelect.value = "";
-      strategicPillarSelect.value = "";
-      ownerSelect.value = "";
+      // Clear all multiselect values
+      selectElements.forEach(select => {
+        if (select && select.multiple) {
+          // Clear all selected options in multiselect
+          Array.from(select.options).forEach(option => {
+            option.selected = false;
+          });
+          
+          // Update custom multiselect display if it exists
+          if (select._multiselectContainer) {
+            const multiselectAPI = select._multiselectAPI;
+            if (multiselectAPI) {
+              multiselectAPI.setSelectedValues([]);
+            }
+          }
+        } else if (select) {
+          select.value = "";
+        }
+      });
+      
+      // Reset Digital Motions button
       digitalMotionsButton.dataset.active = "false";
       updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
 
@@ -482,6 +715,7 @@ function setupExecutionFilterLogic() {
       // Then apply the empty filter state to ensure consistency
       applyExecutionFilters();
     });
+    clearButton.setAttribute("data-listener-attached", "true");
   }
 }
 
@@ -492,17 +726,37 @@ function getExecutionFilterValues() {
   );
   const digitalMotionsActive = digitalMotionsButton?.dataset.active === "true";
 
+  // Helper function to get selected values from multiselect
+  const getSelectedValues = (elementId) => {
+    const element = document.getElementById(elementId);
+    if (!element) return [];
+    
+    if (element.multiple) {
+      return Array.from(element.selectedOptions).map(option => option.value).filter(value => value !== "");
+    } else {
+      const value = element.value;
+      return value ? [value] : [];
+    }
+  };
+
   const filterValues = {
-    region: document.getElementById("executionRegionFilter")?.value || "",
-    quarter: document.getElementById("executionQuarterFilter")?.value || "",
-    status: document.getElementById("executionStatusFilter")?.value || "",
-    programType:
-      document.getElementById("executionProgramTypeFilter")?.value || "",
-    strategicPillar:
-      document.getElementById("executionStrategicPillarFilter")?.value || "",
-    owner: document.getElementById("executionOwnerFilter")?.value || "",
+    region: getSelectedValues("executionRegionFilter"),
+    quarter: getSelectedValues("executionQuarterFilter"),
+    status: getSelectedValues("executionStatusFilter"),
+    programType: getSelectedValues("executionProgramTypeFilter"),
+    strategicPillar: getSelectedValues("executionStrategicPillarFilter"),
+    owner: getSelectedValues("executionOwnerFilter"),
     digitalMotions: digitalMotionsActive,
   };
+
+  console.log(
+    "[Execution] getExecutionFilterValues - Digital Motions button state:",
+    {
+      element: !!digitalMotionsButton,
+      datasetActive: digitalMotionsButton?.dataset.active,
+      digitalMotionsActive,
+    },
+  );
 
   return filterValues;
 }
@@ -517,6 +771,7 @@ function applyExecutionFilters() {
   }
 
   const filters = getExecutionFilterValues();
+  console.log("[Execution] Applying filters:", filters);
 
   // Use requestAnimationFrame to reduce forced reflow
   requestAnimationFrame(() => {
@@ -526,32 +781,32 @@ function applyExecutionFilters() {
     // Apply filters using Tabulator's built-in filter system
     const activeFilters = [];
 
-    // Exact match filters
-    if (filters.region) {
-      activeFilters.push({ field: "region", type: "=", value: filters.region });
+    // Multi-value filters (arrays)
+    if (filters.region.length > 0) {
+      activeFilters.push({ field: "region", type: "in", value: filters.region });
     }
-    if (filters.quarter) {
-      activeFilters.push({ field: "quarter", type: "=", value: filters.quarter });
+    if (filters.quarter.length > 0) {
+      activeFilters.push({ field: "quarter", type: "in", value: filters.quarter });
     }
-    if (filters.status) {
-      activeFilters.push({ field: "status", type: "=", value: filters.status });
+    if (filters.status.length > 0) {
+      activeFilters.push({ field: "status", type: "in", value: filters.status });
     }
-    if (filters.programType) {
+    if (filters.programType.length > 0) {
       activeFilters.push({
         field: "programType",
-        type: "=",
+        type: "in",
         value: filters.programType,
       });
     }
-    if (filters.strategicPillar) {
+    if (filters.strategicPillar.length > 0) {
       activeFilters.push({
         field: "strategicPillars",
-        type: "=",
+        type: "in",
         value: filters.strategicPillar,
       });
     }
-    if (filters.owner) {
-      activeFilters.push({ field: "owner", type: "=", value: filters.owner });
+    if (filters.owner.length > 0) {
+      activeFilters.push({ field: "owner", type: "in", value: filters.owner });
     }
 
     // Apply standard filters first
@@ -569,6 +824,12 @@ function applyExecutionFilters() {
     }
 
     const visibleRows = executionTableInstance.getDataCount(true);
+    console.log("[Execution] Filters applied, showing", visibleRows, "rows");
+
+    // Show helpful message when Digital Motions filter is active
+    if (filters.digitalMotions) {
+      console.log("[Execution] Digital Motions filter is active - showing only campaigns with Digital Motions enabled");
+    }
   });
 }
 
@@ -644,6 +905,9 @@ window.executionModule = {
   getExecutionFilterValues,
   initializeExecutionFilters,
   syncDigitalMotionsFromPlanning,
+  // Multiselect functions
+  createExecutionMultiselect,
+  closeAllExecutionMultiselects,
 };
 
 // Export the execution table instance getter
