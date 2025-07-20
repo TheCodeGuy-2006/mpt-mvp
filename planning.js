@@ -1,6 +1,12 @@
 import { kpis } from "./src/calc.js";
 
 // PLANNING TAB CONSTANTS AND DATA
+// Quarter normalization function to handle format differences ("Q1 July" vs "Q1 - July")
+function normalizeQuarter(quarter) {
+  if (!quarter || typeof quarter !== 'string') return quarter;
+  return quarter.replace(/\s*-\s*/, ' ');
+}
+
 // Simplified performance monitoring
 const planningPerformance = {
   startTime: null,
@@ -446,9 +452,19 @@ class PlanningDataStore {
         const filterValues = filters[field];
         if (filterValues && Array.isArray(filterValues) && filterValues.length > 0) {
           // For strategicPillars field, check against 'strategicPillars' in row data
-          const rowValue = field === 'strategicPillar' ? row.strategicPillars : row[field];
-          if (!filterValues.includes(rowValue)) {
-            return false;
+          let rowValue = field === 'strategicPillar' ? row.strategicPillars : row[field];
+          
+          // Apply quarter normalization for quarter field comparison
+          if (field === 'quarter') {
+            rowValue = normalizeQuarter(rowValue);
+            const normalizedFilterValues = filterValues.map(normalizeQuarter);
+            if (!normalizedFilterValues.includes(rowValue)) {
+              return false;
+            }
+          } else {
+            if (!filterValues.includes(rowValue)) {
+              return false;
+            }
           }
         }
       }
@@ -2043,8 +2059,9 @@ function populatePlanningFilters() {
   if (quarterSelect.children.length === 0) {
     quarterOptions.forEach((quarter) => {
       const option = document.createElement("option");
-      option.value = quarter;
-      option.textContent = quarter;
+      const normalizedQuarter = normalizeQuarter(quarter);
+      option.value = normalizedQuarter;
+      option.textContent = normalizedQuarter;
       quarterSelect.appendChild(option);
     });
   }

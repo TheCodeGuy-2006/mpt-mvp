@@ -271,10 +271,24 @@ function updateRoiTotalSpend() {
   if (window.executionModule.tableInstance) {
     const allData = window.executionModule.tableInstance.getData();
     
+    // Helper function to normalize quarter formats for comparison
+    const normalizeQuarter = (quarter) => {
+      if (!quarter) return '';
+      return quarter.replace(/\s*-\s*/g, ' ').trim();
+    };
+    
     // Optimized filtering with early returns and array support
     filteredData = allData.filter((row) => {
+      // Quarter filter with normalization to handle format differences
+      let quarterMatch = filters.quarter.length === 0;
+      if (!quarterMatch && row.quarter) {
+        quarterMatch = filters.quarter.some(filterQuarter => 
+          normalizeQuarter(row.quarter) === normalizeQuarter(filterQuarter)
+        );
+      }
+      
       return (filters.region.length === 0 || filters.region.includes(row.region)) &&
-             (filters.quarter.length === 0 || filters.quarter.includes(row.quarter)) &&
+             quarterMatch &&
              (filters.country.length === 0 || filters.country.includes(row.country)) &&
              (filters.owner.length === 0 || filters.owner.includes(row.owner)) &&
              (filters.status.length === 0 || filters.status.includes(row.status)) &&
@@ -359,10 +373,17 @@ function updateRoiTotalSpend() {
   let totalForecastedCost = 0;
   if (window.planningModule && window.planningModule.tableInstance) {
     const planningData = window.planningModule.tableInstance.getData();
+    
+    // Helper function to normalize quarter formats for comparison
+    const normalizeQuarter = (quarter) => {
+      if (!quarter) return '';
+      return quarter.replace(/\s*-\s*/g, ' ').trim();
+    };
+    
     totalForecastedCost = planningData.reduce((sum, row) => {
       // Apply filters to forecasted cost calculation
       if (filters.region && row.region !== filters.region) return sum;
-      if (filters.quarter && row.quarter !== filters.quarter) return sum;
+      if (filters.quarter && normalizeQuarter(row.quarter) !== normalizeQuarter(filters.quarter)) return sum;
       if (filters.country && row.country !== filters.country) return sum;
       if (filters.owner && row.owner !== filters.owner) return sum;
       if (filters.status && row.status !== filters.status) return sum;
@@ -468,12 +489,26 @@ updateRoiTotalSpend = function () {
   const filters = getRoiFilterValues();
   let filteredData = [];
   if (window.executionModule.tableInstance) {
+    // Helper function to normalize quarter formats for comparison
+    const normalizeQuarter = (quarter) => {
+      if (!quarter) return '';
+      return quarter.replace(/\s*-\s*/g, ' ').trim();
+    };
+    
     filteredData = window.executionModule.tableInstance
       .getData()
       .filter((row) => {
+        // Quarter filter with normalization to handle format differences
+        let quarterMatch = filters.quarter.length === 0;
+        if (!quarterMatch && row.quarter) {
+          quarterMatch = filters.quarter.some(filterQuarter => 
+            normalizeQuarter(row.quarter) === normalizeQuarter(filterQuarter)
+          );
+        }
+        
         return (
           (filters.region.length === 0 || filters.region.includes(row.region)) &&
-          (filters.quarter.length === 0 || filters.quarter.includes(row.quarter)) &&
+          quarterMatch &&
           (filters.country.length === 0 || filters.country.includes(row.country)) &&
           (filters.owner.length === 0 || filters.owner.includes(row.owner)) &&
           (filters.status.length === 0 || filters.status.includes(row.status)) &&
@@ -622,10 +657,25 @@ updateRoiDataTable = function () {
   }
   const filters = getRoiFilterValues();
   const campaigns = getCampaignDataForRoi();
+  
+  // Helper function to normalize quarter formats for comparison
+  const normalizeQuarter = (quarter) => {
+    if (!quarter) return '';
+    return quarter.replace(/\s*-\s*/g, ' ').trim();
+  };
+  
   const filteredCampaigns = campaigns.filter((campaign) => {
+    // Quarter filter with normalization to handle format differences
+    let quarterMatch = filters.quarter.length === 0;
+    if (!quarterMatch && campaign.quarter) {
+      quarterMatch = filters.quarter.some(filterQuarter => 
+        normalizeQuarter(campaign.quarter) === normalizeQuarter(filterQuarter)
+      );
+    }
+    
     return (
       (filters.region.length === 0 || filters.region.includes(campaign.region)) &&
-      (filters.quarter.length === 0 || filters.quarter.includes(campaign.quarter)) &&
+      quarterMatch &&
       (filters.country.length === 0 || filters.country.includes(campaign.country)) &&
       (filters.owner.length === 0 || filters.owner.includes(campaign.owner)) &&
       (filters.status.length === 0 || filters.status.includes(campaign.status)) &&
@@ -1190,13 +1240,19 @@ function updateRoiDataTable() {
   const quarterFilter =
     document.getElementById("roiQuarterFilter")?.value || "";
 
+  // Helper function to normalize quarter formats for comparison
+  const normalizeQuarter = (quarter) => {
+    if (!quarter) return '';
+    return quarter.replace(/\s*-\s*/g, ' ').trim();
+  };
+
   // Get fresh data
   const campaigns = getCampaignDataForRoi();
 
   // Apply filters
   const filteredCampaigns = campaigns.filter((campaign) => {
     const matchesRegion = !regionFilter || campaign.region === regionFilter;
-    const matchesQuarter = !quarterFilter || campaign.quarter === quarterFilter;
+    const matchesQuarter = !quarterFilter || normalizeQuarter(campaign.quarter) === normalizeQuarter(quarterFilter);
     return matchesRegion && matchesQuarter;
   });
 
@@ -1281,10 +1337,17 @@ async function updateRemainingBudget(filters) {
     let totalActualCost = 0;
     if (window.executionModule && window.executionModule.tableInstance) {
       const executionData = window.executionModule.tableInstance.getData();
+      
+      // Helper function to normalize quarter formats for comparison
+      const normalizeQuarter = (quarter) => {
+        if (!quarter) return '';
+        return quarter.replace(/\s*-\s*/g, ' ').trim();
+      };
+      
       totalActualCost = executionData.reduce((sum, row) => {
         // Apply all filters
         if (filters.region && row.region !== filters.region) return sum;
-        if (filters.quarter && row.quarter !== filters.quarter) return sum;
+        if (filters.quarter && normalizeQuarter(row.quarter) !== normalizeQuarter(filters.quarter)) return sum;
         if (filters.country && row.country !== filters.country) return sum;
         if (filters.owner && row.owner !== filters.owner) return sum;
         if (filters.status && row.status !== filters.status) return sum;
@@ -1378,10 +1441,17 @@ async function updateForecastedBudgetUsage(filters) {
     let totalForecastedCost = 0;
     if (window.planningModule && window.planningModule.tableInstance) {
       const planningData = window.planningModule.tableInstance.getData();
+      
+      // Helper function to normalize quarter formats for comparison
+      const normalizeQuarter = (quarter) => {
+        if (!quarter) return '';
+        return quarter.replace(/\s*-\s*/g, ' ').trim();
+      };
+      
       totalForecastedCost = planningData.reduce((sum, row) => {
         // Apply all filters
         if (filters.region && row.region !== filters.region) return sum;
-        if (filters.quarter && row.quarter !== filters.quarter) return sum;
+        if (filters.quarter && normalizeQuarter(row.quarter) !== normalizeQuarter(filters.quarter)) return sum;
         if (filters.country && row.country !== filters.country) return sum;
         if (filters.owner && row.owner !== filters.owner) return sum;
         if (filters.status && row.status !== filters.status) return sum;

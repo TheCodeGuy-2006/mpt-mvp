@@ -245,7 +245,14 @@ let activeFilters = {
   programType: [],
   strategicPillars: [],
   revenuePlay: [],
+  quarter: [],
 };
+
+// Quarter normalization function to handle format differences ("Q1 July" vs "Q1 - July")
+function normalizeQuarter(quarter) {
+  if (!quarter || typeof quarter !== 'string') return quarter;
+  return quarter.replace(/\s*-\s*/, ' ');
+}
 
 // Performance cache for calendar data
 const calendarCache = {
@@ -384,6 +391,7 @@ function getCampaignsForMonthInternal(month, year) {
     // Apply active filters with early exit - now working with arrays
     if (activeFilters.region.length > 0 && !activeFilters.region.includes(campaign.region)) continue;
     if (activeFilters.country.length > 0 && !activeFilters.country.includes(campaign.country)) continue;
+    if (activeFilters.quarter.length > 0 && !activeFilters.quarter.includes(normalizeQuarter(campaign.quarter))) continue;
     if (activeFilters.owner.length > 0 && !activeFilters.owner.includes(campaign.owner)) continue;
     if (activeFilters.status.length > 0 && !activeFilters.status.includes(campaign.status)) continue;
     if (activeFilters.programType.length > 0 && !activeFilters.programType.includes(campaign.programType)) continue;
@@ -416,6 +424,7 @@ function getFilterOptions() {
     programTypes: new Set(),
     strategicPillars: new Set(),
     revenuePlays: new Set(),
+    quarters: new Set(),
   };
 
   campaigns.forEach((campaign) => {
@@ -427,6 +436,7 @@ function getFilterOptions() {
     if (campaign.strategicPillars)
       options.strategicPillars.add(campaign.strategicPillars);
     if (campaign.revenuePlay) options.revenuePlays.add(campaign.revenuePlay);
+    if (campaign.quarter) options.quarters.add(normalizeQuarter(campaign.quarter));
   });
 
   return {
@@ -437,6 +447,7 @@ function getFilterOptions() {
     programTypes: Array.from(options.programTypes).sort(),
     strategicPillars: Array.from(options.strategicPillars).sort(),
     revenuePlays: Array.from(options.revenuePlays).sort(),
+    quarters: Array.from(options.quarters).sort(),
   };
 }
 
@@ -510,6 +521,18 @@ function renderFilterControls() {
               .map(
                 (country) =>
                   `<option value="${country}" ${activeFilters.country.includes(country) ? "selected" : ""}>${country}</option>`,
+              )
+              .join("")}
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="filterQuarter">Quarter</label>
+          <select id="filterQuarter" class="filter-select" multiple data-placeholder="Quarters">
+            ${filterOptions.quarters
+              .map(
+                (quarter) =>
+                  `<option value="${quarter}" ${activeFilters.quarter.includes(quarter) ? "selected" : ""}>${quarter}</option>`,
               )
               .join("")}
           </select>
@@ -592,6 +615,7 @@ function renderFilterControls() {
   const selectElements = [
     document.getElementById("filterRegion"),
     document.getElementById("filterCountry"),
+    document.getElementById("filterQuarter"),
     document.getElementById("filterOwner"),
     document.getElementById("filterStatus"),
     document.getElementById("filterProgramType"),
@@ -615,6 +639,7 @@ function setupFilterEventListeners() {
   const filterIds = [
     "filterRegion",
     "filterCountry",
+    "filterQuarter",
     "filterOwner",
     "filterStatus",
     "filterProgramType",
@@ -646,7 +671,7 @@ function updateFilterSummary() {
   if (!summary) return;
 
   const activeCount = Object.values(activeFilters).filter(
-    (f) => f !== "",
+    (f) => Array.isArray(f) && f.length > 0,
   ).length;
   
   const campaigns = getCampaignData();
@@ -699,6 +724,7 @@ function applyFilters() {
   // Get current filter values from the multiselects
   const regionFilter = document.getElementById("filterRegion");
   const countryFilter = document.getElementById("filterCountry");
+  const quarterFilter = document.getElementById("filterQuarter");
   const ownerFilter = document.getElementById("filterOwner");
   const statusFilter = document.getElementById("filterStatus");
   const programTypeFilter = document.getElementById("filterProgramType");
@@ -711,6 +737,9 @@ function applyFilters() {
   }
   if (countryFilter && countryFilter._multiselectContainer) {
     activeFilters.country = Array.from(countryFilter.selectedOptions).map(option => option.value);
+  }
+  if (quarterFilter && quarterFilter._multiselectContainer) {
+    activeFilters.quarter = Array.from(quarterFilter.selectedOptions).map(option => option.value);
   }
   if (ownerFilter && ownerFilter._multiselectContainer) {
     activeFilters.owner = Array.from(ownerFilter.selectedOptions).map(option => option.value);
@@ -740,6 +769,7 @@ function clearAllFilters() {
   activeFilters = {
     region: [],
     country: [],
+    quarter: [],
     owner: [],
     status: [],
     programType: [],
@@ -751,6 +781,7 @@ function clearAllFilters() {
   const filterIds = [
     "filterRegion",
     "filterCountry",
+    "filterQuarter",
     "filterOwner",
     "filterStatus",
     "filterProgramType",

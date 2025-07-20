@@ -693,11 +693,17 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
   if (window.executionTableInstance) {
     const data = window.executionTableInstance.getData();
     
+    // Helper function to normalize quarter formats for comparison
+    const normalizeQuarter = (quarter) => {
+      if (!quarter) return '';
+      return quarter.replace(/\s*-\s*/g, ' ').trim();
+    };
+    
     // Process data with filtering
     data.forEach((row) => {
       // Apply filters before processing data
       if (filters.region && row.region !== filters.region) return;
-      if (filters.quarter && row.quarter !== filters.quarter) return;
+      if (filters.quarter && normalizeQuarter(row.quarter) !== normalizeQuarter(filters.quarter)) return;
       if (filters.country && row.country !== filters.country) return;
       if (filters.owner && row.owner !== filters.owner) return;
       if (filters.status && row.status !== filters.status) return;
@@ -848,11 +854,17 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
   if (window.executionTableInstance) {
     const data = window.executionTableInstance.getData();
     
+    // Helper function to normalize quarter formats for comparison
+    const normalizeQuarter = (quarter) => {
+      if (!quarter) return '';
+      return quarter.replace(/\s*-\s*/g, ' ').trim();
+    };
+    
     let processedRows = 0;
     data.forEach((row) => {
       // Apply filters before processing data
       if (filters.region && row.region !== filters.region) return;
-      if (filters.quarter && row.quarter !== filters.quarter) return;
+      if (filters.quarter && normalizeQuarter(row.quarter) !== normalizeQuarter(filters.quarter)) return;
       if (filters.country && row.country !== filters.country) return;
       if (filters.owner && row.owner !== filters.owner) return;
       if (filters.status && row.status !== filters.status) return;

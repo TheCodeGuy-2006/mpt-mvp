@@ -1,6 +1,12 @@
 // Planning Data Processing Web Worker
 // This worker handles heavy data processing off the main thread
 
+// Quarter normalization function to handle format differences ("Q1 July" vs "Q1 - July")
+function normalizeQuarter(quarter) {
+  if (!quarter || typeof quarter !== 'string') return quarter;
+  return quarter.replace(/\s*-\s*/, ' ');
+}
+
 self.onmessage = function(e) {
   const { type, data, options } = e.data;
   
@@ -105,8 +111,19 @@ function applyFilters(rows, filters) {
     // Exact match filters
     const exactMatchFields = ['region', 'quarter', 'status', 'programType', 'strategicPillars', 'owner'];
     for (const field of exactMatchFields) {
-      if (filters[field] && row[field] !== filters[field]) {
-        return false;
+      if (filters[field]) {
+        if (field === 'quarter') {
+          // Apply quarter normalization for comparison
+          const normalizedRowQuarter = normalizeQuarter(row[field]);
+          const normalizedFilterQuarter = normalizeQuarter(filters[field]);
+          if (normalizedRowQuarter !== normalizedFilterQuarter) {
+            return false;
+          }
+        } else {
+          if (row[field] !== filters[field]) {
+            return false;
+          }
+        }
       }
     }
     
