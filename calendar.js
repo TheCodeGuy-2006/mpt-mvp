@@ -459,7 +459,7 @@ function renderFilterControls() {
           margin-bottom: 12px;
           border-left: 4px solid #1976d2;
         ">
-          <h5 style="margin: 0 0 8px 0; color: #1976d2; font-size: 14px;">🎨 Region Color Guide:</h5>
+          <h5 style="margin: 0 0 8px 0; color: #0969da; font-size: 14px;">🎨 Region Color Guide:</h5>
           <div style="
             display: flex;
             flex-wrap: wrap;
@@ -797,18 +797,23 @@ function getStatusColor(status) {
 // Get region color for campaigns
 function getRegionColor(region) {
   const colors = {
-    "APAC": "#1e88e5",      // Blue
-    "EMEA": "#43a047",      // Green  
-    "Americas": "#f4511e",  // Orange/Red
-    "JP & Korea": "#8e24aa", // Purple
-    "Global": "#546e7a",    // Blue Grey
-    "NA": "#fb8c00",        // Orange
-    "LATAM": "#d81b60",     // Pink
-    "ANZ": "#00acc1",       // Cyan
-    "India": "#7cb342",     // Light Green
-    "China": "#ff7043",     // Deep Orange
+    "JP & Korea": "#7db4e8",         // Soft blue - darker but still gentle
+    "South APAC": "#7dc67d",         // Soft green - darker but still gentle
+    "SAARC": "#e87d7d",              // Soft red/pink - darker but still gentle
+    "X APAC Non English": "#b17de8", // Soft purple - darker but still gentle
+    "X APAC English": "#ffaa66",     // Soft orange - darker but still gentle
+    // Legacy/fallback colors for backward compatibility
+    "APAC": "#9ec0e0",               // Medium soft blue
+    "EMEA": "#9ed0a8", 
+    "Americas": "#e0a0a0",           // Medium soft red
+    "Global": "#b8c5d2",             // Medium muted
+    "NA": "#ffc999",                 // Medium soft orange
+    "LATAM": "#c0a0e0",              // Medium soft purple
+    "ANZ": "#a0c8e8",                // Medium soft blue
+    "India": "#a8d8a8",              // Medium soft green
+    "China": "#e8a8a8",              // Medium soft red
   };
-  return colors[region] || "#757575"; // Default grey for unknown regions
+  return colors[region] || "#b8c5d2"; // Medium muted grey for unknown regions
 }
 
 // Get region colors for the legend

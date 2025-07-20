@@ -90,7 +90,7 @@ const monthOptions = [
 const regionOptions = ["JP & Korea", "South APAC", "SAARC", "X APAC Non English", "X APAC English"];
 
 const statusOptions = ["Planning", "On Track", "Shipped", "Cancelled"];
-const yesNo = ["Yes", "No"];
+const yesNo = ["(Clear)", "Yes", "No"];
 
 // Country options by region (partial mapping)
 const countryOptionsByRegion = {
@@ -856,6 +856,17 @@ function initPlanningGrid(rows) {
         editor: "list",
         editorParams: { values: yesNo },
         width: 110,
+        cellEdited: function(cell) {
+          // Convert "(Clear)" display value to empty string for data storage
+          if (cell.getValue() === "(Clear)") {
+            cell.setValue("");
+          }
+        },
+        formatter: function(cell) {
+          // Display "(Clear)" for empty values, otherwise show the actual value
+          const value = cell.getValue();
+          return value === "" || value === null || value === undefined ? "(Clear)" : value;
+        },
       },
       // Digital Motions toggle
       {
