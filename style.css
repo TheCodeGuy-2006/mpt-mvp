@@ -3175,3 +3175,146 @@ label.required::after {
     font-size: 1rem;
   }
 }
+
+/* ============================================================================
+   TABULATOR PAGINATION IMPROVEMENTS
+   Fix for page size dropdown being too long and improve button layout
+   ============================================================================ */
+
+/* Main pagination container - improved layout */
+.tabulator .tabulator-footer {
+  padding: 12px 16px !important;
+  background: #f6f8fa !important;
+  border-top: 1px solid #d0d7de !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: 16px !important;
+  min-height: 48px !important;
+}
+
+/* Left side - Page size controls */
+.tabulator .tabulator-footer .tabulator-paginator {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  order: 1 !important;
+}
+
+/* Page size label and dropdown container */
+.tabulator .tabulator-footer .tabulator-page-size {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 13px !important;
+  color: #656d76 !important;
+}
+
+/* Style the page size select dropdown */
+.tabulator .tabulator-footer .tabulator-page-size select {
+  min-width: 60px !important;
+  max-width: 70px !important;
+  width: 65px !important;
+  padding: 4px 6px !important;
+  font-size: 13px !important;
+  border: 1px solid #d0d7de !important;
+  border-radius: 6px !important;
+  background: white !important;
+  height: 28px !important;
+  cursor: pointer !important;
+}
+
+.tabulator .tabulator-footer .tabulator-page-size select:hover {
+  border-color: #8c959f !important;
+}
+
+.tabulator .tabulator-footer .tabulator-page-size select:focus {
+  border-color: #0969da !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1) !important;
+}
+
+/* Center - Page navigation buttons */
+.tabulator .tabulator-footer .tabulator-pages {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  order: 2 !important;
+  flex: 1 !important;
+}
+
+/* Individual page buttons */
+.tabulator .tabulator-footer .tabulator-page {
+  padding: 6px 10px !important;
+  margin: 0 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border: 1px solid #d0d7de !important;
+  border-radius: 6px !important;
+  background: white !important;
+  color: #24292e !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  text-decoration: none !important;
+}
+
+.tabulator .tabulator-footer .tabulator-page:hover:not(.disabled) {
+  background: #f6f8fa !important;
+  border-color: #8c959f !important;
+  transform: translateY(-1px) !important;
+}
+
+.tabulator .tabulator-footer .tabulator-page.active {
+  background: #0969da !important;
+  color: white !important;
+  border-color: #0969da !important;
+  font-weight: 600 !important;
+}
+
+.tabulator .tabulator-footer .tabulator-page.disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background: #f6f8fa !important;
+  color: #8c959f !important;
+}
+
+.tabulator .tabulator-footer .tabulator-page.disabled:hover {
+  transform: none !important;
+  border-color: #d0d7de !important;
+}
+
+/* Right side - Page counter */
+.tabulator .tabulator-footer .tabulator-page-counter {
+  font-size: 13px !important;
+  color: #656d76 !important;
+  font-weight: 500 !important;
+  order: 3 !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .tabulator .tabulator-footer {
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 8px 12px !important;
+  }
+  
+  .tabulator .tabulator-footer .tabulator-paginator,
+  .tabulator .tabulator-footer .tabulator-pages,
+  .tabulator .tabulator-footer .tabulator-page-counter {
+    order: unset !important;
+  }
+  
+  .tabulator .tabulator-footer .tabulator-pages {
+    flex: none !important;
+  }
+}

@@ -231,7 +231,7 @@ function initExecutionGrid(rows) {
     // Pagination to improve initial load
     pagination: "local",
     paginationSize: 25,
-    paginationSizeSelector: [10, 25, 50, 100],
+    paginationSizeSelector: [25, 50, 100],
     
     // Optimized rendering
     renderHorizontal: "virtual",

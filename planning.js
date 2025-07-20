@@ -581,7 +581,7 @@ function initPlanningGrid(rows) {
     // Pagination to improve initial load
     pagination: "local",
     paginationSize: 50, // Larger page size for better user experience
-    paginationSizeSelector: [25, 50, 100, 200, "all"],
+    paginationSizeSelector: [25, 50, 100],
     paginationCounter: "rows",
     
     // Enable progressive loading for smoother experience
