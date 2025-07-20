@@ -402,35 +402,76 @@ function initExecutionGrid(rows) {
 function setupExecutionSave(table, rows) {
   let btn = document.getElementById("saveExecutionRows");
   if (!btn) {
-    btn = document.createElement("button");
-    btn.id = "saveExecutionRows";
-    btn.textContent = "Save";
-    btn.style.margin = "12px 0";
-    document
-      .getElementById("view-execution")
-      .insertBefore(btn, document.getElementById("executionGrid"));
-  } else {
-    btn.textContent = "Save";
+    console.error("Save button not found in HTML structure");
+    return;
   }
+  
   btn.onclick = () => {
-    // Save all execution data to planning.json via backend API (same as planning)
+    // Save all execution data using the same pattern as planning
     const data = table.getData();
-    fetch("http://localhost:3000/save-planning", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: data }),
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.success) {
-          alert("Execution data saved to backend!");
-        } else {
-          alert("Failed to save: " + (result.error || "Unknown error"));
-        }
+    
+    console.log("Saving execution data:", data.length, "rows");
+
+    // Try Worker first, then backend fallback
+    if (window.cloudflareSyncModule) {
+      // Primary: Save to Worker (using planning endpoint since execution is part of planning data)
+      window.cloudflareSyncModule
+        .saveToWorker("planning", data, { source: "manual-save-execution" })
+        .then((result) => {
+          console.log("Worker save successful:", result);
+          alert(
+            "✅ Execution data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed.",
+          );
+
+          // Refresh data after successful save
+          if (window.cloudflareSyncModule.refreshDataAfterSave) {
+            window.cloudflareSyncModule.refreshDataAfterSave("planning");
+          }
+        })
+        .catch((error) => {
+          console.warn("Worker save failed, trying backend:", error);
+
+          // Fallback: Save to backend
+          fetch("http://localhost:3000/save-planning", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: data }),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (result.success) {
+                alert(
+                  "✅ Execution data saved to backend (Worker unavailable)!",
+                );
+              } else {
+                alert(
+                  "❌ Failed to save: " + (result.error || "Unknown error"),
+                );
+              }
+            })
+            .catch((err) => {
+              alert("❌ Save failed: " + err.message);
+            });
+        });
+    } else {
+      // No Worker configured, use backend only
+      fetch("http://localhost:3000/save-planning", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: data }),
       })
-      .catch((err) => {
-        alert("Failed to save: " + err.message);
-      });
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success) {
+            alert("✅ Execution data saved to backend!");
+          } else {
+            alert("❌ Failed to save: " + (result.error || "Unknown error"));
+          }
+        })
+        .catch((err) => {
+          alert("❌ Failed to save: " + err.message);
+        });
+    }
   };
 }
 
@@ -597,13 +638,17 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
 function updateExecutionDigitalMotionsButtonVisual(button) {
   const isActive = button.dataset.active === "true";
   if (isActive) {
-    button.style.background = "#1976d2";
+    button.classList.add('filter-btn-active');
+    button.style.background = "#1a7f37";
+    button.style.borderColor = "#1a7f37";
     button.style.color = "white";
-    button.style.fontWeight = "600";
+    button.textContent = "🚀 Digital Motions ✓";
   } else {
-    button.style.background = "white";
-    button.style.color = "#1976d2";
-    button.style.fontWeight = "500";
+    button.classList.remove('filter-btn-active');
+    button.style.background = "#2da44e";
+    button.style.borderColor = "#2da44e";
+    button.style.color = "white";
+    button.textContent = "🚀 Digital Motions";
   }
 }
 

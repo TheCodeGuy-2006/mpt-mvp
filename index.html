@@ -109,16 +109,16 @@
             <div class="content-card-header">Campaign Management</div>
             <div class="content-card-body">
               <div class="button-group">
-                <button id="addPlanningRow">➕ Add Campaign</button>
-                <button id="deletePlanningRow">Delete Row</button>
-                <button id="importCSVBtn">Import Campaign</button>
+                <button id="addPlanningRow" class="btn-success">➕ Add Campaign</button>
+                <button id="deletePlanningRow" class="btn-danger">🗑️ Delete Row</button>
+                <button id="importCSVBtn" class="btn-secondary">📥 Import Campaign</button>
                 <input
                   type="file"
                   id="csvFileInput"
                   accept=".csv"
                   style="display: none"
                 />
-                <button id="savePlanningRows" class="save-large">Save Changes</button>
+                <button id="savePlanningRows" class="btn-primary btn-lg">💾 Save Changes</button>
               </div>
             </div>
           </div>
@@ -199,6 +199,11 @@
           <div class="content-card">
             <div class="content-card-header">Campaign Execution Status</div>
             <div class="content-card-body">
+              <div class="button-group">
+                <button id="saveExecutionRows" class="btn-primary">
+                  💾 Save Execution Data
+                </button>
+              </div>
               <div id="executionGrid"></div>
             </div>
           </div>
@@ -413,7 +418,7 @@
         </table>
         <div id="annualBudgetButtons">
           <button id="addRegionRow" disabled>+ Add Region</button>
-          <button id="saveAnnualBudget" disabled>Save Annual Budget</button>
+          <button id="saveAnnualBudget" class="btn-primary btn-lg" disabled>💾 Save Annual Budget</button>
         </div>
       </div>
       <!-- Password Modal for Annual Budget Edit -->
@@ -492,7 +497,7 @@
                   </div>
                 </div>
                 <div style="margin-top: 16px;">
-                  <button id="roiClearFilters" class="clear-filters-btn">
+                  <button id="roiClearFilters" class="filter-btn filter-btn-clear">
                     Clear Filters
                   </button>
                 </div>

@@ -652,7 +652,7 @@ function initPlanningGrid(rows) {
         formatter: function (cell) {
           const row = cell.getRow();
           const selected = row.getElement().classList.contains("row-selected");
-          return `<span class="select-circle" style="display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid #888;background:${selected ? "#1976d2" : "transparent"};cursor:pointer;"></span>`;
+          return `<span class="select-circle" style="display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid #888;background:${selected ? "#0969da" : "transparent"};cursor:pointer;"></span>`;
         },
         width: 40,
         hozAlign: "center",
@@ -909,7 +909,7 @@ function initPlanningGrid(rows) {
         title: "",
         field: "delete",
         formatter: function () {
-          return '<button class="delete-row-btn" title="Delete"><span style="font-size:1.2em; color:#d1242f;">🗑️</span></button>';
+          return '<button class="delete-row-btn" title="Delete"><span>🗑️</span></button>';
         },
         width: 50,
         hozAlign: "center",
@@ -1031,16 +1031,7 @@ function showAddRowModal() {
             <span style="font-size: 24px;">➕</span>
             Add New Campaign
           </h2>
-          <button id="closeAddRowModal" style="
-            background: #d1242f;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-          ">✕</button>
+          <button id="closeAddRowModal" class="modal-close-btn">✕</button>
         </div>
         
         <form id="addRowForm" style="
@@ -1272,26 +1263,8 @@ function showAddRowModal() {
           
           <!-- Buttons -->
           <div style="grid-column: 1 / -1; margin-top: 30px; display: flex; gap: 12px; justify-content: flex-end;">
-            <button type="button" id="cancelAddRow" style="
-              background: #6c757d;
-              color: white;
-              border: none;
-              padding: 12px 24px;
-              border-radius: 6px;
-              cursor: pointer;
-              font-size: 14px;
-              font-weight: bold;
-            ">Cancel</button>
-            <button type="submit" id="confirmAddRow" style="
-              background: #28a745;
-              color: white;
-              border: none;
-              padding: 12px 24px;
-              border-radius: 6px;
-              cursor: pointer;
-              font-size: 14px;
-              font-weight: bold;
-            ">✓ Add Campaign</button>
+            <button type="button" id="cancelAddRow" class="modal-btn-cancel" style="padding: 12px 24px;">Cancel</button>
+            <button type="submit" id="confirmAddRow" class="modal-btn-confirm" style="padding: 12px 24px;">✓ Add Campaign</button>
           </div>
         </form>
       </div>
@@ -1958,13 +1931,13 @@ document.addEventListener('click', (e) => {
 function updateDigitalMotionsButtonVisual(button) {
   const isActive = button.dataset.active === "true";
   if (isActive) {
-    button.style.background = "#2e7d32";
-    button.style.borderColor = "#2e7d32";
+    button.style.background = "#1a7f37";
+    button.style.borderColor = "#1a7f37";
     button.style.color = "white";
     button.textContent = "🚀 Digital Motions ✓";
   } else {
-    button.style.background = "#4caf50";
-    button.style.borderColor = "#45a049";
+    button.style.background = "#2da44e";
+    button.style.borderColor = "#2da44e";
     button.style.color = "white";
     button.textContent = "🚀 Digital Motions";
   }

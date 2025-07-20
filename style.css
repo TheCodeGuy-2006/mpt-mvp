@@ -204,56 +204,27 @@ h2 {
 }
 #gridButtons button,
 #savePlan {
-  background: #0969da;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-#gridButtons button:hover,
-#savePlan:hover {
-  background: #0860ca;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+  /* Use new button system - extending primary button */
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  /* Inherits primary button styling from above */
 }
 
 #gridButtons {
   display: flex;
-  gap: 12px;
-  margin: 20px 0;
+  gap: 8px;
+  margin: 16px 0;
   flex-wrap: wrap;
 }
 #saveAnnualBudget {
-  background: linear-gradient(90deg, #0969da 60%, #58a6ff 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
+  /* Uses primary button styling with larger size */
   padding: 10px 28px;
-  font-size: 1.08rem;
+  font-size: 16px;
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   letter-spacing: 0.02em;
-  cursor: pointer;
   margin: 0 8px;
-  transition:
-    background 0.2s,
-    box-shadow 0.2s,
-    transform 0.1s;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-#saveAnnualBudget:hover {
-  background: linear-gradient(90deg, #0860ca 60%, #0969da 100%);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px) scale(1.03);
+  /* Inherits primary button colors and behavior */
 }
 #view-budget-setup {
   display: flex;
@@ -286,25 +257,25 @@ table#planTable th {
   font-weight: 600;
   font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-table#planTable td input[type="number"] {
-  width: 100%;
-  padding: 6px 8px;
-  border: 1px solid #d0d7de;
-  border-radius: 4px;
-  background: #ffffff;
-  color: #24292e;
-  font-size: 1rem;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
+/* Table specific input styling */
+table#planTable td input[type="number"],
 table#planTable td input[type="text"] {
-  width: 100%;
   padding: 6px 8px;
   border: 1px solid #d0d7de;
-  border-radius: 4px;
+  border-radius: 6px;
   background: #ffffff;
   color: #24292e;
-  font-size: 1.25rem;
+  font-size: 14px;
   font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+table#planTable td input[type="number"]:focus,
+table#planTable td input[type="text"]:focus {
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
 }
 /* Programme Grid Table Styling */
 #gridContainer .tabulator,
@@ -470,32 +441,24 @@ table#planTable td input[type="text"] {
   background: #0860ca;
 }
 #planningGridButtons button {
-  background: #0969da;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 18px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-#planningGridButtons button:hover {
-  background: #0860ca;
-  transform: translateY(-2px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  /* Use new button system */
+  padding: 6px 16px;
+  font-size: 14px;
+  /* Inherits primary button styling */
 }
 
 #addPlanningRow {
-  background: #28a745 !important;
-  color: white;
-  font-weight: bold;
+  /* Success variant for add button */
+  background: #2da44e !important;
+  border-color: #2da44e !important;
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+#addPlanningRow:hover {
+  background: #2c974b !important;
+  border-color: #2c974b !important;
 }
 
 #addPlanningRow:hover {
@@ -509,58 +472,8 @@ table#planTable td input[type="text"] {
   margin: 0 auto;
   padding: 0 0 24px 0;
 }
-#savePlanningRows.save-large {
-  font-size: 1.18rem;
-  padding: 12px 36px;
-  font-weight: 700;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #0969da 60%, #58a6ff 100%);
-  color: #ffffff;
-  border: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.03em;
-  transition:
-    background 0.22s,
-    transform 0.18s,
-    box-shadow 0.18s;
-  outline: none;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-#savePlanningRows.save-large:hover,
-#savePlanningRows.save-large:focus {
-  background: linear-gradient(90deg, #0860ca 60%, #0969da 100%);
-  color: #ffffff;
-  transform: scale(1.045);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-#saveExecutionRows.save-large,
-#saveExecutionRows {
-  font-size: 1.18rem;
-  padding: 12px 36px;
-  font-weight: 700;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #0969da 60%, #58a6ff 100%);
-  color: #ffffff;
-  border: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.03em;
-  transition:
-    background 0.22s,
-    transform 0.18s,
-    box-shadow 0.18s;
-  outline: none;
-  margin-bottom: 18px;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-#saveExecutionRows.save-large:hover,
-#saveExecutionRows:hover,
-#saveExecutionRows.save-large:focus,
-#saveExecutionRows:focus {
-  background: linear-gradient(90deg, #0860ca 60%, #0969da 100%);
-  color: #ffffff;
-  transform: scale(1.045);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
+/* Legacy save button styling removed - now uses unified button system */
+
 .desc-tooltip {
   position: absolute;
   z-index: 9999;
@@ -778,19 +691,25 @@ table#planTable td input[type="text"] {
   margin: 0 0 18px 0;
 }
 #graphFullscreenOverlay button {
-  background: none;
-  border: none;
+  /* Minimal button for overlay */
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
   cursor: pointer;
-  opacity: 0.7;
-  font-size: 1.3em;
+  padding: 8px;
+  font-size: 1.2em;
   position: absolute;
   top: 10px;
   right: 16px;
-  transition: opacity 0.15s;
+  transition: all 0.15s ease;
+  color: #24292e;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
 #graphFullscreenOverlay button:hover {
-  opacity: 1;
-  background: #ddf4ff;
+  background: #ffffff;
+  border-color: #0969da;
+  color: #0969da;
 }
 /* Chart styling */
 .chart-container {
@@ -823,25 +742,28 @@ table#planTable td input[type="text"] {
 
 .roi-chart-tab {
   flex: 1;
-  padding: 16px 24px;
+  padding: 12px 16px;
   border: none;
-  background: #f6f8fa;
+  background: #ffffff;
   color: #656d76;
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.15s ease;
   font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  border-bottom: 2px solid transparent;
 }
 
 .roi-chart-tab.active {
-  background: #24292e;
-  color: white;
+  background: #ffffff;
+  color: #24292e;
+  border-bottom-color: #0969da;
+  font-weight: 600;
 }
 
 .roi-chart-tab:hover:not(.active) {
-  background: #ddf4ff;
-  color: #0969da;
+  background: #f6f8fa;
+  color: #24292e;
 }
 
 .chart-content-area {
@@ -1052,15 +974,6 @@ table#planTable td input[type="text"] {
   box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.2);
 }
 
-#calendarFilters button {
-  transition: all 0.2s;
-}
-
-#calendarFilters button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
 #filterSummary {
   font-style: italic;
 }
@@ -1069,20 +982,33 @@ table#planTable td input[type="text"] {
 .filter-container {
   background: #ffffff;
   border: 1px solid #d0d7de;
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 0;
-  margin-bottom: 24px;
+  padding: 16px;
+  margin-bottom: 20px;
   position: relative;
-  overflow: hidden;
-  transition: 
-    box-shadow 0.3s ease,
-    transform 0.2s ease;
 }
 
-.filter-container:hover {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+/* Form sections within filters */
+.filter-container .form-section {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+}
+
+.filter-container .form-section:last-child {
+  margin-bottom: 0;
+}
+
+.filter-container .form-section-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: #24292e;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #d0d7de;
 }
 
 /* Filter header */
@@ -1205,30 +1131,30 @@ table#planTable td input[type="text"] {
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .filter-group label {
-  font-weight: 600;
+  font-weight: 500;
   color: #24292e;
-  font-size: 0.8rem;
+  font-size: 14px;
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
   font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* Filter inputs - inherit from base form styling */
 .filter-input,
 .filter-select {
-  padding: 8px 10px;
+  padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid #d0d7de;
-  font-size: 0.9rem;
+  font-size: 14px;
   background: #ffffff;
-  transition: all 0.2s ease;
+  color: #24292e;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   min-width: 0;
   width: 100%;
-  height: 36px;
+  height: 38px;
   box-sizing: border-box;
   font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -1421,19 +1347,18 @@ table#planTable td input[type="text"] {
 .filter-select:focus {
   outline: none;
   border-color: #0969da;
-  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.15);
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
   background: #ffffff;
 }
 
 .filter-input:hover,
 .filter-select:hover {
-  border-color: #0969da;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-color: #8c959f;
 }
 
 .filter-input::placeholder {
   color: #656d76;
-  font-size: 0.85rem;
+  font-size: 14px;
 }
 
 .filter-actions {
@@ -1448,45 +1373,39 @@ table#planTable td input[type="text"] {
 }
 
 .filter-btn {
+  /* Inherits from base button system */
   padding: 6px 16px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
+  font-size: 12px;
+  height: 32px;
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 32px;
   letter-spacing: 0.3px;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .filter-btn-digital {
-  background: linear-gradient(135deg, #1a7f37, #2da44e);
-  color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* Success button variant */
+  background: #2da44e;
+  color: #ffffff;
+  border-color: #2da44e;
 }
 
 .filter-btn-digital:hover {
-  background: linear-gradient(135deg, #148f3b, #1a7f37);
-  transform: translateY(-1px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: #2c974b;
+  border-color: #2c974b;
 }
 
 .filter-btn-clear {
-  background: linear-gradient(135deg, #f6f8fa, #eaeef2);
+  /* Secondary button variant */
+  background: #ffffff;
   color: #656d76;
-  border: 1px solid #d0d7de;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-color: #d0d7de;
 }
 
 .filter-btn-clear:hover {
-  background: linear-gradient(135deg, #eaeef2, #d0d7de);
+  background: #f3f4f6;
   color: #24292e;
-  transform: translateY(-1px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-color: #d0d7de;
 }
 
 /* ===== RESPONSIVE FILTER LAYOUT ===== */
@@ -1962,15 +1881,14 @@ div[style*="max-width: 1200px"] {
 
 .password-modal-input {
   width: 100%;
-  padding: 16px 20px;
-  margin-bottom: 20px;
-  border: 2px solid #d0d7de;
-  border-radius: 12px;
-  font-size: 1.1rem;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 14px;
   background: #ffffff;
   color: #24292e;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   box-sizing: border-box;
 }
@@ -1979,7 +1897,6 @@ div[style*="max-width: 1200px"] {
   outline: none;
   border-color: #0969da;
   box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
-  background: #ffffff;
 }
 
 .password-modal-input::placeholder {
@@ -2004,41 +1921,24 @@ div[style*="max-width: 1200px"] {
 }
 
 .password-modal-button {
-  padding: 14px 28px;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  /* Inherits from base button system */
+  padding: 10px 20px;
+  font-size: 14px;
   min-width: 120px;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  letter-spacing: 0.02em;
-}
-
-.password-modal-button.primary {
-  background: linear-gradient(135deg, #0969da 0%, #58a6ff 100%);
-  color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.password-modal-button.primary:hover {
-  background: linear-gradient(135deg, #0860ca 0%, #0969da 100%);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  /* Uses button system styling */
 }
 
 .password-modal-button.secondary {
-  background: #f6f8fa;
-  color: #656d76;
-  border: 2px solid #d0d7de;
+  /* Secondary button variant */
+  background: #ffffff;
+  color: #24292e;
+  border-color: #d0d7de;
 }
 
 .password-modal-button.secondary:hover {
-  background: #eaeef2;
-  border-color: #afb8c1;
+  background: #f3f4f6;
   color: #24292e;
-  transform: translateY(-1px);
+  border-color: #d0d7de;
 }
 
 /* Modal animations */
@@ -2473,29 +2373,7 @@ div[style*="max-width: 1200px"] {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.clear-filters-btn {
-  padding: 6px 16px;
-  background: linear-gradient(135deg, #f6f8fa, #eaeef2);
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  color: #656d76;
-  transition: all 0.2s ease;
-  font-weight: 600;
-  height: 32px;
-  margin-top: 8px;
-  letter-spacing: 0.3px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-.clear-filters-btn:hover {
-  background: linear-gradient(135deg, #eaeef2, #d0d7de);
-  color: #24292e;
-  transform: translateY(-1px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
+/* Legacy clear-filters-btn styling removed - now uses filter-btn-clear */
 
 /* Responsive filters */
 @media (max-width: 1200px) {
@@ -2594,7 +2472,400 @@ div[style*="max-width: 1200px"] {
   box-sizing: border-box;
 }
 
-/* ===== CARD-BASED LAYOUT IMPROVEMENTS ===== */
+/* ===== GITHUB-STYLE BUTTON SYSTEM ===== */
+/* 
+ * Comprehensive button system following GitHub Primer design
+ * All buttons inherit base styling and can be extended with variants
+ * 
+ * Base classes: button, .btn, .btn-primary (primary blue)
+ * Variants: .btn-secondary, .btn-success, .btn-danger, .btn-outline
+ * Sizes: .btn-sm, .btn-lg (default is standard size)
+ * Specialized: .modal-close-btn, .modal-btn-cancel, .modal-btn-confirm, .delete-row-btn
+ * 
+ * Colors follow GitHub Primer:
+ * - Primary: #0969da (GitHub blue)
+ * - Success: #2da44e (GitHub green) 
+ * - Danger: #d1242f (GitHub red)
+ * - Secondary: white with gray border
+ */
+
+/* Primary button - GitHub style */
+button,
+.btn,
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  
+  /* Primary styling */
+  background: #0969da;
+  color: #ffffff;
+  border-color: #0969da;
+  box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+}
+
+button:hover,
+.btn:hover,
+.btn-primary:hover {
+  background: #0860ca;
+  border-color: #0860ca;
+  box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
+}
+
+button:active,
+.btn:active,
+.btn-primary:active {
+  background: #0757ba;
+  border-color: #0757ba;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+button:disabled,
+.btn:disabled,
+.btn-primary:disabled {
+  background: #94a3b8;
+  border-color: #94a3b8;
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Secondary button */
+.btn-secondary {
+  background: #ffffff;
+  color: #24292e;
+  border-color: #d0d7de;
+  box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+}
+
+.btn-secondary:hover {
+  background: #f3f4f6;
+  border-color: #d0d7de;
+  box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
+}
+
+.btn-secondary:active {
+  background: #e5e7eb;
+  border-color: #d0d7de;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Success button */
+.btn-success {
+  background: #2da44e;
+  color: #ffffff;
+  border-color: #2da44e;
+}
+
+.btn-success:hover {
+  background: #2c974b;
+  border-color: #2c974b;
+}
+
+.btn-success:active {
+  background: #298e46;
+  border-color: #298e46;
+}
+
+/* Danger button */
+.btn-danger {
+  background: #d1242f;
+  color: #ffffff;
+  border-color: #d1242f;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.btn-danger:active {
+  background: #991b1b;
+  border-color: #991b1b;
+}
+
+/* Button sizes */
+.btn-sm {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.btn-lg {
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+/* Button groups */
+.button-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.button-group:first-child {
+  margin-top: 0;
+}
+
+.button-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Outline button variant */
+.btn-outline {
+  background: transparent;
+  color: #0969da;
+  border-color: #d0d7de;
+}
+
+.btn-outline:hover {
+  background: #f6f8fa;
+  color: #0969da;
+  border-color: #d0d7de;
+}
+
+/* Modal close button */
+.modal-close-btn {
+  background: #d1242f;
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  border-color: #d1242f;
+  transition: all 0.15s ease;
+}
+
+.modal-close-btn:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+/* Modal form buttons */
+.modal-btn-cancel {
+  background: #ffffff;
+  color: #24292e;
+  border-color: #d0d7de;
+}
+
+.modal-btn-cancel:hover {
+  background: #f3f4f6;
+  border-color: #d0d7de;
+}
+
+.modal-btn-confirm {
+  background: #2da44e;
+  color: #ffffff;
+  border-color: #2da44e;
+}
+
+.modal-btn-confirm:hover {
+  background: #2c974b;
+  border-color: #2c974b;
+}
+
+/* Campaign navigation buttons */
+.campaign-nav-btn {
+  background: #0969da;
+  color: #ffffff;
+  border: 1px solid #0969da;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.campaign-nav-btn:hover:not(:disabled) {
+  background: #0860ca;
+  border-color: #0860ca;
+}
+
+.campaign-nav-btn:disabled {
+  background: #94a3b8;
+  border-color: #94a3b8;
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ===== SPECIALIZED BUTTON STYLING ===== */
+
+/* Delete row button in tables */
+.delete-row-btn {
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  color: #d1242f;
+  font-size: 16px;
+}
+
+.delete-row-btn:hover {
+  background: rgba(209, 36, 47, 0.1);
+}
+
+.delete-row-btn span {
+  font-size: 1.2em;
+  color: inherit;
+}
+
+/* ===== LEGACY BUTTON UPDATES ===== */
+
+/* Base form input styling - GitHub design system */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+  padding: 8px 12px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #24292e;
+  font-size: 14px;
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.4;
+}
+
+/* Focus states */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+}
+
+/* Disabled states */
+input[type="text"]:disabled,
+input[type="number"]:disabled,
+input[type="email"]:disabled,
+input[type="password"]:disabled,
+input[type="search"]:disabled,
+input[type="date"]:disabled,
+input[type="time"]:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: #f6f8fa;
+  color: #656d76;
+  cursor: not-allowed;
+}
+
+/* Form groups and sections */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-section {
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+.form-section-header {
+  font-size: 16px;
+  font-weight: 600;
+  color: #24292e;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #d0d7de;
+}
+
+/* Form labels */
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #24292e;
+  margin-bottom: 6px;
+}
+
+label.required::after {
+  content: " *";
+  color: #d1242f;
+}
+
+/* Field descriptions */
+.field-description {
+  font-size: 12px;
+  color: #656d76;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* Form rows for inline fields */
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Responsive form layout */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-row .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-row .form-group:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* ===== UPDATED SPECIFIC FORM STYLING ===== */
 
 /* Table responsive improvements */
 .content-card-body .tabulator {
@@ -2605,11 +2876,43 @@ div[style*="max-width: 1200px"] {
   background: #fff;
 }
 
-/* Improved form spacing within cards */
+/* Enhanced card-based form styling */
 .content-card-body form {
   margin: 0;
 }
 
+.content-card-body .form-group {
+  margin-bottom: 16px;
+}
+
+.content-card-body .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.content-card-body .form-section {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.content-card-body .form-section:last-child {
+  margin-bottom: 0;
+}
+
+.content-card-body .form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.content-card-body .form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Legacy form field styling for compatibility */
 .content-card-body input,
 .content-card-body select,
 .content-card-body textarea {

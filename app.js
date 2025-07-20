@@ -68,16 +68,16 @@ function initGithubSync() {
         </div>
 
         <div style="margin-bottom: 20px;">
-          <button type="button" id="saveConfigBtn" style="padding: 8px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          <button type="button" id="saveConfigBtn" class="btn-primary" style="margin-right: 8px;">
             💾 Save Configuration
           </button>
-          <button type="button" id="testConnectionBtn" style="padding: 8px 16px; background: #388e3c; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+          <button type="button" id="testConnectionBtn" class="btn-success" style="margin-right: 8px;">
             🔍 Test Connection
           </button>
-          <button type="button" id="forceSyncBtn" style="padding: 8px 16px; background: #f57c00; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+          <button type="button" id="forceSyncBtn" class="btn-secondary" style="margin-right: 8px; background: #f57c00; border-color: #f57c00;">
             ⚡ Force Sync All Data
           </button>
-          <button type="button" id="refreshDataBtn" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+          <button type="button" id="refreshDataBtn" class="btn-secondary">
             🔄 Refresh Data
           </button>
         </div>

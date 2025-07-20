@@ -853,7 +853,7 @@ function renderFYTabs() {
     padding: 8px 16px;
     margin: 0 4px;
     border: 2px solid #1976d2;
-    background: ${currentFY === "All Years" ? "#1976d2" : "white"};
+    background: ${currentFY === "All Years" ? "#0969da" : "white"};
     color: ${currentFY === "All Years" ? "white" : "#1976d2"};
     border-radius: 4px;
     cursor: pointer;
@@ -876,7 +876,7 @@ function renderFYTabs() {
       padding: 8px 16px;
       margin: 0 4px;
       border: 2px solid #1976d2;
-      background: ${fy === currentFY ? "#1976d2" : "white"};
+      background: ${fy === currentFY ? "#0969da" : "white"};
       color: ${fy === currentFY ? "white" : "#1976d2"};
       border-radius: 4px;
       cursor: pointer;
@@ -934,24 +934,8 @@ function showCampaignDetails(
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #eee;">
             <span style="color: #666; font-size: 14px;">Campaign ${currentIndex + 1} of ${campaignList.length}</span>
             <div style="display: flex; gap: 8px;">
-              <button id="prevCampaign" ${!hasPrevious ? "disabled" : ""} style="
-                background: ${hasPrevious ? "#1976d2" : "#ccc"};
-                color: white;
-                border: none;
-                padding: 4px 8px;
-                border-radius: 4px;
-                cursor: ${hasPrevious ? "pointer" : "not-allowed"};
-                font-size: 12px;
-              ">‹ Previous</button>
-              <button id="nextCampaign" ${!hasNext ? "disabled" : ""} style="
-                background: ${hasNext ? "#1976d2" : "#ccc"};
-                color: white;
-                border: none;
-                padding: 4px 8px;
-                border-radius: 4px;
-                cursor: ${hasNext ? "pointer" : "not-allowed"};
-                font-size: 12px;
-              ">Next ›</button>
+              <button id="prevCampaign" ${!hasPrevious ? "disabled" : ""} class="campaign-nav-btn">‹ Previous</button>
+              <button id="nextCampaign" ${!hasNext ? "disabled" : ""} class="campaign-nav-btn">Next ›</button>
             </div>
           </div>
         `
