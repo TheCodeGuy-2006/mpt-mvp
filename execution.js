@@ -642,13 +642,13 @@ function updateExecutionDigitalMotionsButtonVisual(button) {
     button.style.background = "#1a7f37";
     button.style.borderColor = "#1a7f37";
     button.style.color = "white";
-    button.textContent = "🚀 Digital Motions ✓";
+    button.innerHTML = '<i class="octicon octicon-rocket" aria-hidden="true"></i> Digital Motions <i class="octicon octicon-check" aria-hidden="true"></i>';
   } else {
     button.classList.remove('filter-btn-active');
     button.style.background = "#2da44e";
     button.style.borderColor = "#2da44e";
     button.style.color = "white";
-    button.textContent = "🚀 Digital Motions";
+    button.innerHTML = '<i class="octicon octicon-rocket" aria-hidden="true"></i> Digital Motions';
   }
 }
 

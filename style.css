@@ -1,7 +1,79 @@
+/* ============================================================================
+   TYPOGRAPHY SYSTEM
+   Consistent font hierarchy and scale across all components
+   ============================================================================ */
+
+/* Primary Typography - Consistent across all tabs */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  color: #24292e;
+  margin: 0;
+  line-height: 1.25;
+}
+
+/* Typography Scale */
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+h5 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+h6 {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* Body text and paragraphs */
+body, p, span, div, td, th, input, select, textarea, button {
+  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #656d76;
+  margin: 0 0 12px 0;
+}
+
+/* Small text */
+small, .text-small {
+  font-size: 12px;
+  color: #656d76;
+}
+
+/* ============================================================================
+   MAIN LAYOUT & BASE STYLES
+   ============================================================================ */
+
 body {
   background: #f6f8fa;
   color: #24292e;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   margin: 0;
   min-height: 100vh;
   overflow-x: hidden;
@@ -16,6 +88,10 @@ body {
   min-height: calc(100vh - 96px); /* Account for nav height */
 }
 
+/* ============================================================================
+   NAVIGATION STYLES
+   ============================================================================ */
+
 nav {
   display: flex;
   justify-content: space-between;
@@ -27,6 +103,7 @@ nav {
   min-height: 60px;
   border-bottom: 1px solid #30363d;
 }
+
 .nav-links {
   display: flex;
   flex: 1;
@@ -46,21 +123,38 @@ nav a {
   height: 60px;
   display: flex;
   align-items: center;
+  gap: 8px;
   box-sizing: border-box;
   flex: 1;
   justify-content: center;
   border-radius: 0;
 }
+
+nav a .octicon {
+  font-size: 16px;
+  opacity: 0.8;
+  transition: opacity 0.15s ease;
+}
+
 nav a:hover {
   color: #f0f6fc;
   background: rgba(255, 255, 255, 0.05);
   border-bottom-color: transparent;
 }
+
+nav a:hover .octicon {
+  opacity: 1;
+}
+
 nav a.active {
   color: #f0f6fc;
   background: transparent;
   border-bottom-color: #0969da;
   font-weight: 600;
+}
+
+nav a.active .octicon {
+  opacity: 1;
 }
 
 nav a.active::after {
@@ -72,6 +166,7 @@ nav a.active::after {
   height: 2px;
   background-color: #0969da;
 }
+
 nav a.active:hover {
   color: #f0f6fc;
   background: rgba(255, 255, 255, 0.05);
@@ -114,24 +209,57 @@ section {
   overflow: hidden;
 }
 
-/* Section headers */
+/* ============================================================================
+   SECTION HEADERS & CONTENT CARDS
+   ============================================================================ */
+
+/* Section headers with consistent typography and Octicons */
 .section-header {
   background: linear-gradient(135deg, #24292e 0%, #6e7681 100%);
   color: white;
   padding: 20px 24px;
   margin: 0;
   border-radius: 16px 16px 0 0;
-  font-size: 1.4rem;
-  font-weight: 600;
   border-bottom: 1px solid #d0d7de;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.section-header::before {
-  content: '📊';
-  font-size: 1.2em;
+.section-header .octicon {
+  font-size: 24px;
+  opacity: 0.9;
+}
+
+.section-header h1 {
+  color: white;
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+/* Content card headers with consistent typography and darker theme */
+.content-card-header {
+  background: linear-gradient(135deg, #21262d 0%, #30363d 100%);
+  color: white;
+  padding: 16px 20px;
+  border-bottom: 1px solid #21262d;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.content-card-header .octicon {
+  font-size: 16px;
+  color: #f0f6fc;
+  opacity: 0.9;
+}
+
+.content-card-header h2 {
+  color: #f0f6fc;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
 }
 
 /* Section content areas */
@@ -157,24 +285,8 @@ section {
   transform: translateY(-1px);
 }
 
-.content-card-header {
-  background: linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%);
-  padding: 16px 20px;
-  border-bottom: 1px solid #d0d7de;
-  font-weight: 600;
-  color: #24292e;
-  font-size: 1.1rem;
-}
-
 .content-card-body {
   padding: 20px;
-}
-h2 {
-  color: #24292e;
-  font-weight: 600;
-  margin: 0 0 20px 0;
-  padding: 0;
-  font-size: 1.5rem;
 }
 
 /* Consistent spacing for elements */
@@ -183,6 +295,19 @@ h2 {
 }
 
 .spaced-element:last-child {
+  margin-bottom: 0;
+}
+
+/* Button groups with proper spacing and Octicon support */
+.button-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.button-group:last-child {
   margin-bottom: 0;
 }
 
@@ -291,13 +416,16 @@ table#planTable td input[type="text"]:focus {
 }
 
 .content-card-body .tabulator .tabulator-header {
-  background: linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%);
-  border-bottom: 2px solid #d0d7de;
+  background: linear-gradient(135deg, #21262d 0%, #30363d 100%);
+  color: #f0f6fc;
+  border-bottom: 2px solid #21262d;
 }
 
 .content-card-body .tabulator .tabulator-header .tabulator-col {
   background: transparent;
-  border-right: 1px solid #d0d7de;
+  color: #f0f6fc;
+  border-right: 1px solid #30363d;
+  font-weight: 600;
 }
 
 #gridContainer .tabulator-header {
@@ -791,10 +919,9 @@ table#planTable td input[type="text"]:focus {
 .chart-panel-title {
   margin: 0 0 24px 0;
   color: #24292e;
-  font-size: 1.4rem;
+  font-size: 20px; /* h3 size from typography scale */
   text-align: center;
   font-weight: 600;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .chart-wrapper {
@@ -1123,11 +1250,15 @@ table#planTable td input[type="text"]:focus {
 }
 
 .filter-row-main {
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  width: 100%;
 }
 
 .filter-row-secondary {
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  width: 100%;
   padding-top: 12px;
   border-top: 1px solid #e8f4fd;
   margin-top: 8px;
@@ -1378,14 +1509,20 @@ table#planTable td input[type="text"]:focus {
 }
 
 .filter-btn {
-  /* Inherits from base button system */
+  /* Inherits from base button system with Octicon support */
   padding: 6px 16px;
   font-size: 12px;
   height: 32px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   letter-spacing: 0.3px;
+}
+
+.filter-btn .octicon {
+  font-size: 12px;
+  opacity: 0.8;
+  transition: opacity 0.15s ease;
 }
 
 .filter-btn-digital {
@@ -1398,6 +1535,10 @@ table#planTable td input[type="text"]:focus {
 .filter-btn-digital:hover {
   background: #2c974b;
   border-color: #2c974b;
+}
+
+.filter-btn-digital:hover .octicon {
+  opacity: 1;
 }
 
 .filter-btn-clear {
@@ -1413,12 +1554,16 @@ table#planTable td input[type="text"]:focus {
   border-color: #d0d7de;
 }
 
+.filter-btn-clear:hover .octicon {
+  opacity: 1;
+}
+
 /* ===== RESPONSIVE FILTER LAYOUT ===== */
 @media (max-width: 1200px) {
   .filter-row-main,
   .filter-row-secondary {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 10px;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
   }
   
   .filter-container {
@@ -1427,6 +1572,12 @@ table#planTable td input[type="text"]:focus {
 }
 
 @media (max-width: 768px) {
+  .filter-row-main,
+  .filter-row-secondary {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
   .filter-container {
     padding: 12px 16px 16px 16px;
     margin-bottom: 16px;
@@ -1867,12 +2018,16 @@ div[style*="max-width: 1200px"] {
 
 .password-modal h3 {
   margin: 0 0 8px 0;
-  color: #24292e;
+  color: #f0f6fc;
+  background: linear-gradient(135deg, #21262d 0%, #30363d 100%);
   font-size: 1.4rem;
   font-weight: 700;
   text-align: center;
   letter-spacing: -0.02em;
   font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
 }
 
 .password-modal p {
@@ -2039,10 +2194,18 @@ div[style*="max-width: 1200px"] {
 .roi-gauge-title {
   margin: 0 0 16px 0;
   color: #24292e;
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 20px; /* h3 size from typography scale */
+  font-weight: 600;
   letter-spacing: -0.02em;
-  font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.roi-gauge-title .octicon {
+  font-size: 18px;
+  color: #656d76;
+  opacity: 0.8;
 }
 
 .roi-gauge-chart-wrapper {
@@ -2477,10 +2640,11 @@ div[style*="max-width: 1200px"] {
   box-sizing: border-box;
 }
 
-/* ===== GITHUB-STYLE BUTTON SYSTEM ===== */
+/* ===== GITHUB-STYLE BUTTON SYSTEM WITH OCTICONS ===== */
 /* 
  * Comprehensive button system following GitHub Primer design
  * All buttons inherit base styling and can be extended with variants
+ * Supports Octicons for visual cues
  * 
  * Base classes: button, .btn, .btn-primary (primary blue)
  * Variants: .btn-secondary, .btn-success, .btn-danger, .btn-outline
@@ -2494,15 +2658,15 @@ div[style*="max-width: 1200px"] {
  * - Secondary: white with gray border
  */
 
-/* Primary button - GitHub style */
+/* Primary button - GitHub style with Octicon support */
 button,
 .btn,
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 6px 16px;
+  gap: 8px;
+  padding: 8px 16px;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
@@ -2523,12 +2687,25 @@ button,
   box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
 }
 
+/* Octicon styling within buttons */
+button .octicon,
+.btn .octicon {
+  font-size: 14px;
+  opacity: 0.9;
+  transition: opacity 0.15s ease;
+}
+
 button:hover,
 .btn:hover,
 .btn-primary:hover {
   background: #0860ca;
   border-color: #0860ca;
   box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
+}
+
+button:hover .octicon,
+.btn:hover .octicon {
+  opacity: 1;
 }
 
 button:active,

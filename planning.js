@@ -920,7 +920,7 @@ function initPlanningGrid(rows) {
         title: "",
         field: "delete",
         formatter: function () {
-          return '<button class="delete-row-btn" title="Delete"><span>🗑️</span></button>';
+          return '<button class="delete-row-btn" title="Delete"><i class="octicon octicon-trash" aria-hidden="true"></i></button>';
         },
         width: 50,
         hozAlign: "center",
@@ -1035,14 +1035,17 @@ function showAddRowModal() {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 24px;
-          border-bottom: 2px solid #e3f2fd;
-          padding-bottom: 16px;
+          background: linear-gradient(135deg, #21262d 0%, #30363d 100%);
+          border-bottom: 2px solid #21262d;
+          padding: 20px 24px;
+          border-radius: 12px 12px 0 0;
+          margin: -32px -32px 24px -32px;
         ">
-          <h2 style="margin: 0; color: #24292e; display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 24px;">➕</span>
+          <h2 style="margin: 0; color: #f0f6fc; display: flex; align-items: center; gap: 8px;">
+            <i class="octicon octicon-plus" style="font-size: 20px; color: #f0f6fc;" aria-hidden="true"></i>
             Add New Campaign
           </h2>
-          <button id="closeAddRowModal" class="modal-close-btn">✕</button>
+          <button id="closeAddRowModal" class="modal-close-btn" style="color: #f0f6fc;">✕</button>
         </div>
         
         <form id="addRowForm" style="
@@ -1052,8 +1055,9 @@ function showAddRowModal() {
         ">
           <!-- Row 1: Basic Info -->
           <div style="grid-column: 1 / -1;">
-            <h3 style="margin: 0 0 16px 0; color: #24292e; border-bottom: 1px solid #d0d7de; padding-bottom: 8px;">
-              📋 Basic Information
+            <h3 style="margin: 0 0 16px 0; color: #f0f6fc; background: linear-gradient(135deg, #21262d 0%, #30363d 100%); border-bottom: 1px solid #21262d; padding: 12px 16px; border-radius: 8px;">
+              <i class="octicon octicon-info" aria-hidden="true"></i>
+              Basic Information
             </h3>
           </div>
           
@@ -1110,8 +1114,9 @@ function showAddRowModal() {
           
           <!-- Row 2: Scheduling -->
           <div style="grid-column: 1 / -1; margin-top: 20px;">
-            <h3 style="margin: 0 0 16px 0; color: #1976d2; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
-              📅 Scheduling & Location
+            <h3 style="margin: 0 0 16px 0; color: #f0f6fc; background: linear-gradient(135deg, #21262d 0%, #30363d 100%); border-bottom: 1px solid #21262d; padding: 12px 16px; border-radius: 8px;">
+              <i class="octicon octicon-calendar" aria-hidden="true"></i>
+              Scheduling & Location
             </h3>
           </div>
           
@@ -1187,8 +1192,9 @@ function showAddRowModal() {
           
           <!-- Row 3: Financial & Goals -->
           <div style="grid-column: 1 / -1; margin-top: 20px;">
-            <h3 style="margin: 0 0 16px 0; color: #1976d2; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
-              💰 Financial & Goals
+            <h3 style="margin: 0 0 16px 0; color: #f0f6fc; background: linear-gradient(135deg, #21262d 0%, #30363d 100%); border-bottom: 1px solid #21262d; padding: 12px 16px; border-radius: 8px;">
+              <i class="octicon octicon-currency-dollar" aria-hidden="true"></i>
+              Financial & Goals
             </h3>
           </div>
           
@@ -1945,12 +1951,12 @@ function updateDigitalMotionsButtonVisual(button) {
     button.style.background = "#1a7f37";
     button.style.borderColor = "#1a7f37";
     button.style.color = "white";
-    button.textContent = "🚀 Digital Motions ✓";
+    button.innerHTML = '<i class="octicon octicon-rocket" aria-hidden="true"></i> Digital Motions <i class="octicon octicon-check" aria-hidden="true"></i>';
   } else {
     button.style.background = "#2da44e";
     button.style.borderColor = "#2da44e";
     button.style.color = "white";
-    button.textContent = "🚀 Digital Motions";
+    button.innerHTML = '<i class="octicon octicon-rocket" aria-hidden="true"></i> Digital Motions';
   }
 }
 

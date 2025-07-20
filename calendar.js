@@ -1134,9 +1134,9 @@ function showMonthDetails(monthInfo, monthCampaigns) {
                 <div style="font-size: 14px; opacity: 0.95; line-height: 1.4;">
                   <div style="margin-bottom: 4px;">📍 ${campaign.region || "No Region"} • ${campaign.country || "No Country"}</div>
                   <div style="margin-bottom: 4px;">👤 ${campaign.owner || "Unassigned"}</div>
-                  <div style="margin-bottom: 4px;">📊 ${campaign.status || "Planning"}</div>
+                  <div style="margin-bottom: 4px;"><i class="octicon octicon-pulse" aria-hidden="true"></i> ${campaign.status || "Planning"}</div>
                   <div style="margin-bottom: 4px;">💰 $${(campaign.forecastedCost || 0).toLocaleString()}</div>
-                  <div style="margin-bottom: 4px;">🎯 ${campaign.expectedLeads || 0} leads</div>
+                  <div style="margin-bottom: 4px;"><i class="octicon octicon-target" aria-hidden="true"></i> ${campaign.expectedLeads || 0} leads</div>
                   <div style="font-size: 12px; opacity: 0.8; margin-top: 8px;">Click for full details</div>
                 </div>
               </div>

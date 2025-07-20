@@ -368,7 +368,7 @@ function initializeAnnualBudgetPlan(budgets) {
         tr.innerHTML = `
           <td><input type="text" value="${row.region}" disabled /></td>
           <td><input type="text" class="plan-usd-input" value="$${Number(row.assignedBudget ?? 0).toLocaleString()}" disabled /></td>
-          <td><button class="plan-delete-btn delete-row-btn" title="Delete" disabled><span>🗑️</span></button></td>
+          <td><button class="plan-delete-btn delete-row-btn" title="Delete" disabled><i class="octicon octicon-trash" aria-hidden="true"></i></button></td>
         `;
         planTableBody.appendChild(tr);
       });
@@ -434,7 +434,7 @@ function initializeAnnualBudgetPlan(budgets) {
       newRow.innerHTML = `
         <td><input type="text" placeholder="Region name" /></td>
         <td><input type="number" value="" /></td>
-        <td><button class="plan-delete-btn delete-row-btn" title="Delete"><span>🗑️</span></button></td>
+        <td><button class="plan-delete-btn delete-row-btn" title="Delete"><i class="octicon octicon-trash" aria-hidden="true"></i></button></td>
       `;
       newRow.querySelector(".plan-delete-btn").onclick = function () {
         newRow.remove();
