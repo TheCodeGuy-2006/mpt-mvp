@@ -20,7 +20,9 @@
     "sql": 36,
     "opps": 29,
     "pipeline": 1450000,
-    "id": "row_0_1752722417590"
+    "id": "row_0_1752722417590",
+    "poRaised": "Yes",
+    "__modified": true
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -2659,7 +2661,12 @@
     "mqlForecast": 35,
     "sqlForecast": 21,
     "oppsForecast": 17,
-    "pipelineForecast": 850000
+    "pipelineForecast": 850000,
+    "mql": 35,
+    "sql": 21,
+    "opps": 17,
+    "pipeline": 850000,
+    "id": "row_115_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -2677,7 +2684,12 @@
     "mqlForecast": 8,
     "sqlForecast": 5,
     "oppsForecast": 4,
-    "pipelineForecast": 200000
+    "pipelineForecast": 200000,
+    "mql": 8,
+    "sql": 5,
+    "opps": 4,
+    "pipeline": 200000,
+    "id": "row_116_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -2695,7 +2707,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_117_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -2713,7 +2730,12 @@
     "mqlForecast": 8,
     "sqlForecast": 5,
     "oppsForecast": 4,
-    "pipelineForecast": 200000
+    "pipelineForecast": 200000,
+    "mql": 8,
+    "sql": 5,
+    "opps": 4,
+    "pipeline": 200000,
+    "id": "row_118_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -2731,7 +2753,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_119_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -2749,7 +2776,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_120_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -2767,7 +2799,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_121_1752982304233"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2785,7 +2822,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_122_1752982304233"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2803,7 +2845,12 @@
     "mqlForecast": 200,
     "sqlForecast": 120,
     "oppsForecast": 96,
-    "pipelineForecast": 4800000
+    "pipelineForecast": 4800000,
+    "mql": 200,
+    "sql": 120,
+    "opps": 96,
+    "pipeline": 4800000,
+    "id": "row_123_1752982304233"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2821,7 +2868,12 @@
     "mqlForecast": 22,
     "sqlForecast": 13,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 22,
+    "sql": 13,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_124_1752982304233"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2839,7 +2891,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 10,
+    "sql": 6,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_125_1752982304233"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2857,7 +2914,12 @@
     "mqlForecast": 200,
     "sqlForecast": 120,
     "oppsForecast": 96,
-    "pipelineForecast": 4800000
+    "pipelineForecast": 4800000,
+    "mql": 200,
+    "sql": 120,
+    "opps": 96,
+    "pipeline": 4800000,
+    "id": "row_126_1752982304233"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2875,7 +2937,12 @@
     "mqlForecast": 22,
     "sqlForecast": 13,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 22,
+    "sql": 13,
+    "opps": 10,
+    "pipeline": 500000,
+    "id": "row_127_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -2893,7 +2960,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_128_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -2911,7 +2983,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_129_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -2929,7 +3006,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 50,
+    "sql": 30,
+    "opps": 24,
+    "pipeline": 1200000,
+    "id": "row_130_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -2947,7 +3029,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_131_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -2965,7 +3052,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_132_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -2983,7 +3075,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 50,
+    "sql": 30,
+    "opps": 24,
+    "pipeline": 1200000,
+    "id": "row_133_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -3001,7 +3098,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_134_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -3019,7 +3121,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_135_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -3037,7 +3144,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_136_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -3055,7 +3167,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_137_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -3073,7 +3190,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 50,
+    "sql": 30,
+    "opps": 24,
+    "pipeline": 1200000,
+    "id": "row_138_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -3091,7 +3213,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 25,
+    "sql": 15,
+    "opps": 12,
+    "pipeline": 600000,
+    "id": "row_139_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -3109,7 +3236,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_140_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -3127,7 +3259,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 50,
+    "sql": 30,
+    "opps": 24,
+    "pipeline": 1200000,
+    "id": "row_141_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -3145,7 +3282,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_142_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -3163,7 +3305,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 50,
+    "sql": 30,
+    "opps": 24,
+    "pipeline": 1200000,
+    "id": "row_143_1752982304233"
   },
   {
     "programType": "Operational/Infrastructure/Swag",
@@ -3181,7 +3328,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_144_1752982304233"
   },
   {
     "programType": "Operational/Infrastructure/Swag",
@@ -3199,7 +3351,12 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "mql": 0,
+    "sql": 0,
+    "opps": 0,
+    "pipeline": 0,
+    "id": "row_145_1752982304233"
   },
   {
     "programType": "User Groups",
@@ -3217,7 +3374,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_146_1752982304233"
   },
   {
     "programType": "Webinars",
@@ -3235,7 +3397,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 30,
+    "sql": 18,
+    "opps": 14,
+    "pipeline": 700000,
+    "id": "row_147_1752982304233"
   },
   {
     "programType": "Localized Programs",
@@ -3253,6 +3420,11 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 40,
+    "sql": 24,
+    "opps": 19,
+    "pipeline": 950000,
+    "id": "row_148_1752982304233"
   }
 ]
