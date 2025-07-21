@@ -3177,6 +3177,299 @@ label.required::after {
 }
 
 /* ============================================================================
+   UNIVERSAL SEARCH FILTER COMPONENT
+   Advanced search functionality for all tabs with multi-select results
+   ============================================================================ */
+
+/* Search filter container */
+.universal-search-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Search input styling */
+.universal-search-input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  font-size: 14px;
+  border: 2px solid #d0d7de;
+  border-radius: 8px;
+  background: white;
+  color: #24292e;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.universal-search-input:focus {
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+}
+
+.universal-search-input::placeholder {
+  color: #656d76;
+  font-style: italic;
+}
+
+/* Search icon */
+.universal-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #656d76;
+  font-size: 16px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Search results dropdown */
+.universal-search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+}
+
+.universal-search-results.show {
+  display: block;
+}
+
+/* Search result categories */
+.search-category {
+  border-bottom: 1px solid #f6f8fa;
+}
+
+.search-category:last-child {
+  border-bottom: none;
+}
+
+.search-category-header {
+  padding: 8px 16px;
+  background: #f6f8fa;
+  font-size: 12px;
+  font-weight: 600;
+  color: #656d76;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+/* Individual search result items */
+.search-result-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.15s ease;
+  border-bottom: 1px solid #f6f8fa;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background: #f6f8fa;
+}
+
+.search-result-item.selected {
+  background: #e7f3ff;
+  border-left: 3px solid #0969da;
+}
+
+.search-result-item.keyboard-focus {
+  background: #f1f3f4;
+  outline: 2px solid #0969da;
+  outline-offset: -2px;
+}
+
+.search-result-item.selected.keyboard-focus {
+  background: #cce7ff;
+}
+
+.search-result-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.search-result-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #24292e;
+  margin-bottom: 2px;
+}
+
+.search-result-category {
+  font-size: 12px;
+  color: #656d76;
+  text-transform: capitalize;
+}
+
+.search-result-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d0d7de;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  transition: all 0.15s ease;
+}
+
+.search-result-item.selected .search-result-checkbox {
+  background: #0969da;
+  border-color: #0969da;
+  color: white;
+}
+
+.search-result-checkbox::after {
+  content: "✓";
+  font-size: 10px;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.search-result-item.selected .search-result-checkbox::after {
+  opacity: 1;
+}
+
+/* Selected filters display */
+.selected-search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  min-height: 24px;
+}
+
+.selected-search-filter-tag {
+  background: #e7f3ff;
+  border: 1px solid #0969da;
+  border-radius: 16px;
+  padding: 4px 12px 4px 8px;
+  font-size: 12px;
+  color: #0969da;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.selected-search-filter-tag:hover {
+  background: #cce7ff;
+}
+
+.selected-search-filter-category {
+  background: #656d76;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.selected-search-filter-remove {
+  background: none;
+  border: none;
+  color: #0969da;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.selected-search-filter-remove:hover {
+  color: #d1242f;
+}
+
+/* Empty state */
+.search-no-results {
+  padding: 20px 16px;
+  text-align: center;
+  color: #656d76;
+  font-style: italic;
+}
+
+/* Loading state */
+.search-loading {
+  padding: 20px 16px;
+  text-align: center;
+  color: #656d76;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.search-loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f6f8fa;
+  border-top: 2px solid #0969da;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Clear all button */
+.search-clear-all {
+  background: none;
+  border: 1px solid #d0d7de;
+  color: #656d76;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 4px;
+}
+
+.search-clear-all:hover {
+  background: #f6f8fa;
+  border-color: #8c959f;
+  color: #24292e;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .universal-search-results {
+    max-height: 250px;
+  }
+  
+  .selected-search-filters {
+    gap: 4px;
+  }
+  
+  .selected-search-filter-tag {
+    font-size: 11px;
+    padding: 3px 8px 3px 6px;
+  }
+}
+
+/* ============================================================================
    TABULATOR PAGINATION IMPROVEMENTS
    Fix for page size dropdown being too long and improve button layout
    ============================================================================ */

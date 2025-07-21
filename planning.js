@@ -569,32 +569,30 @@ function initPlanningGrid(rows) {
   // Initialize data store
   planningDataStore.setData(rows);
   
-  // Performance optimizations for large datasets with fixed virtual DOM
+  // Performance optimizations for large datasets - fixed conflicts
   const performanceConfig = {
-    // Adjust virtual DOM settings for better visibility
-    virtualDom: true,
-    virtualDomBuffer: 50, // Larger buffer to show more rows initially
-    
-    // Remove explicit height to use CSS height for proper virtual DOM calculation
-    // height: "calc(100vh - 300px)", // Let CSS handle this
-    
-    // Pagination to improve initial load
+    // Use pagination for better performance (conflicts resolved)
     pagination: "local",
-    paginationSize: 50, // Larger page size for better user experience
+    paginationSize: 50,
     paginationSizeSelector: [25, 50, 100],
     paginationCounter: "rows",
     
-    // Enable progressive loading for smoother experience
-    progressiveLoad: "scroll",
-    progressiveLoadDelay: 100,
+    // Disable conflicting features - cannot use virtualDom AND pagination AND progressiveLoad together
+    virtualDom: false,
+    progressiveLoad: false,
     
-    // Fix horizontal scrolling - disable virtual horizontal rendering
-    renderHorizontal: "basic", // Changed from "virtual" to "basic" for better column visibility
-    renderVertical: "virtual", // Keep vertical virtual for performance
+    // Use basic rendering to avoid scroll violations and improve performance
+    renderHorizontal: "basic",
+    renderVertical: "basic",
     
-    // Enable auto-resize for proper viewport calculation
+    // Performance optimizations
     autoResize: true,
     responsiveLayout: false, // Disable to allow horizontal scrolling
+    invalidOptionWarnings: false,
+    
+    // Improve scroll performance
+    scrollToRowPosition: "top",
+    scrollToColumnPosition: "left",
     
     // Enable proper data loading indicators
     dataLoaderLoading: "<div style='padding:20px; text-align:center;'>Loading...</div>",
@@ -619,7 +617,7 @@ function initPlanningGrid(rows) {
     selectableRows: 1,
     layout: "fitData", // Changed from "fitColumns" to "fitData" for better horizontal scrolling
     initialSort: [
-      { column: "id", dir: "desc" }, // Sort by ID descending so newer rows appear at top
+      { column: "quarter", dir: "asc" }, // Sort by quarter ascending for logical order
     ],
     
     // Apply performance optimizations
@@ -2337,6 +2335,8 @@ window.planningModule = {
   ensurePlanningGridVisible, // Add grid visibility function
   initPlanningWorker,
   cleanupPlanningWorker,
+  initializePlanningUniversalSearch,
+  updatePlanningSearchData,
   // State getters
   getIsInitialized: () => isGridInitialized,
   getIsLoading: () => isDataLoading,
@@ -2366,6 +2366,11 @@ if (window.tabManager) {
       console.log("🎯 Initializing planning tab via TabManager");
       await initPlanningGridLazy();
       populatePlanningFilters();
+      
+      // Add a small delay to ensure DOM is ready
+      setTimeout(() => {
+        initializePlanningUniversalSearch();
+      }, 100);
     },
     async () => {
       // Tab cleanup callback
@@ -2461,4 +2466,112 @@ function triggerPlanningAutosave(table) {
     modifiedCount: modifiedData.length,
     totalCount: allData.length,
   });
+}
+
+// Universal Search Filter Implementation
+
+function initializePlanningUniversalSearch() {
+  console.log("🔍 PLANNING: Starting universal search initialization...");
+  
+  // Check if UniversalSearchFilter class is available
+  if (!window.UniversalSearchFilter) {
+    console.error("❌ PLANNING: UniversalSearchFilter class not found!");
+    console.log("Available on window:", Object.keys(window).filter(k => k.includes('Search') || k.includes('Universal')));
+    return;
+  }
+  
+  console.log("✅ PLANNING: UniversalSearchFilter class found");
+  
+  // Check if container exists
+  const container = document.getElementById('planningUniversalSearch');
+  if (!container) {
+    console.error("❌ PLANNING: Container 'planningUniversalSearch' not found in DOM!");
+    console.log("Available elements with 'planning' in id:", Array.from(document.querySelectorAll('[id*="planning"]')).map(el => el.id));
+    return;
+  }
+  
+  console.log("✅ PLANNING: Container found:", container);
+  console.log("✅ PLANNING: Container visible:", container.offsetParent !== null);
+  
+  try {
+    // Initialize universal search for planning
+    window.planningUniversalSearch = new window.UniversalSearchFilter(
+      'planningUniversalSearch',
+      [],
+      (selectedFilters) => {
+        console.log("🔄 PLANNING: Search filters changed:", selectedFilters);
+        applyPlanningSearchFilters(selectedFilters);
+      }
+    );
+    
+    console.log("✅ PLANNING: Universal search initialized successfully!");
+    
+    // Update search data with current planning data
+    updatePlanningSearchData();
+    
+  } catch (error) {
+    console.error("❌ PLANNING: Error initializing universal search:", error);
+    console.error("❌ PLANNING: Error stack:", error.stack);
+  }
+}
+
+function updatePlanningSearchData() {
+  console.log("📊 PLANNING: Updating search data...");
+  
+  if (!window.planningUniversalSearch) {
+    console.warn("⚠️ PLANNING: Universal search not initialized yet");
+    return;
+  }
+  
+  if (!planningTableInstance) {
+    console.warn("⚠️ PLANNING: Planning table instance not available yet");
+    return;
+  }
+  
+  try {
+    const planningData = planningTableInstance.getData();
+    console.log("📈 PLANNING: Processing", planningData.length, "planning records for search");
+    
+    const searchData = planningData.map(row => ({
+      ...row,
+      quarter: normalizeQuarter(row.quarter)
+    }));
+    
+    window.planningUniversalSearch.updateData(searchData);
+    console.log("✅ PLANNING: Search data updated successfully");
+    
+  } catch (error) {
+    console.error("❌ PLANNING: Error updating search data:", error);
+  }
+}
+
+function applyPlanningSearchFilters(selectedFilters) {
+  console.log("🎯 PLANNING: Applying search filters:", selectedFilters);
+  
+  if (!planningTableInstance) {
+    console.warn("⚠️ PLANNING: Planning table instance not available");
+    return;
+  }
+  
+  try {
+    if (selectedFilters.length === 0) {
+      // Clear all filters
+      planningTableInstance.clearFilter();
+      console.log("🧹 PLANNING: Cleared all filters");
+      return;
+    }
+    
+    // Apply filters
+    const filters = selectedFilters.map(filter => ({
+      field: filter.category,
+      type: "=",
+      value: filter.value
+    }));
+    
+    planningTableInstance.setFilter(filters);
+    console.log("✅ PLANNING: Applied", filters.length, "filters");
+    
+  } catch (error) {
+    console.error("❌ PLANNING: Error applying search filters:", error);
+  }
 }

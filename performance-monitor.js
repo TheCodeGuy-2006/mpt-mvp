@@ -6,8 +6,48 @@ class PerformanceMonitor {
     this.metrics = new Map();
     this.observers = [];
     this.setupObservers();
+    this.setupTabulatorOptimizations();
     
     console.log("📊 Performance Monitor initialized");
+  }
+  
+  // Setup Tabulator-specific performance optimizations
+  setupTabulatorOptimizations() {
+    // Override default Tabulator event handlers to be passive when possible
+    if (typeof Tabulator !== 'undefined') {
+      console.log("🚀 Applying Tabulator performance optimizations...");
+      
+      // Disable some expensive Tabulator features globally
+      const originalDefaults = Tabulator.prototype.defaultOptions;
+      if (originalDefaults) {
+        // Apply performance defaults
+        Object.assign(originalDefaults, {
+          invalidOptionWarnings: false,
+          debugInvalidOptions: false,
+          tooltips: false, // Disable tooltips for better performance
+          downloadRowRange: "visible", // Only download visible rows
+        });
+        
+        console.log("✅ Tabulator defaults optimized for performance");
+      }
+    }
+    
+    // Add passive event listeners for better scroll performance
+    document.addEventListener('wheel', this.handleWheel.bind(this), { passive: true });
+    document.addEventListener('touchstart', this.handleTouch.bind(this), { passive: true });
+    document.addEventListener('touchmove', this.handleTouch.bind(this), { passive: true });
+  }
+  
+  // Handle wheel events passively
+  handleWheel(event) {
+    // This is a passive handler - no preventDefault
+    // Just monitor for performance if needed
+  }
+  
+  // Handle touch events passively
+  handleTouch(event) {
+    // This is a passive handler - no preventDefault
+    // Just monitor for performance if needed
   }
   
   // Setup performance observers

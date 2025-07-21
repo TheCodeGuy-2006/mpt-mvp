@@ -10,11 +10,15 @@
   will-change: transform;
   transform: translateZ(0);
   backface-visibility: hidden;
+  /* Prevent scroll violations */
+  touch-action: manipulation;
 }
 
 /* Optimize table rendering */
 .tabulator-table {
   contain: layout style paint;
+  /* Improve scroll performance */
+  scroll-behavior: auto;
 }
 
 .tabulator-cell {
@@ -26,11 +30,22 @@
   contain: layout;
 }
 
-/* Optimize scrolling */
+/* Optimize scrolling performance */
 .tabulator-tableHolder {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   contain: strict;
+  /* Prevent passive scroll violations */
+  touch-action: pan-x pan-y;
+}
+
+/* Optimize column manager wheel events */
+.tabulator-col {
+  touch-action: manipulation;
+}
+
+.tabulator-col-resize-handle {
+  touch-action: none;
 }
 
 /* Optimize editor rendering */
