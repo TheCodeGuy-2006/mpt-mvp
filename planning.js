@@ -2651,10 +2651,11 @@ function initializePlanningUniversalSearch() {
     // Initialize universal search for planning
     window.planningUniversalSearch = new window.UniversalSearchFilter(
       'planningUniversalSearch',
-      [],
-      (selectedFilters) => {
-        console.log("🔄 PLANNING: Search filters changed:", selectedFilters);
-        applyPlanningSearchFilters(selectedFilters);
+      {
+        onFilterChange: (selectedFilters) => {
+          console.log("🔄 PLANNING: Search filters changed:", selectedFilters);
+          applyPlanningSearchFilters(selectedFilters);
+        }
       }
     );
     

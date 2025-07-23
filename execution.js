@@ -1063,15 +1063,25 @@ function initializeExecutionUniversalSearch() {
   console.log("✅ EXECUTION: Container visible:", container.offsetParent !== null);
   
   try {
+    // Debug: Check if UniversalSearchFilter constructor is working properly
+    console.log("🔧 EXECUTION: Creating universal search with constructor:", window.UniversalSearchFilter);
+    console.log("🔧 EXECUTION: Constructor prototype:", window.UniversalSearchFilter.prototype);
+    
     // Initialize universal search for execution
     window.executionUniversalSearch = new window.UniversalSearchFilter(
       'executionUniversalSearch',
-      [],
-      (selectedFilters) => {
-        console.log("🔄 EXECUTION: Search filters changed:", selectedFilters);
-        applyExecutionSearchFilters(selectedFilters);
+      {
+        onFilterChange: (selectedFilters) => {
+          console.log("🔄 EXECUTION: Search filters changed:", selectedFilters);
+          applyExecutionSearchFilters(selectedFilters);
+        }
       }
     );
+    
+    // Debug: Check the created object
+    console.log("🔧 EXECUTION: Created object:", window.executionUniversalSearch);
+    console.log("🔧 EXECUTION: Object methods:", Object.getOwnPropertyNames(Object.getPrototypeOf(window.executionUniversalSearch)));
+    console.log("🔧 EXECUTION: updateData method exists:", typeof window.executionUniversalSearch.updateData);
     
     console.log("✅ EXECUTION: Universal search initialized successfully!");
     
