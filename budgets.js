@@ -105,6 +105,20 @@ function initBudgetsTable(budgets, rows) {
     autoResize: false,
     responsiveLayout: false,
     
+    // Add safer scroll configuration to prevent errors
+    scrollToRowIfVisible: false,
+    
+    // Add error handling for table operations
+    tableBuilt: function() {
+      setTimeout(() => {
+        try {
+          this.redraw(true);
+        } catch (e) {
+          console.warn("Error in budgets table built callback:", e.message);
+        }
+      }, 100);
+    },
+    
     columns: [
       {
         title: "Region",

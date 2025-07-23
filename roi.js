@@ -1073,6 +1073,20 @@ function initRoiDataTable() {
       headerHeight: 50,
       virtualDom: true, // Enable virtual DOM for better performance with large datasets
       virtualDomBuffer: 10, // Buffer for smoother scrolling
+      
+      // Add safer scroll configuration to prevent errors
+      scrollToRowIfVisible: false,
+      
+      // Add error handling for table operations
+      tableBuilt: function() {
+        setTimeout(() => {
+          try {
+            this.redraw(true);
+          } catch (e) {
+            console.warn("Error in ROI table built callback:", e.message);
+          }
+        }, 100);
+      },
       columns: [
         {
           title: "Campaign Name & Type",

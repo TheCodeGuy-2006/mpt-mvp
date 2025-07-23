@@ -1,5 +1,60 @@
 import { kpis } from "./src/calc.js";
 
+// Utility function for safe table scrolling
+function safeScrollToRow(table, rowIdentifier, position = "top", ifVisible = false) {
+  if (!table || typeof table.scrollToRow !== 'function') {
+    console.warn("Invalid table instance for scrolling");
+    return false;
+  }
+  
+  try {
+    // Check if table is properly initialized
+    if (!table.element || !table.element.offsetParent) {
+      console.warn("Table not yet visible, skipping scroll");
+      return false;
+    }
+    
+    const data = table.getData();
+    if (!data || data.length === 0) {
+      console.warn("No data available for scrolling");
+      return false;
+    }
+    
+    // If rowIdentifier is a number, use the first row instead
+    let targetRow = rowIdentifier;
+    if (typeof rowIdentifier === 'number') {
+      // Use the actual first row object, not an index
+      targetRow = data[0];
+    }
+    
+    // Additional check to ensure targetRow exists
+    if (!targetRow) {
+      console.warn("Target row not found for scrolling");
+      return false;
+    }
+    
+    // Wrap in additional try-catch for the actual scroll operation
+    try {
+      table.scrollToRow(targetRow, position, ifVisible);
+      return true;
+    } catch (scrollError) {
+      // If direct scroll fails, try alternative approach
+      console.warn("Direct scroll failed, trying alternative:", scrollError.message);
+      
+      // Try scrolling to top instead as fallback
+      if (typeof table.scrollToPosition === 'function') {
+        table.scrollToPosition(0, 0);
+        return true;
+      }
+      
+      return false;
+    }
+  } catch (error) {
+    console.warn("Error in safe scroll operation:", error.message);
+    return false;
+  }
+}
+
 // PLANNING TAB CONSTANTS AND DATA
 // Quarter normalization function to handle format differences ("Q1 July" vs "Q1 - July")
 function normalizeQuarter(quarter) {
@@ -155,14 +210,20 @@ Object.keys(countryOptionsByRegion).forEach((region) => {
   }
 });
 
-// Utility: Get all unique countries from all regions
+// Utility: Get all unique countries from all regions (cached for performance)
+let allCountriesCache = null;
 function getAllCountries() {
+  if (allCountriesCache) {
+    return allCountriesCache;
+  }
+  
   const all = [];
   Object.values(countryOptionsByRegion).forEach((arr) => {
     if (Array.isArray(arr)) all.push(...arr);
   });
-  // Remove duplicates
-  return Array.from(new Set(all));
+  // Remove duplicates and cache result
+  allCountriesCache = Array.from(new Set(all));
+  return allCountriesCache;
 }
 
 // Patch: For now, allow all countries for any region
@@ -240,28 +301,36 @@ function debounce(func, wait) {
 }
 
 // Batch processing utility for large datasets
-function processRowsInBatches(rows, batchSize = 100, callback) {
+function processRowsInBatches(rows, batchSize = 15, callback) {
   return new Promise((resolve) => {
     let index = 0;
     
-    function processBatch() {
+    async function processBatch() {
       const batch = rows.slice(index, index + batchSize);
       if (batch.length === 0) {
         resolve();
         return;
       }
       
-      // Process batch
-      batch.forEach((row, i) => {
-        callback(row, index + i);
-      });
+      // Process batch with micro-yields for very large batches
+      for (let i = 0; i < batch.length; i++) {
+        callback(batch[i], index + i);
+        
+        // Yield control every 3 items within the batch to prevent long tasks
+        if (i > 0 && i % 3 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 0));
+        }
+      }
       
       index += batchSize;
       
-      // Use requestAnimationFrame for non-blocking processing
-      requestAnimationFrame(() => {
-        // Add small delay to prevent UI freezing
-        setTimeout(processBatch, 0);
+      // Yield control between batches
+      await new Promise(resolve => {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            processBatch().then(resolve);
+          }, 0);
+        });
       });
     }
     
@@ -328,13 +397,13 @@ async function loadPlanning(retryCount = 0, useCache = true) {
       }
     }
     
-    // Show loading indicator for large datasets
-    if (rows.length > 500) {
+    // Show loading indicator for medium to large datasets
+    if (rows.length > 100) {
       showLoadingIndicator("Processing " + rows.length + " campaigns...");
     }
     
-    // Use Web Worker for heavy processing if available and dataset is large
-    if (rows.length > 200 && initPlanningWorker()) {
+    // Use Web Worker for heavy processing if available for almost any dataset size
+    if (rows.length > 15 && initPlanningWorker()) {
       return new Promise((resolve) => {
         const handleWorkerMessage = (e) => {
           if (e.data.type === 'PROCESS_PLANNING_DATA_COMPLETE') {
@@ -350,12 +419,12 @@ async function loadPlanning(retryCount = 0, useCache = true) {
         planningWorker.postMessage({
           type: 'PROCESS_PLANNING_DATA',
           data: rows,
-          options: { batchSize: 100 }
+          options: { batchSize: 50 }
         });
       });
     } else {
       // Fallback to main thread processing for smaller datasets
-      await processRowsInBatches(rows, 100, (row, i) => {
+      await processRowsInBatches(rows, 15, (row, i) => {
         if (typeof row.expectedLeads === "number") {
           Object.assign(row, kpis(row.expectedLeads));
         }
@@ -440,6 +509,11 @@ class PlanningDataStore {
   applyFilters(filters) {
     const startTime = performance.now();
     
+    // Pre-compute normalized quarter filter values for performance
+    const normalizedQuarterFilters = filters.quarter && Array.isArray(filters.quarter) 
+      ? filters.quarter.map(normalizeQuarter) 
+      : null;
+    
     this.filteredData = this.data.filter(row => {
       // Digital Motions filter
       if (filters.digitalMotions && row.digitalMotions !== true) {
@@ -454,11 +528,10 @@ class PlanningDataStore {
           // For strategicPillars field, check against 'strategicPillars' in row data
           let rowValue = field === 'strategicPillar' ? row.strategicPillars : row[field];
           
-          // Apply quarter normalization for quarter field comparison
+          // Apply quarter normalization for quarter field comparison (optimized)
           if (field === 'quarter') {
             rowValue = normalizeQuarter(rowValue);
-            const normalizedFilterValues = filterValues.map(normalizeQuarter);
-            if (!normalizedFilterValues.includes(rowValue)) {
+            if (!normalizedQuarterFilters.includes(rowValue)) {
               return false;
             }
           } else {
@@ -550,7 +623,7 @@ async function initPlanningGridLazy() {
     // Load data first
     const rows = await loadPlanning();
     
-    // Initialize grid with data
+    // Initialize grid with data (now returns a Promise)
     const table = await initPlanningGrid(rows);
     isGridInitialized = true;
     
@@ -569,446 +642,491 @@ function initPlanningGrid(rows) {
   // Initialize data store
   planningDataStore.setData(rows);
   
-  // Performance optimizations for large datasets - fixed conflicts
-  const performanceConfig = {
-    // Use pagination for better performance (conflicts resolved)
-    pagination: "local",
-    paginationSize: 50,
-    paginationSizeSelector: [25, 50, 100],
-    paginationCounter: "rows",
-    
-    // Disable conflicting features - cannot use virtualDom AND pagination AND progressiveLoad together
-    virtualDom: false,
-    progressiveLoad: false,
-    
-    // Use basic rendering to avoid scroll violations and improve performance
-    renderHorizontal: "basic",
-    renderVertical: "basic",
-    
-    // Performance optimizations
-    autoResize: true,
-    responsiveLayout: false, // Disable to allow horizontal scrolling
-    invalidOptionWarnings: false,
-    
-    // Improve scroll performance
-    scrollToRowPosition: "top",
-    scrollToColumnPosition: "left",
-    
-    // Enable proper data loading indicators
-    dataLoaderLoading: "<div style='padding:20px; text-align:center;'>Loading...</div>",
-    dataLoaderError: "<div style='padding:20px; text-align:center; color:red;'>Error loading data</div>",
-    
-    // Reduce column calculations only if not needed
-    columnCalcs: false,
-    
-    // Optimized scroll handling
-    scrollToRowPosition: "center",
-    scrollToRowIfVisible: false,
-    
-    // Debounced data updates with reasonable delay
-    dataChanged: debounce(() => {
-      console.log("Planning data changed");
-    }, 500), // Shorter debounce for better responsiveness
-  };
-  
-  planningTableInstance = new Tabulator("#planningGrid", {
-    data: rows,
-    reactiveData: true,
-    selectableRows: 1,
-    layout: "fitData", // Changed from "fitColumns" to "fitData" for better horizontal scrolling
-    initialSort: [
-      { column: "quarter", dir: "asc" }, // Sort by quarter ascending for logical order
-    ],
-    
-    // Apply performance optimizations
-    ...performanceConfig,
-    
-    // Add table built callback to ensure proper rendering
-    tableBuilt: function() {
-      // Force a redraw after table is built to ensure virtual DOM is properly calculated
-      setTimeout(() => {
-        this.redraw(true);
-        // Scroll to top to ensure we see the first rows
-        this.scrollToRow(1, "top", false);
-      }, 100);
-    },
-    
-    // Add data loaded callback
-    dataLoaded: function(data) {
-      console.log(`Planning grid loaded with ${data.length} rows`);
-      // Ensure virtual DOM recalculates after data load
-      setTimeout(() => {
-        this.redraw(true);
-      }, 50);
-    },
-    
-    columns: [
-      // Sequential number column
-      {
-        title: "#",
-        field: "rowNumber",
-        formatter: function (cell) {
-          const row = cell.getRow();
-          const table = row.getTable();
-          const allRows = table.getRows();
-          const index = allRows.indexOf(row);
-          return index + 1;
+  return new Promise((resolve) => {
+    // Break up the initialization into smaller chunks to prevent long tasks
+    const initializeInChunks = async () => {
+      
+      // Chunk 1: Performance config (small task)
+      const performanceConfig = {
+        // Use pagination for better performance (conflicts resolved)
+        pagination: "local",
+        paginationSize: 50,
+        paginationSizeSelector: [25, 50, 100],
+        paginationCounter: "rows",
+        
+        // Disable conflicting features - cannot use virtualDom AND pagination AND progressiveLoad together
+        virtualDom: false,
+        progressiveLoad: false,
+        
+        // Use basic rendering to avoid scroll violations and improve performance
+        renderHorizontal: "basic",
+        renderVertical: "basic",
+        
+        // Performance optimizations
+        autoResize: true,
+        responsiveLayout: false, // Disable to allow horizontal scrolling
+        invalidOptionWarnings: false,
+        
+        // Enable proper data loading indicators
+        dataLoaderLoading: "<div style='padding:20px; text-align:center;'>Loading...</div>",
+        dataLoaderError: "<div style='padding:20px; text-align:center; color:red;'>Error loading data</div>",
+        
+        // Reduce column calculations only if not needed
+        columnCalcs: false,
+        
+        // Optimized scroll handling - single configuration
+        scrollToRowPosition: "top",
+        scrollToColumnPosition: "left",
+        scrollToRowIfVisible: false,
+        
+        // Debounced data updates with reasonable delay
+        dataChanged: debounce(() => {
+          console.log("Planning data changed");
+        }, 500), // Shorter debounce for better responsiveness
+        
+        // Add pagination callback to prevent scroll errors
+        pageLoaded: function(pageno) {
+          // Ensure we don't try to scroll to invalid positions after page changes
+          console.log(`Planning grid page ${pageno} loaded`);
         },
-        width: 50,
-        hozAlign: "center",
-        headerSort: false,
-        frozen: true, // Keep this column visible when scrolling horizontally
-      },
-      // Select row button (circle)
-      {
-        title: "",
-        field: "select",
-        formatter: function (cell) {
-          const row = cell.getRow();
-          const selected = row.getElement().classList.contains("row-selected");
-          return `<span class="select-circle" style="display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid #888;background:${selected ? "#0969da" : "transparent"};cursor:pointer;"></span>`;
-        },
-        width: 40,
-        hozAlign: "center",
-        cellClick: function (e, cell) {
-          const row = cell.getRow();
-          row.getElement().classList.toggle("row-selected");
-          cell.getTable().redraw(true);
-        },
-        headerSort: false,
-      },
-      {
-        title: "Program Type",
-        field: "programType",
-        editor: "list",
-        editorParams: { values: programTypes },
-        width: 200,
-        cellEdited: debounce((cell) => {
-          const r = cell.getRow();
-          const rowData = r.getData();
-
-          // Special logic for In-Account Events (1:1)
-          if (cell.getValue() === "In-Account Events (1:1)") {
-            r.update({
-              expectedLeads: 0,
-              mqlForecast: 0,
-              sqlForecast: 0,
-              oppsForecast: 0,
-              pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
-            });
-          } else {
-            // For other program types, recalculate based on expected leads
-            if (typeof rowData.expectedLeads === "number" && rowData.expectedLeads > 0) {
-              const kpiVals = kpis(rowData.expectedLeads);
-              r.update({
-                mqlForecast: kpiVals.mql,
-                sqlForecast: kpiVals.sql,
-                oppsForecast: kpiVals.opps,
-                pipelineForecast: kpiVals.pipeline,
-              });
-            }
-          }
-          rowData.__modified = true;
-          debouncedAutosave();
-        }, 1000),
-      },
-      {
-        title: "Strategic Pillar",
-        field: "strategicPillars",
-        editor: "list",
-        editorParams: { values: strategicPillars },
-        width: 220,
-      },
-      {
-        title: "Description",
-        field: "description",
-        editor: "input",
-        width: 180,
-        // Simplified tooltip - only show on click to reduce overhead
-        cellClick: function (e, cell) {
-          if (cell.getValue() && cell.getValue().length > 20) {
-            const tooltip = prompt("Description:", cell.getValue());
-            if (tooltip !== null && tooltip !== cell.getValue()) {
-              cell.setValue(tooltip);
-            }
-          }
-        },
-      },
-      {
-        title: "Owner",
-        field: "owner",
-        editor: "list",
-        editorParams: { values: names },
-        width: 140,
-      },
-      {
-        title: "Quarter",
-        field: "quarter",
-        editor: "list",
-        editorParams: { values: quarterOptions },
-        width: 120,
-      },
-      {
-        title: "Region",
-        field: "region",
-        editor: "list",
-        editorParams: { values: regionOptions },
-        width: 120,
-      },
-      {
-        title: "Fiscal Year",
-        field: "fiscalYear",
-        editor: "list",
-        editorParams: { values: ["FY25", "FY26", "FY27"] },
-        width: 100,
-      },
-      {
-        title: "Country",
-        field: "country",
-        editor: "list",
-        editorParams: {
-          values: getAllCountries(),
-        },
-        width: 130,
-      },
-      {
-        title: "Forecasted Cost",
-        field: "forecastedCost",
-        editor: "number",
-        width: 200,
-        formatter: function (cell) {
-          const v = cell.getValue();
-          if (v === null || v === undefined || v === "") return "";
-          return "$" + Number(v).toLocaleString();
-        },
-        cellEdited: debounce((cell) => {
-          const r = cell.getRow();
-          const rowData = r.getData();
-
-          // Special logic for In-Account Events (1:1) - recalculate pipeline based on cost
-          if (rowData.programType === "In-Account Events (1:1)") {
-            r.update({
-              expectedLeads: 0,
-              mqlForecast: 0,
-              sqlForecast: 0,
-              oppsForecast: 0,
-              pipelineForecast: cell.getValue() ? Number(cell.getValue()) * 20 : 0,
-            });
-          }
-          rowData.__modified = true;
-          debouncedAutosave();
-        }, 1000),
-      },
-      {
-        title: "Expected Leads",
-        field: "expectedLeads",
-        editor: "number",
-        width: 150,
-        cellEdited: debounce((cell) => {
-          const r = cell.getRow();
-          const rowData = r.getData();
-
-          // Special logic for In-Account Events (1:1) - ignore expected leads, use forecasted cost
-          if (rowData.programType === "In-Account Events (1:1)") {
-            r.update({
-              expectedLeads: 0,
-              mqlForecast: 0,
-              sqlForecast: 0,
-              oppsForecast: 0,
-              pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
-            });
-          } else {
-            // Normal KPI calculation for other program types
-            const kpiVals = kpis(cell.getValue());
-            r.update({
-              mqlForecast: kpiVals.mql,
-              sqlForecast: kpiVals.sql,
-              oppsForecast: kpiVals.opps,
-              pipelineForecast: kpiVals.pipeline,
-            });
-          }
-          rowData.__modified = true;
-          debouncedAutosave();
-        }, 1000),
-      },
-      { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
-      { title: "SQL", field: "sqlForecast", editable: false, width: 90 },
-      { title: "Opps", field: "oppsForecast", editable: false, width: 90 },
-      {
-        title: "Pipeline",
-        field: "pipelineForecast",
-        editable: false,
-        width: 120,
-        formatter: function (cell) {
-          const v = cell.getValue();
-          if (v === null || v === undefined || v === "") return "";
-          return "$" + Number(v).toLocaleString();
-        },
-      },
-      {
-        title: "Revenue Play",
-        field: "revenuePlay",
-        editor: "list",
-        editorParams: { values: revenuePlays },
-        width: 140,
-      },
-      {
-        title: "Status",
-        field: "status",
-        editor: "list",
-        editorParams: { values: statusOptions },
-        width: 130,
-        cellEdited: debounce((cell) => {
-          const rowData = cell.getRow().getData();
-          rowData.__modified = true;
-          debouncedAutosave();
-        }, 1000),
-      },
-      {
-        title: "PO raised",
-        field: "poRaised",
-        editor: "list",
-        editorParams: { values: yesNo },
-        width: 110,
-        cellEdited: function(cell) {
-          // Convert "(Clear)" display value to empty string for data storage
-          if (cell.getValue() === "(Clear)") {
-            cell.setValue("");
-          }
-        },
-        formatter: function(cell) {
-          // Display "(Clear)" for empty values, otherwise show the actual value
-          const value = cell.getValue();
-          return value === "" || value === null || value === undefined ? "(Clear)" : value;
-        },
-      },
-      // Digital Motions toggle
-      {
-        title: "Digital Motions",
-        field: "digitalMotions",
-        formatter: function (cell) {
-          const value = cell.getValue();
-          return `<input type='checkbox' ${value ? "checked" : ""} style='transform:scale(1.3); cursor:pointer;' />`;
-        },
-        width: 120,
-        hozAlign: "center",
-        cellClick: function (e, cell) {
-          // Toggle value
-          const current = !!cell.getValue();
-          cell.setValue(!current);
-
-          // Sync digitalMotions change to execution table
+      };
+      
+      // Yield control back to the browser
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
+      // Chunk 2: Create table with basic config (medium task)
+      planningTableInstance = new Tabulator("#planningGrid", {
+        data: rows,
+        reactiveData: true,
+        selectableRows: 1,
+        layout: "fitData",
+        initialSort: [
+          { column: "quarter", dir: "asc" },
+        ],
+        
+        // Apply performance optimizations
+        ...performanceConfig,
+        
+        // Override any problematic scroll behavior
+        scrollToRowPosition: "top",
+        scrollToColumnPosition: "left",
+        scrollToRowIfVisible: false,
+        
+        // Add table built callback to ensure proper rendering
+        tableBuilt: function() {
           setTimeout(() => {
-            if (
-              window.executionModule &&
-              typeof window.executionModule.syncDigitalMotionsFromPlanning ===
-                "function"
-            ) {
-              window.executionModule.syncDigitalMotionsFromPlanning();
-              console.log(
-                "[Planning] Synced Digital Motions change to execution table",
-              );
+            try {
+              this.redraw(true);
+              
+              setTimeout(() => {
+                if (this.getData().length > 0 && this.element && this.element.offsetParent) {
+                  safeScrollToRow(this, 1, "top", false);
+                }
+              }, 50);
+            } catch (e) {
+              console.warn("Error in tableBuilt callback:", e.message);
             }
+          }, 150);
+        },
+        
+        // Add data loaded callback
+        dataLoaded: function(data) {
+          console.log(`Planning grid loaded with ${data.length} rows`);
+          setTimeout(() => {
+            this.redraw(true);
           }, 50);
-
-          // Trigger ROI budget updates when Digital Motions toggle changes
-          setTimeout(() => {
-            if (
-              window.roiModule &&
-              typeof window.roiModule.updateRemainingBudget === "function"
-            ) {
-              const regionFilter =
-                document.getElementById("roiRegionFilter")?.value || "";
-              window.roiModule.updateRemainingBudget(regionFilter);
-              window.roiModule.updateForecastedBudgetUsage(regionFilter);
-              console.log(
-                "[Planning] Triggered ROI budget updates after Digital Motions toggle",
-              );
-            }
-          }, 100);
         },
-        headerSort: false,
-      },
-      // Bin icon (delete)
-      {
-        title: "",
-        field: "delete",
-        formatter: function () {
-          return '<button class="delete-row-btn" title="Delete"><i class="octicon octicon-trash" aria-hidden="true"></i></button>';
-        },
-        width: 50,
-        hozAlign: "center",
-        cellClick: function (e, cell) {
-          cell.getRow().delete();
-        },
-        headerSort: false,
-      },
-    ],
-  });
-
-  // Create debounced autosave function for this table instance with longer delay
-  const debouncedAutosave = debounce(() => {
-    triggerPlanningAutosave(planningTableInstance);
-  }, 3000); // Much longer autosave delay
-
-  // Wire up Add Row and Delete Row buttons for Planning grid
-  const addBtn = document.getElementById("addPlanningRow");
-  if (addBtn) {
-    addBtn.onclick = () => showAddRowModal();
-  }
-
-  const delBtn = document.getElementById("deletePlanningRow");
-  if (delBtn) {
-    delBtn.textContent = "Delete Highlighted Rows";
-    delBtn.onclick = () => {
-      const rows = planningTableInstance.getRows();
-      let deleted = 0;
-      rows.forEach((row) => {
-        if (row.getElement().classList.contains("row-selected")) {
-          row.delete();
-          deleted++;
-        }
+        
+        // Columns will be added in next chunk
+        columns: []
       });
-      if (deleted === 0) {
-        alert("No rows selected for deletion.");
+      
+      // Yield control back to the browser
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
+      // Chunk 3: Add columns in smaller batches to prevent blocking
+      const addColumnsInBatches = async () => {
+        const allColumns = [
+          // Sequential number column
+          {
+            title: "#",
+            field: "rowNumber",
+            formatter: function (cell) {
+              const row = cell.getRow();
+              const table = row.getTable();
+              const allRows = table.getRows();
+              const index = allRows.indexOf(row);
+              return index + 1;
+            },
+            width: 50,
+            hozAlign: "center",
+            headerSort: false,
+            frozen: true,
+          },
+          // Select row button (circle)
+          {
+            title: "",
+            field: "select",
+            formatter: function (cell) {
+              const row = cell.getRow();
+              const selected = row.getElement().classList.contains("row-selected");
+              return `<span class="select-circle" style="display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid #888;background:${selected ? "#0969da" : "transparent"};cursor:pointer;"></span>`;
+            },
+            width: 40,
+            hozAlign: "center",
+            cellClick: function (e, cell) {
+              const row = cell.getRow();
+              row.getElement().classList.toggle("row-selected");
+              cell.getTable().redraw(true);
+            },
+            headerSort: false,
+          },
+          {
+            title: "Program Type",
+            field: "programType",
+            editor: "list",
+            editorParams: { values: programTypes },
+            width: 200,
+            cellEdited: debounce((cell) => {
+              const r = cell.getRow();
+              const rowData = r.getData();
+
+              if (cell.getValue() === "In-Account Events (1:1)") {
+                r.update({
+                  expectedLeads: 0,
+                  mqlForecast: 0,
+                  sqlForecast: 0,
+                  oppsForecast: 0,
+                  pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
+                });
+              } else {
+                if (typeof rowData.expectedLeads === "number" && rowData.expectedLeads > 0) {
+                  const kpiVals = kpis(rowData.expectedLeads);
+                  r.update({
+                    mqlForecast: kpiVals.mql,
+                    sqlForecast: kpiVals.sql,
+                    oppsForecast: kpiVals.opps,
+                    pipelineForecast: kpiVals.pipeline,
+                  });
+                }
+              }
+              rowData.__modified = true;
+              debouncedAutosave();
+            }, 1000),
+          },
+          {
+            title: "Strategic Pillar",
+            field: "strategicPillars",
+            editor: "list",
+            editorParams: { values: strategicPillars },
+            width: 220,
+          },
+          {
+            title: "Description",
+            field: "description",
+            editor: "input",
+            width: 180,
+            cellClick: function (e, cell) {
+              if (cell.getValue() && cell.getValue().length > 20) {
+                const tooltip = prompt("Description:", cell.getValue());
+                if (tooltip !== null && tooltip !== cell.getValue()) {
+                  cell.setValue(tooltip);
+                }
+              }
+            },
+          },
+          {
+            title: "Owner",
+            field: "owner",
+            editor: "list",
+            editorParams: { values: names },
+            width: 140,
+          },
+          {
+            title: "Quarter",
+            field: "quarter",
+            editor: "list",
+            editorParams: { values: quarterOptions },
+            width: 120,
+          },
+          {
+            title: "Region",
+            field: "region",
+            editor: "list",
+            editorParams: { values: regionOptions },
+            width: 120,
+          },
+          {
+            title: "Fiscal Year",
+            field: "fiscalYear",
+            editor: "list",
+            editorParams: { values: ["FY25", "FY26", "FY27"] },
+            width: 100,
+          },
+          {
+            title: "Country",
+            field: "country",
+            editor: "list",
+            editorParams: {
+              values: getAllCountries(),
+            },
+            width: 130,
+          },
+          {
+            title: "Forecasted Cost",
+            field: "forecastedCost",
+            editor: "number",
+            width: 200,
+            formatter: function (cell) {
+              const v = cell.getValue();
+              if (v === null || v === undefined || v === "") return "";
+              return "$" + Number(v).toLocaleString();
+            },
+            cellEdited: debounce((cell) => {
+              const r = cell.getRow();
+              const rowData = r.getData();
+
+              if (rowData.programType === "In-Account Events (1:1)") {
+                r.update({
+                  expectedLeads: 0,
+                  mqlForecast: 0,
+                  sqlForecast: 0,
+                  oppsForecast: 0,
+                  pipelineForecast: cell.getValue() ? Number(cell.getValue()) * 20 : 0,
+                });
+              }
+              rowData.__modified = true;
+              debouncedAutosave();
+            }, 1000),
+          },
+          {
+            title: "Expected Leads",
+            field: "expectedLeads",
+            editor: "number",
+            width: 150,
+            cellEdited: debounce((cell) => {
+              const r = cell.getRow();
+              const rowData = r.getData();
+
+              if (rowData.programType === "In-Account Events (1:1)") {
+                r.update({
+                  expectedLeads: 0,
+                  mqlForecast: 0,
+                  sqlForecast: 0,
+                  oppsForecast: 0,
+                  pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
+                });
+              } else {
+                const kpiVals = kpis(cell.getValue());
+                r.update({
+                  mqlForecast: kpiVals.mql,
+                  sqlForecast: kpiVals.sql,
+                  oppsForecast: kpiVals.opps,
+                  pipelineForecast: kpiVals.pipeline,
+                });
+              }
+              rowData.__modified = true;
+              debouncedAutosave();
+            }, 1000),
+          },
+          { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
+          { title: "SQL", field: "sqlForecast", editable: false, width: 90 },
+          { title: "Opps", field: "oppsForecast", editable: false, width: 90 },
+          {
+            title: "Pipeline",
+            field: "pipelineForecast",
+            editable: false,
+            width: 120,
+            formatter: function (cell) {
+              const v = cell.getValue();
+              if (v === null || v === undefined || v === "") return "";
+              return "$" + Number(v).toLocaleString();
+            },
+          },
+          {
+            title: "Revenue Play",
+            field: "revenuePlay",
+            editor: "list",
+            editorParams: { values: revenuePlays },
+            width: 140,
+          },
+          {
+            title: "Status",
+            field: "status",
+            editor: "list",
+            editorParams: { values: statusOptions },
+            width: 130,
+            cellEdited: debounce((cell) => {
+              const rowData = cell.getRow().getData();
+              rowData.__modified = true;
+              debouncedAutosave();
+            }, 1000),
+          },
+          {
+            title: "PO raised",
+            field: "poRaised",
+            editor: "list",
+            editorParams: { values: yesNo },
+            width: 110,
+            cellEdited: function(cell) {
+              if (cell.getValue() === "(Clear)") {
+                cell.setValue("");
+              }
+            },
+            formatter: function(cell) {
+              const value = cell.getValue();
+              return value === "" || value === null || value === undefined ? "(Clear)" : value;
+            },
+          },
+          // Digital Motions toggle
+          {
+            title: "Digital Motions",
+            field: "digitalMotions",
+            formatter: function (cell) {
+              const value = cell.getValue();
+              return `<input type='checkbox' ${value ? "checked" : ""} style='transform:scale(1.3); cursor:pointer;' />`;
+            },
+            width: 120,
+            hozAlign: "center",
+            cellClick: function (e, cell) {
+              const current = !!cell.getValue();
+              cell.setValue(!current);
+
+              setTimeout(() => {
+                if (
+                  window.executionModule &&
+                  typeof window.executionModule.syncDigitalMotionsFromPlanning ===
+                    "function"
+                ) {
+                  window.executionModule.syncDigitalMotionsFromPlanning();
+                  console.log(
+                    "[Planning] Synced Digital Motions change to execution table",
+                  );
+                }
+              }, 50);
+
+              setTimeout(() => {
+                if (
+                  window.roiModule &&
+                  typeof window.roiModule.updateRemainingBudget === "function"
+                ) {
+                  const regionFilter =
+                    document.getElementById("roiRegionFilter")?.value || "";
+                  window.roiModule.updateRemainingBudget(regionFilter);
+                  window.roiModule.updateForecastedBudgetUsage(regionFilter);
+                  console.log(
+                    "[Planning] Triggered ROI budget updates after Digital Motions toggle",
+                  );
+                }
+              }, 100);
+            },
+            headerSort: false,
+          },
+          // Bin icon (delete)
+          {
+            title: "",
+            field: "delete",
+            formatter: function () {
+              return '<button class="delete-row-btn" title="Delete"><i class="octicon octicon-trash" aria-hidden="true"></i></button>';
+            },
+            width: 50,
+            hozAlign: "center",
+            cellClick: function (e, cell) {
+              cell.getRow().delete();
+            },
+            headerSort: false,
+          },
+        ];
+        
+        // Add columns in batches to prevent long tasks
+        const batchSize = 3;
+        for (let i = 0; i < allColumns.length; i += batchSize) {
+          const batch = allColumns.slice(i, i + batchSize);
+          
+          // Add this batch of columns
+          batch.forEach(column => {
+            planningTableInstance.addColumn(column);
+          });
+          
+          // Yield control after each batch
+          await new Promise(resolve => setTimeout(resolve, 0));
+        }
+      };
+      
+      await addColumnsInBatches();
+      
+      // Chunk 4: Setup remaining functionality
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
+      // Create debounced autosave function
+      const debouncedAutosave = debounce(() => {
+        triggerPlanningAutosave(planningTableInstance);
+      }, 3000);
+
+      // Wire up buttons
+      const addBtn = document.getElementById("addPlanningRow");
+      if (addBtn) {
+        addBtn.onclick = () => showAddRowModal();
       }
+
+      const delBtn = document.getElementById("deletePlanningRow");
+      if (delBtn) {
+        delBtn.textContent = "Delete Highlighted Rows";
+        delBtn.onclick = () => {
+          const rows = planningTableInstance.getRows();
+          let deleted = 0;
+          rows.forEach((row) => {
+            if (row.getElement().classList.contains("row-selected")) {
+              row.delete();
+              deleted++;
+            }
+          });
+          if (deleted === 0) {
+            alert("No rows selected for deletion.");
+          }
+        };
+      }
+
+      setupPlanningSave(planningTableInstance, rows);
+
+      // Update global reference
+      window.planningTableInstance = planningTableInstance;
+
+      // Add event handlers
+      const resizeHandler = debounce(() => {
+        if (planningTableInstance) {
+          planningTableInstance.redraw(true);
+        }
+      }, 250);
+      
+      window.addEventListener('resize', resizeHandler);
+      
+      const visibilityHandler = () => {
+        if (!document.hidden && planningTableInstance) {
+          setTimeout(() => {
+            planningTableInstance.redraw(true);
+          }, 100);
+        }
+      };
+      
+      document.addEventListener('visibilitychange', visibilityHandler);
+      
+      planningTableInstance._cleanup = () => {
+        window.removeEventListener('resize', resizeHandler);
+        document.removeEventListener('visibilitychange', visibilityHandler);
+      };
+
+      planningPerformance.end('grid initialization');
+      
+      resolve(planningTableInstance);
     };
-  }
-
-  setupPlanningSave(planningTableInstance, rows);
-
-  // Update global reference
-  window.planningTableInstance = planningTableInstance;
-
-  // Add window resize handler for proper virtual DOM recalculation
-  const resizeHandler = debounce(() => {
-    if (planningTableInstance) {
-      planningTableInstance.redraw(true);
-    }
-  }, 250);
-  
-  window.addEventListener('resize', resizeHandler);
-  
-  // Add visibility change handler to redraw when tab becomes visible
-  const visibilityHandler = () => {
-    if (!document.hidden && planningTableInstance) {
-      setTimeout(() => {
-        planningTableInstance.redraw(true);
-      }, 100);
-    }
-  };
-  
-  document.addEventListener('visibilitychange', visibilityHandler);
-  
-  // Store cleanup function for later use
-  planningTableInstance._cleanup = () => {
-    window.removeEventListener('resize', resizeHandler);
-    document.removeEventListener('visibilitychange', visibilityHandler);
-  };
-
-  planningPerformance.end('grid initialization');
-  
-  return planningTableInstance;
+    
+    // Start the chunked initialization
+    initializeInChunks().catch(error => {
+      console.error("Error in chunked initialization:", error);
+      resolve(null);
+    });
+  });
 }
 
 // Show Add Row Modal
@@ -1388,9 +1506,13 @@ function setupAddRowModalEvents() {
 
     // Scroll to the new row and make it visible
     setTimeout(() => {
-      if (newRow && newRow.scrollTo) {
-        newRow.scrollTo();
-        console.log("Scrolled to new planning row");
+      if (newRow && typeof newRow.scrollTo === 'function') {
+        try {
+          newRow.scrollTo();
+          console.log("Scrolled to new planning row");
+        } catch (e) {
+          console.warn("Could not scroll to new row:", e);
+        }
       }
     }, 100);
 
@@ -1431,27 +1553,38 @@ function setupPlanningSave(table, rows) {
   // Use the correct button ID from your HTML
   const saveBtn = document.getElementById("savePlanningRows");
   if (!saveBtn) return;
-  saveBtn.onclick = () => {
+  saveBtn.onclick = async () => {
     // Recalculate KPIs for all rows before saving
     const allRows = table.getData();
-    allRows.forEach((row) => {
-      if (typeof row.expectedLeads === "number") {
-        const kpiVals = kpis(row.expectedLeads);
-        let changed = false;
-        [
-          "mqlForecast",
-          "sqlForecast",
-          "oppsForecast",
-          "pipelineForecast",
-        ].forEach((field) => {
-          if (row[field] !== kpiVals[field]) {
-            row[field] = kpiVals[field];
-            changed = true;
-          }
-        });
-        if (changed) row.__modified = true;
+    
+    // Process KPI calculations in very small batches to prevent long tasks
+    for (let i = 0; i < allRows.length; i += 8) {
+      const batch = allRows.slice(i, i + 8);
+      
+      batch.forEach((row) => {
+        if (typeof row.expectedLeads === "number") {
+          const kpiVals = kpis(row.expectedLeads);
+          let changed = false;
+          [
+            "mqlForecast",
+            "sqlForecast",
+            "oppsForecast",
+            "pipelineForecast",
+          ].forEach((field) => {
+            if (row[field] !== kpiVals[field]) {
+              row[field] = kpiVals[field];
+              changed = true;
+            }
+          });
+          if (changed) row.__modified = true;
+        }
+      });
+      
+      // Yield control after each batch
+      if (i + 8 < allRows.length) {
+        await new Promise(resolve => setTimeout(resolve, 0));
       }
-    });
+    }
     // Save all planning data
     const data = table.getData();
 
@@ -1583,7 +1716,7 @@ document
         // Map CSV headers to table fields and clean up data in batches
         const mappedRows = [];
         
-        await processRowsInBatches(rows, 50, (row) => {
+        await processRowsInBatches(rows, 15, (row) => {
           const mappedRow = {};
 
           // Map column names from CSV to expected field names
@@ -1645,7 +1778,7 @@ document
         });
 
         // Process calculated fields in batches
-        await processRowsInBatches(mappedRows, 50, (row) => {
+        await processRowsInBatches(mappedRows, 15, (row) => {
           // Special logic for In-Account Events (1:1): no leads, pipeline = 20x forecasted cost
           if (row.programType === "In-Account Events (1:1)") {
             row.expectedLeads = 0;
@@ -1990,7 +2123,7 @@ function ensurePlanningGridVisible() {
       if (data && data.length > 0) {
         // Scroll to first row to ensure visibility
         setTimeout(() => {
-          planningTableInstance.scrollToRow(1, "top", false);
+          safeScrollToRow(planningTableInstance, 1, "top", false);
         }, 50);
       }
       
@@ -2221,14 +2354,17 @@ function getPlanningFilterValues() {
     digitalMotions: digitalMotionsActive,
   };
 
-  console.log(
-    "[Planning] getPlanningFilterValues - Digital Motions button state:",
-    {
-      element: !!digitalMotionsButton,
-      datasetActive: digitalMotionsButton?.dataset.active,
-      digitalMotionsActive,
-    },
-  );
+  // Only log filter values in debug mode (reduced console noise)
+  if (window.DEBUG_FILTERS) {
+    console.log(
+      "[Planning] getPlanningFilterValues - Digital Motions button state:",
+      {
+        element: !!digitalMotionsButton,
+        datasetActive: digitalMotionsButton?.dataset.active,
+        digitalMotionsActive,
+      },
+    );
+  }
 
   return filterValues;
 }

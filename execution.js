@@ -259,6 +259,20 @@ function initExecutionGrid(rows) {
     initialSort: [
       { column: "quarter", dir: "asc" }, // Sort by quarter for logical order
     ],
+    
+    // Add safer scroll configuration
+    scrollToRowIfVisible: false, // Prevent automatic scrolling issues
+    
+    // Add error handling for table operations
+    tableBuilt: function() {
+      setTimeout(() => {
+        try {
+          this.redraw(true);
+        } catch (e) {
+          console.warn("Error in execution table built callback:", e.message);
+        }
+      }, 100);
+    },
     rowFormatter: function (row) {
       // Visual indicator for shipped
       if (row.getData().status === "Shipped") {
