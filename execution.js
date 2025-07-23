@@ -1075,8 +1075,10 @@ function initializeExecutionUniversalSearch() {
     
     console.log("✅ EXECUTION: Universal search initialized successfully!");
     
-    // Update search data with current execution data
-    updateExecutionSearchData();
+    // Update search data with current execution data - add delay like planning module
+    setTimeout(() => {
+      updateExecutionSearchData();
+    }, 100);
     
   } catch (error) {
     console.error("❌ EXECUTION: Error initializing universal search:", error);
@@ -1092,6 +1094,14 @@ function updateExecutionSearchData() {
     return;
   }
   
+  // Additional debug check
+  if (typeof window.executionUniversalSearch.updateData !== 'function') {
+    console.error("❌ EXECUTION: Universal search exists but updateData is not a function");
+    console.log("EXECUTION: Available methods:", Object.getOwnPropertyNames(window.executionUniversalSearch));
+    console.log("EXECUTION: Constructor:", window.executionUniversalSearch.constructor.name);
+    return;
+  }
+  
   if (!executionTableInstance) {
     console.warn("⚠️ EXECUTION: Execution table instance not available yet");
     return;
@@ -1104,57 +1114,19 @@ function updateExecutionSearchData() {
       const executionData = executionTableInstance.getData();
       console.log("📈 EXECUTION: Processing", executionData.length, "execution records for search");
       
-      // Process all data at once but normalize quarters efficiently
-      const normalizedData = executionData.map(row => ({
+      // Process data the same way as planning.js - just normalize quarters
+      const searchData = executionData.map(row => ({
         ...row,
         quarter: normalizeQuarter(row.quarter)
       }));
       
-      // Create search data structure for universal search
-      const searchData = [];
-      normalizedData.forEach(row => {
-        // Add searchable fields to search data
-        if (row.region) {
-          searchData.push({ category: 'region', value: row.region, displayValue: row.region });
-        }
-        if (row.quarter) {
-          searchData.push({ category: 'quarter', value: row.quarter, displayValue: row.quarter });
-        }
-        if (row.status) {
-          searchData.push({ category: 'status', value: row.status, displayValue: row.status });
-        }
-        if (row.programType) {
-          searchData.push({ category: 'programType', value: row.programType, displayValue: row.programType });
-        }
-        if (row.strategicPillars) {
-          searchData.push({ category: 'strategicPillars', value: row.strategicPillars, displayValue: row.strategicPillars });
-        }
-        if (row.owner) {
-          searchData.push({ category: 'owner', value: row.owner, displayValue: row.owner });
-        }
-        if (row.description) {
-          searchData.push({ category: 'description', value: row.description, displayValue: row.description });
-        }
-      });
-      
-      // Remove duplicates from search data
-      const uniqueSearchData = [];
-      const seen = new Set();
-      searchData.forEach(item => {
-        const key = `${item.category}:${item.value}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          uniqueSearchData.push(item);
-        }
-      });
-      
       // Update universal search with processed data
-      window.executionUniversalSearch.updateData(uniqueSearchData);
+      window.executionUniversalSearch.updateData(searchData);
       
       const endTime = performance.now();
       const duration = endTime - startTime;
       console.log("✅ EXECUTION: Search data updated successfully in", duration.toFixed(2), "ms");
-      console.log("✅ EXECUTION: Created", uniqueSearchData.length, "unique search terms");
+      console.log("✅ EXECUTION: Updated search data for", searchData.length, "execution records");
       
     } catch (error) {
       console.error("❌ EXECUTION: Error updating search data:", error);
@@ -1277,34 +1249,33 @@ if (window.tabManager) {
   );
   console.log("✅ Execution tab registered with TabManager");
 } else {
-  console.warn("⚠️ TabManager not available, using direct initialization");
-  // Direct initialization if no tab manager - also optimized
-  const initializeWithIdleCallback = (callback) => {
-    if (window.requestIdleCallback) {
-      window.requestIdleCallback(callback, { timeout: 100 });
-    } else {
-      setTimeout(callback, 0);
-    }
-  };
+  // Fallback: Initialize when explicitly needed
+  console.log("🎯 TabManager not available, execution will initialize on demand");
   
-  initializeWithIdleCallback(() => {
-    if (!executionTableInstance) {
-      const emptyData = [];
-      initExecutionGrid(emptyData);
+  // Store fallback initialization function for later use
+  window.executionModule.initializeFallback = async () => {
+    try {
+      console.log("🔧 EXECUTION: Initializing via fallback...");
       
-      initializeWithIdleCallback(() => {
+      if (!executionTableInstance) {
+        const emptyData = [];
+        initExecutionGrid(emptyData);
         setupExecutionFilters();
         
+        // Sync data from planning if available
         if (window.planningModule?.tableInstance) {
-          initializeWithIdleCallback(() => {
-            syncDigitalMotionsFromPlanning();
-          });
+          syncDigitalMotionsFromPlanning();
         }
         
-        initializeWithIdleCallback(() => {
+        // Add a small delay to ensure DOM is ready
+        setTimeout(() => {
           initializeExecutionUniversalSearch();
-        });
-      });
+        }, 100);
+      }
+      
+      console.log("✅ Execution tab initialized via fallback");
+    } catch (error) {
+      console.error("❌ Failed to initialize execution tab:", error);
     }
-  });
+  };
 }
