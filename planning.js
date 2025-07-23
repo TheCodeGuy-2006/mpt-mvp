@@ -2516,7 +2516,25 @@ if (window.tabManager) {
   );
   console.log("✅ Planning tab registered with TabManager");
 } else {
-  console.warn("⚠️ TabManager not available, using direct initialization");
+  // Fallback: Initialize when explicitly needed
+  console.log("🎯 TabManager not available, planning will initialize on demand");
+  
+  // Store fallback initialization function for later use
+  window.planningModule.initializeFallback = async () => {
+    try {
+      await initPlanningGridLazy();
+      populatePlanningFilters();
+      
+      // Add a small delay to ensure DOM is ready
+      setTimeout(() => {
+        initializePlanningUniversalSearch();
+      }, 100);
+      
+      console.log("✅ Planning tab initialized via fallback");
+    } catch (error) {
+      console.error("❌ Failed to initialize planning tab:", error);
+    }
+  };
 }
 
 // Memory management and cleanup functions
