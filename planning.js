@@ -2848,12 +2848,15 @@ function applyPlanningSearchFilters(selectedFilters) {
       fiscalYear: []
     };
     
-    // Group selected filters by category
-    selectedFilters.forEach(filter => {
-      if (universalSearchFilters.hasOwnProperty(filter.category)) {
-        universalSearchFilters[filter.category].push(filter.value);
-      }
-    });
+    // selectedFilters is an object with categories as keys and arrays as values
+    // e.g., { region: ['SAARC'], status: ['Planning'] }
+    if (selectedFilters && typeof selectedFilters === 'object') {
+      Object.entries(selectedFilters).forEach(([category, values]) => {
+        if (universalSearchFilters.hasOwnProperty(category) && Array.isArray(values)) {
+          universalSearchFilters[category] = [...values];
+        }
+      });
+    }
     
     console.log("🔍 PLANNING: Universal search filters updated:", universalSearchFilters);
     
