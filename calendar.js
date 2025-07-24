@@ -340,6 +340,9 @@ function getCampaignData() {
 
 // Parse quarter to get month and year
 function parseQuarterToDate(quarter, fiscalYear) {
+  // Normalize quarter format - remove dashes to handle both "Q1 July" and "Q1 - July" formats
+  const normalizedQuarter = quarter ? quarter.replace(/\s*-\s*/g, ' ') : '';
+  
   const quarterMap = {
     "Q1 July": { month: 6, year: getFYStartYear(fiscalYear) }, // July (month 6, 0-indexed)
     "Q1 August": { month: 7, year: getFYStartYear(fiscalYear) }, // August
@@ -356,7 +359,7 @@ function parseQuarterToDate(quarter, fiscalYear) {
   };
 
   return (
-    quarterMap[quarter] || {
+    quarterMap[normalizedQuarter] || {
       month: new Date().getMonth(),
       year: new Date().getFullYear(),
     }
