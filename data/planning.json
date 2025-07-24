@@ -16,12 +16,12 @@
     "sqlForecast": 36,
     "oppsForecast": 29,
     "pipelineForecast": 1450000,
-    "mql": 60,
-    "sql": 36,
-    "opps": 29,
-    "pipeline": 1450000,
+    "mql": 180,
+    "sql": 45,
+    "opps": 7,
+    "pipeline": 350000,
     "id": "row_0_1752722417590",
-    "poRaised": "Yes",
+    "poRaised": "(Clear)",
     "__modified": true
   },
   {
@@ -41,10 +41,10 @@
     "sqlForecast": 2,
     "oppsForecast": 2,
     "pipelineForecast": 100000,
-    "mql": 3,
+    "mql": 9,
     "sql": 2,
-    "opps": 2,
-    "pipeline": 100000,
+    "opps": 0,
+    "pipeline": 0,
     "id": "row_1_1752722417590"
   },
   {
@@ -64,10 +64,10 @@
     "sqlForecast": 15,
     "oppsForecast": 12,
     "pipelineForecast": 600000,
-    "mql": 25,
-    "sql": 15,
-    "opps": 12,
-    "pipeline": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_2_1752722417590"
   },
   {
@@ -87,10 +87,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_3_1752722417590"
   },
   {
@@ -110,10 +110,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_4_1752722417590"
   },
   {
@@ -156,10 +156,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_6_1752722417590"
   },
   {
@@ -179,10 +179,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_7_1752722417590"
   },
   {
@@ -202,10 +202,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_8_1752722417590"
   },
   {
@@ -225,10 +225,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_9_1752722417590"
   },
   {
@@ -248,10 +248,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_10_1752722417590"
   },
   {
@@ -271,10 +271,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_11_1752722417590"
   },
   {
@@ -317,10 +317,10 @@
     "sqlForecast": 15,
     "oppsForecast": 12,
     "pipelineForecast": 600000,
-    "mql": 25,
-    "sql": 15,
-    "opps": 12,
-    "pipeline": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_13_1752722417590"
   },
   {
@@ -340,10 +340,10 @@
     "sqlForecast": 15,
     "oppsForecast": 12,
     "pipelineForecast": 600000,
-    "mql": 25,
-    "sql": 15,
-    "opps": 12,
-    "pipeline": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_14_1752722417590"
   },
   {
@@ -363,10 +363,10 @@
     "sqlForecast": 21,
     "oppsForecast": 17,
     "pipelineForecast": 850000,
-    "mql": 35,
-    "sql": 21,
-    "opps": 17,
-    "pipeline": 850000,
+    "mql": 105,
+    "sql": 26,
+    "opps": 4,
+    "pipeline": 200000,
     "id": "row_15_1752722417590"
   },
   {
@@ -409,10 +409,10 @@
     "sqlForecast": 2,
     "oppsForecast": 2,
     "pipelineForecast": 100000,
-    "mql": 3,
+    "mql": 9,
     "sql": 2,
-    "opps": 2,
-    "pipeline": 100000,
+    "opps": 0,
+    "pipeline": 0,
     "id": "row_17_1752722417590"
   },
   {
@@ -432,10 +432,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_18_1752722417590"
   },
   {
@@ -455,10 +455,10 @@
     "sqlForecast": 15,
     "oppsForecast": 12,
     "pipelineForecast": 600000,
-    "mql": 25,
-    "sql": 15,
-    "opps": 12,
-    "pipeline": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_19_1752722417590"
   },
   {
@@ -478,10 +478,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_20_1752722417590"
   },
   {
@@ -501,10 +501,10 @@
     "sqlForecast": 5,
     "oppsForecast": 4,
     "pipelineForecast": 200000,
-    "mql": 8,
-    "sql": 5,
-    "opps": 4,
-    "pipeline": 200000,
+    "mql": 24,
+    "sql": 6,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_21_1752722417590"
   },
   {
@@ -524,10 +524,10 @@
     "sqlForecast": 15,
     "oppsForecast": 12,
     "pipelineForecast": 600000,
-    "mql": 25,
-    "sql": 15,
-    "opps": 12,
-    "pipeline": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_22_1752722417590"
   },
   {
@@ -547,10 +547,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_23_1752722417590"
   },
   {
@@ -570,10 +570,10 @@
     "sqlForecast": 3,
     "oppsForecast": 2,
     "pipelineForecast": 100000,
-    "mql": 5,
-    "sql": 3,
-    "opps": 2,
-    "pipeline": 100000,
+    "mql": 15,
+    "sql": 4,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_24_1752722417590"
   },
   {
@@ -593,10 +593,10 @@
     "sqlForecast": 2,
     "oppsForecast": 2,
     "pipelineForecast": 100000,
-    "mql": 3,
+    "mql": 9,
     "sql": 2,
-    "opps": 2,
-    "pipeline": 100000,
+    "opps": 0,
+    "pipeline": 0,
     "id": "row_25_1752722417590"
   },
   {
@@ -616,10 +616,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_26_1752722417590"
   },
   {
@@ -639,10 +639,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_27_1752722417590"
   },
   {
@@ -662,10 +662,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_28_1752722417590"
   },
   {
@@ -685,10 +685,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_29_1752722417590"
   },
   {
@@ -1076,10 +1076,10 @@
     "sqlForecast": 36,
     "oppsForecast": 29,
     "pipelineForecast": 1450000,
-    "mql": 60,
-    "sql": 36,
-    "opps": 29,
-    "pipeline": 1450000,
+    "mql": 180,
+    "sql": 45,
+    "opps": 7,
+    "pipeline": 350000,
     "id": "row_46_1752722417590"
   },
   {
@@ -1168,10 +1168,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_50_1752722417590"
   },
   {
@@ -1191,10 +1191,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_51_1752722417590"
   },
   {
@@ -1214,10 +1214,10 @@
     "sqlForecast": 5,
     "oppsForecast": 4,
     "pipelineForecast": 200000,
-    "mql": 8,
-    "sql": 5,
-    "opps": 4,
-    "pipeline": 200000,
+    "mql": 24,
+    "sql": 6,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_52_1752722417590"
   },
   {
@@ -1260,10 +1260,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_54_1752722417590"
   },
   {
@@ -1283,10 +1283,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 21,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 62,
+    "sql": 16,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_55_1752722417590"
   },
   {
@@ -1306,10 +1306,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_56_1752722417590"
   },
   {
@@ -1329,10 +1329,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_57_1752722417590"
   },
   {
@@ -1352,10 +1352,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_58_1752722417590"
   },
   {
@@ -1375,10 +1375,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_59_1752722417590"
   },
   {
@@ -1398,10 +1398,10 @@
     "sqlForecast": 15,
     "oppsForecast": 12,
     "pipelineForecast": 600000,
-    "mql": 25,
-    "sql": 15,
-    "opps": 12,
-    "pipeline": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_60_1752722417590"
   },
   {
@@ -1421,10 +1421,10 @@
     "sqlForecast": 15,
     "oppsForecast": 12,
     "pipelineForecast": 600000,
-    "mql": 25,
-    "sql": 15,
-    "opps": 12,
-    "pipeline": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_61_1752722417590"
   },
   {
@@ -1444,10 +1444,10 @@
     "sqlForecast": 15,
     "oppsForecast": 12,
     "pipelineForecast": 600000,
-    "mql": 25,
-    "sql": 15,
-    "opps": 12,
-    "pipeline": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_62_1752722417590"
   },
   {
@@ -1467,10 +1467,10 @@
     "sqlForecast": 2,
     "oppsForecast": 2,
     "pipelineForecast": 100000,
-    "mql": 3,
+    "mql": 9,
     "sql": 2,
-    "opps": 2,
-    "pipeline": 100000,
+    "opps": 0,
+    "pipeline": 0,
     "id": "row_63_1752722417590"
   },
   {
@@ -1490,10 +1490,10 @@
     "sqlForecast": 2,
     "oppsForecast": 2,
     "pipelineForecast": 100000,
-    "mql": 3,
+    "mql": 9,
     "sql": 2,
-    "opps": 2,
-    "pipeline": 100000,
+    "opps": 0,
+    "pipeline": 0,
     "id": "row_64_1752722417590"
   },
   {
@@ -1513,10 +1513,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_65_1752722417590"
   },
   {
@@ -1536,10 +1536,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_66_1752722417590"
   },
   {
@@ -1604,10 +1604,10 @@
     "sqlForecast": 5,
     "oppsForecast": 4,
     "pipelineForecast": 200000,
-    "mql": 8,
-    "sql": 5,
-    "opps": 4,
-    "pipeline": 200000,
+    "mql": 24,
+    "sql": 6,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_69_1752722417590"
   },
   {
@@ -1627,10 +1627,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 21,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 62,
+    "sql": 16,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_70_1752722417590"
   },
   {
@@ -1650,10 +1650,10 @@
     "sqlForecast": 15,
     "oppsForecast": 12,
     "pipelineForecast": 600000,
-    "mql": 25,
-    "sql": 15,
-    "opps": 12,
-    "pipeline": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_71_1752722417590"
   },
   {
@@ -1673,10 +1673,10 @@
     "sqlForecast": 15,
     "oppsForecast": 12,
     "pipelineForecast": 600000,
-    "mql": 25,
-    "sql": 15,
-    "opps": 12,
-    "pipeline": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_72_1752722417590"
   },
   {
@@ -1719,10 +1719,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_74_1752722417590"
   },
   {
@@ -1742,10 +1742,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_75_1752722417590"
   },
   {
@@ -1765,10 +1765,10 @@
     "sqlForecast": 4,
     "oppsForecast": 3,
     "pipelineForecast": 150000,
-    "mql": 7,
-    "sql": 4,
-    "opps": 3,
-    "pipeline": 150000,
+    "mql": 21,
+    "sql": 5,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_76_1752722417590"
   },
   {
@@ -1788,10 +1788,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_77_1752722417590"
   },
   {
@@ -1811,10 +1811,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_78_1752722417590"
   },
   {
@@ -1834,10 +1834,10 @@
     "sqlForecast": 1,
     "oppsForecast": 1,
     "pipelineForecast": 50000,
-    "mql": 2,
-    "sql": 1,
-    "opps": 1,
-    "pipeline": 50000,
+    "mql": 6,
+    "sql": 2,
+    "opps": 0,
+    "pipeline": 0,
     "id": "row_79_1752722417590"
   },
   {
@@ -1857,10 +1857,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_80_1752722417590"
   },
   {
@@ -1880,10 +1880,10 @@
     "sqlForecast": 1,
     "oppsForecast": 1,
     "pipelineForecast": 50000,
-    "mql": 2,
-    "sql": 1,
-    "opps": 1,
-    "pipeline": 50000,
+    "mql": 6,
+    "sql": 2,
+    "opps": 0,
+    "pipeline": 0,
     "id": "row_81_1752722417590"
   },
   {
@@ -1903,10 +1903,10 @@
     "sqlForecast": 11,
     "oppsForecast": 9,
     "pipelineForecast": 450000,
-    "mql": 18,
-    "sql": 11,
-    "opps": 9,
-    "pipeline": 450000,
+    "mql": 54,
+    "sql": 14,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_82_1752722417590"
   },
   {
@@ -1926,10 +1926,10 @@
     "sqlForecast": 1,
     "oppsForecast": 1,
     "pipelineForecast": 50000,
-    "mql": 2,
-    "sql": 1,
-    "opps": 1,
-    "pipeline": 50000,
+    "mql": 6,
+    "sql": 2,
+    "opps": 0,
+    "pipeline": 0,
     "id": "row_83_1752722417590"
   },
   {
@@ -1949,10 +1949,10 @@
     "sqlForecast": 30,
     "oppsForecast": 24,
     "pipelineForecast": 1200000,
-    "mql": 50,
-    "sql": 30,
-    "opps": 24,
-    "pipeline": 1200000,
+    "mql": 150,
+    "sql": 38,
+    "opps": 6,
+    "pipeline": 300000,
     "id": "row_84_1752722417590"
   },
   {
@@ -1972,10 +1972,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_85_1752722417590"
   },
   {
@@ -1995,10 +1995,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_86_1752722417590"
   },
   {
@@ -2018,10 +2018,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_87_1752722417590"
   },
   {
@@ -2041,10 +2041,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_88_1752722417590"
   },
   {
@@ -2064,10 +2064,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_89_1752722417590"
   },
   {
@@ -2087,10 +2087,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_90_1752722417590"
   },
   {
@@ -2110,10 +2110,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_91_1752722417590"
   },
   {
@@ -2133,10 +2133,10 @@
     "sqlForecast": 11,
     "oppsForecast": 9,
     "pipelineForecast": 450000,
-    "mql": 18,
-    "sql": 11,
-    "opps": 9,
-    "pipeline": 450000,
+    "mql": 54,
+    "sql": 14,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_92_1752722417590"
   },
   {
@@ -2156,10 +2156,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_93_1752722417590"
   },
   {
@@ -2179,10 +2179,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_94_1752722417590"
   },
   {
@@ -2202,10 +2202,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_95_1752722417590"
   },
   {
@@ -2225,10 +2225,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_96_1752722417590"
   },
   {
@@ -2248,10 +2248,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_97_1752722417590"
   },
   {
@@ -2271,10 +2271,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_98_1752722417590"
   },
   {
@@ -2294,10 +2294,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_99_1752722417590"
   },
   {
@@ -2317,10 +2317,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_100_1752722417590"
   },
   {
@@ -2340,10 +2340,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_101_1752722417590"
   },
   {
@@ -2363,10 +2363,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_102_1752722417590"
   },
   {
@@ -2386,10 +2386,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_103_1752722417590"
   },
   {
@@ -2409,10 +2409,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_104_1752722417590"
   },
   {
@@ -2432,10 +2432,10 @@
     "sqlForecast": 18,
     "oppsForecast": 14,
     "pipelineForecast": 700000,
-    "mql": 30,
-    "sql": 18,
-    "opps": 14,
-    "pipeline": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
     "id": "row_105_1752722417590"
   },
   {
@@ -2455,10 +2455,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_106_1752722417590"
   },
   {
@@ -2478,10 +2478,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_107_1752722417590"
   },
   {
@@ -2501,10 +2501,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_108_1752722417590"
   },
   {
@@ -2524,10 +2524,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_109_1752722417590"
   },
   {
@@ -2547,10 +2547,10 @@
     "sqlForecast": 9,
     "oppsForecast": 7,
     "pipelineForecast": 350000,
-    "mql": 15,
-    "sql": 9,
-    "opps": 7,
-    "pipeline": 350000,
+    "mql": 45,
+    "sql": 11,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_110_1752722417590"
   },
   {
@@ -2570,10 +2570,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_111_1752722417590"
   },
   {
@@ -2593,10 +2593,10 @@
     "sqlForecast": 12,
     "oppsForecast": 10,
     "pipelineForecast": 500000,
-    "mql": 20,
-    "sql": 12,
-    "opps": 10,
-    "pipeline": 500000,
+    "mql": 60,
+    "sql": 15,
+    "opps": 2,
+    "pipeline": 100000,
     "id": "row_112_1752722417590"
   },
   {
@@ -2616,10 +2616,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_113_1752722417590"
   },
   {
@@ -2639,10 +2639,10 @@
     "sqlForecast": 6,
     "oppsForecast": 5,
     "pipelineForecast": 250000,
-    "mql": 10,
-    "sql": 6,
-    "opps": 5,
-    "pipeline": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
     "id": "row_114_1752722417590"
   },
   {
@@ -2661,7 +2661,12 @@
     "mqlForecast": 35,
     "sqlForecast": 21,
     "oppsForecast": 17,
-    "pipelineForecast": 850000
+    "pipelineForecast": 850000,
+    "mql": 105,
+    "sql": 26,
+    "opps": 4,
+    "pipeline": 200000,
+    "id": "row_115_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -2679,7 +2684,12 @@
     "mqlForecast": 8,
     "sqlForecast": 5,
     "oppsForecast": 4,
-    "pipelineForecast": 200000
+    "pipelineForecast": 200000,
+    "mql": 24,
+    "sql": 6,
+    "opps": 1,
+    "pipeline": 50000,
+    "id": "row_116_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -2697,7 +2707,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_117_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -2715,7 +2730,12 @@
     "mqlForecast": 8,
     "sqlForecast": 5,
     "oppsForecast": 4,
-    "pipelineForecast": 200000
+    "pipelineForecast": 200000,
+    "mql": 24,
+    "sql": 6,
+    "opps": 1,
+    "pipeline": 50000,
+    "id": "row_118_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -2733,7 +2753,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_119_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -2751,7 +2776,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_120_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -2769,7 +2799,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_121_1753352703039"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2787,7 +2822,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
+    "id": "row_122_1753352703039"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2805,7 +2845,12 @@
     "mqlForecast": 200,
     "sqlForecast": 120,
     "oppsForecast": 96,
-    "pipelineForecast": 4800000
+    "pipelineForecast": 4800000,
+    "mql": 600,
+    "sql": 150,
+    "opps": 23,
+    "pipeline": 1150000,
+    "id": "row_123_1753352703039"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2823,7 +2868,12 @@
     "mqlForecast": 22,
     "sqlForecast": 13,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 67,
+    "sql": 17,
+    "opps": 3,
+    "pipeline": 150000,
+    "id": "row_124_1753352703039"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2841,7 +2891,12 @@
     "mqlForecast": 10,
     "sqlForecast": 6,
     "oppsForecast": 5,
-    "pipelineForecast": 250000
+    "pipelineForecast": 250000,
+    "mql": 30,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000,
+    "id": "row_125_1753352703039"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2859,7 +2914,12 @@
     "mqlForecast": 200,
     "sqlForecast": 120,
     "oppsForecast": 96,
-    "pipelineForecast": 4800000
+    "pipelineForecast": 4800000,
+    "mql": 600,
+    "sql": 150,
+    "opps": 23,
+    "pipeline": 1150000,
+    "id": "row_126_1753352703039"
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2877,7 +2937,12 @@
     "mqlForecast": 22,
     "sqlForecast": 13,
     "oppsForecast": 10,
-    "pipelineForecast": 500000
+    "pipelineForecast": 500000,
+    "mql": 67,
+    "sql": 17,
+    "opps": 3,
+    "pipeline": 150000,
+    "id": "row_127_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -2895,7 +2960,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
+    "id": "row_128_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -2913,7 +2983,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_129_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -2931,7 +3006,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 150,
+    "sql": 38,
+    "opps": 6,
+    "pipeline": 300000,
+    "id": "row_130_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -2949,7 +3029,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
+    "id": "row_131_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -2967,7 +3052,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_132_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -2985,7 +3075,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 150,
+    "sql": 38,
+    "opps": 6,
+    "pipeline": 300000,
+    "id": "row_133_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -3003,7 +3098,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_134_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -3021,7 +3121,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_135_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -3039,7 +3144,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
+    "id": "row_136_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -3057,7 +3167,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_137_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -3075,7 +3190,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 150,
+    "sql": 38,
+    "opps": 6,
+    "pipeline": 300000,
+    "id": "row_138_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -3093,7 +3213,12 @@
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
-    "pipelineForecast": 600000
+    "pipelineForecast": 600000,
+    "mql": 75,
+    "sql": 19,
+    "opps": 3,
+    "pipeline": 150000,
+    "id": "row_139_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -3111,7 +3236,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_140_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -3129,7 +3259,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 150,
+    "sql": 38,
+    "opps": 6,
+    "pipeline": 300000,
+    "id": "row_141_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -3147,7 +3282,12 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_142_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -3165,7 +3305,12 @@
     "mqlForecast": 50,
     "sqlForecast": 30,
     "oppsForecast": 24,
-    "pipelineForecast": 1200000
+    "pipelineForecast": 1200000,
+    "mql": 150,
+    "sql": 38,
+    "opps": 6,
+    "pipeline": 300000,
+    "id": "row_143_1753352703039"
   },
   {
     "programType": "Operational/Infrastructure/Swag",
@@ -3183,7 +3328,8 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "id": "row_144_1753352703039"
   },
   {
     "programType": "Operational/Infrastructure/Swag",
@@ -3201,7 +3347,8 @@
     "mqlForecast": 0,
     "sqlForecast": 0,
     "oppsForecast": 0,
-    "pipelineForecast": 0
+    "pipelineForecast": 0,
+    "id": "row_145_1753352703039"
   },
   {
     "programType": "User Groups",
@@ -3219,7 +3366,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
+    "id": "row_146_1753352703039"
   },
   {
     "programType": "Webinars",
@@ -3237,7 +3389,12 @@
     "mqlForecast": 30,
     "sqlForecast": 18,
     "oppsForecast": 14,
-    "pipelineForecast": 700000
+    "pipelineForecast": 700000,
+    "mql": 90,
+    "sql": 23,
+    "opps": 3,
+    "pipeline": 150000,
+    "id": "row_147_1753352703039"
   },
   {
     "programType": "Localized Programs",
@@ -3255,6 +3412,11 @@
     "mqlForecast": 40,
     "sqlForecast": 24,
     "oppsForecast": 19,
-    "pipelineForecast": 950000
+    "pipelineForecast": 950000,
+    "mql": 120,
+    "sql": 30,
+    "opps": 5,
+    "pipeline": 250000,
+    "id": "row_148_1753352703039"
   }
 ]
