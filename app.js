@@ -53,6 +53,22 @@ if (typeof window !== 'undefined') {
   // Copy static methods
   Object.setPrototypeOf(window.Promise, OriginalPromise);
   Object.setPrototypeOf(window.Promise.prototype, OriginalPromise.prototype);
+  
+  // Override addEventListener to make wheel events passive by default for better scroll performance
+  const originalAddEventListener = EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (type === 'wheel' || type === 'mousewheel' || type === 'DOMMouseScroll') {
+      // Force passive for wheel events to improve scroll performance
+      if (typeof options === 'boolean') {
+        options = { capture: options, passive: true };
+      } else if (typeof options === 'object' && options !== null) {
+        options = { ...options, passive: true };
+      } else {
+        options = { passive: true };
+      }
+    }
+    return originalAddEventListener.call(this, type, listener, options);
+  };
 }
 
 // These constants will be available from the planning module once it loads

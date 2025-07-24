@@ -260,9 +260,13 @@ function initExecutionGrid(rows) {
         // Reduce column calculations
         columnCalcs: false,
         
-        // Improve scroll performance
+        // Fix scroll performance issues - disable problematic scroll features
         scrollToRowPosition: "top",
         scrollToColumnPosition: "left",
+        scrollToRowIfVisible: false,
+        
+        // Disable wheel event handling that causes passive listener warnings
+        wheelScrollSpeed: 0, // Disable wheel scrolling in tabulator
       };
 
       // Yield control after config preparation
@@ -277,9 +281,10 @@ function initExecutionGrid(rows) {
         selectableRows: 1,
         layout: "fitColumns",
         ...performanceConfig,
-        initialSort: [
-          { column: "quarter", dir: "asc" }, // Sort by quarter for logical order
-    ],
+        // Remove initial sort as quarter column doesn't exist as a separate field
+        // initialSort: [
+        //   { column: "quarter", dir: "asc" }, // Sort by quarter for logical order
+        // ],
     
     // Add safer scroll configuration
     scrollToRowIfVisible: false, // Prevent automatic scrolling issues

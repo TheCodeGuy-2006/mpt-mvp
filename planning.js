@@ -677,6 +677,14 @@ function initPlanningGrid(rows) {
         responsiveLayout: false, // Disable to allow horizontal scrolling
         invalidOptionWarnings: false,
         
+        // Fix scroll performance issues - disable problematic scroll features
+        scrollToRowPosition: "top",
+        scrollToColumnPosition: "left", 
+        scrollToRowIfVisible: false,
+        
+        // Disable wheel event handling that causes passive listener warnings
+        wheelScrollSpeed: 0, // Disable wheel scrolling in tabulator
+        
         // Enable proper data loading indicators
         dataLoaderLoading: "<div style='padding:20px; text-align:center;'>Loading...</div>",
         dataLoaderError: "<div style='padding:20px; text-align:center; color:red;'>Error loading data</div>",
@@ -710,9 +718,10 @@ function initPlanningGrid(rows) {
         reactiveData: true,
         selectableRows: 1,
         layout: "fitData",
-        initialSort: [
-          { column: "quarter", dir: "asc" },
-        ],
+        // Remove initial sort - will add after columns are created
+        // initialSort: [
+        //   { column: "quarter", dir: "asc" },
+        // ],
         
         // Apply performance optimizations
         ...performanceConfig,
@@ -1127,6 +1136,16 @@ function initPlanningGrid(rows) {
       };
 
       planningPerformance.end('grid initialization');
+      
+      // Apply initial sort after all columns are added
+      try {
+        if (planningTableInstance && planningTableInstance.getColumns().length > 0) {
+          planningTableInstance.setSort([{ column: "quarter", dir: "asc" }]);
+          console.log("✅ Planning grid: Initial sort applied");
+        }
+      } catch (e) {
+        console.warn("Planning grid: Could not apply initial sort:", e.message);
+      }
       
       resolve(planningTableInstance);
     };
