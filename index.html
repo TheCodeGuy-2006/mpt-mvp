@@ -467,21 +467,33 @@
             <div class="password-modal-content">
               <h3>� GitHub Sync Authentication</h3>
               <p>Enter administrator password to access GitHub sync features</p>
-              <input
-                id="githubSyncPasswordInput"
-                type="password"
-                class="password-modal-input"
-                placeholder="Enter password..."
-              />
-              <div class="password-modal-error" id="githubSyncPasswordError"></div>
-              <div class="password-modal-buttons">
-                <button id="githubSyncPasswordSubmit" class="password-modal-button primary">
-                  Unlock Access
-                </button>
-                <button id="githubSyncPasswordCancel" class="password-modal-button secondary">
-                  Cancel
-                </button>
-              </div>
+              <form id="githubSyncPasswordForm">
+                <input
+                  type="text"
+                  name="username"
+                  autocomplete="username"
+                  style="display: none;"
+                  value="admin"
+                  readonly
+                />
+                <input
+                  id="githubSyncPasswordInput"
+                  type="password"
+                  name="password"
+                  class="password-modal-input"
+                  placeholder="Enter password..."
+                  autocomplete="current-password"
+                />
+                <div class="password-modal-error" id="githubSyncPasswordError"></div>
+                <div class="password-modal-buttons">
+                  <button type="submit" id="githubSyncPasswordSubmit" class="password-modal-button primary">
+                    Unlock Access
+                  </button>
+                  <button type="button" id="githubSyncPasswordCancel" class="password-modal-button secondary">
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -519,21 +531,33 @@
         <div class="password-modal-content">
           <h3>💰 Unlock Annual Budget</h3>
           <p>Enter password to edit the annual budget plan</p>
-          <input
-            id="annualBudgetPasswordInput"
-            type="password"
-            class="password-modal-input"
-            placeholder="Enter password..."
-          />
-          <div class="password-modal-error" id="annualBudgetPasswordError"></div>
-          <div class="password-modal-buttons">
-            <button id="annualBudgetPasswordSubmit" class="password-modal-button primary">
-              Unlock Editing
-            </button>
-            <button id="annualBudgetPasswordCancel" class="password-modal-button secondary">
-              Cancel
-            </button>
-          </div>
+          <form id="annualBudgetPasswordForm">
+            <input
+              type="text"
+              name="username"
+              autocomplete="username"
+              style="display: none;"
+              value="admin"
+              readonly
+            />
+            <input
+              id="annualBudgetPasswordInput"
+              type="password"
+              name="password"
+              class="password-modal-input"
+              placeholder="Enter password..."
+              autocomplete="current-password"
+            />
+            <div class="password-modal-error" id="annualBudgetPasswordError"></div>
+            <div class="password-modal-buttons">
+              <button type="submit" id="annualBudgetPasswordSubmit" class="password-modal-button primary">
+                Unlock Editing
+              </button>
+              <button type="button" id="annualBudgetPasswordCancel" class="password-modal-button secondary">
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </section>

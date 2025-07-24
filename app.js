@@ -1087,22 +1087,27 @@ let githubSyncUnlocked = false;
 
 function showGithubSyncPasswordModal(callback) {
   const modal = document.getElementById("githubSyncPasswordModal");
+  const form = document.getElementById("githubSyncPasswordForm");
   const input = document.getElementById("githubSyncPasswordInput");
   const error = document.getElementById("githubSyncPasswordError");
   const submit = document.getElementById("githubSyncPasswordSubmit");
   const cancel = document.getElementById("githubSyncPasswordCancel");
-  if (!modal || !input || !submit || !cancel) return;
+  if (!modal || !form || !input || !submit || !cancel) return;
+  
   error.textContent = "";
   input.value = "";
   modal.style.display = "flex";
   input.focus();
+  
   function closeModal() {
     modal.style.display = "none";
-    submit.onclick = null;
+    form.onsubmit = null;
     cancel.onclick = null;
     input.onkeydown = null;
   }
-  submit.onclick = function () {
+  
+  form.onsubmit = function (e) {
+    e.preventDefault(); // Prevent actual form submission
     if (input.value === "git") {
       githubSyncUnlocked = true;
       closeModal();
@@ -1118,12 +1123,13 @@ function showGithubSyncPasswordModal(callback) {
       input.focus();
     }
   };
+  
   cancel.onclick = function () {
     closeModal();
     callback(false);
   };
+  
   input.onkeydown = function (e) {
-    if (e.key === "Enter") submit.onclick();
     if (e.key === "Escape") cancel.onclick();
   };
 }

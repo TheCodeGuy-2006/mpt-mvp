@@ -305,22 +305,27 @@ let annualBudgetUnlocked = false;
 
 function showAnnualBudgetPasswordModal(callback) {
   const modal = document.getElementById("annualBudgetPasswordModal");
+  const form = document.getElementById("annualBudgetPasswordForm");
   const input = document.getElementById("annualBudgetPasswordInput");
   const error = document.getElementById("annualBudgetPasswordError");
   const submit = document.getElementById("annualBudgetPasswordSubmit");
   const cancel = document.getElementById("annualBudgetPasswordCancel");
-  if (!modal || !input || !submit || !cancel) return;
+  if (!modal || !form || !input || !submit || !cancel) return;
+  
   error.textContent = "";
   input.value = "";
   modal.style.display = "flex";
   input.focus();
+  
   function closeModal() {
     modal.style.display = "none";
-    submit.onclick = null;
+    form.onsubmit = null;
     cancel.onclick = null;
     input.onkeydown = null;
   }
-  submit.onclick = function () {
+  
+  form.onsubmit = function (e) {
+    e.preventDefault(); // Prevent actual form submission
     if (input.value === "git") {
       annualBudgetUnlocked = true;
       closeModal();
@@ -331,12 +336,13 @@ function showAnnualBudgetPasswordModal(callback) {
       input.focus();
     }
   };
+  
   cancel.onclick = function () {
     closeModal();
     callback(false);
   };
+  
   input.onkeydown = function (e) {
-    if (e.key === "Enter") submit.onclick();
     if (e.key === "Escape") cancel.onclick();
   };
 }
