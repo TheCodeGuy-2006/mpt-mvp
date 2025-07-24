@@ -11,7 +11,7 @@
     "description": "AOAI Dev Day",
     "forecastedCost": 7143,
     "expectedLeads": 600,
-    "status": "Planning",
+    "status": "Shipped",
     "mqlForecast": 60,
     "sqlForecast": 36,
     "oppsForecast": 29,
@@ -335,7 +335,7 @@
     "description": "DevOps Confex and Awards, Delhi",
     "forecastedCost": 10000,
     "expectedLeads": 250,
-    "status": "Planning",
+    "status": "Shipped",
     "mqlForecast": 25,
     "sqlForecast": 15,
     "oppsForecast": 12,
@@ -344,7 +344,9 @@
     "sql": 19,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_14_1752722417590"
+    "id": "row_14_1752722417590",
+    "actualLeads": 318,
+    "__modified": true
   },
   {
     "programType": "3P Sponsored Events",
@@ -1585,7 +1587,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_68_1752722417590"
+    "id": "row_68_1752722417590",
+    "poRaised": "Yes",
+    "__modified": true
   },
   {
     "programType": "Lunch & Learns and Workshops (1:few)",
