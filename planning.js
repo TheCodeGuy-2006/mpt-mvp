@@ -20,37 +20,61 @@ function safeScrollToRow(table, rowIdentifier, position = "top", ifVisible = fal
       return false;
     }
     
-    // If rowIdentifier is a number, use the first row instead
+    // More robust row identification
     let targetRow = rowIdentifier;
     if (typeof rowIdentifier === 'number') {
-      // Use the actual first row object, not an index
+      // Validate the index is within bounds
+      if (rowIdentifier <= data.length && rowIdentifier > 0) {
+        targetRow = data[rowIdentifier - 1]; // Convert to 0-based index
+      } else {
+        // Fallback to first row if index is out of bounds
+        targetRow = data[0];
+      }
+    }
+    
+    // Verify the target row still exists
+    if (!targetRow || typeof targetRow !== 'object') {
+      console.warn("Invalid target row, using first available row");
       targetRow = data[0];
     }
     
-    // Additional check to ensure targetRow exists
-    if (!targetRow) {
-      console.warn("Target row not found for scrolling");
+    // Check if the row actually exists in the current table state
+    const tableRows = table.getRows();
+    const rowExists = tableRows.some(row => {
+      try {
+        const rowData = row.getData();
+        return rowData === targetRow;
+      } catch (e) {
+        return false;
+      }
+    });
+    
+    if (!rowExists) {
+      console.warn("Target row no longer exists in table, scrolling to top");
+      if (typeof table.scrollToPosition === 'function') {
+        table.scrollToPosition(0, 0, false);
+        return true;
+      }
       return false;
     }
     
-    // Wrap in additional try-catch for the actual scroll operation
+    // Perform the scroll operation
+    table.scrollToRow(targetRow, position, ifVisible);
+    return true;
+    
+  } catch (scrollError) {
+    console.warn("Scroll operation failed:", scrollError.message);
+    
+    // Fallback to position-based scrolling
     try {
-      table.scrollToRow(targetRow, position, ifVisible);
-      return true;
-    } catch (scrollError) {
-      // If direct scroll fails, try alternative approach
-      console.warn("Direct scroll failed, trying alternative:", scrollError.message);
-      
-      // Try scrolling to top instead as fallback
       if (typeof table.scrollToPosition === 'function') {
-        table.scrollToPosition(0, 0);
+        table.scrollToPosition(0, 0, false);
         return true;
       }
-      
-      return false;
+    } catch (fallbackError) {
+      console.warn("Fallback scroll also failed:", fallbackError.message);
     }
-  } catch (error) {
-    console.warn("Error in safe scroll operation:", error.message);
+    
     return false;
   }
 }
@@ -650,9 +674,9 @@ function initPlanningGrid(rows) {
       const yieldToMain = () => new Promise(resolve => {
         // Use requestIdleCallback if available, otherwise setTimeout
         if (window.requestIdleCallback) {
-          requestIdleCallback(resolve, { timeout: 16 });
+          requestIdleCallback(resolve, { timeout: 5 }); // Much shorter timeout
         } else {
-          setTimeout(resolve, 16); // One frame yield
+          setTimeout(resolve, 5); // Much shorter timeout for immediate yielding
         }
       });
       
@@ -733,27 +757,55 @@ function initPlanningGrid(rows) {
         
         // Add table built callback to ensure proper rendering
         tableBuilt: function() {
-          setTimeout(() => {
-            try {
-              this.redraw(true);
-              
-              setTimeout(() => {
-                if (this.getData().length > 0 && this.element && this.element.offsetParent) {
-                  safeScrollToRow(this, 1, "top", false);
+          // Use requestIdleCallback for non-blocking redraw
+          const scheduleRedraw = () => {
+            if (window.requestIdleCallback) {
+              requestIdleCallback(() => {
+                try {
+                  this.redraw(false); // Use false for non-blocking redraw
+                  
+                  // Schedule scroll with even lower priority
+                  requestIdleCallback(() => {
+                    if (this.getData().length > 0 && this.element && this.element.offsetParent) {
+                      safeScrollToRow(this, 1, "top", false);
+                    }
+                  }, { timeout: 100 });
+                } catch (e) {
+                  console.warn("Error in tableBuilt callback:", e.message);
                 }
-              }, 50);
-            } catch (e) {
-              console.warn("Error in tableBuilt callback:", e.message);
+              }, { timeout: 50 });
+            } else {
+              // Fallback to setTimeout with smaller delay
+              setTimeout(() => {
+                try {
+                  this.redraw(false);
+                  setTimeout(() => {
+                    if (this.getData().length > 0 && this.element && this.element.offsetParent) {
+                      safeScrollToRow(this, 1, "top", false);
+                    }
+                  }, 25);
+                } catch (e) {
+                  console.warn("Error in tableBuilt callback:", e.message);
+                }
+              }, 25);
             }
-          }, 150);
+          };
+          scheduleRedraw();
         },
         
         // Add data loaded callback
         dataLoaded: function(data) {
           console.log(`Planning grid loaded with ${data.length} rows`);
-          setTimeout(() => {
-            this.redraw(true);
-          }, 50);
+          // Use requestIdleCallback for non-blocking redraw
+          if (window.requestIdleCallback) {
+            requestIdleCallback(() => {
+              this.redraw(false); // Use false for non-blocking redraw
+            }, { timeout: 50 });
+          } else {
+            setTimeout(() => {
+              this.redraw(false);
+            }, 25);
+          }
         },
         
         // Columns will be added in next chunk
@@ -796,7 +848,16 @@ function initPlanningGrid(rows) {
             cellClick: function (e, cell) {
               const row = cell.getRow();
               row.getElement().classList.toggle("row-selected");
-              cell.getTable().redraw(true);
+              // Use non-blocking redraw
+              if (window.requestIdleCallback) {
+                requestIdleCallback(() => {
+                  cell.getTable().redraw(false);
+                }, { timeout: 50 });
+              } else {
+                setTimeout(() => {
+                  cell.getTable().redraw(false);
+                }, 10);
+              }
             },
             headerSort: false,
           },
@@ -1057,8 +1118,8 @@ function initPlanningGrid(rows) {
           },
         ];
         
-        // Add columns in batches to prevent long tasks
-        const batchSize = 3;
+        // Add columns in very small batches to prevent long tasks
+        const batchSize = 2; // Reduced from 3 to prevent long tasks
         for (let i = 0; i < allColumns.length; i += batchSize) {
           const batch = allColumns.slice(i, i + batchSize);
           
@@ -1067,14 +1128,20 @@ function initPlanningGrid(rows) {
             planningTableInstance.addColumn(column);
           });
           
-          // Yield control after each batch with aggressive yielding
-          await yieldToMain();
+          // More aggressive yielding after each batch
+          await new Promise(resolve => {
+            if (window.requestIdleCallback) {
+              requestIdleCallback(resolve, { timeout: 10 }); // Very short timeout
+            } else {
+              setTimeout(resolve, 5); // Very short timeout
+            }
+          });
         }
       };
       
       await addColumnsInBatches();
       
-      // Chunk 4: Setup remaining functionality
+      // Chunk 4: Setup remaining functionality with yielding
       await yieldToMain();
       
       // Create debounced autosave function
@@ -1082,11 +1149,15 @@ function initPlanningGrid(rows) {
         triggerPlanningAutosave(planningTableInstance);
       }, 3000);
 
+      await yieldToMain(); // Yield before setting up buttons
+
       // Wire up buttons
       const addBtn = document.getElementById("addPlanningRow");
       if (addBtn) {
         addBtn.onclick = () => showAddRowModal();
       }
+
+      await yieldToMain(); // Yield between button setups
 
       const delBtn = document.getElementById("deletePlanningRow");
       if (delBtn) {
@@ -1114,7 +1185,16 @@ function initPlanningGrid(rows) {
       // Add event handlers
       const resizeHandler = debounce(() => {
         if (planningTableInstance) {
-          planningTableInstance.redraw(true);
+          // Use non-blocking redraw for resize events
+          if (window.requestIdleCallback) {
+            requestIdleCallback(() => {
+              planningTableInstance.redraw(false);
+            }, { timeout: 100 });
+          } else {
+            setTimeout(() => {
+              planningTableInstance.redraw(false);
+            }, 50);
+          }
         }
       }, 250);
       
@@ -1122,9 +1202,16 @@ function initPlanningGrid(rows) {
       
       const visibilityHandler = () => {
         if (!document.hidden && planningTableInstance) {
-          setTimeout(() => {
-            planningTableInstance.redraw(true);
-          }, 100);
+          // Use requestIdleCallback to prevent blocking
+          if (window.requestIdleCallback) {
+            requestIdleCallback(() => {
+              planningTableInstance.redraw(false); // Non-blocking redraw
+            }, { timeout: 100 });
+          } else {
+            setTimeout(() => {
+              planningTableInstance.redraw(false);
+            }, 50);
+          }
         }
       };
       
@@ -1137,11 +1224,24 @@ function initPlanningGrid(rows) {
 
       planningPerformance.end('grid initialization');
       
+      // Yield before applying sort to prevent blocking
+      await yieldToMain();
+      
       // Apply initial sort after all columns are added
       try {
         if (planningTableInstance && planningTableInstance.getColumns().length > 0) {
-          planningTableInstance.setSort([{ column: "quarter", dir: "asc" }]);
-          console.log("✅ Planning grid: Initial sort applied");
+          // Use requestIdleCallback for non-blocking sort
+          if (window.requestIdleCallback) {
+            requestIdleCallback(() => {
+              planningTableInstance.setSort([{ column: "quarter", dir: "asc" }]);
+              console.log("✅ Planning grid: Initial sort applied");
+            }, { timeout: 100 });
+          } else {
+            setTimeout(() => {
+              planningTableInstance.setSort([{ column: "quarter", dir: "asc" }]);
+              console.log("✅ Planning grid: Initial sort applied");
+            }, 25);
+          }
         }
       } catch (e) {
         console.warn("Planning grid: Could not apply initial sort:", e.message);
@@ -2139,32 +2239,45 @@ function updateDigitalMotionsButtonVisual(button) {
 // Function to ensure planning grid is properly rendered and visible
 function ensurePlanningGridVisible() {
   if (planningTableInstance) {
-    // Force recalculation of virtual DOM and redraw
-    requestAnimationFrame(() => {
-      // First, recalculate the table height and dimensions
-      planningTableInstance.recalc();
-      
-      // Force recalculation of column widths for horizontal scrolling
-      planningTableInstance.redraw(true);
-      
-      // Ensure we're scrolled to a visible position
-      const data = planningTableInstance.getData();
-      if (data && data.length > 0) {
-        // Scroll to first row to ensure visibility
-        setTimeout(() => {
-          safeScrollToRow(planningTableInstance, 1, "top", false);
-        }, 50);
-      }
-      
-      // Final recalculation after everything is settled
-      setTimeout(() => {
-        if (planningTableInstance) {
-          // Force column width recalculation for horizontal scrolling
+    // Use requestIdleCallback for non-blocking operations
+    const performRecalc = () => {
+      if (window.requestIdleCallback) {
+        requestIdleCallback(() => {
+          // Gentle recalculation without forced redraws
           planningTableInstance.recalc();
-          planningTableInstance.redraw(true);
-        }
-      }, 150);
-    });
+          
+          // Schedule redraw with low priority
+          requestIdleCallback(() => {
+            planningTableInstance.redraw(false); // Non-blocking redraw
+            
+            // Handle scrolling if needed
+            const data = planningTableInstance.getData();
+            if (data && data.length > 0) {
+              // Schedule scroll with even lower priority
+              requestIdleCallback(() => {
+                safeScrollToRow(planningTableInstance, 1, "top", false);
+              }, { timeout: 100 });
+            }
+          }, { timeout: 50 });
+        }, { timeout: 25 });
+      } else {
+        // Fallback to setTimeout with small delays
+        setTimeout(() => {
+          planningTableInstance.recalc();
+          setTimeout(() => {
+            planningTableInstance.redraw(false);
+            const data = planningTableInstance.getData();
+            if (data && data.length > 0) {
+              setTimeout(() => {
+                safeScrollToRow(planningTableInstance, 1, "top", false);
+              }, 25);
+            }
+          }, 15);
+        }, 10);
+      }
+    };
+    
+    performRecalc();
   }
 }
 
