@@ -460,6 +460,9 @@ function updateRoiCharts() {
 
 // --- ROI FILTER LOGIC UPDATE START ---
 // Update ROI Total Spend and Data Table to use all calendar filters
+// Store universal search filters globally for ROI
+const universalRoiSearchFilters = new Map();
+
 function getRoiFilterValues() {
   // Helper function to get selected values from multiselect
   const getSelectedValues = (elementId) => {
@@ -470,7 +473,8 @@ function getRoiFilterValues() {
     return [];
   };
 
-  return {
+  // Get values from dropdown filters
+  const dropdownFilterValues = {
     region: getSelectedValues("roiRegionFilter"),
     quarter: getSelectedValues("roiQuarterFilter"),
     country: getSelectedValues("roiCountryFilter"),
@@ -480,6 +484,25 @@ function getRoiFilterValues() {
     strategicPillars: getSelectedValues("roiStrategicPillarsFilter"),
     revenuePlay: getSelectedValues("roiRevenuePlayFilter"),
   };
+
+  // Combine dropdown filters with universal search filters
+  const filterValues = {
+    region: [...new Set([...dropdownFilterValues.region, ...(universalRoiSearchFilters.get('region') || [])])],
+    quarter: [...new Set([...dropdownFilterValues.quarter, ...(universalRoiSearchFilters.get('quarter') || [])])],
+    country: [...new Set([...dropdownFilterValues.country, ...(universalRoiSearchFilters.get('country') || [])])],
+    owner: [...new Set([...dropdownFilterValues.owner, ...(universalRoiSearchFilters.get('owner') || [])])],
+    status: [...new Set([...dropdownFilterValues.status, ...(universalRoiSearchFilters.get('status') || [])])],
+    programType: [...new Set([...dropdownFilterValues.programType, ...(universalRoiSearchFilters.get('programType') || [])])],
+    strategicPillars: [...new Set([...dropdownFilterValues.strategicPillars, ...(universalRoiSearchFilters.get('strategicPillars') || [])])],
+    revenuePlay: [...new Set([...dropdownFilterValues.revenuePlay, ...(universalRoiSearchFilters.get('revenuePlay') || [])])],
+    universalRoiSearchFilters: universalRoiSearchFilters
+  };
+
+  if (window.DEBUG_FILTERS) {
+    console.log("[ROI] Combined filters (dropdown + universal search):", filterValues);
+  }
+
+  return filterValues;
 }
 
 // Patch updateRoiTotalSpend
@@ -818,6 +841,12 @@ function populateRoiFilters() {
             });
           }
         });
+        
+        // Clear universal search filters
+        universalRoiSearchFilters.clear();
+        if (window.roiUniversalSearch) {
+          window.roiUniversalSearch.clearFilters();
+        }
         
         // Reset filter state and force update
         lastFilterState = null;
@@ -1355,17 +1384,23 @@ function initializeRoiUniversalSearch() {
 function applyRoiSearchFilters(selectedFilters) {
   console.log("🔍 ROI: Applying search filters:", selectedFilters);
   
-  // Store selected filters for later use
-  window.activeRoiSearchFilters = selectedFilters;
+  // Clear existing universal search filters
+  universalRoiSearchFilters.clear();
   
-  // Update ROI charts and tables with filters applied
-  if (typeof updateRoiCharts === 'function') {
-    updateRoiCharts();
+  // selectedFilters is an object with categories as keys and arrays as values
+  // e.g., { region: ['SAARC'], status: ['Planning'] }
+  if (selectedFilters && typeof selectedFilters === 'object') {
+    Object.entries(selectedFilters).forEach(([category, values]) => {
+      if (Array.isArray(values) && values.length > 0) {
+        universalRoiSearchFilters.set(category, new Set(values));
+      }
+    });
   }
   
-  if (window.roiDataTableInstance && typeof updateRoiDataTable === 'function') {
-    updateRoiDataTable();
-  }
+  console.log("🔍 ROI: Universal search filters applied:", universalRoiSearchFilters);
+  
+  // Trigger ROI filter update using existing system
+  debouncedFilterUpdate();
 }
 
 // Update ROI search data
@@ -1377,25 +1412,140 @@ function updateRoiSearchData() {
   
   try {
     const campaigns = getCampaignDataForRoi();
-    console.log(`🔍 ROI: Updating search data with ${campaigns.length} campaigns`);
+    console.log(`🔍 ROI: Creating filter options from ${campaigns.length} campaigns`);
     
-    // Extract searchable data from campaigns
-    const searchData = campaigns.map(campaign => ({
-      id: campaign.index,
-      title: campaign.programType || '',
-      description: campaign.description || '',
-      region: campaign.region || '',
-      country: campaign.country || '',
-      quarter: campaign.quarter || '',
-      owner: campaign.owner || '',
-      status: campaign.status || '',
-      strategicPillars: campaign.strategicPillars || '',
-      revenuePlay: campaign.revenuePlay || '',
-      fiscalYear: campaign.fiscalYear || ''
-    }));
+    // Get filter options from planning module constants
+    const regionOptions = window.planningModule?.constants?.regionOptions || [];
+    const quarterOptions = window.planningModule?.constants?.quarterOptions || [];
+    const statusOptions = window.planningModule?.constants?.statusOptions || [];
+    const programTypes = window.planningModule?.constants?.programTypes || [];
+    const strategicPillars = window.planningModule?.constants?.strategicPillars || [];
+    const revenuePlays = window.planningModule?.constants?.revenuePlays || [];
+    const fyOptions = window.planningModule?.constants?.fyOptions || [];
+    
+    // Get unique values from actual ROI data
+    const uniqueOwners = Array.from(
+      new Set(campaigns.map((c) => c.owner).filter(Boolean)),
+    ).sort();
+    
+    const uniqueCountries = Array.from(
+      new Set(campaigns.map((c) => c.country).filter(Boolean)),
+    ).sort();
+    
+    // Create searchable filter options
+    const searchData = [];
+    
+    // Add region filters
+    regionOptions.forEach(region => {
+      searchData.push({
+        id: `region_${region}`,
+        title: region,
+        category: 'region',
+        value: region,
+        description: `Filter by ${region} region`,
+        type: 'filter'
+      });
+    });
+    
+    // Add quarter filters
+    quarterOptions.forEach(quarter => {
+      const normalizedQuarter = quarter; // ROI might not need normalization
+      searchData.push({
+        id: `quarter_${normalizedQuarter}`,
+        title: normalizedQuarter,
+        category: 'quarter',
+        value: normalizedQuarter,
+        description: `Filter by ${normalizedQuarter}`,
+        type: 'filter'
+      });
+    });
+    
+    // Add status filters
+    statusOptions.forEach(status => {
+      searchData.push({
+        id: `status_${status}`,
+        title: status,
+        category: 'status',
+        value: status,
+        description: `Filter by ${status} status`,
+        type: 'filter'
+      });
+    });
+    
+    // Add program type filters
+    programTypes.forEach(programType => {
+      searchData.push({
+        id: `programType_${programType}`,
+        title: programType,
+        category: 'programType',
+        value: programType,
+        description: `Filter by ${programType}`,
+        type: 'filter'
+      });
+    });
+    
+    // Add strategic pillar filters
+    strategicPillars.forEach(pillar => {
+      searchData.push({
+        id: `strategicPillars_${pillar}`,
+        title: pillar,
+        category: 'strategicPillars',
+        value: pillar,
+        description: `Filter by ${pillar}`,
+        type: 'filter'
+      });
+    });
+    
+    // Add revenue play filters
+    revenuePlays.forEach(revenuePlay => {
+      searchData.push({
+        id: `revenuePlay_${revenuePlay}`,
+        title: revenuePlay,
+        category: 'revenuePlay',
+        value: revenuePlay,
+        description: `Filter by ${revenuePlay}`,
+        type: 'filter'
+      });
+    });
+    
+    // Add owner filters (from actual data)
+    uniqueOwners.forEach(owner => {
+      searchData.push({
+        id: `owner_${owner}`,
+        title: owner,
+        category: 'owner',
+        value: owner,
+        description: `Filter by ${owner}`,
+        type: 'filter'
+      });
+    });
+    
+    // Add country filters (from actual data)
+    uniqueCountries.forEach(country => {
+      searchData.push({
+        id: `country_${country}`,
+        title: country,
+        category: 'country',
+        value: country,
+        description: `Filter by ${country}`,
+        type: 'filter'
+      });
+    });
+    
+    // Add fiscal year filters
+    fyOptions.forEach(fy => {
+      searchData.push({
+        id: `fiscalYear_${fy}`,
+        title: fy,
+        category: 'fiscalYear',
+        value: fy,
+        description: `Filter by ${fy}`,
+        type: 'filter'
+      });
+    });
     
     window.roiUniversalSearch.updateData(searchData);
-    console.log("✅ ROI: Search data updated successfully");
+    console.log("✅ ROI: Search data updated with", searchData.length, "filter options");
     
   } catch (error) {
     console.error("❌ ROI: Error updating search data:", error);

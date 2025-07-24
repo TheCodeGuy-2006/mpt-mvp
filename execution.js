@@ -801,6 +801,22 @@ function setupExecutionFilterLogic() {
         digitalMotionsButton.dataset.active = "false";
         updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
 
+        // Clear universal search filters
+        universalExecutionSearchFilters = {
+          region: [],
+          quarter: [],
+          status: [],
+          programType: [],
+          strategicPillar: [],
+          owner: [],
+          fiscalYear: []
+        };
+        
+        // Clear universal search display if it exists
+        if (window.executionUniversalSearch && typeof window.executionUniversalSearch.clearAllFilters === 'function') {
+          window.executionUniversalSearch.clearAllFilters();
+        }
+
         // Clear all table filters first
         if (executionTableInstance) {
           executionTableInstance.clearFilter();
@@ -815,6 +831,17 @@ function setupExecutionFilterLogic() {
 }
 
 // Get current filter values for execution tracking
+// Store universal search filters globally for execution
+let universalExecutionSearchFilters = {
+  region: [],
+  quarter: [],
+  status: [],
+  programType: [],
+  strategicPillar: [],
+  owner: [],
+  fiscalYear: []
+};
+
 function getExecutionFilterValues() {
   const digitalMotionsButton = document.getElementById(
     "executionDigitalMotionsFilter",
@@ -834,13 +861,25 @@ function getExecutionFilterValues() {
     }
   };
 
-  const filterValues = {
+  // Get values from dropdown filters
+  const dropdownFilterValues = {
     region: getSelectedValues("executionRegionFilter"),
     quarter: getSelectedValues("executionQuarterFilter"),
     status: getSelectedValues("executionStatusFilter"),
     programType: getSelectedValues("executionProgramTypeFilter"),
     strategicPillar: getSelectedValues("executionStrategicPillarFilter"),
     owner: getSelectedValues("executionOwnerFilter"),
+    digitalMotions: digitalMotionsActive,
+  };
+
+  // Combine dropdown filters with universal search filters
+  const filterValues = {
+    region: [...new Set([...dropdownFilterValues.region, ...universalExecutionSearchFilters.region])],
+    quarter: [...new Set([...dropdownFilterValues.quarter, ...universalExecutionSearchFilters.quarter])],
+    status: [...new Set([...dropdownFilterValues.status, ...universalExecutionSearchFilters.status])],
+    programType: [...new Set([...dropdownFilterValues.programType, ...universalExecutionSearchFilters.programType])],
+    strategicPillar: [...new Set([...dropdownFilterValues.strategicPillar, ...universalExecutionSearchFilters.strategicPillar])],
+    owner: [...new Set([...dropdownFilterValues.owner, ...universalExecutionSearchFilters.owner])],
     digitalMotions: digitalMotionsActive,
   };
 
@@ -852,6 +891,10 @@ function getExecutionFilterValues() {
       digitalMotionsActive,
     },
   );
+
+  if (window.DEBUG_FILTERS) {
+    console.log("[Execution] Combined filters (dropdown + universal search):", filterValues);
+  }
 
   return filterValues;
 }
@@ -1122,24 +1165,118 @@ function updateExecutionSearchData() {
     try {
       const startTime = performance.now();
       const executionData = executionTableInstance.getData();
-      console.log("📈 EXECUTION: Processing", executionData.length, "execution records for search");
+      console.log("📈 EXECUTION: Creating filter options from", executionData.length, "execution records");
       
-      // Process data the same way as planning.js - just normalize quarters
-      const searchData = executionData.map(row => ({
-        ...row,
-        quarter: normalizeQuarter(row.quarter)
-      }));
+      // Get filter options from planning module constants
+      const regionOptions = window.planningModule?.constants?.regionOptions || [];
+      const quarterOptions = window.planningModule?.constants?.quarterOptions || [];
+      const statusOptions = window.planningModule?.constants?.statusOptions || [];
+      const programTypes = window.planningModule?.constants?.programTypes || [];
+      const strategicPillars = window.planningModule?.constants?.strategicPillars || [];
+      const fyOptions = window.planningModule?.constants?.fyOptions || [];
       
-      // Update universal search with processed data
+      // Get unique owners from actual data
+      const uniqueOwners = Array.from(
+        new Set(executionData.map((c) => c.owner).filter(Boolean)),
+      ).sort();
+      
+      // Create searchable filter options
+      const searchData = [];
+      
+      // Add region filters
+      regionOptions.forEach(region => {
+        searchData.push({
+          id: `region_${region}`,
+          title: region,
+          category: 'region',
+          value: region,
+          description: `Filter by ${region} region`,
+          type: 'filter'
+        });
+      });
+      
+      // Add quarter filters
+      quarterOptions.forEach(quarter => {
+        const normalizedQuarter = normalizeQuarter(quarter);
+        searchData.push({
+          id: `quarter_${normalizedQuarter}`,
+          title: normalizedQuarter,
+          category: 'quarter',
+          value: normalizedQuarter,
+          description: `Filter by ${normalizedQuarter}`,
+          type: 'filter'
+        });
+      });
+      
+      // Add status filters
+      statusOptions.forEach(status => {
+        searchData.push({
+          id: `status_${status}`,
+          title: status,
+          category: 'status',
+          value: status,
+          description: `Filter by ${status} status`,
+          type: 'filter'
+        });
+      });
+      
+      // Add program type filters
+      programTypes.forEach(programType => {
+        searchData.push({
+          id: `programType_${programType}`,
+          title: programType,
+          category: 'programType',
+          value: programType,
+          description: `Filter by ${programType}`,
+          type: 'filter'
+        });
+      });
+      
+      // Add strategic pillar filters
+      strategicPillars.forEach(pillar => {
+        searchData.push({
+          id: `strategicPillar_${pillar}`,
+          title: pillar,
+          category: 'strategicPillar',
+          value: pillar,
+          description: `Filter by ${pillar}`,
+          type: 'filter'
+        });
+      });
+      
+      // Add owner filters (from actual data)
+      uniqueOwners.forEach(owner => {
+        searchData.push({
+          id: `owner_${owner}`,
+          title: owner,
+          category: 'owner',
+          value: owner,
+          description: `Filter by ${owner}`,
+          type: 'filter'
+        });
+      });
+      
+      // Add fiscal year filters
+      fyOptions.forEach(fy => {
+        searchData.push({
+          id: `fiscalYear_${fy}`,
+          title: fy,
+          category: 'fiscalYear',
+          value: fy,
+          description: `Filter by ${fy}`,
+          type: 'filter'
+        });
+      });
+      
+            // Update universal search with processed data
       window.executionUniversalSearch.updateData(searchData);
       
-      const endTime = performance.now();
-      const duration = endTime - startTime;
-      console.log("✅ EXECUTION: Search data updated successfully in", duration.toFixed(2), "ms");
-      console.log("✅ EXECUTION: Updated search data for", searchData.length, "execution records");
+      const processingTime = performance.now() - startTime;
+      console.log("✅ EXECUTION: Search data updated with", searchData.length, "filter options in", processingTime.toFixed(1), "ms");
       
     } catch (error) {
       console.error("❌ EXECUTION: Error updating search data:", error);
+      console.error("❌ EXECUTION: Error stack:", error.stack);
     }
   };
   
@@ -1160,22 +1297,31 @@ function applyExecutionSearchFilters(selectedFilters) {
   }
   
   try {
-    if (selectedFilters.length === 0) {
-      // Clear all filters
-      executionTableInstance.clearFilter();
-      console.log("🧹 EXECUTION: Cleared all filters");
-      return;
+    // Reset universal search filters
+    universalExecutionSearchFilters = {
+      region: [],
+      quarter: [],
+      status: [],
+      programType: [],
+      strategicPillar: [],
+      owner: [],
+      fiscalYear: []
+    };
+    
+    // selectedFilters is an object with categories as keys and arrays as values
+    // e.g., { region: ['SAARC'], status: ['Planning'] }
+    if (selectedFilters && typeof selectedFilters === 'object') {
+      Object.entries(selectedFilters).forEach(([category, values]) => {
+        if (universalExecutionSearchFilters.hasOwnProperty(category) && Array.isArray(values)) {
+          universalExecutionSearchFilters[category] = [...values];
+        }
+      });
     }
     
-    // Apply filters
-    const filters = selectedFilters.map(filter => ({
-      field: filter.category,
-      type: "=",
-      value: filter.value
-    }));
+    console.log("🔍 EXECUTION: Universal search filters updated:", universalExecutionSearchFilters);
     
-    executionTableInstance.setFilter(filters);
-    console.log("✅ EXECUTION: Applied", filters.length, "filters");
+    // Apply filters using the main execution filter system
+    applyExecutionFilters();
     
   } catch (error) {
     console.error("❌ EXECUTION: Error applying search filters:", error);

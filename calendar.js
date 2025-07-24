@@ -248,6 +248,9 @@ let activeFilters = {
   quarter: [],
 };
 
+// Universal search filters for calendar
+const universalCalendarSearchFilters = new Map();
+
 // Quarter normalization function to handle format differences ("Q1 July" vs "Q1 - July")
 function normalizeQuarter(quarter) {
   if (!quarter || typeof quarter !== 'string') return quarter;
@@ -460,6 +463,23 @@ function getFilterOptions() {
     strategicPillars: Array.from(options.strategicPillars).sort(),
     revenuePlays: Array.from(options.revenuePlays).sort(),
     quarters: Array.from(options.quarters).sort(),
+  };
+}
+
+// Get calendar filter values (used by universal search and main filtering)
+function getCalendarFilterValues() {
+  const filterOptions = getFilterOptions();
+  
+  return {
+    region: filterOptions.regions,
+    country: filterOptions.countries,
+    owner: filterOptions.owners,
+    status: filterOptions.statuses,
+    programType: filterOptions.programTypes,
+    strategicPillars: filterOptions.strategicPillars,
+    revenuePlay: filterOptions.revenuePlays,
+    quarter: filterOptions.quarters,
+    universalCalendarSearchFilters: universalCalendarSearchFilters
   };
 }
 
@@ -769,6 +789,16 @@ function applyFilters() {
     activeFilters.revenuePlay = Array.from(revenuePlayFilter.selectedOptions).map(option => option.value);
   }
 
+  // Integrate universal search filters
+  universalCalendarSearchFilters.forEach((values, category) => {
+    if (activeFilters.hasOwnProperty(category)) {
+      // Merge universal search filters with existing activeFilters
+      const existingValues = new Set(activeFilters[category]);
+      values.forEach(value => existingValues.add(value));
+      activeFilters[category] = Array.from(existingValues);
+    }
+  });
+
   // Use requestAnimationFrame for smooth UI updates
   requestAnimationFrame(() => {
     updateFilterSummary();
@@ -821,6 +851,12 @@ function clearAllFilters() {
       }
     }
   });
+
+  // Clear universal search filters
+  universalCalendarSearchFilters.clear();
+  if (window.calendarUniversalSearch) {
+    window.calendarUniversalSearch.clearFilters();
+  }
 
   updateFilterSummary();
   renderCalendar();
@@ -1624,11 +1660,23 @@ function initializeCalendarUniversalSearch() {
 function applyCalendarSearchFilters(selectedFilters) {
   console.log("🔍 CALENDAR: Applying search filters:", selectedFilters);
   
-  // Store selected filters for later use
-  window.activeCalendarSearchFilters = selectedFilters;
+  // Clear existing universal search filters
+  universalCalendarSearchFilters.clear();
   
-  // Re-render calendar with filters applied
-  renderCalendar();
+  // selectedFilters is an object with categories as keys and arrays as values
+  // e.g., { region: ['SAARC'], status: ['Planning'] }
+  if (selectedFilters && typeof selectedFilters === 'object') {
+    Object.entries(selectedFilters).forEach(([category, values]) => {
+      if (Array.isArray(values) && values.length > 0) {
+        universalCalendarSearchFilters.set(category, new Set(values));
+      }
+    });
+  }
+  
+  console.log("🔍 CALENDAR: Universal search filters applied:", universalCalendarSearchFilters);
+  
+  // Trigger calendar filter update using existing system
+  applyFilters();
 }
 
 // Update calendar search data
@@ -1642,22 +1690,31 @@ function updateCalendarSearchData() {
     const campaigns = getCampaignData();
     console.log(`🔍 CALENDAR: Updating search data with ${campaigns.length} campaigns`);
     
-    // Extract searchable data from campaigns
-    const searchData = campaigns.map(campaign => ({
-      id: campaign.index,
-      title: campaign.programType || '',
-      description: campaign.description || '',
-      region: campaign.region || '',
-      country: campaign.country || '',
-      quarter: campaign.quarter || '',
-      owner: campaign.owner || '',
-      status: campaign.status || '',
-      strategicPillars: campaign.strategicPillars || '',
-      revenuePlay: campaign.revenuePlay || '',
-      fiscalYear: campaign.fiscalYear || ''
-    }));
+    // Get filter values for calendar
+    const filterValues = getCalendarFilterValues();
     
-    window.calendarUniversalSearch.updateData(searchData);
+    // Create filter options for universal search
+    const filterOptions = [];
+    
+    // Add each filter category as searchable options
+    Object.entries(filterValues).forEach(([category, values]) => {
+      if (category !== 'universalCalendarSearchFilters' && Array.isArray(values)) {
+        values.forEach(value => {
+          if (value && value.trim()) {
+            filterOptions.push({
+              id: `${category}-${value}`,
+              title: value,
+              category: category,
+              value: value,
+              type: 'filter'
+            });
+          }
+        });
+      }
+    });
+    
+    console.log(`🔍 CALENDAR: Generated ${filterOptions.length} filter options`);
+    window.calendarUniversalSearch.updateData(filterOptions);
     console.log("✅ CALENDAR: Search data updated successfully");
     
   } catch (error) {
