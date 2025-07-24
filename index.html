@@ -386,40 +386,8 @@
           </div>
         </div>
       </section>
-    <section id="view-github-sync" style="display: none">
-      <div id="githubSync">
-        <div id="githubSyncLocked" style="text-align: center; padding: 40px;">
-          <h3>🔒 GitHub Sync Access Restricted</h3>
-          <p>This section requires administrator permissions.</p>
-          <p>Please click the "GitHub Sync" tab to authenticate.</p>
-        </div>
-        <div id="githubSyncUnlocked" style="display: none;">
-          <h3>✅ GitHub Sync Unlocked</h3>
-          <p>GitHub synchronization features are now available.</p>
-          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h4>Available Actions:</h4>
-            <ul>
-              <li>Sync planning data to GitHub</li>
-              <li>Export execution data</li>
-              <li>Download ROI reports</li>
-              <li>Backup budget configurations</li>
-            </ul>
-          </div>
-          <div style="margin: 20px 0;">
-            <button onclick="syncToGithub()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 6px; margin-right: 10px; cursor: pointer;">
-              🔄 Sync to GitHub
-            </button>
-            <button onclick="exportData()" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 6px; margin-right: 10px; cursor: pointer;">
-              📁 Export Data
-            </button>
-            <button onclick="downloadReports()" style="background: #6f42c1; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">
-              📊 Download Reports
-            </button>
-          </div>
-        </div>
-      </div>
-      <!-- Password Modal for GitHub Sync -->
-            <section id="view-github-sync" style="display: none">
+
+      <section id="view-github-sync" style="display: none">
         <div class="section-header">
           <i class="octicon octicon-sync" aria-hidden="true"></i>
           <h1>GitHub Integration & Data Sync</h1>
@@ -487,9 +455,11 @@
                 <div class="password-modal-error" id="githubSyncPasswordError"></div>
                 <div class="password-modal-buttons">
                   <button type="submit" id="githubSyncPasswordSubmit" class="password-modal-button primary">
+                    <i class="octicon octicon-unlock" aria-hidden="true"></i>
                     Unlock Access
                   </button>
                   <button type="button" id="githubSyncPasswordCancel" class="password-modal-button secondary">
+                    <i class="octicon octicon-x" aria-hidden="true"></i>
                     Cancel
                   </button>
                 </div>
@@ -522,14 +492,23 @@
           </tbody>
         </table>
         <div id="annualBudgetButtons">
-          <button id="addRegionRow" disabled>+ Add Region</button>
-          <button id="saveAnnualBudget" class="btn-primary btn-lg" disabled>💾 Save Annual Budget</button>
+          <button id="addRegionRow" disabled>
+            <i class="octicon octicon-plus" aria-hidden="true"></i>
+            Add Region
+          </button>
+          <button id="saveAnnualBudget" class="btn-primary btn-lg" disabled>
+            <i class="octicon octicon-device-desktop-download" aria-hidden="true"></i>
+            Save Annual Budget
+          </button>
         </div>
       </div>
       <!-- Password Modal for Annual Budget Edit -->
       <div id="annualBudgetPasswordModal" class="password-modal">
         <div class="password-modal-content">
-          <h3>💰 Unlock Annual Budget</h3>
+          <h3>
+            <i class="octicon octicon-lock" aria-hidden="true"></i>
+            Unlock Annual Budget
+          </h3>
           <p>Enter password to edit the annual budget plan</p>
           <form id="annualBudgetPasswordForm">
             <input
@@ -551,9 +530,11 @@
             <div class="password-modal-error" id="annualBudgetPasswordError"></div>
             <div class="password-modal-buttons">
               <button type="submit" id="annualBudgetPasswordSubmit" class="password-modal-button primary">
+                <i class="octicon octicon-unlock" aria-hidden="true"></i>
                 Unlock Editing
               </button>
               <button type="button" id="annualBudgetPasswordCancel" class="password-modal-button secondary">
+                <i class="octicon octicon-x" aria-hidden="true"></i>
                 Cancel
               </button>
             </div>
@@ -704,12 +685,15 @@
           <!-- Tab Navigation -->
           <div id="roiChartTabs" class="chart-tabs-nav">
             <button id="roiRegionTabBtn" class="roi-chart-tab active">
+              <i class="octicon octicon-globe" aria-hidden="true"></i>
               ROI by Region
             </button>
             <button id="roiProgramTypeTabBtn" class="roi-chart-tab">
+              <i class="octicon octicon-table" aria-hidden="true"></i>
               Data Table
             </button>
             <button id="roiQuarterTabBtn" class="roi-chart-tab">
+              <i class="octicon octicon-graph" aria-hidden="true"></i>
               Forecasted vs Actual
             </button>
           </div>
