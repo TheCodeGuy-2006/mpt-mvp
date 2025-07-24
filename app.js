@@ -1206,43 +1206,68 @@ window.addEventListener("DOMContentLoaded", async () => {
   let executionTable = null;
   let budgetsTable = null;
 
+  // Helper function to update loading progress
+  const updateLoadingProgress = (message) => {
+    console.log(`📊 ${message}`);
+    // Could add visual progress indicator here if needed
+  };
+
   // Initialize tables with error boundaries and performance monitoring in chunks
   const initTables = async () => {
+    // Use more aggressive chunking with longer yields to prevent long tasks
+    const yieldControl = () => new Promise(resolve => setTimeout(resolve, 16)); // One frame yield
+    
     // Chunk 1: Planning table
     try {
       if (window.planningModule?.initPlanningGrid) {
+        console.log("🔄 Starting planning grid initialization...");
         planningTable = await window.planningModule.initPlanningGrid(rows);
         window.planningTableInstance = planningTable;
+        console.log("✅ Planning grid initialized");
       }
     } catch (e) {
       console.error("Planning grid initialization failed:", e);
     }
     
-    // Yield control to prevent long task
-    await new Promise(resolve => setTimeout(resolve, 0));
+    // Longer yield to ensure UI responsiveness
+    await yieldControl();
+    
+    // Show progress indicator if needed
+    updateLoadingProgress("Initializing execution grid...");
 
     // Chunk 2: Execution table
     try {
       if (window.executionModule?.initExecutionGrid) {
-        executionTable = window.executionModule.initExecutionGrid(rows);
+        console.log("🔄 Starting execution grid initialization...");
+        executionTable = await window.executionModule.initExecutionGrid(rows);
         window.executionTableInstance = executionTable;
+        console.log("✅ Execution grid initialized");
       }
     } catch (e) {
       console.error("Execution grid initialization failed:", e);
     }
     
-    // Yield control to prevent long task
-    await new Promise(resolve => setTimeout(resolve, 0));
+    // Longer yield to ensure UI responsiveness
+    await yieldControl();
+    
+    // Show progress indicator if needed
+    updateLoadingProgress("Initializing budgets table...");
 
     // Chunk 3: Budgets table
     try {
       if (window.budgetsModule?.initBudgetsTable) {
+        console.log("🔄 Starting budgets table initialization...");
         budgetsTable = window.budgetsModule.initBudgetsTable(budgets, rows);
         window.budgetsTableInstance = budgetsTable;
+        console.log("✅ Budgets table initialized");
       }
     } catch (e) {
       console.error("Budgets table initialization failed:", e);
     }
+    
+    // Final yield before completing
+    await yieldControl();
+    updateLoadingProgress("Tables initialized successfully");
   };
 
   await initTables();

@@ -646,6 +646,16 @@ function initPlanningGrid(rows) {
     // Break up the initialization into smaller chunks to prevent long tasks
     const initializeInChunks = async () => {
       
+      // More aggressive yielding function for better responsiveness
+      const yieldToMain = () => new Promise(resolve => {
+        // Use requestIdleCallback if available, otherwise setTimeout
+        if (window.requestIdleCallback) {
+          requestIdleCallback(resolve, { timeout: 16 });
+        } else {
+          setTimeout(resolve, 16); // One frame yield
+        }
+      });
+      
       // Chunk 1: Performance config (small task)
       const performanceConfig = {
         // Use pagination for better performance (conflicts resolved)
@@ -691,8 +701,8 @@ function initPlanningGrid(rows) {
         },
       };
       
-      // Yield control back to the browser
-      await new Promise(resolve => setTimeout(resolve, 0));
+      // Yield control back to the browser with new aggressive yielding
+      await yieldToMain();
       
       // Chunk 2: Create table with basic config (medium task)
       planningTableInstance = new Tabulator("#planningGrid", {
@@ -741,8 +751,8 @@ function initPlanningGrid(rows) {
         columns: []
       });
       
-      // Yield control back to the browser
-      await new Promise(resolve => setTimeout(resolve, 0));
+      // Yield control back to the browser with new aggressive yielding
+      await yieldToMain();
       
       // Chunk 3: Add columns in smaller batches to prevent blocking
       const addColumnsInBatches = async () => {
@@ -1048,15 +1058,15 @@ function initPlanningGrid(rows) {
             planningTableInstance.addColumn(column);
           });
           
-          // Yield control after each batch
-          await new Promise(resolve => setTimeout(resolve, 0));
+          // Yield control after each batch with aggressive yielding
+          await yieldToMain();
         }
       };
       
       await addColumnsInBatches();
       
       // Chunk 4: Setup remaining functionality
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await yieldToMain();
       
       // Create debounced autosave function
       const debouncedAutosave = debounce(() => {

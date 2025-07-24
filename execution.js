@@ -213,51 +213,72 @@ document.addEventListener('click', (e) => {
 
 // EXECUTION GRID INITIALIZATION
 function initExecutionGrid(rows) {
-  // Get constants from planning module for consistency
-  const statusOptions = window.planningModule?.constants?.statusOptions || [
-    "Planning",
-    "On Track",
-    "Shipped",
-    "Cancelled",
-  ];
-  const yesNo = window.planningModule?.constants?.yesNo || ["Yes", "No"];
+  return new Promise(async (resolve, reject) => {
+    try {
+      // More aggressive yielding function for better responsiveness
+      const yieldToMain = () => new Promise(resolveYield => {
+        // Use requestIdleCallback if available, otherwise setTimeout
+        if (window.requestIdleCallback) {
+          requestIdleCallback(resolveYield, { timeout: 16 });
+        } else {
+          setTimeout(resolveYield, 16); // One frame yield
+        }
+      });
 
-  // Performance optimizations for large datasets
-  const performanceConfig = {
-    // Use pagination for better performance and user experience
-    pagination: "local",
-    paginationSize: 25,
-    paginationSizeSelector: [25, 50, 100],
-    paginationCounter: "rows",
-    
-    // Disable conflicting features - cannot use virtualDom with pagination
-    virtualDom: false,
-    progressiveLoad: false,
-    
-    // Use basic horizontal rendering to avoid scroll violations
-    renderHorizontal: "basic",
-    
-    // Disable expensive features for large datasets
-    invalidOptionWarnings: false,
-    autoResize: false,
-    responsiveLayout: false,
-    
-    // Reduce column calculations
-    columnCalcs: false,
-    
-    // Improve scroll performance
-    scrollToRowPosition: "top",
-    scrollToColumnPosition: "left",
-  };
+      // Chunk 1: Prepare configuration
+      console.log("🔄 Initializing execution grid - preparing config...");
+      
+      // Get constants from planning module for consistency
+      const statusOptions = window.planningModule?.constants?.statusOptions || [
+        "Planning",
+        "On Track",
+        "Shipped",
+        "Cancelled",
+      ];
+      const yesNo = window.planningModule?.constants?.yesNo || ["Yes", "No"];
 
-  const table = new Tabulator("#executionGrid", {
-    data: rows,
-    reactiveData: true,
-    selectableRows: 1,
-    layout: "fitColumns",
-    ...performanceConfig,
-    initialSort: [
-      { column: "quarter", dir: "asc" }, // Sort by quarter for logical order
+      // Performance optimizations for large datasets
+      const performanceConfig = {
+        // Use pagination for better performance and user experience
+        pagination: "local",
+        paginationSize: 25,
+        paginationSizeSelector: [25, 50, 100],
+        paginationCounter: "rows",
+        
+        // Disable conflicting features - cannot use virtualDom with pagination
+        virtualDom: false,
+        progressiveLoad: false,
+        
+        // Use basic horizontal rendering to avoid scroll violations
+        renderHorizontal: "basic",
+        
+        // Disable expensive features for large datasets
+        invalidOptionWarnings: false,
+        autoResize: false,
+        responsiveLayout: false,
+        
+        // Reduce column calculations
+        columnCalcs: false,
+        
+        // Improve scroll performance
+        scrollToRowPosition: "top",
+        scrollToColumnPosition: "left",
+      };
+
+      // Yield control after config preparation
+      await yieldToMain();
+
+      // Chunk 2: Create table instance
+      console.log("🔄 Initializing execution grid - creating table...");
+      
+      const table = new Tabulator("#executionGrid", {
+        data: rows,
+        reactiveData: true,
+        selectableRows: 1,
+        layout: "fitColumns",
+        ...performanceConfig,
+        initialSort: [
+          { column: "quarter", dir: "asc" }, // Sort by quarter for logical order
     ],
     
     // Add safer scroll configuration
@@ -421,7 +442,17 @@ function initExecutionGrid(rows) {
     updateExecutionSearchData();
   }, 100);
   
-  return table;
+  // Yield control one final time before returning
+  await yieldToMain();
+  
+  console.log("✅ Execution grid initialization completed");
+  resolve(table);
+  
+    } catch (error) {
+      console.error("❌ Error initializing execution grid:", error);
+      reject(error);
+    }
+  });
 }
 
 // EXECUTION SAVE FUNCTIONALITY
