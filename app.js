@@ -957,7 +957,22 @@ function route() {
         
         // Initialize universal search for execution if not already done
         if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
-          window.executionModule.initializeExecutionUniversalSearch();
+          // Only initialize if it doesn't exist or is truly broken
+          if (!window.executionUniversalSearch || 
+              window.executionUniversalSearch instanceof HTMLElement ||
+              typeof window.executionUniversalSearch.updateData !== 'function') {
+            console.log("🔄 APP: Re-initializing execution universal search from routing...");
+            window.executionModule.initializeExecutionUniversalSearch();
+            
+            // Update search data after initialization
+            setTimeout(() => {
+              if (typeof window.executionModule.updateExecutionSearchData === 'function') {
+                window.executionModule.updateExecutionSearchData();
+              }
+            }, 100);
+          } else {
+            console.log("✅ APP: Execution universal search already properly initialized, skipping");
+          }
         }
       }, 0);
     }

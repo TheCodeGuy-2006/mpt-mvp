@@ -442,10 +442,28 @@ function initExecutionGrid(rows) {
   executionTableInstance = table;
   setupExecutionSave(table, rows);
   
-  // Update search data when table is ready
+  // Initialize universal search and then update search data when table is ready
   setTimeout(() => {
-    updateExecutionSearchData();
-  }, 100);
+    // Initialize universal search first if not already done
+    if (typeof initializeExecutionUniversalSearch === 'function' && !window.executionUniversalSearch) {
+      console.log("🔄 EXECUTION: Initializing universal search during table setup...");
+      // Reset retry counter for new initialization
+      window.executionSearchRetryCount = 0;
+      initializeExecutionUniversalSearch();
+    }
+    
+    // Then update search data - but only if universal search is properly initialized
+    setTimeout(() => {
+      // Wait a bit longer to ensure routing system has had time to initialize universal search
+      if (window.executionUniversalSearch && 
+          !(window.executionUniversalSearch instanceof HTMLElement) &&
+          typeof window.executionUniversalSearch.updateData === 'function') {
+        updateExecutionSearchData();
+      } else {
+        console.log("⏳ EXECUTION: Universal search not ready yet, will be updated by routing system");
+      }
+    }, 500); // Increased delay to let routing system initialize first
+  }, 300); // Increased from 100ms
   
   // Yield control one final time before returning
   await yieldToMain();
@@ -1121,6 +1139,14 @@ Object.defineProperty(window.executionModule, "tableInstance", {
 function initializeExecutionUniversalSearch() {
   console.log("🔍 EXECUTION: Starting universal search initialization...");
   
+  // Check if there's already a valid instance running
+  if (window.executionUniversalSearch && 
+      !(window.executionUniversalSearch instanceof HTMLElement) &&
+      typeof window.executionUniversalSearch.updateData === 'function') {
+    console.log("✅ EXECUTION: Universal search already properly initialized, skipping");
+    return;
+  }
+  
   // Check if UniversalSearchFilter class is available
   if (!window.UniversalSearchFilter) {
     console.error("❌ EXECUTION: UniversalSearchFilter class not found!");
@@ -1146,7 +1172,14 @@ function initializeExecutionUniversalSearch() {
     console.log("🔧 EXECUTION: Creating universal search with constructor:", window.UniversalSearchFilter);
     console.log("🔧 EXECUTION: Constructor prototype:", window.UniversalSearchFilter.prototype);
     
+    // Clear any existing instance first
+    if (window.executionUniversalSearch) {
+      console.log("🔄 EXECUTION: Clearing existing universal search instance");
+      window.executionUniversalSearch = null;
+    }
+    
     // Initialize universal search for execution
+    console.log("🔧 EXECUTION: About to create new UniversalSearchFilter...");
     window.executionUniversalSearch = new window.UniversalSearchFilter(
       'executionUniversalSearch',
       {
@@ -1157,17 +1190,35 @@ function initializeExecutionUniversalSearch() {
       }
     );
     
+    console.log("🔧 EXECUTION: Created object immediately after constructor:", window.executionUniversalSearch);
+    console.log("🔧 EXECUTION: Constructor result type:", typeof window.executionUniversalSearch);
+    console.log("🔧 EXECUTION: Constructor result is object:", typeof window.executionUniversalSearch === 'object');
+    console.log("🔧 EXECUTION: Constructor result is HTMLElement:", window.executionUniversalSearch instanceof HTMLElement);
+    
+    // Verify the created object has the expected methods
+    if (!window.executionUniversalSearch || typeof window.executionUniversalSearch.updateData !== 'function') {
+      console.error("❌ EXECUTION: Universal search object creation failed - missing updateData method");
+      console.log("❌ EXECUTION: Available methods on created object:", Object.getOwnPropertyNames(window.executionUniversalSearch || {}));
+      console.log("❌ EXECUTION: Prototype methods:", window.executionUniversalSearch ? Object.getOwnPropertyNames(Object.getPrototypeOf(window.executionUniversalSearch)) : 'null');
+      throw new Error("Universal search object creation failed - missing updateData method");
+    }
+    
     // Debug: Check the created object
     console.log("🔧 EXECUTION: Created object:", window.executionUniversalSearch);
     console.log("🔧 EXECUTION: Object methods:", Object.getOwnPropertyNames(Object.getPrototypeOf(window.executionUniversalSearch)));
     console.log("🔧 EXECUTION: updateData method exists:", typeof window.executionUniversalSearch.updateData);
-    
+
     console.log("✅ EXECUTION: Universal search initialized successfully!");
     
     // Update search data with current execution data - add delay like planning module
     setTimeout(() => {
-      updateExecutionSearchData();
-    }, 100);
+      // Only update if the universal search was created successfully
+      if (window.executionUniversalSearch && typeof window.executionUniversalSearch.updateData === 'function') {
+        updateExecutionSearchData();
+      } else {
+        console.warn("⚠️ EXECUTION: Universal search not properly initialized, skipping initial data update");
+      }
+    }, 200); // Increased delay to ensure everything is ready
     
   } catch (error) {
     console.error("❌ EXECUTION: Error initializing universal search:", error);
@@ -1179,15 +1230,21 @@ function updateExecutionSearchData() {
   console.log("📊 EXECUTION: Updating search data...");
   
   if (!window.executionUniversalSearch) {
-    console.warn("⚠️ EXECUTION: Universal search not initialized yet");
+    console.log("⏳ EXECUTION: Universal search not initialized yet, skipping update");
     return;
   }
   
-  // Additional debug check
-  if (typeof window.executionUniversalSearch.updateData !== 'function') {
-    console.error("❌ EXECUTION: Universal search exists but updateData is not a function");
-    console.log("EXECUTION: Available methods:", Object.getOwnPropertyNames(window.executionUniversalSearch));
-    console.log("EXECUTION: Constructor:", window.executionUniversalSearch.constructor.name);
+  // Check for valid universal search object
+  if (window.executionUniversalSearch instanceof HTMLElement ||
+      typeof window.executionUniversalSearch.updateData !== 'function') {
+    console.warn("⚠️ EXECUTION: Invalid universal search object detected, skipping update");
+    console.log("EXECUTION: Current object:", window.executionUniversalSearch);
+    console.log("EXECUTION: Object type:", typeof window.executionUniversalSearch);
+    console.log("EXECUTION: Is HTMLElement:", window.executionUniversalSearch instanceof HTMLElement);
+    console.log("EXECUTION: Is UniversalSearchFilter:", window.executionUniversalSearch instanceof window.UniversalSearchFilter);
+    console.log("EXECUTION: Constructor name:", window.executionUniversalSearch?.constructor?.name);
+    console.log("EXECUTION: updateData type:", typeof window.executionUniversalSearch?.updateData);
+    console.log("EXECUTION: Available methods:", window.executionUniversalSearch ? Object.getOwnPropertyNames(window.executionUniversalSearch) : 'null');
     return;
   }
   
