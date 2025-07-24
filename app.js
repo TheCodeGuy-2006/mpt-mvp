@@ -911,6 +911,11 @@ function route() {
         if (typeof window.planningModule.populatePlanningFilters === "function") {
           window.planningModule.populatePlanningFilters();
         }
+        
+        // Initialize universal search for planning if not already done
+        if (typeof window.planningModule.initializePlanningUniversalSearch === "function") {
+          window.planningModule.initializePlanningUniversalSearch();
+        }
       }, 0);
     }
     if (hash === "#execution" && window.executionModule.tableInstance) {
@@ -933,6 +938,11 @@ function route() {
         ) {
           window.executionModule.setupExecutionFilters();
         }
+        
+        // Initialize universal search for execution if not already done
+        if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
+          window.executionModule.initializeExecutionUniversalSearch();
+        }
       }, 0);
     }
     if (
@@ -951,6 +961,11 @@ function route() {
         // Ensure ROI data table is initialized when tab is viewed
         if (typeof window.roiModule.ensureRoiDataTableInitialized === "function") {
           window.roiModule.ensureRoiDataTableInitialized();
+        }
+        
+        // Initialize universal search for ROI if not already done
+        if (typeof window.roiModule.initializeRoiUniversalSearch === "function") {
+          window.roiModule.initializeRoiUniversalSearch();
         }
       }, 0);
       setTimeout(initRoiTabSwitching, 100); // Initialize tab switching when ROI tab is viewed
@@ -982,6 +997,10 @@ function route() {
       typeof window.calendarModule?.handleCalendarRouting === "function"
     ) {
       window.calendarModule.handleCalendarRouting();
+      // Initialize universal search for calendar if not already done
+      if (typeof window.calendarModule?.initializeCalendarUniversalSearch === "function") {
+        window.calendarModule.initializeCalendarUniversalSearch();
+      }
       console.log("[route] Handled calendar routing");
     }
   }

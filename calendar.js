@@ -320,7 +320,19 @@ const calendarCache = {
 
 // Get campaigns from planning data (cached)
 function getCampaignData() {
-  return calendarCache.getCampaigns();
+  let campaigns = calendarCache.getCampaigns();
+  
+  // Apply universal search filters if they exist
+  if (window.activeCalendarSearchFilters && window.activeCalendarSearchFilters.length > 0) {
+    campaigns = campaigns.filter(campaign => {
+      return window.activeCalendarSearchFilters.some(filterId => {
+        // The filterId corresponds to campaign index
+        return campaign.index && campaign.index.toString() === filterId.toString();
+      });
+    });
+  }
+  
+  return campaigns;
 }
 
 // Parse quarter to get month and year
@@ -1506,6 +1518,9 @@ function renderMonthInBatches(monthData, container) {
 function initializeCalendar() {
   console.log('🗓️ Initializing calendar...');
   
+  // Initialize universal search
+  initializeCalendarUniversalSearch();
+  
   // Initialize calendar with available fiscal years
   const campaigns = getCampaignData();
   console.log(`Calendar: Found ${campaigns.length} campaigns during initialization`);
@@ -1558,6 +1573,98 @@ function initializeCalendar() {
   }
 }
 
+// Initialize calendar universal search
+function initializeCalendarUniversalSearch() {
+  console.log("🔍 CALENDAR: Starting universal search initialization...");
+  
+  // Check if UniversalSearchFilter class is available
+  if (!window.UniversalSearchFilter) {
+    console.error("❌ CALENDAR: UniversalSearchFilter class not found!");
+    console.log("Available on window:", Object.keys(window).filter(k => k.includes('Search') || k.includes('Universal')));
+    return;
+  }
+  
+  console.log("✅ CALENDAR: UniversalSearchFilter class found");
+  
+  // Check if container exists
+  const container = document.getElementById('calendarUniversalSearch');
+  if (!container) {
+    console.error("❌ CALENDAR: Container 'calendarUniversalSearch' not found in DOM!");
+    console.log("Available elements with 'calendar' in id:", Array.from(document.querySelectorAll('[id*="calendar"]')).map(el => el.id));
+    return;
+  }
+  
+  console.log("✅ CALENDAR: Container found:", container);
+  console.log("✅ CALENDAR: Container visible:", container.offsetParent !== null);
+  
+  try {
+    // Initialize universal search for calendar
+    window.calendarUniversalSearch = new window.UniversalSearchFilter(
+      'calendarUniversalSearch',
+      {
+        onFilterChange: (selectedFilters) => {
+          console.log("🔄 CALENDAR: Search filters changed:", selectedFilters);
+          applyCalendarSearchFilters(selectedFilters);
+        }
+      }
+    );
+    
+    console.log("✅ CALENDAR: Universal search initialized successfully!");
+    
+    // Update search data with current calendar data
+    updateCalendarSearchData();
+    
+  } catch (error) {
+    console.error("❌ CALENDAR: Error initializing universal search:", error);
+    console.error("❌ CALENDAR: Error stack:", error.stack);
+  }
+}
+
+// Apply search filters to calendar view
+function applyCalendarSearchFilters(selectedFilters) {
+  console.log("🔍 CALENDAR: Applying search filters:", selectedFilters);
+  
+  // Store selected filters for later use
+  window.activeCalendarSearchFilters = selectedFilters;
+  
+  // Re-render calendar with filters applied
+  renderCalendar();
+}
+
+// Update calendar search data
+function updateCalendarSearchData() {
+  if (!window.calendarUniversalSearch) {
+    console.log("🔍 CALENDAR: Universal search not initialized yet");
+    return;
+  }
+  
+  try {
+    const campaigns = getCampaignData();
+    console.log(`🔍 CALENDAR: Updating search data with ${campaigns.length} campaigns`);
+    
+    // Extract searchable data from campaigns
+    const searchData = campaigns.map(campaign => ({
+      id: campaign.index,
+      title: campaign.programType || '',
+      description: campaign.description || '',
+      region: campaign.region || '',
+      country: campaign.country || '',
+      quarter: campaign.quarter || '',
+      owner: campaign.owner || '',
+      status: campaign.status || '',
+      strategicPillars: campaign.strategicPillars || '',
+      revenuePlay: campaign.revenuePlay || '',
+      fiscalYear: campaign.fiscalYear || ''
+    }));
+    
+    window.calendarUniversalSearch.updateData(searchData);
+    console.log("✅ CALENDAR: Search data updated successfully");
+    
+  } catch (error) {
+    console.error("❌ CALENDAR: Error updating search data:", error);
+  }
+}
+
 // Handle calendar tab routing
 function handleCalendarRouting() {
   const hash = location.hash;
@@ -1572,6 +1679,7 @@ function handleCalendarRouting() {
 // Module exports with performance optimizations
 const calendarModule = {
   initializeCalendar,
+  initializeCalendarUniversalSearch,
   handleCalendarRouting,
   renderCalendar,
   showCampaignDetails,

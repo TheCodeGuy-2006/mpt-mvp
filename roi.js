@@ -992,6 +992,9 @@ function initializeRoiFunctionality() {
   
   roiInitialized = true;
   
+  // Initialize universal search
+  initializeRoiUniversalSearch();
+  
   setTimeout(() => {
     renderRoiByRegionChart();
     renderRoiByProgramTypeChart();
@@ -1210,7 +1213,17 @@ function getCampaignDataForRoi() {
     return [];
   }
 
-  const planningData = window.planningModule.tableInstance.getData();
+  let planningData = window.planningModule.tableInstance.getData();
+
+  // Apply universal search filters if they exist
+  if (window.activeRoiSearchFilters && window.activeRoiSearchFilters.length > 0) {
+    planningData = planningData.filter((campaign, index) => {
+      return window.activeRoiSearchFilters.some(filterId => {
+        // The filterId corresponds to campaign index (1-based)
+        return (index + 1).toString() === filterId.toString();
+      });
+    });
+  }
 
   return planningData.map((campaign, index) => {
     const actualCost = Number(campaign.actualCost) || 0;
@@ -1291,6 +1304,104 @@ function handleRoiTabRouting() {
   }
 }
 
+// Initialize ROI universal search
+function initializeRoiUniversalSearch() {
+  console.log("🔍 ROI: Starting universal search initialization...");
+  
+  // Check if UniversalSearchFilter class is available
+  if (!window.UniversalSearchFilter) {
+    console.error("❌ ROI: UniversalSearchFilter class not found!");
+    console.log("Available on window:", Object.keys(window).filter(k => k.includes('Search') || k.includes('Universal')));
+    return;
+  }
+  
+  console.log("✅ ROI: UniversalSearchFilter class found");
+  
+  // Check if container exists
+  const container = document.getElementById('roiUniversalSearch');
+  if (!container) {
+    console.error("❌ ROI: Container 'roiUniversalSearch' not found in DOM!");
+    console.log("Available elements with 'roi' in id:", Array.from(document.querySelectorAll('[id*="roi"]')).map(el => el.id));
+    return;
+  }
+  
+  console.log("✅ ROI: Container found:", container);
+  console.log("✅ ROI: Container visible:", container.offsetParent !== null);
+  
+  try {
+    // Initialize universal search for ROI
+    window.roiUniversalSearch = new window.UniversalSearchFilter(
+      'roiUniversalSearch',
+      {
+        onFilterChange: (selectedFilters) => {
+          console.log("🔄 ROI: Search filters changed:", selectedFilters);
+          applyRoiSearchFilters(selectedFilters);
+        }
+      }
+    );
+    
+    console.log("✅ ROI: Universal search initialized successfully!");
+    
+    // Update search data with current ROI data
+    updateRoiSearchData();
+    
+  } catch (error) {
+    console.error("❌ ROI: Error initializing universal search:", error);
+    console.error("❌ ROI: Error stack:", error.stack);
+  }
+}
+
+// Apply search filters to ROI view
+function applyRoiSearchFilters(selectedFilters) {
+  console.log("🔍 ROI: Applying search filters:", selectedFilters);
+  
+  // Store selected filters for later use
+  window.activeRoiSearchFilters = selectedFilters;
+  
+  // Update ROI charts and tables with filters applied
+  if (typeof updateRoiCharts === 'function') {
+    updateRoiCharts();
+  }
+  
+  if (window.roiDataTableInstance && typeof updateRoiDataTable === 'function') {
+    updateRoiDataTable();
+  }
+}
+
+// Update ROI search data
+function updateRoiSearchData() {
+  if (!window.roiUniversalSearch) {
+    console.log("🔍 ROI: Universal search not initialized yet");
+    return;
+  }
+  
+  try {
+    const campaigns = getCampaignDataForRoi();
+    console.log(`🔍 ROI: Updating search data with ${campaigns.length} campaigns`);
+    
+    // Extract searchable data from campaigns
+    const searchData = campaigns.map(campaign => ({
+      id: campaign.index,
+      title: campaign.programType || '',
+      description: campaign.description || '',
+      region: campaign.region || '',
+      country: campaign.country || '',
+      quarter: campaign.quarter || '',
+      owner: campaign.owner || '',
+      status: campaign.status || '',
+      strategicPillars: campaign.strategicPillars || '',
+      revenuePlay: campaign.revenuePlay || '',
+      fiscalYear: campaign.fiscalYear || ''
+    }));
+    
+    window.roiUniversalSearch.updateData(searchData);
+    console.log("✅ ROI: Search data updated successfully");
+    
+  } catch (error) {
+    console.error("❌ ROI: Error updating search data:", error);
+  }
+}
+
 // Module exports
 const roiModule = {
   updateRoiTotalSpend,
@@ -1298,6 +1409,7 @@ const roiModule = {
   updateReportTotalSpend,
   setupRoiChartEventHandlers,
   initializeRoiFunctionality,
+  initializeRoiUniversalSearch,
   handleRoiTabRouting,
   initRoiDataTable,
   getCampaignDataForRoi,
