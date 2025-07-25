@@ -697,8 +697,8 @@ function initPlanningGrid(rows) {
         renderVertical: "basic",
         
         // Performance optimizations
-        autoResize: true,
-        responsiveLayout: false, // Disable to allow horizontal scrolling
+        autoResize: true, // Re-enable for proper sizing
+        responsiveLayout: false, // Keep disabled to allow horizontal scrolling
         invalidOptionWarnings: false,
         
         // Fix scroll performance issues - disable problematic scroll features
@@ -741,7 +741,7 @@ function initPlanningGrid(rows) {
         data: rows,
         reactiveData: true,
         selectableRows: 1,
-        layout: "fitData",
+        layout: "fitData", // Back to basic fitData for natural column sizing
         // Remove initial sort - will add after columns are created
         // initialSort: [
         //   { column: "quarter", dir: "asc" },
