@@ -1058,7 +1058,7 @@ function initPlanningGrid(rows) {
               return value === "" || value === null || value === undefined ? "(Clear)" : value;
             },
           },
-          // Digital Motions toggle
+          // Digital Motions toggle - moved to second-to-last position
           {
             title: "Digital Motions",
             field: "digitalMotions",
@@ -1102,12 +1102,12 @@ function initPlanningGrid(rows) {
             },
             headerSort: false,
           },
-          // Bin icon (delete)
+          // Bin icon (delete) - kept as last column
           {
             title: "",
             field: "delete",
             formatter: function () {
-              return '<button class="delete-row-btn" title="Delete"><i class="octicon octicon-trash" aria-hidden="true"></i></button>';
+              return '<button class="delete-row-btn" title="Delete Row" style="color: #d1242f; font-size: 16px; display: flex; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 1.75a.25.25 0 0 1 .25-.25h2.5a.25.25 0 0 1 .25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 0 1 0 1.5H13v8.25A1.75 1.75 0 0 1 11.25 14H4.75A1.75 1.75 0 0 1 3 12.75V4.5h-.25a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.5 4.5v8a.25.25 0 0 0 .25.25h6.5a.25.25 0 0 0 .25-.25v-8H4.5z"/></svg></button>';
             },
             width: 50,
             hozAlign: "center",

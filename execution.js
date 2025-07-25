@@ -424,8 +424,6 @@ function initExecutionGrid(rows) {
           cell.getRow().getData().__modified = true;
         }, 500),
       },
-      { title: "SQL", field: "sqlForecast", editable: false },
-      { title: "Opps", field: "oppsForecast", editable: false },
       {
         title: "Pipeline",
         field: "pipelineForecast",
