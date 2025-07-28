@@ -1,8 +1,4 @@
-  // Debug: Log region and values for chart
-  console.log(`[Region Chart] ${region} | Assigned:`, assignedBudget, '| Forecasted:', forecastedCost, '| Actual:', actualCost);
-  if (forecastedCost === 0) {
-    console.warn(`[Region Chart] Forecasted value is ZERO for region: ${region}`);
-  }
+// ...existing code...
 // charts.js - Chart rendering and visualization utilities
 
 // CHARTS PERFORMANCE CONFIGURATION
@@ -24,7 +20,7 @@ const CHARTS_PERFORMANCE_CONFIG = {
   useRequestAnimationFrame: true,
   batchChartUpdates: true,
   maxConcurrentCharts: 3
-};
+}
 
 // Performance utilities for charts
 const chartsPerformanceUtils = {
@@ -712,7 +708,7 @@ function createFullscreenOverlay(region, assignedBudget, forecastedCost, actualC
 // ROI by Region Chart (optimized with caching and filtering)
 const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
   // Get current ROI filter state
-  const filters = window.roiModule ? window.roiModule.getFilterState ? window.roiModule.getFilterState() : {} : {};
+  const filters = roiModule.getFilterState ? roiModule.getFilterState() : {};
   
   // Create cache key based on filters
   const cacheKey = `roi-region-chart-${JSON.stringify(filters)}`;
@@ -1234,13 +1230,13 @@ const initRoiTabSwitching = chartsPerformanceUtils.debounce(() => {
       } else if (activePanel === dataTablePanel) {
         // Initialize the ROI data table if it doesn't exist yet
         if (!window.roiDataTableInstance) {
-          if (window.roiModule && window.roiModule.initRoiDataTable) {
-            window.roiDataTableInstance = window.roiModule.initRoiDataTable();
+          if (roiModule.initRoiDataTable) {
+            window.roiDataTableInstance = roiModule.initRoiDataTable();
           }
         } else {
           // Update the ROI data table when switching to it
-          if (window.roiModule && window.roiModule.updateRoiDataTable) {
-            window.roiModule.updateRoiDataTable();
+          if (roiModule.updateRoiDataTable) {
+            roiModule.updateRoiDataTable();
           }
         }
       } else if (activePanel === quarterPanel) {
@@ -1307,41 +1303,16 @@ const cleanupAllCharts = () => {
 };
 
 // Export optimized chart module functions and utilities
-if (typeof window !== "undefined") {
-  window.chartsModule = {
-    // Core chart functions
-    initializeChartJS,
-    renderBudgetsBarChart,
-    renderBudgetsRegionCharts,
-    renderRoiByRegionChart,
-    renderRoiByProgramTypeChart,
-    renderRoiByQuarterChart,
-    updateRoiGauge,
-    createReportSpendByRegionChart,
-    initRoiTabSwitching,
-    
-    // Performance utilities
-    cleanupAllCharts,
-    clearChartCache: () => chartCache.clear(),
-    
-    // Performance configuration
-    config: CHARTS_PERFORMANCE_CONFIG,
-    
-    // Performance statistics
-    getCacheStats: () => ({
-      cacheSize: chartCache.cache.size,
-      cacheKeys: Array.from(chartCache.cache.keys())
-    })
-  };
-  
-  // Maintain backward compatibility
-  window.initializeChartJS = initializeChartJS;
-  window.renderBudgetsBarChart = renderBudgetsBarChart;
-  window.renderBudgetsRegionCharts = renderBudgetsRegionCharts;
-  window.renderRoiByRegionChart = renderRoiByRegionChart;
-  window.renderRoiByProgramTypeChart = renderRoiByProgramTypeChart;
-  window.renderRoiByQuarterChart = renderRoiByQuarterChart;
-  window.updateRoiGauge = updateRoiGauge;
-  window.createReportSpendByRegionChart = createReportSpendByRegionChart;
-  window.initRoiTabSwitching = initRoiTabSwitching;
-}
+// Export all relevant functions for module usage
+export {
+  initializeChartJS,
+  renderBudgetsBarChart,
+  renderBudgetsRegionCharts,
+  renderRoiByRegionChart,
+  renderRoiByProgramTypeChart,
+  renderRoiByQuarterChart,
+  updateRoiGauge,
+  createReportSpendByRegionChart,
+  initRoiTabSwitching,
+  cleanupAllCharts
+};
