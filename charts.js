@@ -1,3 +1,8 @@
+  // Debug: Log region and values for chart
+  console.log(`[Region Chart] ${region} | Assigned:`, assignedBudget, '| Forecasted:', forecastedCost, '| Actual:', actualCost);
+  if (forecastedCost === 0) {
+    console.warn(`[Region Chart] Forecasted value is ZERO for region: ${region}`);
+  }
 // charts.js - Chart rendering and visualization utilities
 
 // CHARTS PERFORMANCE CONFIGURATION
@@ -345,6 +350,10 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
 
 // Helper function to process individual region chart
 function processRegionChart(region, rowContainer, budgetsData, planningRows) {
+  // Debug: Confirm function is called
+  console.log(`[Region Chart] processRegionChart called for region: ${region}`);
+  // Debug: About to create chart for region
+  console.log(`[Region Chart] Creating chart for region: ${region}`);
   // Assigned budget
   const budgetObj = budgetsData.find((b) => b.region === region);
   const assignedBudget = budgetObj && budgetObj.assignedBudget
@@ -378,8 +387,11 @@ function processRegionChart(region, rowContainer, budgetsData, planningRows) {
     position: relative;
   `;
 
-  // Title and canvas
-  chartDiv.innerHTML = `<h3 style="font-size:1.18rem;margin:0 0 12px 0;color:#1976d2;">${region}</h3><canvas id="chart-${region}"></canvas>`;
+  // Title and canvas with explicit height for label space
+  chartDiv.innerHTML = `
+    <h3 style="font-size:1.18rem;margin:0 0 12px 0;color:#1976d2;">${region}</h3>
+    <canvas id="chart-${region}" width="280" height="220"></canvas>
+  `;
 
   // Fullscreen button
   const fullscreenBtn = document.createElement("button");
@@ -390,13 +402,17 @@ function processRegionChart(region, rowContainer, budgetsData, planningRows) {
     position: absolute;
     top: 6px;
     right: 8px;
-    font-size: 1.1em;
-    background: none;
-    border: none;
+    font-size: 1.2em;
+    background: #fff;
+    border: 2px solid #1976d2;
+    border-radius: 6px;
+    color: #1976d2;
     cursor: pointer;
-    opacity: 0.7;
-    padding: 2px 6px;
-    z-index: 2;
+    opacity: 1;
+    padding: 2px 8px;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(25,118,210,0.12);
+    transition: background 0.2s, border 0.2s;
   `;
   chartDiv.appendChild(fullscreenBtn);
   rowContainer.appendChild(chartDiv);
@@ -425,8 +441,17 @@ function processRegionChart(region, rowContainer, budgetsData, planningRows) {
       },
       options: {
         responsive: false,
+        maintainAspectRatio: false,
         animation: {
           duration: CHARTS_PERFORMANCE_CONFIG.chartAnimationDuration
+        },
+        layout: {
+          padding: {
+            left: 10,
+            right: 10,
+            top: 10,
+            bottom: 25  // Extra bottom padding for x-axis labels
+          }
         },
         plugins: {
           legend: { display: false },
@@ -440,7 +465,21 @@ function processRegionChart(region, rowContainer, budgetsData, planningRows) {
             ticks: { callback: (v) => "$" + v.toLocaleString() },
           },
           x: {
+            type: 'category',
             title: { display: false },
+            ticks: {
+              display: true,
+              maxRotation: 0,
+              minRotation: 0,
+              font: {
+                size: 11
+              },
+              padding: 5,
+              userCallback: function(label, index, labels) {
+                // Always return the label as-is
+                return label;
+              }
+            }
           },
         },
       },
