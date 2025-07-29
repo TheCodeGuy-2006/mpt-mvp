@@ -1,5 +1,5 @@
 // roi.js - ROI and Reporting Module
-import { createReportSpendByRegionChart, renderRoiByRegionChart } from './charts.js';
+import { createReportSpendByRegionChart, renderRoiByRegionChart, renderRoiByProgramTypeChart, renderRoiByQuarterChart, initRoiTabSwitching } from './charts.js';
 // Performance optimization: Cache and debounce
 let filterUpdateTimeout = null;
 let lastFilterState = null;

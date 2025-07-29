@@ -1,3 +1,4 @@
+import roiModule from "./roi.js";
 // ...existing code...
 // charts.js - Chart rendering and visualization utilities
 

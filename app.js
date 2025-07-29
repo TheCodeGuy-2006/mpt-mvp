@@ -1,7 +1,7 @@
 import { kpis } from "./src/calc.js";
 import "./src/cloudflare-sync.js";
 import roiModule from "./roi.js";
-import { renderBudgetsRegionCharts } from "./charts.js";
+import { renderBudgetsBarChart, renderBudgetsRegionCharts } from "./charts.js";
 
 console.log("app.js loaded");
 
@@ -879,8 +879,8 @@ function route() {
         console.log("[route] Redrew budgets table");
         // Ensure both charts render after table redraw
         setTimeout(() => {
-          if (typeof window.renderBudgetsBarChart === "function") {
-            window.renderBudgetsBarChart();
+          if (typeof renderBudgetsBarChart === "function") {
+            renderBudgetsBarChart();
             console.log("[route] Triggered budgets bar chart render");
           }
           if (typeof renderBudgetsRegionCharts === "function") {
