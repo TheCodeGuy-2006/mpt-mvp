@@ -1299,6 +1299,17 @@ window.addEventListener("DOMContentLoaded", async () => {
         budgetsTable = window.budgetsModule.initBudgetsTable(budgets, rows);
         window.budgetsTableInstance = budgetsTable;
         console.log("✅ Budgets table initialized");
+        // Ensure budget charts render after table is initialized
+        setTimeout(() => {
+          if (window.chartsModule?.renderBudgetsBarChart) {
+            window.chartsModule.renderBudgetsBarChart();
+            console.log("[init] Triggered budgets bar chart render");
+          }
+          if (window.chartsModule?.renderBudgetsRegionCharts) {
+            window.chartsModule.renderBudgetsRegionCharts();
+            console.log("[init] Triggered budgets region charts render");
+          }
+        }, 100);
       }
     } catch (e) {
       console.error("Budgets table initialization failed:", e);

@@ -134,11 +134,13 @@ const initializeChartJS = chartsPerformanceUtils.debounce(() => {
         Chart.defaults.responsive = CHARTS_PERFORMANCE_CONFIG.chartResponsiveness;
         Chart.defaults.maintainAspectRatio = CHARTS_PERFORMANCE_CONFIG.chartMaintainAspectRatio;
       }
-      
       // Only render if data is available
       chartsPerformanceUtils.optimizedChartUpdate(() => {
         if (typeof renderBudgetsBarChart === "function") {
           renderBudgetsBarChart();
+        }
+        if (typeof renderBudgetsRegionCharts === "function") {
+          renderBudgetsRegionCharts();
         }
       });
     };
@@ -148,10 +150,12 @@ const initializeChartJS = chartsPerformanceUtils.debounce(() => {
     Chart.defaults.animation.duration = CHARTS_PERFORMANCE_CONFIG.chartAnimationDuration;
     Chart.defaults.responsive = CHARTS_PERFORMANCE_CONFIG.chartResponsiveness;
     Chart.defaults.maintainAspectRatio = CHARTS_PERFORMANCE_CONFIG.chartMaintainAspectRatio;
-    
     chartsPerformanceUtils.optimizedChartUpdate(() => {
       if (typeof renderBudgetsBarChart === "function") {
         renderBudgetsBarChart();
+      }
+      if (typeof renderBudgetsRegionCharts === "function") {
+        renderBudgetsRegionCharts();
       }
     });
   }
@@ -161,25 +165,31 @@ const initializeChartJS = chartsPerformanceUtils.debounce(() => {
 const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
   const ctx = document.getElementById("budgetsBarChart");
   if (!ctx) {
+    console.error("[BudgetsBarChart] Canvas with id 'budgetsBarChart' not found.");
     return;
   }
 
   // Check cache first
   const cacheKey = 'budgets-bar-chart';
   const cachedData = chartCache.get(cacheKey);
-  
+
   // Get budgets data from the table or from the budgets object
   let budgetsData = [];
   if (window.budgetsTableInstance) {
     budgetsData = window.budgetsTableInstance.getData();
+    console.info("[BudgetsBarChart] Loaded budgets data from budgetsTableInstance", budgetsData);
   } else if (window.budgetsObj) {
     budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({
       region,
       ...data,
     }));
+    console.info("[BudgetsBarChart] Loaded budgets data from budgetsObj", budgetsData);
+  } else {
+    console.warn("[BudgetsBarChart] No budgetsTableInstance or budgetsObj found on window.");
   }
 
   if (!budgetsData || budgetsData.length === 0) {
+    console.warn("[BudgetsBarChart] No budgets data found to render.", { budgetsData });
     return;
   }
 
@@ -188,9 +198,10 @@ const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
     region: d.region || d.Region, 
     budget: d.assignedBudget || d.AssignedBudget 
   })));
-  
+
   // Use cached data if unchanged
   if (cachedData && cachedData.signature === dataSignature) {
+    console.info("[BudgetsBarChart] Using cached data, no changes detected.");
     return;
   }
 
@@ -206,58 +217,67 @@ const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
   // Destroy previous chart if exists
   if (window.budgetsBarChartInstance) {
     window.budgetsBarChartInstance = chartsPerformanceUtils.cleanupChart(window.budgetsBarChartInstance);
+    console.info("[BudgetsBarChart] Destroyed previous chart instance.");
   }
 
   chartsPerformanceUtils.optimizedChartUpdate(() => {
-    window.budgetsBarChartInstance = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "Assigned Budget (USD)",
-            data: values,
-            backgroundColor: "#1976d2",
-            borderRadius: 8,
-            borderSkipped: false,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          duration: CHARTS_PERFORMANCE_CONFIG.chartAnimationDuration
+    try {
+      window.budgetsBarChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Assigned Budget (USD)",
+              data: values,
+              backgroundColor: "#1976d2",
+              borderRadius: 8,
+              borderSkipped: false,
+            },
+          ],
         },
-        plugins: {
-          legend: { display: false },
-          title: { display: false },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            max: 600000,
-            title: { display: true, text: "Dollars (USD)" },
-            ticks: { callback: (v) => "$" + v.toLocaleString() },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: {
+            duration: CHARTS_PERFORMANCE_CONFIG.chartAnimationDuration
           },
-          x: {
+          plugins: {
+            legend: { display: false },
             title: { display: false },
           },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 600000,
+              title: { display: true, text: "Dollars (USD)" },
+              ticks: { callback: (v) => "$" + v.toLocaleString() },
+            },
+            x: {
+              title: { display: false },
+            },
+          },
         },
-      },
-    });
+      });
+      console.info("[BudgetsBarChart] Chart rendered successfully.");
+    } catch (err) {
+      console.error("[BudgetsBarChart] Error rendering chart:", err);
+    }
   });
 }, CHARTS_PERFORMANCE_CONFIG.chartUpdateDebounce);
 
 // Budgets Region Charts (optimized with intelligent caching and batch processing)
 const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
   const container = document.getElementById("budgetsChartsContainer");
-  if (!container) return;
-  
+  if (!container) {
+    console.error("[BudgetsRegionCharts] Container with id 'budgetsChartsContainer' not found.");
+    return;
+  }
+
   // Check cache for region data
   const cacheKey = 'budgets-region-charts';
   let shouldRebuild = true;
-  
+
   // Get budgets data
   let budgetsData = [];
   if (window.budgetsTableInstance) {
@@ -268,6 +288,9 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
       ...data,
     }));
   }
+  if (!budgetsData || budgetsData.length === 0) {
+    console.warn("[BudgetsRegionCharts] No budgets data found.", { budgetsData });
+  }
 
   // Get planning data (for forecasted/actual cost)
   let planningRows = [];
@@ -275,6 +298,9 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
     planningRows = window.planningTableInstance.getData();
   } else if (window.planningRows) {
     planningRows = window.planningRows;
+  }
+  if (!planningRows || planningRows.length === 0) {
+    console.warn("[BudgetsRegionCharts] No planning data found.", { planningRows });
   }
 
   // Create data signature for caching
@@ -284,14 +310,17 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
     budgetSum: budgetsData.reduce((sum, b) => sum + (Number(b.assignedBudget) || 0), 0),
     forecastSum: planningRows.reduce((sum, p) => sum + (Number(p.forecastedCost) || 0), 0)
   });
-  
+
   const cachedRegionData = chartCache.get(cacheKey);
   if (cachedRegionData && cachedRegionData.signature === dataSignature) {
     shouldRebuild = false;
+    console.info("[BudgetsRegionCharts] Using cached region data.");
   }
-  
-  if (!shouldRebuild) return;
-  
+
+  if (!shouldRebuild) {
+    return;
+  }
+
   // Clear container and rebuild
   container.innerHTML = "";
 
@@ -302,6 +331,10 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
       ...planningRows.map((r) => r.region),
     ]),
   ).filter(Boolean);
+  if (allRegions.length === 0) {
+    console.warn("[BudgetsRegionCharts] No regions found to render.", { allRegions });
+    return;
+  }
 
   // Cache the processed data
   chartCache.set(cacheKey, { signature: dataSignature, regions: allRegions });
@@ -309,10 +342,10 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
   // Batch process regions for better performance
   const processRegionBatch = (startIndex, batchSize = 2) => {
     const endIndex = Math.min(startIndex + batchSize, allRegions.length);
-    
+
     for (let idx = startIndex; idx < endIndex; idx++) {
       const region = allRegions[idx];
-      
+
       // Create row container if needed
       if (idx % 4 === 0) {
         const rowDiv = document.createElement("div");
@@ -325,11 +358,11 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
         `;
         container.appendChild(rowDiv);
       }
-      
+
       const currentRow = container.lastElementChild;
       processRegionChart(region, currentRow, budgetsData, planningRows);
     }
-    
+
     // Process next batch
     if (endIndex < allRegions.length) {
       chartsPerformanceUtils.optimizedChartUpdate(() => {
@@ -337,7 +370,7 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
       });
     }
   };
-  
+
   // Start batch processing
   if (allRegions.length > 0) {
     processRegionBatch(0);
