@@ -1,7 +1,7 @@
 import { kpis } from "./src/calc.js";
 import "./src/cloudflare-sync.js";
 import roiModule from "./roi.js";
-import { renderBudgetsBarChart, renderBudgetsRegionCharts } from "./charts.js";
+import { renderBudgetsBarChart, renderBudgetsRegionCharts, initRoiTabSwitching } from "./charts.js";
 
 console.log("app.js loaded");
 
