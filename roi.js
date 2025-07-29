@@ -1,5 +1,12 @@
 // roi.js - ROI and Reporting Module
-import { createReportSpendByRegionChart, renderRoiByRegionChart, renderRoiByProgramTypeChart, renderRoiByQuarterChart, initRoiTabSwitching, updateRoiGauge } from './charts.js';
+import {
+  createReportSpendByRegionChart,
+  renderRoiByRegionChart,
+  renderRoiByProgramTypeChart,
+  renderRoiByQuarterChart,
+  updateRoiGauge,
+  initRoiTabSwitching
+} from './charts.js';
 // Performance optimization: Cache and debounce
 let filterUpdateTimeout = null;
 let lastFilterState = null;
@@ -1574,6 +1581,9 @@ const roiModule = {
   ensureRoiDataTableInitialized, // New function for lazy data table initialization
   getFilterState, // Export filter state function for charts
 };
+
+// Export to window for access from other modules
+window.roiModule = roiModule;
 
 // Remaining Budget Calculation Functions
 let budgetsData = null;

@@ -1,7 +1,7 @@
+
 import { kpis } from "./src/calc.js";
 import "./src/cloudflare-sync.js";
-import roiModule from "./roi.js";
-import { renderBudgetsBarChart, renderBudgetsRegionCharts, initRoiTabSwitching } from "./charts.js";
+import { initRoiTabSwitching, renderBudgetsRegionCharts } from "./charts.js";
 
 console.log("app.js loaded");
 
@@ -879,12 +879,12 @@ function route() {
         console.log("[route] Redrew budgets table");
         // Ensure both charts render after table redraw
         setTimeout(() => {
-          if (typeof renderBudgetsBarChart === "function") {
-            renderBudgetsBarChart();
+          if (typeof window.renderBudgetsBarChart === "function") {
+            window.renderBudgetsBarChart();
             console.log("[route] Triggered budgets bar chart render");
           }
-          if (typeof renderBudgetsRegionCharts === "function") {
-            renderBudgetsRegionCharts();
+          if (typeof window.renderBudgetsRegionCharts === "function") {
+            window.renderBudgetsRegionCharts();
             console.log("[route] Triggered budgets region charts render");
           }
         }, 100);
@@ -978,22 +978,36 @@ function route() {
         }
       }, 0);
     }
-    if (hash === "#roi") {
+    if (
+      hash === "#roi" &&
+      typeof window.roiModule.updateRoiTotalSpend === "function"
+    ) {
       // Mark ROI tab as active for performance optimization
-      roiModule.setRoiTabActive?.(true);
+      if (typeof window.roiModule.setRoiTabActive === "function") {
+        window.roiModule.setRoiTabActive(true);
+      }
+      
       setTimeout(() => {
-        roiModule.populateRoiFilters?.();
-        roiModule.updateRoiTotalSpend?.();
+        window.roiModule.populateRoiFilters();
+        window.roiModule.updateRoiTotalSpend();
+        
         // Ensure ROI data table is initialized when tab is viewed
-        roiModule.ensureRoiDataTableInitialized?.();
+        if (typeof window.roiModule.ensureRoiDataTableInitialized === "function") {
+          window.roiModule.ensureRoiDataTableInitialized();
+        }
+        
         // Initialize universal search for ROI if not already done
-        roiModule.initializeRoiUniversalSearch?.();
+        if (typeof window.roiModule.initializeRoiUniversalSearch === "function") {
+          window.roiModule.initializeRoiUniversalSearch();
+        }
       }, 0);
       setTimeout(initRoiTabSwitching, 100); // Initialize tab switching when ROI tab is viewed
       console.log("[route] Updated ROI total spend");
     } else {
       // Mark ROI tab as inactive when switching to other tabs
-      roiModule.setRoiTabActive?.(false);
+      if (typeof window.roiModule?.setRoiTabActive === "function") {
+        window.roiModule.setRoiTabActive(false);
+      }
     }
     if (hash === "#report" && window.reportTableInstance) {
       setTimeout(() => {
@@ -1003,10 +1017,25 @@ function route() {
         );
         console.log("[route] Redrew report grid");
       }, 0);
-      setTimeout(() => roiModule.updateReportTotalSpend?.(), 0);
     }
-    window.calendarModule.initializeCalendarUniversalSearch();
-    console.log("[route] Handled calendar routing");
+    if (
+      hash === "#report" &&
+      typeof window.roiModule.updateReportTotalSpend === "function"
+    ) {
+      setTimeout(window.roiModule.updateReportTotalSpend, 0);
+      console.log("[route] Updated report total spend");
+    }
+    if (
+      hash === "#calendar" &&
+      typeof window.calendarModule?.handleCalendarRouting === "function"
+    ) {
+      window.calendarModule.handleCalendarRouting();
+      // Initialize universal search for calendar if not already done
+      if (typeof window.calendarModule?.initializeCalendarUniversalSearch === "function") {
+        window.calendarModule.initializeCalendarUniversalSearch();
+      }
+      console.log("[route] Handled calendar routing");
+    }
   }
   
   // Handle GitHub Sync password protection separately
@@ -1288,13 +1317,13 @@ window.addEventListener("DOMContentLoaded", async () => {
     await new Promise(resolve => {
       requestAnimationFrame(() => {
         // Initialize ROI functionality with pre-caching
-        if (roiModule?.initializeRoiFunctionality) {
-          roiModule.initializeRoiFunctionality();
+        if (window.roiModule?.initializeRoiFunctionality) {
+          window.roiModule.initializeRoiFunctionality();
         }
 
         // Initialize reporting with reduced console output
-        if (roiModule?.updateReportTotalSpend) {
-          roiModule.updateReportTotalSpend();
+        if (window.roiModule?.updateReportTotalSpend) {
+          window.roiModule.updateReportTotalSpend();
         }
         
         resolve();
@@ -1347,8 +1376,8 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
         
         // Setup ROI chart event handlers
-        if (roiModule?.setupRoiChartEventHandlers) {
-          roiModule.setupRoiChartEventHandlers();
+        if (window.roiModule?.setupRoiChartEventHandlers) {
+          window.roiModule.setupRoiChartEventHandlers();
         }
         
         resolve();
@@ -1362,9 +1391,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     await new Promise(resolve => {
       requestAnimationFrame(() => {
         // Pre-cache planning data for faster filter performance (delayed)
-        if (roiModule?.preCachePlanningData) {
+        if (window.roiModule?.preCachePlanningData) {
           setTimeout(() => {
-            roiModule.preCachePlanningData();
+            window.roiModule.preCachePlanningData();
           }, 1000);
         }
         

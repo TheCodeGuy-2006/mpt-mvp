@@ -1,5 +1,4 @@
 import { kpis } from "./src/calc.js";
-import roiModule from "./roi.js";
 
 // Utility function for safe table scrolling
 function safeScrollToRow(table, rowIdentifier, position = "top", ifVisible = false) {
@@ -1087,10 +1086,18 @@ function initPlanningGrid(rows) {
               }, 50);
 
               setTimeout(() => {
-                const regionFilter = document.getElementById("roiRegionFilter")?.value || "";
-                roiModule.updateRemainingBudget?.(regionFilter);
-                roiModule.updateForecastedBudgetUsage?.(regionFilter);
-                console.log("[Planning] Triggered ROI budget updates after Digital Motions toggle");
+                if (
+                  window.roiModule &&
+                  typeof window.roiModule.updateRemainingBudget === "function"
+                ) {
+                  const regionFilter =
+                    document.getElementById("roiRegionFilter")?.value || "";
+                  window.roiModule.updateRemainingBudget(regionFilter);
+                  window.roiModule.updateForecastedBudgetUsage(regionFilter);
+                  console.log(
+                    "[Planning] Triggered ROI budget updates after Digital Motions toggle",
+                  );
+                }
               }, 100);
             },
             headerSort: false,
@@ -1729,7 +1736,9 @@ function setupPlanningSave(table, rows) {
           }
 
           // Update ROI metrics
-          roiModule.updateRoiTotalSpend?.();
+          if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
+            window.roiModule.updateRoiTotalSpend();
+          }
         })
         .catch((error) => {
           console.warn("Worker save failed, trying backend:", error);
@@ -1769,7 +1778,9 @@ function setupPlanningSave(table, rows) {
             alert("✅ Planning data saved to backend!");
 
             // Update ROI metrics
-            roiModule.updateRoiTotalSpend?.();
+            if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
+              window.roiModule.updateRoiTotalSpend();
+            }
           } else {
             alert("❌ Failed to save: " + (result.error || "Unknown error"));
           }
@@ -1940,7 +1951,9 @@ document
           }
           
           // Update ROI metrics to reflect newly imported forecasted costs
-          setTimeout(() => roiModule.updateRoiTotalSpend?.(), 100); // Small delay to ensure data is fully loaded
+          if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
+            setTimeout(window.roiModule.updateRoiTotalSpend, 100); // Small delay to ensure data is fully loaded
+          }
         }
         
         hideLoadingIndicator();

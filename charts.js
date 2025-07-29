@@ -1,4 +1,3 @@
-import roiModule from "./roi.js";
 // ...existing code...
 // charts.js - Chart rendering and visualization utilities
 
@@ -709,7 +708,7 @@ function createFullscreenOverlay(region, assignedBudget, forecastedCost, actualC
 // ROI by Region Chart (optimized with caching and filtering)
 const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
   // Get current ROI filter state
-  const filters = roiModule.getFilterState ? roiModule.getFilterState() : {};
+  const filters = window.roiModule ? window.roiModule.getFilterState ? window.roiModule.getFilterState() : {} : {};
   
   // Create cache key based on filters
   const cacheKey = `roi-region-chart-${JSON.stringify(filters)}`;
@@ -1231,13 +1230,13 @@ const initRoiTabSwitching = chartsPerformanceUtils.debounce(() => {
       } else if (activePanel === dataTablePanel) {
         // Initialize the ROI data table if it doesn't exist yet
         if (!window.roiDataTableInstance) {
-          if (roiModule.initRoiDataTable) {
-            window.roiDataTableInstance = roiModule.initRoiDataTable();
+          if (window.roiModule && window.roiModule.initRoiDataTable) {
+            window.roiDataTableInstance = window.roiModule.initRoiDataTable();
           }
         } else {
           // Update the ROI data table when switching to it
-          if (roiModule.updateRoiDataTable) {
-            roiModule.updateRoiDataTable();
+          if (window.roiModule && window.roiModule.updateRoiDataTable) {
+            window.roiModule.updateRoiDataTable();
           }
         }
       } else if (activePanel === quarterPanel) {
@@ -1304,6 +1303,26 @@ const cleanupAllCharts = () => {
 };
 
 // Export optimized chart module functions and utilities
+if (typeof window !== "undefined") {
+  window.chartsModule = {
+    // Core chart functions
+    initializeChartJS,
+    renderBudgetsBarChart,
+    renderBudgetsRegionCharts,
+    renderRoiByRegionChart,
+    renderRoiByProgramTypeChart,
+    renderRoiByQuarterChart,
+    updateRoiGauge,
+    createReportSpendByRegionChart,
+    initRoiTabSwitching,
+    // Performance utilities
+    cleanupAllCharts,
+    clearChartCache: () => chartCache.clear(),
+    // Performance configuration
+    config: CHARTS_PERFORMANCE_CONFIG
+  };
+}
+
 // Export all relevant functions for module usage
 export {
   initializeChartJS,
