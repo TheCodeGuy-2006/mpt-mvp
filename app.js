@@ -611,9 +611,10 @@ async function loadProgrammeData() {
   
   // Always recalculate and fill in calculated fields for every row
   // Process in very small batches to prevent long tasks
-  for (let i = 0; i < validRows.length; i += 5) {
-    const batch = validRows.slice(i, i + 5);
-    
+  // Use smaller batch size and requestIdleCallback for better yielding
+  const batchSize = 2;
+  for (let i = 0; i < validRows.length; i += batchSize) {
+    const batch = validRows.slice(i, i + batchSize);
     batch.forEach((row) => {
       if (typeof row.expectedLeads === "number") {
         const kpiVals = kpis(row.expectedLeads);
@@ -623,10 +624,15 @@ async function loadProgrammeData() {
         row.pipelineForecast = kpiVals.pipeline;
       }
     });
-    
     // Yield control after each batch to prevent long tasks
-    if (i + 5 < validRows.length) {
-      await new Promise(resolve => setTimeout(resolve, 0));
+    if (i + batchSize < validRows.length) {
+      await new Promise(resolve => {
+        if (typeof window !== 'undefined' && window.requestIdleCallback) {
+          window.requestIdleCallback(resolve, { timeout: 20 });
+        } else {
+          setTimeout(resolve, 0);
+        }
+      });
     }
   }
   return validRows;

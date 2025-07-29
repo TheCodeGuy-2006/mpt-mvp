@@ -908,67 +908,104 @@ const renderRoiByProgramTypeChart = chartsPerformanceUtils.debounce(() => {
 const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
   // Get current ROI filter state
   const filters = window.roiModule ? window.roiModule.getFilterState ? window.roiModule.getFilterState() : {} : {};
-  
+
   // Create cache key based on filters
   const cacheKey = `roi-quarter-chart-${JSON.stringify(filters)}`;
   const cachedData = chartCache.get(cacheKey);
-  
-  // Calculate totals from execution data
-  let forecastedMql = 0;
-  let actualMql = 0;
-  let forecastedLeads = 0;
-  let actualLeads = 0;
 
-  if (window.executionTableInstance) {
-    const data = window.executionTableInstance.getData();
-    
-    // Helper function to normalize quarter formats for comparison
-    const normalizeQuarter = (quarter) => {
-      if (!quarter) return '';
-      return quarter.replace(/\s*-\s*/g, ' ').trim();
-    };
-    
-    let processedRows = 0;
-    data.forEach((row) => {
-      // Apply filters before processing data
-      if (filters.region && row.region !== filters.region) return;
-      if (filters.quarter && normalizeQuarter(row.quarter) !== normalizeQuarter(filters.quarter)) return;
-      if (filters.country && row.country !== filters.country) return;
-      if (filters.owner && row.owner !== filters.owner) return;
-      if (filters.status && row.status !== filters.status) return;
-      if (filters.programType && row.programType !== filters.programType) return;
-      if (filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) return;
-      if (filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) return;
-      
-      processedRows++;
-      
-      // MQL data
+  // Always use planning table for forecasted bars
+  let forecastedMql = 0;
+  let forecastedLeads = 0;
+  let hasPlanningData = false;
+  let actualMql = 0;
+  let actualLeads = 0;
+  let hasExecutionData = false;
+
+  // Helper to normalize quarter
+  const normalizeQuarter = (quarter) => {
+    if (!quarter) return '';
+    return quarter.replace(/\s*-\s*/g, ' ').trim();
+  };
+
+  // Get forecasted from planning table
+  let planningRows = [];
+  if (window.planningTableInstance) {
+    planningRows = window.planningTableInstance.getData();
+    console.log('[ROI CHART] planningTableInstance found, rows:', planningRows);
+  } else if (window.planningRows) {
+    planningRows = window.planningRows;
+    console.log('[ROI CHART] window.planningRows fallback, rows:', planningRows);
+  } else {
+    console.warn('[ROI CHART] No planningTableInstance or planningRows found');
+  }
+  console.log('[ROI CHART] Filters:', filters);
+  if (Array.isArray(planningRows) && planningRows.length > 0) {
+    hasPlanningData = true;
+    let filteredCount = 0;
+    planningRows.forEach((row) => {
+      // Multi-select filter logic: only filter if array is non-empty
+      if (Array.isArray(filters.region) && filters.region.length > 0 && !filters.region.includes(row.region)) return;
+      if (Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) return;
+      if (Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) return;
+      if (Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) return;
+      if (Array.isArray(filters.status) && filters.status.length > 0 && !filters.status.includes(row.status)) return;
+      if (Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) return;
+      if (Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) return;
+      if (Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) return;
+
+      filteredCount++;
       let fMql = row.mqlForecast || 0;
-      if (typeof fMql === "string")
-        fMql = Number(fMql.toString().replace(/[^\d.-]/g, ""));
+      if (typeof fMql === "string") fMql = Number(fMql.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(fMql)) forecastedMql += Number(fMql);
 
-      let aMql = row.actualMQLs || 0;
-      if (typeof aMql === "string")
-        aMql = Number(aMql.toString().replace(/[^\d.-]/g, ""));
-      if (!isNaN(aMql)) actualMql += Number(aMql);
-
-      // Leads data
       let fLeads = row.expectedLeads || 0;
-      if (typeof fLeads === "string")
-        fLeads = Number(fLeads.toString().replace(/[^\d.-]/g, ""));
+      if (typeof fLeads === "string") fLeads = Number(fLeads.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(fLeads)) forecastedLeads += Number(fLeads);
-
-      let aLeads = row.actualLeads || 0;
-      if (typeof aLeads === "string")
-        aLeads = Number(aLeads.toString().replace(/[^\d.-]/g, ""));
-      if (!isNaN(aLeads)) actualLeads += Number(aLeads);
     });
+    console.log(`[ROI CHART] Planning rows: total=${planningRows.length}, filtered=${filteredCount}, forecastedMql=${forecastedMql}, forecastedLeads=${forecastedLeads}`);
+  } else {
+    console.warn('[ROI CHART] planningRows is empty or not an array:', planningRows);
   }
-  
+
+  // Get actuals from execution table if available
+  if (window.executionTableInstance) {
+    const execRows = window.executionTableInstance.getData();
+    console.log('[ROI CHART] executionTableInstance found, rows:', execRows);
+    if (Array.isArray(execRows) && execRows.length > 0) {
+      let execFilteredCount = 0;
+      execRows.forEach((row) => {
+        // Multi-select filter logic: only filter if array is non-empty
+        if (Array.isArray(filters.region) && filters.region.length > 0 && !filters.region.includes(row.region)) return;
+        if (Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) return;
+        if (Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) return;
+        if (Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) return;
+        if (Array.isArray(filters.status) && filters.status.length > 0 && !filters.status.includes(row.status)) return;
+        if (Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) return;
+        if (Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) return;
+        if (Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) return;
+
+        execFilteredCount++;
+        hasExecutionData = true;
+        let aMql = row.actualMQLs || 0;
+        if (typeof aMql === "string") aMql = Number(aMql.toString().replace(/[^\d.-]/g, ""));
+        if (!isNaN(aMql)) actualMql += Number(aMql);
+
+        let aLeads = row.actualLeads || 0;
+        if (typeof aLeads === "string") aLeads = Number(aLeads.toString().replace(/[^\d.-]/g, ""));
+        if (!isNaN(aLeads)) actualLeads += Number(aLeads);
+      });
+      console.log(`[ROI CHART] Execution rows: total=${execRows.length}, filtered=${execFilteredCount}, actualMql=${actualMql}, actualLeads=${actualLeads}`);
+    } else {
+      console.warn('[ROI CHART] executionTableInstance rows is empty or not an array:', execRows);
+    }
+  } else {
+    console.warn('[ROI CHART] No executionTableInstance found');
+  }
+
   // Cache processed data
   const chartData = { forecastedMql, actualMql, forecastedLeads, actualLeads };
   chartCache.set(cacheKey, chartData);
+  console.log('[ROI CHART] Final chartData:', chartData, 'hasPlanningData:', hasPlanningData, 'hasExecutionData:', hasExecutionData);
 
   // Use the predefined chart container
   const ctx = document.getElementById("roiQuarterChart");
@@ -978,6 +1015,31 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
   if (window.roiQuarterChartInstance) {
     window.roiQuarterChartInstance = chartsPerformanceUtils.cleanupChart(window.roiQuarterChartInstance);
   }
+
+  // If no planning data, show a message
+  if (!hasPlanningData || (forecastedMql === 0 && forecastedLeads === 0)) {
+    // Clear canvas and show message
+    const parent = ctx.parentElement;
+    ctx.style.display = 'none';
+    let msg = parent.querySelector('.no-chart-data-msg');
+    if (!msg) {
+      msg = document.createElement('div');
+      msg.className = 'no-chart-data-msg';
+      msg.style.cssText = 'text-align:center;padding:32px 0;color:#888;font-size:1.1em;';
+      parent.appendChild(msg);
+    }
+    msg.textContent = 'No planning data available for this chart.';
+    return;
+  } else {
+    // Remove message if present
+    const parent = ctx.parentElement;
+    ctx.style.display = '';
+    const msg = parent.querySelector('.no-chart-data-msg');
+    if (msg) msg.remove();
+  }
+
+  // If no execution data, set actuals to zero and show a note
+  let showNoActualsNote = !hasExecutionData;
 
   chartsPerformanceUtils.optimizedChartUpdate(() => {
     window.roiQuarterChartInstance = new Chart(ctx, {
@@ -994,7 +1056,7 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
           },
           {
             label: "Actual",
-            data: [actualMql, actualLeads],
+            data: [hasExecutionData ? actualMql : 0, hasExecutionData ? actualLeads : 0],
             backgroundColor: "#66bb6a",
             borderRadius: 4,
             borderSkipped: false,
@@ -1042,6 +1104,23 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
         },
       },
     });
+
+    // Show a note if there is no execution data
+    if (showNoActualsNote) {
+      const parent = ctx.parentElement;
+      let note = parent.querySelector('.no-actuals-note');
+      if (!note) {
+        note = document.createElement('div');
+        note.className = 'no-actuals-note';
+        note.style.cssText = 'text-align:center;padding:8px 0;color:#888;font-size:0.95em;';
+        parent.appendChild(note);
+      }
+      note.textContent = 'No actuals data available yet. Only forecasted values are shown.';
+    } else {
+      const parent = ctx.parentElement;
+      const note = parent.querySelector('.no-actuals-note');
+      if (note) note.remove();
+    }
   });
 }, CHARTS_PERFORMANCE_CONFIG.filterUpdateDebounce);
 
