@@ -1010,8 +1010,7 @@ function initPlanningGrid(rows) {
             }, 1000),
           },
           { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
-          { title: "SQL", field: "sqlForecast", editable: false, width: 90 },
-          { title: "Opps", field: "oppsForecast", editable: false, width: 90 },
+          // Removed SQL and Opps columns
           {
             title: "Pipeline",
             field: "pipelineForecast",
@@ -1022,6 +1021,22 @@ function initPlanningGrid(rows) {
               if (v === null || v === undefined || v === "") return "";
               return "$" + Number(v).toLocaleString();
             },
+          },
+          // Added Issue Link column
+          {
+            title: 'Issue Link',
+            field: 'issueLink',
+            formatter: function(cell) {
+              const val = cell.getValue();
+              if (!val) return '';
+              if (/^https?:\/\//.test(val)) {
+                return `<a href="${val}" target="_blank" rel="noopener">Link</a>`;
+              }
+              return val;
+            },
+            editor: 'input',
+            headerTooltip: 'Paste a GitHub or Jira issue link for this row',
+            width: 140
           },
           {
             title: "Revenue Play",

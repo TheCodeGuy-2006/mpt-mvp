@@ -1266,6 +1266,31 @@ window.addEventListener("DOMContentLoaded", async () => {
     try {
       if (window.planningModule?.initPlanningGrid) {
         console.log("🔄 Starting planning grid initialization...");
+        // Remove 'opps' and 'sql' columns from the planning grid
+        if (window.planningModule.PLANNING_COLUMNS) {
+          window.planningModule.PLANNING_COLUMNS = window.planningModule.PLANNING_COLUMNS.filter(
+            col => col.field !== 'opps' && col.field !== 'sql'
+          );
+          // Add 'issue link' column if not already present
+          if (!window.planningModule.PLANNING_COLUMNS.some(col => col.field === 'issueLink')) {
+            window.planningModule.PLANNING_COLUMNS.push({
+              title: 'Issue Link',
+              field: 'issueLink',
+              formatter: function(cell) {
+                const val = cell.getValue();
+                if (!val) return '';
+                // If value looks like a URL, make it clickable
+                if (/^https?:\/\//.test(val)) {
+                  return `<a href="${val}" target="_blank" rel="noopener">Link</a>`;
+                }
+                return val;
+              },
+              editor: 'input',
+              headerTooltip: 'Paste a GitHub or Jira issue link for this row',
+              width: 140
+            });
+          }
+        }
         planningTable = await window.planningModule.initPlanningGrid(rows);
         window.planningTableInstance = planningTable;
         console.log("✅ Planning grid initialized");
