@@ -3,7 +3,7 @@ import { kpis } from "./src/calc.js";
 import "./src/cloudflare-sync.js";
 import { initRoiTabSwitching, renderBudgetsRegionCharts } from "./charts.js";
 
-console.log("app.js loaded");
+// console.log("app.js loaded"); // Redundant log removed
 
 // Debug flags for performance monitoring
 window.DEBUG_FILTERS = false; // Set to true to enable filter debug logging
@@ -308,7 +308,7 @@ async function testWorkerConnection() {
     }
 
     const healthResult = await healthResponse.json();
-    console.log("Worker health check result:", healthResult);
+    // console.log("Worker health check result:", healthResult); // Redundant log removed
 
     // Test 2: Data API endpoints
     showSyncStatus("🔄 Testing data API endpoints...", "info");
@@ -461,7 +461,7 @@ async function forceSaveAll() {
   }
 
   const results = await Promise.all(promises);
-  console.log("Force save all completed:", results);
+  // console.log("Force save all completed:", results); // Redundant log removed
   return results;
 }
 
@@ -480,7 +480,7 @@ async function refreshAllData() {
           .then((rows) => {
             if (window.planningTableInstance && rows && rows.length > 0) {
               window.planningTableInstance.setData(rows);
-              console.log("✅ Planning data refreshed");
+              // ...existing code...
               return { type: "planning", success: true, count: rows.length };
             }
             return {
@@ -515,7 +515,7 @@ async function refreshAllData() {
                   }),
                 );
                 window.budgetsTableInstance.setData(budgetsArray);
-                console.log("✅ Budgets data refreshed");
+                // ...existing code...
                 return {
                   type: "budgets",
                   success: true,
@@ -563,7 +563,7 @@ async function refreshAllData() {
       showSyncStatus(`❌ Refresh failed: ${failMessage}`, "error");
     }
 
-    console.log("Data refresh completed:", results);
+    // ...existing code...
     return results;
   } catch (error) {
     console.error("Error refreshing data:", error);
@@ -610,9 +610,9 @@ async function loadProgrammeData() {
   const validRows = rows.filter(Boolean);
   
   // Always recalculate and fill in calculated fields for every row
-  // Process in very small batches to prevent long tasks
-  // Use smaller batch size and requestIdleCallback for better yielding
-  const batchSize = 2;
+  // Process in larger batches and yield less frequently to optimize performance
+  const batchSize = 5; // Smaller batch for less blocking
+  const yieldEvery = 1; // Yield every batch
   for (let i = 0; i < validRows.length; i += batchSize) {
     const batch = validRows.slice(i, i + batchSize);
     batch.forEach((row) => {
@@ -624,11 +624,11 @@ async function loadProgrammeData() {
         row.pipelineForecast = kpiVals.pipeline;
       }
     });
-    // Yield control after each batch to prevent long tasks
-    if (i + batchSize < validRows.length) {
+    // Yield control every batch to prevent long tasks
+    if ((i / batchSize) % yieldEvery === yieldEvery - 1 && i + batchSize < validRows.length) {
       await new Promise(resolve => {
         if (typeof window !== 'undefined' && window.requestIdleCallback) {
-          window.requestIdleCallback(resolve, { timeout: 20 });
+          window.requestIdleCallback(resolve, { timeout: 50 });
         } else {
           setTimeout(resolve, 0);
         }
@@ -879,21 +879,31 @@ function route() {
     if (window.budgetsTableInstance) {
       setTimeout(() => {
         window.budgetsTableInstance.redraw(true);
+        // If the table library supports chunked setData, use it here for large data sets
+        // Example: window.budgetsTableInstance.setDataInChunks(...)
         window.budgetsTableInstance.setData(
           window.budgetsTableInstance.getData(),
         );
-        console.log("[route] Redrew budgets table");
-        // Ensure both charts render after table redraw
-        setTimeout(() => {
-          if (typeof window.renderBudgetsBarChart === "function") {
-            window.renderBudgetsBarChart();
-            console.log("[route] Triggered budgets bar chart render");
-          }
-          if (typeof window.renderBudgetsRegionCharts === "function") {
-            window.renderBudgetsRegionCharts();
-            console.log("[route] Triggered budgets region charts render");
-          }
-        }, 100);
+        // Defer chart rendering to idle time for smoother UI
+        if (typeof window !== 'undefined' && window.requestIdleCallback) {
+          window.requestIdleCallback(() => {
+            if (typeof window.renderBudgetsBarChart === "function") {
+              window.renderBudgetsBarChart();
+            }
+            if (typeof window.renderBudgetsRegionCharts === "function") {
+              window.renderBudgetsRegionCharts();
+            }
+          }, { timeout: 100 });
+        } else {
+          setTimeout(() => {
+            if (typeof window.renderBudgetsBarChart === "function") {
+              window.renderBudgetsBarChart();
+            }
+            if (typeof window.renderBudgetsRegionCharts === "function") {
+              window.renderBudgetsRegionCharts();
+            }
+          }, 100);
+        }
       }, 0);
     }
     // --- Ensure Annual Budget Plan unlock logic is initialized every time tab is shown ---
@@ -915,7 +925,7 @@ function route() {
     const section = document.querySelector(
       `section#view-${hash.replace("#", "")}`,
     );
-    console.log(`[route] hash:`, hash, "section:", section);
+    // ...existing code...
     if (section) section.style.display = "block";
     if (
       hash === "#planning" &&
@@ -945,42 +955,68 @@ function route() {
     if (hash === "#execution" && window.executionModule.tableInstance) {
       setTimeout(() => {
         window.executionModule.tableInstance.redraw(true);
+        // If the table library supports chunked setData, use it here for large data sets
+        // Example: window.executionModule.tableInstance.setDataInChunks(...)
         window.executionModule.tableInstance.setData(
           window.executionModule.tableInstance.getData(),
         );
-        console.log("[route] Redrew execution grid");
-        // Sync digital motions data from planning tab
-        if (
-          typeof window.executionModule.syncDigitalMotionsFromPlanning ===
-          "function"
-        ) {
-          window.executionModule.syncDigitalMotionsFromPlanning();
-        }
-        // Initialize filters when execution tab is shown
-        if (
-          typeof window.executionModule.setupExecutionFilters === "function"
-        ) {
-          window.executionModule.setupExecutionFilters();
-        }
-        
-        // Initialize universal search for execution if not already done
-        if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
-          // Only initialize if it doesn't exist or is truly broken
-          if (!window.executionUniversalSearch || 
-              window.executionUniversalSearch instanceof HTMLElement ||
-              typeof window.executionUniversalSearch.updateData !== 'function') {
-            console.log("🔄 APP: Re-initializing execution universal search from routing...");
-            window.executionModule.initializeExecutionUniversalSearch();
-            
-            // Update search data after initialization
-            setTimeout(() => {
-              if (typeof window.executionModule.updateExecutionSearchData === 'function') {
-                window.executionModule.updateExecutionSearchData();
+        // Defer heavy sync and filter operations to idle time
+        if (typeof window !== 'undefined' && window.requestIdleCallback) {
+          window.requestIdleCallback(() => {
+            // Sync digital motions data from planning tab
+            if (
+              typeof window.executionModule.syncDigitalMotionsFromPlanning ===
+              "function"
+            ) {
+              window.executionModule.syncDigitalMotionsFromPlanning();
+            }
+            // Initialize filters when execution tab is shown
+            if (
+              typeof window.executionModule.setupExecutionFilters === "function"
+            ) {
+              window.executionModule.setupExecutionFilters();
+            }
+            // Initialize universal search for execution if not already done
+            if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
+              if (!window.executionUniversalSearch || 
+                  window.executionUniversalSearch instanceof HTMLElement ||
+                  typeof window.executionUniversalSearch.updateData !== 'function') {
+                window.executionModule.initializeExecutionUniversalSearch();
+                // Update search data after initialization
+                setTimeout(() => {
+                  if (typeof window.executionModule.updateExecutionSearchData === 'function') {
+                    window.executionModule.updateExecutionSearchData();
+                  }
+                }, 100);
               }
-            }, 100);
-          } else {
-            console.log("✅ APP: Execution universal search already properly initialized, skipping");
-          }
+            }
+          }, { timeout: 100 });
+        } else {
+          setTimeout(() => {
+            if (
+              typeof window.executionModule.syncDigitalMotionsFromPlanning ===
+              "function"
+            ) {
+              window.executionModule.syncDigitalMotionsFromPlanning();
+            }
+            if (
+              typeof window.executionModule.setupExecutionFilters === "function"
+            ) {
+              window.executionModule.setupExecutionFilters();
+            }
+            if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
+              if (!window.executionUniversalSearch || 
+                  window.executionUniversalSearch instanceof HTMLElement ||
+                  typeof window.executionUniversalSearch.updateData !== 'function') {
+                window.executionModule.initializeExecutionUniversalSearch();
+                setTimeout(() => {
+                  if (typeof window.executionModule.updateExecutionSearchData === 'function') {
+                    window.executionModule.updateExecutionSearchData();
+                  }
+                }, 100);
+              }
+            }
+          }, 100);
         }
       }, 0);
     }
@@ -1008,7 +1044,7 @@ function route() {
         }
       }, 0);
       setTimeout(initRoiTabSwitching, 100); // Initialize tab switching when ROI tab is viewed
-      console.log("[route] Updated ROI total spend");
+      // ...existing code...
     } else {
       // Mark ROI tab as inactive when switching to other tabs
       if (typeof window.roiModule?.setRoiTabActive === "function") {
@@ -1021,7 +1057,7 @@ function route() {
         window.reportTableInstance.setData(
           window.reportTableInstance.getData(),
         );
-        console.log("[route] Redrew report grid");
+        // ...existing code...
       }, 0);
     }
     if (
@@ -1029,7 +1065,7 @@ function route() {
       typeof window.roiModule.updateReportTotalSpend === "function"
     ) {
       setTimeout(window.roiModule.updateReportTotalSpend, 0);
-      console.log("[route] Updated report total spend");
+      // ...existing code...
     }
     if (
       hash === "#calendar" &&
@@ -1040,7 +1076,7 @@ function route() {
       if (typeof window.calendarModule?.initializeCalendarUniversalSearch === "function") {
         window.calendarModule.initializeCalendarUniversalSearch();
       }
-      console.log("[route] Handled calendar routing");
+      // ...existing code...
     }
   }
   
@@ -1049,11 +1085,11 @@ function route() {
     if (!githubSyncUnlocked) {
       showGithubSyncPasswordModal((success) => {
         if (success) {
-          console.log("[route] GitHub Sync unlocked");
+          // ...existing code...
           // Re-route to show the actual content
           route();
         } else {
-          console.log("[route] GitHub Sync access denied, redirecting to planning");
+          // ...existing code...
           location.hash = "#planning";
         }
       });
@@ -1064,7 +1100,7 @@ function route() {
       const unlockedDiv = document.getElementById("githubSyncUnlocked");
       if (lockedDiv) lockedDiv.style.display = "none";
       if (unlockedDiv) unlockedDiv.style.display = "block";
-      console.log("[route] GitHub Sync already unlocked, showing content");
+      // ...existing code...
     }
   }
 }
@@ -1145,17 +1181,17 @@ function showGithubSyncPasswordModal(callback) {
 // GitHub Sync functionality placeholders
 function syncToGithub() {
   alert("Sync to GitHub functionality - This would sync your data to a GitHub repository.");
-  console.log("GitHub sync initiated");
+  // ...existing code...
 }
 
 function exportData() {
   alert("Export Data functionality - This would export all your planning and execution data.");
-  console.log("Data export initiated");
+  // ...existing code...
 }
 
 function downloadReports() {
   alert("Download Reports functionality - This would generate and download ROI and budget reports.");
-  console.log("Report download initiated");
+  // ...existing code...
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -1253,7 +1289,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Helper function to update loading progress
   const updateLoadingProgress = (message) => {
-    console.log(`📊 ${message}`);
+    // ...existing code...
     // Could add visual progress indicator here if needed
   };
 
@@ -1265,7 +1301,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Chunk 1: Planning table
     try {
       if (window.planningModule?.initPlanningGrid) {
-        console.log("🔄 Starting planning grid initialization...");
+        // console.log("🔄 Starting planning grid initialization..."); // Redundant log removed
         // Remove 'opps' and 'sql' columns from the planning grid
         if (window.planningModule.PLANNING_COLUMNS) {
           window.planningModule.PLANNING_COLUMNS = window.planningModule.PLANNING_COLUMNS.filter(
@@ -1293,7 +1329,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
         planningTable = await window.planningModule.initPlanningGrid(rows);
         window.planningTableInstance = planningTable;
-        console.log("✅ Planning grid initialized");
+        // console.log("✅ Planning grid initialized"); // Redundant log removed
       }
     } catch (e) {
       console.error("Planning grid initialization failed:", e);
@@ -1308,10 +1344,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Chunk 2: Execution table
     try {
       if (window.executionModule?.initExecutionGrid) {
-        console.log("🔄 Starting execution grid initialization...");
+        // console.log("🔄 Starting execution grid initialization..."); // Redundant log removed
         executionTable = await window.executionModule.initExecutionGrid(rows);
         window.executionTableInstance = executionTable;
-        console.log("✅ Execution grid initialized");
+        // console.log("✅ Execution grid initialized"); // Redundant log removed
       }
     } catch (e) {
       console.error("Execution grid initialization failed:", e);
@@ -1326,19 +1362,19 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Chunk 3: Budgets table
     try {
       if (window.budgetsModule?.initBudgetsTable) {
-        console.log("🔄 Starting budgets table initialization...");
+        // console.log("🔄 Starting budgets table initialization..."); // Redundant log removed
         budgetsTable = window.budgetsModule.initBudgetsTable(budgets, rows);
         window.budgetsTableInstance = budgetsTable;
-        console.log("✅ Budgets table initialized");
+        // console.log("✅ Budgets table initialized"); // Redundant log removed
         // Ensure budget charts render after table is initialized
         setTimeout(() => {
           if (window.chartsModule?.renderBudgetsBarChart) {
             window.chartsModule.renderBudgetsBarChart();
-            console.log("[init] Triggered budgets bar chart render");
+            // console.log("[init] Triggered budgets bar chart render"); // Redundant log removed
           }
           if (window.chartsModule?.renderBudgetsRegionCharts) {
             window.chartsModule.renderBudgetsRegionCharts();
-            console.log("[init] Triggered budgets region charts render");
+            // console.log("[init] Triggered budgets region charts render"); // Redundant log removed
           }
         }, 100);
       }
