@@ -324,7 +324,13 @@ const calendarCache = {
 // Get campaigns from planning data (cached)
 function getCampaignData() {
   let campaigns = calendarCache.getCampaigns();
-  
+
+  // Exclude Contractor/Infrastructure program type from calendar (exact match, case-insensitive, trimmed)
+  campaigns = campaigns.filter(campaign => {
+    const pt = (campaign.programType || '').toLowerCase().trim();
+    return pt !== 'contractor/infrastructure';
+  });
+
   // Apply universal search filters if they exist
   if (window.activeCalendarSearchFilters && window.activeCalendarSearchFilters.length > 0) {
     campaigns = campaigns.filter(campaign => {
@@ -334,7 +340,7 @@ function getCampaignData() {
       });
     });
   }
-  
+
   return campaigns;
 }
 

@@ -20,6 +20,7 @@
   "homepage": "https://jordanradford.github.io/mpt-mvp/",
   "dependencies": {
     "axios": "^1.9.0",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0"
   },
