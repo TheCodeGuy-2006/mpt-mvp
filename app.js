@@ -1303,10 +1303,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Use more aggressive chunking with longer yields to prevent long tasks
     const yieldControl = () => new Promise(resolve => setTimeout(resolve, 16)); // One frame yield
     
-    // Chunk 1: Planning table
+    // Chunk 1: Planning table with smaller chunk size and more frequent yielding
     try {
       if (window.planningModule?.initPlanningGrid) {
-        // console.log("🔄 Starting planning grid initialization..."); // Redundant log removed
         // Remove 'opps' and 'sql' columns from the planning grid
         if (window.planningModule.PLANNING_COLUMNS) {
           window.planningModule.PLANNING_COLUMNS = window.planningModule.PLANNING_COLUMNS.filter(
@@ -1320,7 +1319,6 @@ window.addEventListener("DOMContentLoaded", async () => {
               formatter: function(cell) {
                 const val = cell.getValue();
                 if (!val) return '';
-                // If value looks like a URL, make it clickable
                 if (/^https?:\/\//.test(val)) {
                   return `<a href="${val}" target="_blank" rel="noopener">Link</a>`;
                 }
@@ -1332,14 +1330,33 @@ window.addEventListener("DOMContentLoaded", async () => {
             });
           }
         }
-        planningTable = await window.planningModule.initPlanningGrid(rows);
+        // Chunked/yielded planning data processing (very small chunk size)
+        const planningChunkSize = 1;
+        let processedRows = [];
+        for (let i = 0; i < rows.length; i += planningChunkSize) {
+          const chunk = rows.slice(i, i + planningChunkSize);
+          for (const row of chunk) {
+            if (typeof window.planningModule.calculatePlanningMetrics === 'function') {
+              row.metrics = window.planningModule.calculatePlanningMetrics(row);
+            }
+            // Yield after each row if calculation is heavy
+            await new Promise(resolve => {
+              if (typeof window !== 'undefined' && window.requestIdleCallback) {
+                window.requestIdleCallback(resolve, { timeout: 10 });
+              } else {
+                setTimeout(resolve, 0);
+              }
+            });
+          }
+          processedRows.push(...chunk);
+        }
+        planningTable = await window.planningModule.initPlanningGrid(processedRows);
         window.planningTableInstance = planningTable;
-        // console.log("✅ Planning grid initialized"); // Redundant log removed
       }
     } catch (e) {
       console.error("Planning grid initialization failed:", e);
     }
-    
+
     // Longer yield to ensure UI responsiveness
     await yieldControl();
     
@@ -1402,6 +1419,84 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (e) {
       console.error("Budgets table initialization failed:", e);
+    }
+
+    // Longer yield to ensure UI responsiveness before calendar
+    await yieldControl();
+
+    // Chunk 4: Calendar table/grid with chunked/yielded initialization
+    updateLoadingProgress("Initializing calendar...");
+    try {
+      if (window.calendarModule?.initCalendarGrid && typeof window.calendarModule.loadCalendarData === 'function') {
+        // Load calendar data (async)
+        let calendarData = await window.calendarModule.loadCalendarData();
+        // Chunked/yielded processing for large calendar data
+        const chunkSize = 10;
+        let processedCalendar = [];
+        for (let i = 0; i < calendarData.length; i += chunkSize) {
+          const chunk = calendarData.slice(i, i + chunkSize);
+          // Example: perform any heavy calculation per row if needed
+          chunk.forEach(row => {
+            if (typeof window.calendarModule.calculateCalendarMetrics === 'function') {
+              row.metrics = window.calendarModule.calculateCalendarMetrics(row);
+            }
+          });
+          processedCalendar.push(...chunk);
+          // Yield to main thread
+          await new Promise(resolve => {
+            if (typeof window !== 'undefined' && window.requestIdleCallback) {
+              window.requestIdleCallback(resolve, { timeout: 50 });
+            } else {
+              setTimeout(resolve, 0);
+            }
+          });
+        }
+        // Initialize the calendar grid/table with processed data
+        if (typeof window.calendarModule.initCalendarGrid === 'function') {
+          window.calendarTableInstance = await window.calendarModule.initCalendarGrid(processedCalendar);
+        }
+      }
+    } catch (e) {
+      console.error("Calendar table initialization failed:", e);
+    }
+
+    // Longer yield to ensure UI responsiveness before ROI
+    await yieldControl();
+
+    // Chunk 5: ROI table/grid with chunked/yielded initialization
+    updateLoadingProgress("Initializing ROI table...");
+    try {
+      if (window.roiModule?.initRoiGrid && typeof window.roiModule.loadRoiData === 'function') {
+        // Load ROI data (async)
+        let roiData = await window.roiModule.loadRoiData();
+        // Chunked/yielded processing for large ROI data
+        const chunkSize = 10;
+        let processedRoi = [];
+        for (let i = 0; i < roiData.length; i += chunkSize) {
+          const chunk = roiData.slice(i, i + chunkSize);
+          // Example: perform any heavy calculation per row if needed
+          chunk.forEach(row => {
+            if (typeof window.roiModule.calculateRoiMetrics === 'function') {
+              row.metrics = window.roiModule.calculateRoiMetrics(row);
+            }
+          });
+          processedRoi.push(...chunk);
+          // Yield to main thread
+          await new Promise(resolve => {
+            if (typeof window !== 'undefined' && window.requestIdleCallback) {
+              window.requestIdleCallback(resolve, { timeout: 50 });
+            } else {
+              setTimeout(resolve, 0);
+            }
+          });
+        }
+        // Initialize the ROI grid/table with processed data
+        if (typeof window.roiModule.initRoiGrid === 'function') {
+          window.roiTableInstance = await window.roiModule.initRoiGrid(processedRoi);
+        }
+      }
+    } catch (e) {
+      console.error("ROI table initialization failed:", e);
     }
 
     // Final yield before completing
