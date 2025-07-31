@@ -1365,7 +1365,15 @@ window.addEventListener("DOMContentLoaded", async () => {
               // Yield after metrics calculation
               await new Promise(resolve => setTimeout(resolve, 0));
             }
-            // Step 2: (Optional) Any other heavy per-row logic can go here
+            // Step 2: Auto-tick digital motions if owner is Giorgia Parham
+            if (
+              row.owner &&
+              typeof row.owner === 'string' &&
+              row.owner.trim().toLowerCase() === 'giorgia parham'
+            ) {
+              row.digitalMotions = true;
+            }
+            // Step 3: (Optional) Any other heavy per-row logic can go here
             // If you have more heavy logic, yield again after it
           },
           5 // Lower yieldTimeout for more frequent yielding

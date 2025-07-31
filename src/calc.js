@@ -13,7 +13,9 @@ export function regionMetrics(rows, budgets) {
   // budgets: object { region: { assignedBudget } }
   const result = {};
   rows.forEach((row) => {
-    const region = row.region || "Unknown";
+    // Assign to 'Digital Motions' if digitalMotions is true, else use region
+    const isDigitalMotions = row.digitalMotions === true;
+    const region = isDigitalMotions ? "Digital Motions" : (row.region || "Unknown");
     if (!result[region]) result[region] = { plan: 0, forecast: 0, actuals: 0 };
     if (budgets[region]) result[region].plan = budgets[region].assignedBudget;
     if (row.status === "Shipped") {

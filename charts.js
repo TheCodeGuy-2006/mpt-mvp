@@ -388,18 +388,30 @@ function processRegionChart(region, rowContainer, budgetsData, planningRows) {
   const assignedBudget = budgetObj && budgetObj.assignedBudget
     ? Number(budgetObj.assignedBudget) : 0;
 
-  // Forecasted cost: sum of forecastedCost for this region
-  const regionForecasts = planningRows.filter(
-    (r) => r.region === region && typeof r.forecastedCost === "number",
-  );
-  const forecastedCost = regionForecasts.reduce(
-    (sum, r) => sum + r.forecastedCost, 0,
-  );
-
-  // Actual cost: sum of actualCost for this region
-  const actualCost = planningRows
-    .filter((r) => r.region === region && typeof r.actualCost === "number")
-    .reduce((sum, r) => sum + r.actualCost, 0);
+  let regionForecasts, forecastedCost, actualCost;
+  if (region === "Digital Motions") {
+    // For Digital Motions, use all rows where digitalMotions === true
+    regionForecasts = planningRows.filter(
+      (r) => r.digitalMotions === true && typeof r.forecastedCost === "number"
+    );
+    forecastedCost = regionForecasts.reduce(
+      (sum, r) => sum + r.forecastedCost, 0
+    );
+    actualCost = planningRows
+      .filter((r) => r.digitalMotions === true && typeof r.actualCost === "number")
+      .reduce((sum, r) => sum + r.actualCost, 0);
+  } else {
+    // For all other regions, use region match
+    regionForecasts = planningRows.filter(
+      (r) => r.region === region && typeof r.forecastedCost === "number"
+    );
+    forecastedCost = regionForecasts.reduce(
+      (sum, r) => sum + r.forecastedCost, 0
+    );
+    actualCost = planningRows
+      .filter((r) => r.region === region && typeof r.actualCost === "number")
+      .reduce((sum, r) => sum + r.actualCost, 0);
+  }
 
   // Create chart canvas and fullscreen button
   const chartDiv = document.createElement("div");
