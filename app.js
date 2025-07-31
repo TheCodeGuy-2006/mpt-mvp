@@ -829,6 +829,11 @@ function showSection(hash) {
 
 // Optimized route function with intelligent caching and reduced operations
 function route() {
+  // Hide ROI chart tabs container by default
+  const roiChartTabsContainer = document.getElementById('roiChartTabsContainer');
+  if (roiChartTabsContainer) {
+    roiChartTabsContainer.style.display = 'none';
+  }
   const hash = location.hash || "#planning";
   lastRouteTime = performance.now();
   
@@ -1029,6 +1034,10 @@ function route() {
       hash === "#roi" &&
       typeof window.roiModule.updateRoiTotalSpend === "function"
     ) {
+      // Show ROI chart tabs container only on ROI tab
+      if (roiChartTabsContainer) {
+        roiChartTabsContainer.style.display = '';
+      }
       // Mark ROI tab as active for performance optimization
       if (typeof window.roiModule.setRoiTabActive === "function") {
         window.roiModule.setRoiTabActive(true);
@@ -1298,20 +1307,34 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Could add visual progress indicator here if needed
   };
 
+  // Utility: Chunked/yielded processing for any data array
+  async function processInChunks(data, chunkSize, processFn, yieldTimeout = 10) {
+    for (let i = 0; i < data.length; i += chunkSize) {
+      const chunk = data.slice(i, i + chunkSize);
+      for (const row of chunk) {
+        await processFn(row);
+      }
+      await new Promise(resolve => {
+        if (typeof window !== 'undefined' && window.requestIdleCallback) {
+          window.requestIdleCallback(resolve, { timeout: yieldTimeout });
+        } else {
+          setTimeout(resolve, 0);
+        }
+      });
+    }
+  }
+
   // Initialize tables with error boundaries and performance monitoring in chunks
   const initTables = async () => {
-    // Use more aggressive chunking with longer yields to prevent long tasks
     const yieldControl = () => new Promise(resolve => setTimeout(resolve, 16)); // One frame yield
-    
-    // Chunk 1: Planning table with smaller chunk size and more frequent yielding
+
+    // Chunk 1: Planning table
     try {
       if (window.planningModule?.initPlanningGrid) {
-        // Remove 'opps' and 'sql' columns from the planning grid
         if (window.planningModule.PLANNING_COLUMNS) {
           window.planningModule.PLANNING_COLUMNS = window.planningModule.PLANNING_COLUMNS.filter(
             col => col.field !== 'opps' && col.field !== 'sql'
           );
-          // Add 'issue link' column if not already present
           if (!window.planningModule.PLANNING_COLUMNS.some(col => col.field === 'issueLink')) {
             window.planningModule.PLANNING_COLUMNS.push({
               title: 'Issue Link',
@@ -1330,26 +1353,24 @@ window.addEventListener("DOMContentLoaded", async () => {
             });
           }
         }
-        // Chunked/yielded planning data processing (very small chunk size)
-        const planningChunkSize = 1;
+        // Use chunked utility for planning
         let processedRows = [];
-        for (let i = 0; i < rows.length; i += planningChunkSize) {
-          const chunk = rows.slice(i, i + planningChunkSize);
-          for (const row of chunk) {
+        await processInChunks(
+          rows,
+          1,
+          async (row) => {
+            // Step 1: Calculate metrics
             if (typeof window.planningModule.calculatePlanningMetrics === 'function') {
               row.metrics = window.planningModule.calculatePlanningMetrics(row);
+              // Yield after metrics calculation
+              await new Promise(resolve => setTimeout(resolve, 0));
             }
-            // Yield after each row if calculation is heavy
-            await new Promise(resolve => {
-              if (typeof window !== 'undefined' && window.requestIdleCallback) {
-                window.requestIdleCallback(resolve, { timeout: 10 });
-              } else {
-                setTimeout(resolve, 0);
-              }
-            });
-          }
-          processedRows.push(...chunk);
-        }
+            // Step 2: (Optional) Any other heavy per-row logic can go here
+            // If you have more heavy logic, yield again after it
+          },
+          5 // Lower yieldTimeout for more frequent yielding
+        );
+        processedRows = rows;
         planningTable = await window.planningModule.initPlanningGrid(processedRows);
         window.planningTableInstance = planningTable;
       }
@@ -1357,57 +1378,37 @@ window.addEventListener("DOMContentLoaded", async () => {
       console.error("Planning grid initialization failed:", e);
     }
 
-    // Longer yield to ensure UI responsiveness
     await yieldControl();
-    
-    // Show progress indicator if needed
     updateLoadingProgress("Initializing execution grid...");
 
     // Chunk 2: Execution table
     try {
       if (window.executionModule?.initExecutionGrid) {
-        // console.log("🔄 Starting execution grid initialization..."); // Redundant log removed
         executionTable = await window.executionModule.initExecutionGrid(rows);
         window.executionTableInstance = executionTable;
-        // console.log("✅ Execution grid initialized"); // Redundant log removed
       }
     } catch (e) {
       console.error("Execution grid initialization failed:", e);
     }
-    
-    // Longer yield to ensure UI responsiveness
+
     await yieldControl();
-    
-    // Show progress indicator if needed
     updateLoadingProgress("Initializing budgets table...");
 
-    // Chunk 3: Budgets table with chunked/yielded initialization and utilization calculation
+    // Chunk 3: Budgets table
     try {
       if (window.budgetsModule?.initBudgetsTable) {
-        // Chunked/yielded budgets data preparation
-        const chunkSize = 10;
-        let processedBudgets = [];
-        for (let i = 0; i < budgets.length; i += chunkSize) {
-          const chunk = budgets.slice(i, i + chunkSize);
-          // Example utilization calculation (replace with actual logic if needed)
-          chunk.forEach(row => {
+        await processInChunks(
+          budgets,
+          10,
+          async (row) => {
             if (typeof window.budgetsModule.calculateUtilization === 'function') {
               row.utilization = window.budgetsModule.calculateUtilization(row);
             }
-          });
-          processedBudgets.push(...chunk);
-          // Yield to main thread
-          await new Promise(resolve => {
-            if (typeof window !== 'undefined' && window.requestIdleCallback) {
-              window.requestIdleCallback(resolve, { timeout: 50 });
-            } else {
-              setTimeout(resolve, 0);
-            }
-          });
-        }
-        budgetsTable = window.budgetsModule.initBudgetsTable(processedBudgets, rows);
+          },
+          50
+        );
+        budgetsTable = window.budgetsModule.initBudgetsTable(budgets, rows);
         window.budgetsTableInstance = budgetsTable;
-        // Ensure budget charts render after table is initialized
         setTimeout(() => {
           if (window.chartsModule?.renderBudgetsBarChart) {
             window.chartsModule.renderBudgetsBarChart();
@@ -1421,85 +1422,56 @@ window.addEventListener("DOMContentLoaded", async () => {
       console.error("Budgets table initialization failed:", e);
     }
 
-    // Longer yield to ensure UI responsiveness before calendar
     await yieldControl();
-
-    // Chunk 4: Calendar table/grid with chunked/yielded initialization
     updateLoadingProgress("Initializing calendar...");
+
+    // Chunk 4: Calendar table/grid
     try {
       if (window.calendarModule?.initCalendarGrid && typeof window.calendarModule.loadCalendarData === 'function') {
-        // Load calendar data (async)
         let calendarData = await window.calendarModule.loadCalendarData();
-        // Chunked/yielded processing for large calendar data
-        const chunkSize = 10;
-        let processedCalendar = [];
-        for (let i = 0; i < calendarData.length; i += chunkSize) {
-          const chunk = calendarData.slice(i, i + chunkSize);
-          // Example: perform any heavy calculation per row if needed
-          chunk.forEach(row => {
+        await processInChunks(
+          calendarData,
+          10,
+          async (row) => {
             if (typeof window.calendarModule.calculateCalendarMetrics === 'function') {
               row.metrics = window.calendarModule.calculateCalendarMetrics(row);
             }
-          });
-          processedCalendar.push(...chunk);
-          // Yield to main thread
-          await new Promise(resolve => {
-            if (typeof window !== 'undefined' && window.requestIdleCallback) {
-              window.requestIdleCallback(resolve, { timeout: 50 });
-            } else {
-              setTimeout(resolve, 0);
-            }
-          });
-        }
-        // Initialize the calendar grid/table with processed data
+          },
+          50
+        );
         if (typeof window.calendarModule.initCalendarGrid === 'function') {
-          window.calendarTableInstance = await window.calendarModule.initCalendarGrid(processedCalendar);
+          window.calendarTableInstance = await window.calendarModule.initCalendarGrid(calendarData);
         }
       }
     } catch (e) {
       console.error("Calendar table initialization failed:", e);
     }
 
-    // Longer yield to ensure UI responsiveness before ROI
     await yieldControl();
-
-    // Chunk 5: ROI table/grid with chunked/yielded initialization
     updateLoadingProgress("Initializing ROI table...");
+
+    // Chunk 5: ROI table/grid
     try {
       if (window.roiModule?.initRoiGrid && typeof window.roiModule.loadRoiData === 'function') {
-        // Load ROI data (async)
         let roiData = await window.roiModule.loadRoiData();
-        // Chunked/yielded processing for large ROI data
-        const chunkSize = 10;
-        let processedRoi = [];
-        for (let i = 0; i < roiData.length; i += chunkSize) {
-          const chunk = roiData.slice(i, i + chunkSize);
-          // Example: perform any heavy calculation per row if needed
-          chunk.forEach(row => {
+        await processInChunks(
+          roiData,
+          10,
+          async (row) => {
             if (typeof window.roiModule.calculateRoiMetrics === 'function') {
               row.metrics = window.roiModule.calculateRoiMetrics(row);
             }
-          });
-          processedRoi.push(...chunk);
-          // Yield to main thread
-          await new Promise(resolve => {
-            if (typeof window !== 'undefined' && window.requestIdleCallback) {
-              window.requestIdleCallback(resolve, { timeout: 50 });
-            } else {
-              setTimeout(resolve, 0);
-            }
-          });
-        }
-        // Initialize the ROI grid/table with processed data
+          },
+          50
+        );
         if (typeof window.roiModule.initRoiGrid === 'function') {
-          window.roiTableInstance = await window.roiModule.initRoiGrid(processedRoi);
+          window.roiTableInstance = await window.roiModule.initRoiGrid(roiData);
         }
       }
     } catch (e) {
       console.error("ROI table initialization failed:", e);
     }
 
-    // Final yield before completing
     await yieldControl();
     updateLoadingProgress("Tables initialized successfully");
   };
