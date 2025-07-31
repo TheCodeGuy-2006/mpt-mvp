@@ -1364,29 +1364,46 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Show progress indicator if needed
     updateLoadingProgress("Initializing budgets table...");
 
-    // Chunk 3: Budgets table
+    // Chunk 3: Budgets table with chunked/yielded initialization and utilization calculation
     try {
       if (window.budgetsModule?.initBudgetsTable) {
-        // console.log("🔄 Starting budgets table initialization..."); // Redundant log removed
-        budgetsTable = window.budgetsModule.initBudgetsTable(budgets, rows);
+        // Chunked/yielded budgets data preparation
+        const chunkSize = 10;
+        let processedBudgets = [];
+        for (let i = 0; i < budgets.length; i += chunkSize) {
+          const chunk = budgets.slice(i, i + chunkSize);
+          // Example utilization calculation (replace with actual logic if needed)
+          chunk.forEach(row => {
+            if (typeof window.budgetsModule.calculateUtilization === 'function') {
+              row.utilization = window.budgetsModule.calculateUtilization(row);
+            }
+          });
+          processedBudgets.push(...chunk);
+          // Yield to main thread
+          await new Promise(resolve => {
+            if (typeof window !== 'undefined' && window.requestIdleCallback) {
+              window.requestIdleCallback(resolve, { timeout: 50 });
+            } else {
+              setTimeout(resolve, 0);
+            }
+          });
+        }
+        budgetsTable = window.budgetsModule.initBudgetsTable(processedBudgets, rows);
         window.budgetsTableInstance = budgetsTable;
-        // console.log("✅ Budgets table initialized"); // Redundant log removed
         // Ensure budget charts render after table is initialized
         setTimeout(() => {
           if (window.chartsModule?.renderBudgetsBarChart) {
             window.chartsModule.renderBudgetsBarChart();
-            // console.log("[init] Triggered budgets bar chart render"); // Redundant log removed
           }
           if (window.chartsModule?.renderBudgetsRegionCharts) {
             window.chartsModule.renderBudgetsRegionCharts();
-            // console.log("[init] Triggered budgets region charts render"); // Redundant log removed
           }
         }, 100);
       }
     } catch (e) {
       console.error("Budgets table initialization failed:", e);
     }
-    
+
     // Final yield before completing
     await yieldControl();
     updateLoadingProgress("Tables initialized successfully");
