@@ -1,3 +1,70 @@
+// Save button setup for execution table
+function setupExecutionSave(table, rows) {
+  let btn = document.getElementById("saveExecutionRows");
+  if (!btn) {
+    console.error("Save button not found in HTML structure");
+    return;
+  }
+  btn.onclick = () => {
+    // Save all execution data using the same pattern as planning
+    const data = table.getData();
+    console.log("Saving execution data:", data.length, "rows");
+    // Try Worker first, then backend fallback
+    if (window.cloudflareSyncModule) {
+      window.cloudflareSyncModule
+        .saveToWorker("planning", data, { source: "manual-save-execution" })
+        .then((result) => {
+          console.log("Worker save successful:", result);
+          alert(
+            "✅ Execution data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed."
+          );
+          if (window.cloudflareSyncModule.refreshDataAfterSave) {
+            window.cloudflareSyncModule.refreshDataAfterSave("planning");
+          }
+        })
+        .catch((error) => {
+          console.warn("Worker save failed, trying backend:", error);
+          fetch("http://localhost:3000/save-planning", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: data }),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (result.success) {
+                alert(
+                  "✅ Execution data saved to backend (Worker unavailable)!"
+                );
+              } else {
+                alert(
+                  "❌ Failed to save: " + (result.error || "Unknown error")
+                );
+              }
+            })
+            .catch((err) => {
+              alert("❌ Save failed: " + err.message);
+            });
+        });
+    } else {
+      fetch("http://localhost:3000/save-planning", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: data }),
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success) {
+            alert("✅ Execution data saved to backend!");
+          } else {
+            alert("❌ Failed to save: " + (result.error || "Unknown error"));
+          }
+        })
+        .catch((err) => {
+          alert("❌ Save failed: " + err.message);
+        });
+    }
+  };
+}
 // EXECUTION TAB MODULE
 
 // Execution table instance
@@ -219,16 +286,14 @@ function initExecutionGrid(rows) {
       const yieldToMain = () => new Promise(resolveYield => {
         // Use requestIdleCallback if available, otherwise setTimeout
         if (window.requestIdleCallback) {
-          requestIdleCallback(resolveYield, { timeout: 16 });
+          requestIdleCallback(resolveYield, { timeout: 5 });
         } else {
-          setTimeout(resolveYield, 16); // One frame yield
+          setTimeout(resolveYield, 5);
         }
       });
 
       // Chunk 1: Prepare configuration
       console.log("🔄 Initializing execution grid - preparing config...");
-      
-      // Get constants from planning module for consistency
       const statusOptions = window.planningModule?.constants?.statusOptions || [
         "Planning",
         "On Track",
@@ -236,248 +301,190 @@ function initExecutionGrid(rows) {
         "Cancelled",
       ];
       const yesNo = window.planningModule?.constants?.yesNo || ["Yes", "No"];
-
-      // Performance optimizations for large datasets
       const performanceConfig = {
-        // Use pagination for better performance and user experience
         pagination: "local",
         paginationSize: 25,
         paginationSizeSelector: [25, 50, 100],
         paginationCounter: "rows",
-        
-        // Disable conflicting features - cannot use virtualDom with pagination
         virtualDom: false,
         progressiveLoad: false,
-        
-        // Use basic horizontal rendering to avoid scroll violations
         renderHorizontal: "basic",
-        
-        // Disable expensive features for large datasets
         invalidOptionWarnings: false,
         autoResize: false,
         responsiveLayout: false,
-        
-        // Reduce column calculations
         columnCalcs: false,
-        
-        // Fix scroll performance issues - disable problematic scroll features
         scrollToRowPosition: "top",
         scrollToColumnPosition: "left",
         scrollToRowIfVisible: false,
-        
-        // Disable wheel event handling that causes passive listener warnings
-        wheelScrollSpeed: 0, // Disable wheel scrolling in tabulator
+        wheelScrollSpeed: 0,
       };
-
-      // Yield control after config preparation
       await yieldToMain();
 
-      // Chunk 2: Create table instance
+      // Chunk 2: Create table instance with no columns yet
       console.log("🔄 Initializing execution grid - creating table...");
-      
       const table = new Tabulator("#executionGrid", {
         data: rows,
         reactiveData: true,
         selectableRows: 1,
         layout: "fitColumns",
         ...performanceConfig,
-        // Remove initial sort as quarter column doesn't exist as a separate field
-        // initialSort: [
-        //   { column: "quarter", dir: "asc" }, // Sort by quarter for logical order
-        // ],
-    
-    // Add safer scroll configuration
-    scrollToRowIfVisible: false, // Prevent automatic scrolling issues
-    
-    // Add error handling for table operations
-    tableBuilt: function() {
+        columns: [] // Add columns in next chunk
+      });
+      executionTableInstance = table;
+      await yieldToMain();
+
+      // Chunk 3: Add columns in very small batches (1 at a time) with yields
+      const allColumns = [
+        {
+          title: "#",
+          field: "rowNumber",
+          formatter: function (cell) {
+            const row = cell.getRow();
+            const table = row.getTable();
+            const allRows = table.getRows();
+            const index = allRows.indexOf(row);
+            return index + 1;
+          },
+          width: 50,
+          hozAlign: "center",
+          headerSort: false,
+          frozen: true,
+        },
+        {
+          title: "Program Type",
+          field: "details",
+          width: 240,
+          editable: false,
+          formatter: function (cell) {
+            const data = cell.getRow().getData();
+            const region = data.region || "";
+            const owner = data.owner || "";
+            const description = data.description || "";
+            const programType = data.programType || "";
+            const quarter = data.quarter || "";
+            let html = '<div style="padding: 4px; line-height: 1.3; font-size: 12px;">';
+            if (region) html += `<div style="font-weight: bold; color: #1976d2;">${region}</div>`;
+            if (quarter) html += `<div style="color: #e65100; font-weight: bold; margin-top: 2px;">${quarter}</div>`;
+            if (owner) html += `<div style="color: #666; margin-top: 2px;">${owner}</div>`;
+            if (programType) html += `<div style="color: #888; font-size: 11px; margin-top: 2px;">${programType}</div>`;
+            if (description) html += `<div style="color: #333; margin-top: 2px; word-wrap: break-word;">${description}</div>`;
+            html += "</div>";
+            return html;
+          },
+        },
+        {
+          title: "Status",
+          field: "status",
+          editor: "list",
+          editorParams: { values: statusOptions },
+          cellEdited: debounce((cell) => {
+            cell.getRow().getData().__modified = true;
+          }, 500),
+        },
+        {
+          title: "PO Raised",
+          field: "poRaised",
+          editor: "list",
+          editorParams: { values: yesNo },
+          cellEdited: debounce((cell) => {
+            cell.getRow().getData().__modified = true;
+          }, 500),
+        },
+        {
+          title: "Forecasted Cost",
+          field: "forecastedCost",
+          editor: false,
+          formatter: function (cell) {
+            const v = cell.getValue();
+            if (v === null || v === undefined || v === "") return "";
+            return "$" + Number(v).toLocaleString();
+          },
+        },
+        {
+          title: "Actual Cost",
+          field: "actualCost",
+          editor: "number",
+          formatter: function (cell) {
+            const v = cell.getValue();
+            if (v === null || v === undefined || v === "") return "";
+            return "$" + Number(v).toLocaleString();
+          },
+          cellEdited: debounce((cell) => {
+            cell.getRow().getData().__modified = true;
+          }, 500),
+        },
+        { title: "Expected Leads", field: "expectedLeads" },
+        {
+          title: "Actual Leads",
+          field: "actualLeads",
+          editor: "number",
+          cellEdited: debounce((cell) => {
+            cell.getRow().getData().__modified = true;
+          }, 500),
+        },
+        { title: "MQL", field: "mqlForecast", editable: false },
+        {
+          title: "Actual MQLs",
+          field: "actualMQLs",
+          editor: "number",
+          cellEdited: debounce((cell) => {
+            cell.getRow().getData().__modified = true;
+          }, 500),
+        },
+        {
+          title: "Pipeline",
+          field: "pipelineForecast",
+          editable: false,
+          formatter: function (cell) {
+            const v = cell.getValue();
+            if (v === null || v === undefined || v === "") return "";
+            return "$" + Number(v).toLocaleString();
+          },
+        },
+      ];
+      // Add columns in batches of 1 with yields
+      for (let i = 0; i < allColumns.length; i++) {
+        table.addColumn(allColumns[i]);
+        await yieldToMain();
+      }
+
+      setupExecutionSave(table, rows);
+      await yieldToMain();
+
+      // Chunk 4: Table built callback and universal search
       setTimeout(() => {
         try {
-          this.redraw(true);
+          table.redraw(true);
         } catch (e) {
           console.warn("Error in execution table built callback:", e.message);
         }
       }, 100);
-    },
-    rowFormatter: function (row) {
-      // Visual indicator for shipped
-      if (row.getData().status === "Shipped") {
-        row.getElement().style.background = "#e3f2fd";
-      } else {
-        row.getElement().style.background = "";
-      }
-    },
-    columns: [
-      // Sequential number column
-      {
-        title: "#",
-        field: "rowNumber",
-        formatter: function (cell) {
-          const row = cell.getRow();
-          const table = row.getTable();
-          const allRows = table.getRows();
-          const index = allRows.indexOf(row);
-          return index + 1;
-        },
-        width: 50,
-        hozAlign: "center",
-        headerSort: false,
-        frozen: true, // Keep this column visible when scrolling horizontally
-      },
-      {
-        title: "Program Type",
-        field: "details",
-        width: 240,
-        editable: false,
-        formatter: function (cell) {
-          const data = cell.getRow().getData();
-          const region = data.region || "";
-          const owner = data.owner || "";
-          const description = data.description || "";
-          const programType = data.programType || "";
-          const quarter = data.quarter || "";
 
-          // Create multi-line informative format
-          let html =
-            '<div style="padding: 4px; line-height: 1.3; font-size: 12px;">';
-
-          if (region) {
-            html += `<div style="font-weight: bold; color: #1976d2;">${region}</div>`;
+      // Initialize universal search and then update search data when table is ready
+      setTimeout(() => {
+        if (typeof initializeExecutionUniversalSearch === 'function' && !window.executionUniversalSearch) {
+          window.executionSearchRetryCount = 0;
+          initializeExecutionUniversalSearch();
+        }
+        setTimeout(() => {
+          if (window.executionUniversalSearch && 
+              !(window.executionUniversalSearch instanceof HTMLElement) &&
+              typeof window.executionUniversalSearch.updateData === 'function') {
+            updateExecutionSearchData();
+          } else {
+            console.log("⏳ EXECUTION: Universal search not ready yet, will be updated by routing system");
           }
+        }, 500);
+      }, 300);
 
-          if (quarter) {
-            html += `<div style="color: #e65100; font-weight: bold; margin-top: 2px;">${quarter}</div>`;
-          }
-
-          if (owner) {
-            html += `<div style="color: #666; margin-top: 2px;">${owner}</div>`;
-          }
-
-          if (programType) {
-            html += `<div style="color: #888; font-size: 11px; margin-top: 2px;">${programType}</div>`;
-          }
-
-          if (description) {
-            html += `<div style="color: #333; margin-top: 2px; word-wrap: break-word;">${description}</div>`;
-          }
-
-          html += "</div>";
-          return html;
-        },
-      },
-      {
-        title: "Status",
-        field: "status",
-        editor: "list",
-        editorParams: { values: statusOptions },
-        cellEdited: debounce((cell) => {
-          cell.getRow().getData().__modified = true;
-        }, 500),
-      },
-      {
-        title: "PO Raised",
-        field: "poRaised",
-        editor: "list",
-        editorParams: { values: yesNo },
-        cellEdited: debounce((cell) => {
-          cell.getRow().getData().__modified = true;
-        }, 500),
-      },
-      {
-        title: "Forecasted Cost",
-        field: "forecastedCost",
-        editor: false,
-        formatter: function (cell) {
-          const v = cell.getValue();
-          if (v === null || v === undefined || v === "") return "";
-          return "$" + Number(v).toLocaleString();
-        },
-      },
-      {
-        title: "Actual Cost",
-        field: "actualCost",
-        editor: "number",
-        formatter: function (cell) {
-          const v = cell.getValue();
-          if (v === null || v === undefined || v === "") return "";
-          return "$" + Number(v).toLocaleString();
-        },
-        cellEdited: debounce((cell) => {
-          cell.getRow().getData().__modified = true;
-        }, 500),
-      },
-      { title: "Expected Leads", field: "expectedLeads" },
-      {
-        title: "Actual Leads",
-        field: "actualLeads",
-        editor: "number",
-        cellEdited: debounce((cell) => {
-          cell.getRow().getData().__modified = true;
-        }, 500),
-      },
-      { title: "MQL", field: "mqlForecast", editable: false },
-      {
-        title: "Actual MQLs",
-        field: "actualMQLs",
-        editor: "number",
-        cellEdited: debounce((cell) => {
-          cell.getRow().getData().__modified = true;
-        }, 500),
-      },
-      {
-        title: "Pipeline",
-        field: "pipelineForecast",
-        editable: false,
-        formatter: function (cell) {
-          const v = cell.getValue();
-          if (v === null || v === undefined || v === "") return "";
-          return "$" + Number(v).toLocaleString();
-        },
-      },
-    ],
-  });
-
-  executionTableInstance = table;
-  setupExecutionSave(table, rows);
-  
-  // Initialize universal search and then update search data when table is ready
-  setTimeout(() => {
-    // Initialize universal search first if not already done
-    if (typeof initializeExecutionUniversalSearch === 'function' && !window.executionUniversalSearch) {
-      console.log("🔄 EXECUTION: Initializing universal search during table setup...");
-      // Reset retry counter for new initialization
-      window.executionSearchRetryCount = 0;
-      initializeExecutionUniversalSearch();
-    }
-    
-    // Then update search data - but only if universal search is properly initialized
-    setTimeout(() => {
-      // Wait a bit longer to ensure routing system has had time to initialize universal search
-      if (window.executionUniversalSearch && 
-          !(window.executionUniversalSearch instanceof HTMLElement) &&
-          typeof window.executionUniversalSearch.updateData === 'function') {
-        updateExecutionSearchData();
-      } else {
-        console.log("⏳ EXECUTION: Universal search not ready yet, will be updated by routing system");
-      }
-    }, 500); // Increased delay to let routing system initialize first
-  }, 300); // Increased from 100ms
-  
-  // Yield control one final time before returning
-  await yieldToMain();
-  
-  console.log("✅ Execution grid initialization completed");
-  resolve(table);
-  
+      await yieldToMain();
+      console.log("✅ Execution grid initialization completed");
+      resolve(table);
     } catch (error) {
       console.error("❌ Error initializing execution grid:", error);
       reject(error);
     }
   });
-}
-
-// EXECUTION SAVE FUNCTIONALITY
-function setupExecutionSave(table, rows) {
   let btn = document.getElementById("saveExecutionRows");
   if (!btn) {
     console.error("Save button not found in HTML structure");

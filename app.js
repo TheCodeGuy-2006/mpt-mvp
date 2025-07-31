@@ -952,71 +952,76 @@ function route() {
         }
       }, 0);
     }
-    if (hash === "#execution" && window.executionModule.tableInstance) {
+    if (hash === "#execution") {
       setTimeout(() => {
-        window.executionModule.tableInstance.redraw(true);
-        // If the table library supports chunked setData, use it here for large data sets
-        // Example: window.executionModule.tableInstance.setDataInChunks(...)
-        window.executionModule.tableInstance.setData(
-          window.executionModule.tableInstance.getData(),
-        );
-        // Defer heavy sync and filter operations to idle time
-        if (typeof window !== 'undefined' && window.requestIdleCallback) {
-          window.requestIdleCallback(() => {
-            // Sync digital motions data from planning tab
-            if (
-              typeof window.executionModule.syncDigitalMotionsFromPlanning ===
-              "function"
-            ) {
-              window.executionModule.syncDigitalMotionsFromPlanning();
-            }
-            // Initialize filters when execution tab is shown
-            if (
-              typeof window.executionModule.setupExecutionFilters === "function"
-            ) {
-              window.executionModule.setupExecutionFilters();
-            }
-            // Initialize universal search for execution if not already done
-            if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
-              if (!window.executionUniversalSearch || 
-                  window.executionUniversalSearch instanceof HTMLElement ||
-                  typeof window.executionUniversalSearch.updateData !== 'function') {
-                window.executionModule.initializeExecutionUniversalSearch();
-                // Update search data after initialization
-                setTimeout(() => {
-                  if (typeof window.executionModule.updateExecutionSearchData === 'function') {
-                    window.executionModule.updateExecutionSearchData();
-                  }
-                }, 100);
+        if (window.executionModule && window.executionModule.tableInstance) {
+          window.executionModule.tableInstance.redraw(true);
+          // If the table library supports chunked setData, use it here for large data sets
+          // Example: window.executionModule.tableInstance.setDataInChunks(...)
+          window.executionModule.tableInstance.setData(
+            window.executionModule.tableInstance.getData(),
+          );
+          // Defer heavy sync and filter operations to idle time
+          if (typeof window !== 'undefined' && window.requestIdleCallback) {
+            window.requestIdleCallback(() => {
+              // Sync digital motions data from planning tab
+              if (
+                typeof window.executionModule.syncDigitalMotionsFromPlanning ===
+                "function"
+              ) {
+                window.executionModule.syncDigitalMotionsFromPlanning();
               }
-            }
-          }, { timeout: 100 });
+              // Initialize filters when execution tab is shown
+              if (
+                typeof window.executionModule.setupExecutionFilters === "function"
+              ) {
+                window.executionModule.setupExecutionFilters();
+              }
+              // Initialize universal search for execution if not already done
+              if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
+                if (!window.executionUniversalSearch || 
+                    window.executionUniversalSearch instanceof HTMLElement ||
+                    typeof window.executionUniversalSearch.updateData !== 'function') {
+                  window.executionModule.initializeExecutionUniversalSearch();
+                  // Update search data after initialization
+                  setTimeout(() => {
+                    if (typeof window.executionModule.updateExecutionSearchData === 'function') {
+                      window.executionModule.updateExecutionSearchData();
+                    }
+                  }, 100);
+                }
+              }
+            }, { timeout: 100 });
+          } else {
+            setTimeout(() => {
+              if (
+                typeof window.executionModule.syncDigitalMotionsFromPlanning ===
+                "function"
+              ) {
+                window.executionModule.syncDigitalMotionsFromPlanning();
+              }
+              if (
+                typeof window.executionModule.setupExecutionFilters === "function"
+              ) {
+                window.executionModule.setupExecutionFilters();
+              }
+              if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
+                if (!window.executionUniversalSearch || 
+                    window.executionUniversalSearch instanceof HTMLElement ||
+                    typeof window.executionUniversalSearch.updateData !== 'function') {
+                  window.executionModule.initializeExecutionUniversalSearch();
+                  setTimeout(() => {
+                    if (typeof window.executionModule.updateExecutionSearchData === 'function') {
+                      window.executionModule.updateExecutionSearchData();
+                    }
+                  }, 100);
+                }
+              }
+            }, 100);
+          }
         } else {
-          setTimeout(() => {
-            if (
-              typeof window.executionModule.syncDigitalMotionsFromPlanning ===
-              "function"
-            ) {
-              window.executionModule.syncDigitalMotionsFromPlanning();
-            }
-            if (
-              typeof window.executionModule.setupExecutionFilters === "function"
-            ) {
-              window.executionModule.setupExecutionFilters();
-            }
-            if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
-              if (!window.executionUniversalSearch || 
-                  window.executionUniversalSearch instanceof HTMLElement ||
-                  typeof window.executionUniversalSearch.updateData !== 'function') {
-                window.executionModule.initializeExecutionUniversalSearch();
-                setTimeout(() => {
-                  if (typeof window.executionModule.updateExecutionSearchData === 'function') {
-                    window.executionModule.updateExecutionSearchData();
-                  }
-                }, 100);
-              }
-            }
-          }, 100);
+          // Optionally, retry a few times if executionModule.tableInstance is not ready
+          // Could add a retry mechanism here if needed
         }
       }, 0);
     }

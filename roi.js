@@ -930,7 +930,7 @@ function updateReportTotalSpend() {
     });
 
   // Calculate actual spend, MQL, and SQL from execution data
-  if (window.executionModule.tableInstance) {
+  if (window.executionModule && window.executionModule.tableInstance) {
     const executionData = window.executionModule.tableInstance.getData();
     let totalActualSpend = 0;
     let totalActualMql = 0;
@@ -985,6 +985,19 @@ function updateReportTotalSpend() {
     if (sqlEl) {
       sqlEl.textContent = totalActualSql.toLocaleString();
     }
+  } else {
+    // If execution table is not ready, retry after a short delay (max 5 attempts)
+    if (typeof updateReportTotalSpend.retryCount === 'undefined') {
+      updateReportTotalSpend.retryCount = 0;
+    }
+    if (updateReportTotalSpend.retryCount < 5) {
+      updateReportTotalSpend.retryCount++;
+      setTimeout(updateReportTotalSpend, 200);
+    } else {
+      console.warn("[ROI] Execution table not available after multiple attempts. Skipping actual spend calculation.");
+      updateReportTotalSpend.retryCount = 0;
+    }
+    return;
   }
 }
 
@@ -999,19 +1012,26 @@ function setupRoiChartEventHandlers() {
     }
   });
 
-  // Setup execution table event handlers for ROI chart updates
-  if (window.executionModule.tableInstance) {
-    window.executionModule.tableInstance.on("dataChanged", () => {
-      renderRoiByRegionChart();
-      renderRoiByProgramTypeChart();
-      renderRoiByQuarterChart();
-    });
-    window.executionModule.tableInstance.on("cellEdited", () => {
-      renderRoiByRegionChart();
-      renderRoiByProgramTypeChart();
-      renderRoiByQuarterChart();
-    });
+  // Setup execution table event handlers for ROI chart updates, with guard/retry logic
+  function attachExecutionTableHandlers(attempt = 0) {
+    if (window.executionModule && window.executionModule.tableInstance) {
+      window.executionModule.tableInstance.on("dataChanged", () => {
+        renderRoiByRegionChart();
+        renderRoiByProgramTypeChart();
+        renderRoiByQuarterChart();
+      });
+      window.executionModule.tableInstance.on("cellEdited", () => {
+        renderRoiByRegionChart();
+        renderRoiByProgramTypeChart();
+        renderRoiByQuarterChart();
+      });
+    } else if (attempt < 5) {
+      setTimeout(() => attachExecutionTableHandlers(attempt + 1), 200);
+    } else {
+      console.warn("[ROI] Execution table not available after multiple attempts. Skipping ROI chart event handler attachment.");
+    }
   }
+  attachExecutionTableHandlers();
 }
 
 // Initialize ROI functionality on DOM content loaded
@@ -1805,5 +1825,3 @@ async function updateForecastedBudgetUsage(filters) {
     }
   }
 }
-
-export default roiModule;

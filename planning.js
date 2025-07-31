@@ -326,28 +326,25 @@ function debounce(func, wait) {
 
 // Batch processing utility for large datasets
 function processRowsInBatches(rows, batchSize = 15, callback) {
+  // Reduce batch size for more frequent yielding
+  batchSize = 5;
   return new Promise((resolve) => {
     let index = 0;
-    
     async function processBatch() {
       const batch = rows.slice(index, index + batchSize);
       if (batch.length === 0) {
         resolve();
         return;
       }
-      
-      // Process batch with micro-yields for very large batches
+      // Process batch with micro-yields for very small batches
       for (let i = 0; i < batch.length; i++) {
         callback(batch[i], index + i);
-        
-        // Yield control every 3 items within the batch to prevent long tasks
-        if (i > 0 && i % 3 === 0) {
+        // Yield control every 2 items within the batch
+        if (i > 0 && i % 2 === 0) {
           await new Promise(resolve => setTimeout(resolve, 0));
         }
       }
-      
       index += batchSize;
-      
       // Yield control between batches
       await new Promise(resolve => {
         requestAnimationFrame(() => {
@@ -357,7 +354,6 @@ function processRowsInBatches(rows, batchSize = 15, callback) {
         });
       });
     }
-    
     processBatch();
   });
 }
@@ -438,17 +434,16 @@ async function loadPlanning(retryCount = 0, useCache = true) {
             resolve(e.data.data);
           }
         };
-        
         planningWorker.addEventListener('message', handleWorkerMessage);
         planningWorker.postMessage({
           type: 'PROCESS_PLANNING_DATA',
           data: rows,
-          options: { batchSize: 50 }
+          options: { batchSize: 10 } // Reduce batch size for worker as well
         });
       });
     } else {
       // Fallback to main thread processing for smaller datasets
-      await processRowsInBatches(rows, 15, (row, i) => {
+      await processRowsInBatches(rows, 5, (row, i) => {
         if (typeof row.expectedLeads === "number") {
           Object.assign(row, kpis(row.expectedLeads));
         }
@@ -1133,22 +1128,20 @@ function initPlanningGrid(rows) {
           },
         ];
         
-        // Add columns in very small batches to prevent long tasks
-        const batchSize = 2; // Reduced from 3 to prevent long tasks
+        // Add columns in even smaller batches to prevent long tasks
+        const batchSize = 1; // Reduce to 1 for maximum responsiveness
         for (let i = 0; i < allColumns.length; i += batchSize) {
           const batch = allColumns.slice(i, i + batchSize);
-          
           // Add this batch of columns
           batch.forEach(column => {
             planningTableInstance.addColumn(column);
           });
-          
-          // More aggressive yielding after each batch
+          // Yield after each column
           await new Promise(resolve => {
             if (window.requestIdleCallback) {
-              requestIdleCallback(resolve, { timeout: 10 }); // Very short timeout
+              requestIdleCallback(resolve, { timeout: 5 });
             } else {
-              setTimeout(resolve, 5); // Very short timeout
+              setTimeout(resolve, 2);
             }
           });
         }
@@ -2254,44 +2247,53 @@ function updateDigitalMotionsButtonVisual(button) {
 // Function to ensure planning grid is properly rendered and visible
 function ensurePlanningGridVisible() {
   if (planningTableInstance) {
-    // Use requestIdleCallback for non-blocking operations
+    // Use requestIdleCallback for non-blocking operations, with even more granular yielding
     const performRecalc = () => {
       if (window.requestIdleCallback) {
         requestIdleCallback(() => {
-          // Gentle recalculation without forced redraws
-          planningTableInstance.recalc();
-          
-          // Schedule redraw with low priority
-          requestIdleCallback(() => {
-            planningTableInstance.redraw(false); // Non-blocking redraw
-            
-            // Handle scrolling if needed
-            const data = planningTableInstance.getData();
-            if (data && data.length > 0) {
-              // Schedule scroll with even lower priority
+          // Micro-yield before recalc
+          setTimeout(() => {
+            planningTableInstance.recalc();
+            // Micro-yield before redraw
+            setTimeout(() => {
               requestIdleCallback(() => {
-                safeScrollToRow(planningTableInstance, 1, "top", false);
-              }, { timeout: 100 });
-            }
-          }, { timeout: 50 });
-        }, { timeout: 25 });
+                planningTableInstance.redraw(false); // Non-blocking redraw
+                // Micro-yield before scroll
+                setTimeout(() => {
+                  requestIdleCallback(() => {
+                    const data = planningTableInstance.getData();
+                    if (data && data.length > 0) {
+                      // Micro-yield before scroll
+                      setTimeout(() => {
+                        requestIdleCallback(() => {
+                          safeScrollToRow(planningTableInstance, 1, "top", false);
+                        }, { timeout: 10 });
+                      }, 5);
+                    }
+                  }, { timeout: 10 });
+                }, 5);
+              }, { timeout: 10 });
+            }, 5);
+          }, 5);
+        }, { timeout: 5 });
       } else {
-        // Fallback to setTimeout with small delays
+        // Fallback to setTimeout with even smaller delays and yields
         setTimeout(() => {
           planningTableInstance.recalc();
           setTimeout(() => {
             planningTableInstance.redraw(false);
-            const data = planningTableInstance.getData();
-            if (data && data.length > 0) {
-              setTimeout(() => {
-                safeScrollToRow(planningTableInstance, 1, "top", false);
-              }, 25);
-            }
-          }, 15);
-        }, 10);
+            setTimeout(() => {
+              const data = planningTableInstance.getData();
+              if (data && data.length > 0) {
+                setTimeout(() => {
+                  safeScrollToRow(planningTableInstance, 1, "top", false);
+                }, 5);
+              }
+            }, 5);
+          }, 5);
+        }, 2);
       }
     };
-    
     performRecalc();
   }
 }
