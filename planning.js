@@ -1024,10 +1024,11 @@ function initPlanningGrid(rows) {
             formatter: function(cell) {
               const val = cell.getValue();
               if (!val) return '';
+              // Always show 'Issue Link' for any valid URL, regardless of original anchor text
               if (/^https?:\/\//.test(val)) {
-                return `<a href="${val}" target="_blank" rel="noopener">Link</a>`;
+                return `<a href="${val}" target="_blank" rel="noopener" style="font-family: 'Mona Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Liberation Sans', sans-serif; font-weight: 600; font-size: 1em; color: #1976d2; text-decoration: underline;">Issue Link</a>`;
               }
-              return val;
+              return `<span style="font-family: 'Mona Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Liberation Sans', sans-serif; font-weight: 600; font-size: 1em; color: #1976d2;">${val}</span>`;
             },
             editor: 'input',
             headerTooltip: 'Paste a GitHub or Jira issue link for this row',
@@ -2508,7 +2509,8 @@ let universalSearchFilters = {
   programType: [],
   strategicPillar: [],
   owner: [],
-  fiscalYear: []
+  fiscalYear: [],
+  digitalMotions: false
 };
 
 function getPlanningFilterValues() {
@@ -2549,7 +2551,7 @@ function getPlanningFilterValues() {
     programType: [...new Set([...dropdownFilterValues.programType, ...universalSearchFilters.programType])],
     strategicPillar: [...new Set([...dropdownFilterValues.strategicPillar, ...universalSearchFilters.strategicPillar])],
     owner: [...new Set([...dropdownFilterValues.owner, ...universalSearchFilters.owner])],
-    digitalMotions: digitalMotionsActive,
+    digitalMotions: digitalMotionsActive || !!universalSearchFilters.digitalMotions,
   };
 
   // Only log filter values in debug mode (reduced console noise)
@@ -2955,6 +2957,7 @@ function updatePlanningSearchData() {
       });
     });
     
+
     // Add owner filters (from actual data)
     uniqueOwners.forEach(owner => {
       searchData.push({
@@ -2966,7 +2969,18 @@ function updatePlanningSearchData() {
         type: 'filter'
       });
     });
-    
+
+    // Add Digital Motions filter in the same group as other filters
+    searchData.push({
+      id: 'digitalMotions_true',
+      title: 'Digital Motions',
+      category: 'digitalMotions',
+      value: 'true',
+      displayValue: 'Digital Motions',
+      description: 'Show only Digital Motions campaigns',
+      type: 'filter',
+    });
+
     // Add fiscal year filters
     fyOptions.forEach(fy => {
       searchData.push({
@@ -2978,7 +2992,8 @@ function updatePlanningSearchData() {
         type: 'filter'
       });
     });
-    
+
+    console.log('[DEBUG] planning.js: searchData sent to updateData:', searchData);
     window.planningUniversalSearch.updateData(searchData);
     console.log("✅ PLANNING: Search data updated with", searchData.length, "filter options");
     
@@ -2996,7 +3011,7 @@ function applyPlanningSearchFilters(selectedFilters) {
   }
   
   try {
-    // Reset universal search filters
+    // Reset universal search filters (must include digitalMotions property)
     universalSearchFilters = {
       region: [],
       quarter: [],
@@ -3004,21 +3019,25 @@ function applyPlanningSearchFilters(selectedFilters) {
       programType: [],
       strategicPillar: [],
       owner: [],
-      fiscalYear: []
+      fiscalYear: [],
+      digitalMotions: false
     };
     
     // selectedFilters is an object with categories as keys and arrays as values
     // e.g., { region: ['SAARC'], status: ['Planning'] }
     if (selectedFilters && typeof selectedFilters === 'object') {
       Object.entries(selectedFilters).forEach(([category, values]) => {
-        if (universalSearchFilters.hasOwnProperty(category) && Array.isArray(values)) {
+        if (category === 'digitalMotions') {
+          // If Digital Motions filter is present, set boolean
+          universalSearchFilters.digitalMotions = Array.isArray(values) && values.includes(true);
+        } else if (universalSearchFilters.hasOwnProperty(category) && Array.isArray(values)) {
           universalSearchFilters[category] = [...values];
         }
       });
     }
-    
+
     console.log("🔍 PLANNING: Universal search filters updated:", universalSearchFilters);
-    
+
     // Apply filters using the main planning filter system
     applyPlanningFilters();
     

@@ -1342,10 +1342,11 @@ window.addEventListener("DOMContentLoaded", async () => {
               formatter: function(cell) {
                 const val = cell.getValue();
                 if (!val) return '';
+                // Always show 'Issue Link' for any valid URL, regardless of original anchor text
                 if (/^https?:\/\//.test(val)) {
-                  return `<a href="${val}" target="_blank" rel="noopener">Link</a>`;
+                  return `<a href="${val}" target="_blank" rel="noopener" style="font-family: 'Mona Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Liberation Sans', sans-serif; font-weight: 600; font-size: 1em; color: #1976d2; text-decoration: underline;">Issue Link</a>`;
                 }
-                return val;
+                return `<span style="font-family: 'Mona Sans', 'Segoe UI', 'Helvetica Neue', Arial, 'Liberation Sans', sans-serif; font-weight: 600; font-size: 1em; color: #1976d2;">${val}</span>`;
               },
               editor: 'input',
               headerTooltip: 'Paste a GitHub or Jira issue link for this row',
@@ -1381,6 +1382,20 @@ window.addEventListener("DOMContentLoaded", async () => {
         processedRows = rows;
         planningTable = await window.planningModule.initPlanningGrid(processedRows);
         window.planningTableInstance = planningTable;
+        // --- DEBUG: Print searchData after planning table and universal search are initialized ---
+        if (
+          window.planningModule &&
+          typeof window.planningModule.updatePlanningSearchData === 'function' &&
+          typeof window.planningModule.initializePlanningUniversalSearch === 'function'
+        ) {
+          // Initialize universal search if not already done
+          window.planningModule.initializePlanningUniversalSearch();
+          // Give time for search data to be set up
+          setTimeout(() => {
+            const searchData = window.planningModule.updatePlanningSearchData();
+            console.log('[DEBUG] Planning searchData after universal search init:', searchData);
+          }, 500);
+        }
       }
     } catch (e) {
       console.error("Planning grid initialization failed:", e);

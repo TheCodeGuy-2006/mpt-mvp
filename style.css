@@ -1,3 +1,12 @@
+/* Hide Digital Motions filter button for planning tab, but keep it functional */
+#planningDigitalMotionsFilter {
+  display: none !important;
+}
+
+/* Hide Digital Motions filter button for execution tab, but keep it functional */
+#executionDigitalMotionsFilter {
+  display: none !important;
+}
 /* ============================================================================
    TYPOGRAPHY SYSTEM
    Consistent font hierarchy and scale across all components

@@ -127,8 +127,9 @@ class UniversalSearchFilter {
     
     // Sort categories and limit results
     const sortedResults = new Map();
-    const categoryOrder = ['region', 'quarter', 'status', 'programType', 'strategicPillars', 'owner', 'country', 'revenuePlay'];
-    
+    // Add digitalMotions to the category order so it always appears in the dropdown
+    const categoryOrder = ['region', 'quarter', 'status', 'programType', 'strategicPillars', 'owner', 'country', 'revenuePlay', 'digitalMotions'];
+
     categoryOrder.forEach(cat => {
       if (results.has(cat)) {
         const items = results.get(cat)
@@ -144,7 +145,12 @@ class UniversalSearchFilter {
         sortedResults.set(cat, items);
       }
     });
-    
+
+    // If the search is empty, always show digitalMotions if present
+    if (!searchTerm && results.has('digitalMotions') && !sortedResults.has('digitalMotions')) {
+      sortedResults.set('digitalMotions', results.get('digitalMotions'));
+    }
+
     return sortedResults;
   }
   
@@ -301,7 +307,8 @@ class UniversalSearchFilter {
       strategicPillars: 'Strategic Pillar',
       owner: 'Owner',
       country: 'Country',
-      revenuePlay: 'Revenue Play'
+      revenuePlay: 'Revenue Play',
+      digitalMotions: 'Digital Motions'
     };
     return displayNames[category] || category;
   }

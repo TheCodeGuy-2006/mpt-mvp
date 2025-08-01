@@ -1342,6 +1342,7 @@ function updateExecutionSearchData() {
         });
       });
       
+
       // Add owner filters (from actual data)
       uniqueOwners.forEach(owner => {
         searchData.push({
@@ -1353,7 +1354,18 @@ function updateExecutionSearchData() {
           type: 'filter'
         });
       });
-      
+
+      // Add Digital Motions filter in the same group as other filters
+      searchData.push({
+        id: 'digitalMotions_true',
+        title: 'Digital Motions',
+        category: 'digitalMotions',
+        value: 'true',
+        displayValue: 'Digital Motions',
+        description: 'Show only Digital Motions campaigns',
+        type: 'filter',
+      });
+
       // Add fiscal year filters
       fyOptions.forEach(fy => {
         searchData.push({
@@ -1365,8 +1377,8 @@ function updateExecutionSearchData() {
           type: 'filter'
         });
       });
-      
-            // Update universal search with processed data
+
+      // Update universal search with processed data
       window.executionUniversalSearch.updateData(searchData);
       
       const processingTime = performance.now() - startTime;
