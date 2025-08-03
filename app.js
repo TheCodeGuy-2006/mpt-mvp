@@ -945,12 +945,12 @@ function route() {
           // Fallback to standard redraw
           window.planningModule.tableInstance.redraw(true);
         }
-        
+        // Do not apply any default sort when switching to planning tab
+        // This ensures the table order matches the data array and the '#' column is sequential 1-N.
         // Initialize filters when planning tab is shown
         if (typeof window.planningModule.populatePlanningFilters === "function") {
           window.planningModule.populatePlanningFilters();
         }
-        
         // Initialize universal search for planning if not already done
         if (typeof window.planningModule.initializePlanningUniversalSearch === "function") {
           window.planningModule.initializePlanningUniversalSearch();
@@ -1325,6 +1325,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Initialize tables with error boundaries and performance monitoring in chunks
+  // Store original planning rows for reset functionality
+  window.originalPlanningRows = null;
   const initTables = async () => {
     const yieldControl = () => new Promise(resolve => setTimeout(resolve, 16)); // One frame yield
 
@@ -1354,6 +1356,22 @@ window.addEventListener("DOMContentLoaded", async () => {
             });
           }
         }
+        // Sort rows by 'quarter' (and optionally by another field for tie-breaker) before grid init
+        rows.sort((a, b) => {
+          // If quarter is a string like 'Q1', 'Q2', etc., sort numerically
+          const getQuarterNum = q => {
+            if (!q) return 99;
+            const m = q.match(/Q(\d+)/i);
+            return m ? parseInt(m[1], 10) : 99;
+          };
+          const qA = getQuarterNum(a.quarter);
+          const qB = getQuarterNum(b.quarter);
+          if (qA !== qB) return qA - qB;
+          // Tie-breaker: sort by campaign name or id if available
+          if (a.name && b.name) return a.name.localeCompare(b.name);
+          if (a.id && b.id) return a.id - b.id;
+          return 0;
+        });
         // Use chunked utility for planning
         let processedRows = [];
         await processInChunks(
@@ -1380,8 +1398,30 @@ window.addEventListener("DOMContentLoaded", async () => {
           5 // Lower yieldTimeout for more frequent yielding
         );
         processedRows = rows;
+        // Store a deep copy of the original order for reset
+        window.originalPlanningRows = JSON.parse(JSON.stringify(processedRows));
         planningTable = await window.planningModule.initPlanningGrid(processedRows);
         window.planningTableInstance = planningTable;
+        // Apply default sort immediately after table initialization
+        if (typeof planningTable.setSort === 'function') {
+          planningTable.setSort([
+            { column: 'quarter', dir: 'asc' }
+          ]);
+        }
+// Global function to reset planning table to original order and reapply default sort
+window.resetPlanningTableOrder = function() {
+  if (window.originalPlanningRows && window.planningTableInstance) {
+    // Deep copy to avoid mutation
+    const resetRows = JSON.parse(JSON.stringify(window.originalPlanningRows));
+    window.planningTableInstance.setData(resetRows);
+    // Optionally, reapply default sort (e.g., by 'quarter' or your preferred field)
+    if (typeof window.planningTableInstance.setSort === 'function') {
+      window.planningTableInstance.setSort([
+        { column: 'quarter', dir: 'asc' }
+      ]);
+    }
+  }
+};
         // --- DEBUG: Print searchData after planning table and universal search are initialized ---
         if (
           window.planningModule &&

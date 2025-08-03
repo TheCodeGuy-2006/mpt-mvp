@@ -351,7 +351,7 @@ function initExecutionGrid(rows) {
           frozen: true,
         },
         {
-          title: "Program Type",
+          title: '<span style="display:flex;align-items:center;justify-content:space-between;width:100%;"><span>Program Type</span><span style="display:inline-block;width:18px;"></span><i class="octicon octicon-list-unordered" aria-hidden="true" style="margin-left:auto;"></i></span>',
           field: "details",
           width: 240,
           editable: false,
@@ -373,7 +373,7 @@ function initExecutionGrid(rows) {
           },
         },
         {
-          title: "Status",
+          title: '<span style="display:flex;align-items:center;justify-content:space-between;width:100%;"><span>Status</span><span style="display:inline-block;width:18px;"></span><i class="octicon octicon-checklist" aria-hidden="true" style="margin-left:auto;"></i></span>',
           field: "status",
           editor: "list",
           editorParams: { values: statusOptions },
@@ -382,7 +382,7 @@ function initExecutionGrid(rows) {
           }, 500),
         },
         {
-          title: "PO Raised",
+          title: '<span style="display:flex;align-items:center;justify-content:space-between;width:100%;"><span>PO Raised</span><span style="display:inline-block;width:18px;"></span><i class="octicon octicon-credit-card" aria-hidden="true" style="margin-left:auto;"></i></span>',
           field: "poRaised",
           editor: "list",
           editorParams: { values: yesNo },
@@ -391,7 +391,7 @@ function initExecutionGrid(rows) {
           }, 500),
         },
         {
-          title: "Forecasted Cost",
+          title: '<span style="display:flex;align-items:center;justify-content:space-between;width:100%;"><span>Forecasted Cost</span><span style="display:inline-block;width:18px;"></span><i class="octicon octicon-graph" aria-hidden="true" style="margin-left:auto;"></i></span>',
           field: "forecastedCost",
           editor: false,
           formatter: function (cell) {
@@ -401,7 +401,7 @@ function initExecutionGrid(rows) {
           },
         },
         {
-          title: "Actual Cost",
+          title: '<span style="display:flex;align-items:center;justify-content:space-between;width:100%;"><span>Actual Cost</span><span style="display:inline-block;width:18px;"></span><i class="octicon octicon-repo-push" aria-hidden="true" style="margin-left:auto;"></i></span>',
           field: "actualCost",
           editor: "number",
           formatter: function (cell) {

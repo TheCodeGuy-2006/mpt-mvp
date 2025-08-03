@@ -534,8 +534,8 @@ class PlanningDataStore {
       : null;
     
     this.filteredData = this.data.filter(row => {
-      // Digital Motions filter
-      if (filters.digitalMotions && row.digitalMotions !== true) {
+      // Digital Motions filter (robust: accept boolean true or string 'true')
+      if (filters.digitalMotions && !(row.digitalMotions === true || row.digitalMotions === 'true')) {
         return false;
       }
       
@@ -737,20 +737,11 @@ function initPlanningGrid(rows) {
         reactiveData: true,
         selectableRows: 1,
         layout: "fitData", // Back to basic fitData for natural column sizing
-        // Remove initial sort - will add after columns are created
-        // initialSort: [
-        //   { column: "quarter", dir: "asc" },
-        // ],
-        
-        // Apply performance optimizations
+        // No initialSort: preserve data order for sequential numbering
         ...performanceConfig,
-        
-        // Override any problematic scroll behavior
         scrollToRowPosition: "top",
         scrollToColumnPosition: "left",
         scrollToRowIfVisible: false,
-        
-        // Add table built callback to ensure proper rendering
         tableBuilt: function() {
           // Use requestIdleCallback for non-blocking redraw
           const scheduleRedraw = () => {
@@ -758,8 +749,6 @@ function initPlanningGrid(rows) {
               requestIdleCallback(() => {
                 try {
                   this.redraw(false); // Use false for non-blocking redraw
-                  
-                  // Schedule scroll with even lower priority
                   requestIdleCallback(() => {
                     if (this.getData().length > 0 && this.element && this.element.offsetParent) {
                       safeScrollToRow(this, 1, "top", false);
@@ -770,7 +759,6 @@ function initPlanningGrid(rows) {
                 }
               }, { timeout: 50 });
             } else {
-              // Fallback to setTimeout with smaller delay
               setTimeout(() => {
                 try {
                   this.redraw(false);
@@ -787,14 +775,11 @@ function initPlanningGrid(rows) {
           };
           scheduleRedraw();
         },
-        
-        // Add data loaded callback
         dataLoaded: function(data) {
           console.log(`Planning grid loaded with ${data.length} rows`);
-          // Use requestIdleCallback for non-blocking redraw
           if (window.requestIdleCallback) {
             requestIdleCallback(() => {
-              this.redraw(false); // Use false for non-blocking redraw
+              this.redraw(false);
             }, { timeout: 50 });
           } else {
             setTimeout(() => {
@@ -802,8 +787,6 @@ function initPlanningGrid(rows) {
             }, 25);
           }
         },
-        
-        // Columns will be added in next chunk
         columns: []
       });
       
@@ -3028,8 +3011,8 @@ function applyPlanningSearchFilters(selectedFilters) {
     if (selectedFilters && typeof selectedFilters === 'object') {
       Object.entries(selectedFilters).forEach(([category, values]) => {
         if (category === 'digitalMotions') {
-          // If Digital Motions filter is present, set boolean
-          universalSearchFilters.digitalMotions = Array.isArray(values) && values.includes(true);
+          // If Digital Motions filter is present, set boolean (accept true or 'true')
+          universalSearchFilters.digitalMotions = Array.isArray(values) && (values.includes(true) || values.includes('true'));
         } else if (universalSearchFilters.hasOwnProperty(category) && Array.isArray(values)) {
           universalSearchFilters[category] = [...values];
         }
