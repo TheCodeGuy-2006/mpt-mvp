@@ -752,15 +752,23 @@ function createFullscreenOverlay(region, assignedBudget, forecastedCost, actualC
 
 // ROI by Region Chart (optimized with caching and filtering)
 const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
+
   // Get current ROI filter state
   const filters = window.roiModule ? window.roiModule.getFilterState ? window.roiModule.getFilterState() : {} : {};
-  
+
   // Create cache key based on filters
   const cacheKey = `roi-region-chart-${JSON.stringify(filters)}`;
   const cachedData = chartCache.get(cacheKey);
-  
-  // Define the specific regions to display
-  const targetRegions = ["JP & Korea", "South APAC", "SAARC"];
+
+  // Define the specific regions to display (added missing regions)
+  const targetRegions = [
+    "JP & Korea",
+    "South APAC",
+    "SAARC",
+    "Digital Motions",
+    "X APAC English",
+    "X APAC Non English"
+  ];
 
   // Prepare data
   let regionMap = {};
@@ -770,41 +778,120 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
     regionMap[region] = { spend: 0, pipeline: 0 };
   });
 
-  if (window.executionTableInstance) {
-    const data = window.executionTableInstance.getData();
-    
-    // Helper function to normalize quarter formats for comparison
-    const normalizeQuarter = (quarter) => {
-      if (!quarter) return '';
-      return quarter.replace(/\s*-\s*/g, ' ').trim();
-    };
-    
-    // Process data with filtering
-    data.forEach((row) => {
-      // Apply filters before processing data
-      if (filters.region && row.region !== filters.region) return;
-      if (filters.quarter && normalizeQuarter(row.quarter) !== normalizeQuarter(filters.quarter)) return;
-      if (filters.country && row.country !== filters.country) return;
-      if (filters.owner && row.owner !== filters.owner) return;
-      if (filters.status && row.status !== filters.status) return;
-      if (filters.programType && row.programType !== filters.programType) return;
-      if (filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) return;
-      if (filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) return;
-      
-      const region = row.region;
-      // Only process data for our target regions
-      if (targetRegions.includes(region)) {
-        let spend = row.actualCost;
-        if (typeof spend === "string")
-          spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
-        if (!isNaN(spend)) regionMap[region].spend += Number(spend);
-        let pipeline = row.pipelineForecast;
-        if (typeof pipeline === "string")
-          pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
-        if (!isNaN(pipeline)) regionMap[region].pipeline += Number(pipeline);
-      }
-    });
+  // Debug: Check executionTableInstance and data
+  if (!window.executionTableInstance) {
+    console.warn('[ROI DEBUG] executionTableInstance is not defined. Chart will not render.');
+    return;
   }
+  const data = window.executionTableInstance.getData ? window.executionTableInstance.getData() : null;
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    console.warn('[ROI DEBUG] executionTableInstance.getData() returned no data. Chart will not render.', data);
+    return;
+  }
+  console.log('[ROI DEBUG] executionTableInstance.getData() sample:', data[0], 'total rows:', data.length);
+  // Log all unique region values in the data
+  const uniqueRegions = Array.from(new Set(data.map(row => row.region))).filter(Boolean);
+  console.log('[ROI DEBUG] Unique region values in data:', uniqueRegions);
+
+  // Helper function to normalize quarter formats for comparison
+  const normalizeQuarter = (quarter) => {
+    if (!quarter || typeof quarter !== 'string') return '';
+    return quarter.replace(/\s*-\s*/g, ' ').trim();
+  };
+
+  // Debug: Log current filters
+  console.log('[ROI DEBUG] Current filters:', filters);
+  // Process data with filtering
+  data.forEach((row, idx) => {
+    // Debug: Log row before filters
+    // Only log for first 10 rows to avoid spam
+    if (idx < 10) console.log('[ROI DEBUG] Row before filters:', row);
+    // Only apply region filter if it's a non-empty array
+    if (Array.isArray(filters.region) && filters.region.length > 0 && !filters.region.includes(row.region)) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to region filter:', row.region, 'not in', filters.region);
+      return;
+    }
+    // Only apply quarter filter if it's a non-empty array
+    if (Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to quarter filter:', row.quarter, 'not in', filters.quarter);
+      return;
+    }
+    // Only apply country filter if it's a non-empty array or a string
+    if (Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to country filter:', row.country, 'not in', filters.country);
+      return;
+    } else if (typeof filters.country === 'string' && filters.country && row.country !== filters.country) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to country filter:', row.country, '!=', filters.country);
+      return;
+    }
+    // Only apply owner filter if it's a non-empty array or a string
+    if (Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to owner filter:', row.owner, 'not in', filters.owner);
+      return;
+    } else if (typeof filters.owner === 'string' && filters.owner && row.owner !== filters.owner) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to owner filter:', row.owner, '!=', filters.owner);
+      return;
+    }
+    // Only apply status filter if it's a non-empty array or a string
+    if (Array.isArray(filters.status) && filters.status.length > 0 && !filters.status.includes(row.status)) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to status filter:', row.status, 'not in', filters.status);
+      return;
+    } else if (typeof filters.status === 'string' && filters.status && row.status !== filters.status) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to status filter:', row.status, '!=', filters.status);
+      return;
+    }
+    // Only apply programType filter if it's a non-empty array or a string
+    if (Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to programType filter:', row.programType, 'not in', filters.programType);
+      return;
+    } else if (typeof filters.programType === 'string' && filters.programType && row.programType !== filters.programType) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to programType filter:', row.programType, '!=', filters.programType);
+      return;
+    }
+    // Only apply strategicPillars filter if it's a non-empty array or a string
+    if (Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to strategicPillars filter:', row.strategicPillars, 'not in', filters.strategicPillars);
+      return;
+    } else if (typeof filters.strategicPillars === 'string' && filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to strategicPillars filter:', row.strategicPillars, '!=', filters.strategicPillars);
+      return;
+    }
+    // Only apply revenuePlay filter if it's a non-empty array or a string
+    if (Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to revenuePlay filter:', row.revenuePlay, 'not in', filters.revenuePlay);
+      return;
+    } else if (typeof filters.revenuePlay === 'string' && filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) {
+      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to revenuePlay filter:', row.revenuePlay, '!=', filters.revenuePlay);
+      return;
+    }
+
+    const region = row.region;
+    // Only process data for our target regions
+    if (targetRegions.includes(region)) {
+      let spend = row.actualCost;
+      let pipeline = row.pipelineForecast;
+      // Debug: Log each row being summed
+      console.log('[ROI DEBUG] Summing row for region:', region, {
+        actualCost: row.actualCost,
+        pipelineForecast: row.pipelineForecast,
+        spendBefore: regionMap[region].spend,
+        pipelineBefore: regionMap[region].pipeline
+      });
+      if (typeof spend === "string")
+        spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(spend)) regionMap[region].spend += Number(spend);
+      if (typeof pipeline === "string")
+        pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(pipeline)) regionMap[region].pipeline += Number(pipeline);
+      // Debug: Log after summing
+      console.log('[ROI DEBUG] After sum for region:', region, {
+        spendAfter: regionMap[region].spend,
+        pipelineAfter: regionMap[region].pipeline
+      });
+    }
+  });
+  // Log the final regionMap after processing
+  console.log('[ROI DEBUG] Final regionMap:', regionMap);
 
   const roiPercents = targetRegions.map((region) => {
     const vals = regionMap[region];
