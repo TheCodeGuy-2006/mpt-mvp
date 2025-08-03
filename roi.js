@@ -1119,7 +1119,7 @@ function initRoiDataTable() {
   try {
     const table = new Tabulator(tableContainer, {
       data: campaigns,
-      layout: "fitDataStretch",
+      layout: "fitColumns", // Force columns to fit and not merge visually
       height: "400px",
       responsiveLayout: "collapse",
       pagination: "local",
@@ -1148,6 +1148,7 @@ function initRoiDataTable() {
         }, 100);
       },
       columns: [
+        // Add a border to each column to prevent merging appearance
         {
           title: "Campaign Name & Type",
           field: "campaignInfo",
@@ -1156,7 +1157,7 @@ function initRoiDataTable() {
             const name = data.displayName || data.programType || "Untitled Program";
             const type = data.programType || "No Type";
             return `
-            <div style="line-height: 1.4;">
+            <div style="line-height: 1.4; border-right:1px solid #e0e0e0;">
               <div style="font-weight: bold; color: #1976d2; font-size: 0.95em;">${name}</div>
               <div style="font-size: 0.8em; color: #666; margin-top: 2px;">${type}</div>
             </div>
@@ -1206,7 +1207,11 @@ function initRoiDataTable() {
           title: "Actual Leads",
           field: "actualLeads",
           formatter: (cell) => {
-            const value = Number(cell.getValue()) || 0;
+            const raw = cell.getValue();
+            if (raw === undefined || raw === null || raw === "" || isNaN(Number(raw))) {
+              return '<span style="color:#888;font-style:italic;">No Data Available Yet</span>';
+            }
+            const value = Number(raw);
             return value.toLocaleString();
           },
           width: 110,
@@ -1217,7 +1222,11 @@ function initRoiDataTable() {
           title: "Pipeline Forecasted",
           field: "pipelineForecast",
           formatter: (cell) => {
-            const value = Number(cell.getValue()) || 0;
+            const raw = cell.getValue();
+            if (raw === undefined || raw === null || raw === "" || isNaN(Number(raw))) {
+              return '<span style="color:#888;font-style:italic;">No Data Available Yet</span>';
+            }
+            const value = Number(raw);
             return `$${value.toLocaleString()}`;
           },
           width: 150,
