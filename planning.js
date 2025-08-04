@@ -1,3 +1,31 @@
+// --- Description Cell Hover Enlargement CSS (smaller, smarter, avoids cutoff) ---
+function injectDescriptionHoverCSS() {
+  if (document.getElementById('desc-hover-style')) return;
+  const style = document.createElement('style');
+  style.id = 'desc-hover-style';
+  style.textContent = `
+    .tabulator-cell.description-hover {
+      transition: z-index 0s, box-shadow 0.18s, transform 0.18s, background 0.18s;
+      position: relative;
+      z-index: 1;
+      background: inherit;
+    }
+    .tabulator-cell.description-hover:hover {
+      z-index: 1000 !important;
+      background: #fff !important;
+      box-shadow: 0 2px 12px 0 rgba(0,0,0,0.13), 0 1px 3px 0 rgba(0,0,0,0.08);
+      /* No absolute/fixed positioning here, revert to normal */
+      white-space: pre-line !important;
+      overflow: visible !important;
+      word-break: break-word;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  `;
+  document.head.appendChild(style);
+}
+injectDescriptionHoverCSS();
 import { kpis } from "./src/calc.js";
 
 // Utility function for safe table scrolling
@@ -14,7 +42,7 @@ function safeScrollToRow(table, rowIdentifier, position = "top", ifVisible = fal
       return false;
     }
     
-    const data = table.getData();
+// ...existing code...
     if (!data || data.length === 0) {
       console.warn("No data available for scrolling");
       return false;
@@ -538,7 +566,14 @@ class PlanningDataStore {
       if (filters.digitalMotions && !(row.digitalMotions === true || row.digitalMotions === 'true')) {
         return false;
       }
-      
+
+      // Description keyword filter (case-insensitive, matches ALL keywords)
+      if (Array.isArray(filters.descriptionKeyword) && filters.descriptionKeyword.length > 0) {
+        const desc = (row.description || '').toLowerCase();
+        const allMatch = filters.descriptionKeyword.every(kw => desc.includes(kw.toLowerCase()));
+        if (!allMatch) return false;
+      }
+
       // Multiselect filters - check if row value is in the selected array
       const multiselectFields = ['region', 'quarter', 'status', 'programType', 'strategicPillars', 'owner'];
       for (const field of multiselectFields) {
@@ -546,7 +581,7 @@ class PlanningDataStore {
         if (filterValues && Array.isArray(filterValues) && filterValues.length > 0) {
           // For strategicPillars field, check against 'strategicPillars' in row data
           let rowValue = field === 'strategicPillar' ? row.strategicPillars : row[field];
-          
+
           // Apply quarter normalization for quarter field comparison (optimized)
           if (field === 'quarter') {
             rowValue = normalizeQuarter(rowValue);
@@ -560,7 +595,7 @@ class PlanningDataStore {
           }
         }
       }
-      
+
       return true;
     });
     
@@ -884,12 +919,76 @@ function initPlanningGrid(rows) {
             field: "description",
             editor: "input",
             width: 180,
+            formatter: function(cell) {
+              // Always wrap in a span for hover effect
+              const val = cell.getValue() || '';
+              return `<span class="desc-hover-span">${val.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>`;
+            },
             cellClick: function (e, cell) {
               if (cell.getValue() && cell.getValue().length > 20) {
                 const tooltip = prompt("Description:", cell.getValue());
                 if (tooltip !== null && tooltip !== cell.getValue()) {
                   cell.setValue(tooltip);
                 }
+              }
+            },
+            cellMouseOver: function(e, cell) {
+              const el = cell.getElement();
+              el.classList.add('description-hover');
+              // Create floating tooltip
+              let tooltip = document.createElement('div');
+              tooltip.className = 'desc-hover-tooltip';
+              tooltip.textContent = cell.getValue() || '';
+              document.body.appendChild(tooltip);
+              // Style the tooltip (larger text and box)
+              Object.assign(tooltip.style, {
+                position: 'fixed',
+                zIndex: 99999,
+                background: '#fff',
+                color: '#222',
+                boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18), 0 1px 6px 0 rgba(0,0,0,0.10)',
+                borderRadius: '10px',
+                padding: '18px 28px',
+                maxWidth: '70vw',
+                minWidth: '220px',
+                fontSize: '1.25em',
+                lineHeight: '1.6',
+                whiteSpace: 'pre-line',
+                wordBreak: 'break-word',
+                pointerEvents: 'none',
+                top: '0',
+                left: '0',
+                transition: 'opacity 0.12s',
+                opacity: '0',
+              });
+              // Position near mouse
+              function moveTooltip(ev) {
+                const margin = 18;
+                let x = ev.clientX + margin;
+                let y = ev.clientY + margin;
+                // Prevent overflow
+                const rect = tooltip.getBoundingClientRect();
+                if (x + rect.width > window.innerWidth) x = window.innerWidth - rect.width - margin;
+                if (y + rect.height > window.innerHeight) y = window.innerHeight - rect.height - margin;
+                tooltip.style.left = x + 'px';
+                tooltip.style.top = y + 'px';
+                tooltip.style.opacity = '1';
+              }
+              moveTooltip(e);
+              el._descTooltipMove = moveTooltip;
+              el._descTooltipDiv = tooltip;
+              el.addEventListener('mousemove', moveTooltip);
+            },
+            cellMouseOut: function(e, cell) {
+              const el = cell.getElement();
+              el.classList.remove('description-hover');
+              if (el._descTooltipDiv) {
+                el._descTooltipDiv.remove();
+                el._descTooltipDiv = null;
+              }
+              if (el._descTooltipMove) {
+                el.removeEventListener('mousemove', el._descTooltipMove);
+                el._descTooltipMove = null;
               }
             },
           },
