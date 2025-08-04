@@ -21,10 +21,11 @@
     "opps": 7,
     "pipeline": 350000,
     "id": "row_0_1752722417590",
-    "poRaised": "(Clear)",
+    "poRaised": "Yes",
     "__modified": true,
-    "actualCost": 7143,
-    "actualLeads": ""
+    "actualCost": 6500,
+    "actualLeads": 585,
+    "actualMQLs": 20
   },
   {
     "programType": "Microsoft",
@@ -50,7 +51,9 @@
     "id": "row_3_1752722417590",
     "actualCost": 5000,
     "__modified": true,
-    "issueLink": "http://localhost:49934/#planning"
+    "issueLink": "http://localhost:49934/#planning",
+    "actualLeads": "",
+    "actualMQLs": ""
   },
   {
     "programType": "Contractor/Infrastructure",
