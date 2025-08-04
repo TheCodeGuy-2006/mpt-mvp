@@ -49,7 +49,8 @@
     "pipeline": 100000,
     "id": "row_3_1752722417590",
     "actualCost": 5000,
-    "__modified": true
+    "__modified": true,
+    "issueLink": "http://localhost:49934/#planning"
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -348,7 +349,8 @@
     "id": "row_32_1752722417590",
     "actualCost": 3429,
     "actualLeads": 30,
-    "__modified": true
+    "__modified": true,
+    "issueLink": ""
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -649,7 +651,8 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_66_1752722417590"
+    "id": "row_66_1752722417590",
+    "issueLink": ""
   },
   {
     "programType": "Contractor/Infrastructure",
