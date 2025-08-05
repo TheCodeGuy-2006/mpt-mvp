@@ -163,11 +163,19 @@ const initializeChartJS = chartsPerformanceUtils.debounce(() => {
 
 // Budgets Bar Chart (optimized with caching and performance improvements)
 const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
-  const ctx = document.getElementById("budgetsBarChart");
-  if (!ctx) {
+  const chartCanvas = document.getElementById("budgetsBarChart");
+  if (!chartCanvas) {
     console.error("[BudgetsBarChart] Canvas with id 'budgetsBarChart' not found.");
     return;
   }
+  // Increase the height of the container and canvas
+  if (chartCanvas.parentElement) {
+    chartCanvas.parentElement.style.minHeight = '520px';
+    chartCanvas.parentElement.style.height = '520px';
+  }
+  chartCanvas.style.height = '480px';
+  chartCanvas.height = 480;
+  const ctx = chartCanvas.getContext("2d");
 
   // Check cache first
   const cacheKey = 'budgets-bar-chart';
@@ -233,6 +241,10 @@ const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
               backgroundColor: "#1976d2",
               borderRadius: 8,
               borderSkipped: false,
+              barPercentage: 0.95, // Make bars thicker
+              categoryPercentage: 0.85, // Reduce spacing between bars
+              maxBarThickness: 120, // Make bars taller
+              minBarLength: 10,
             },
           ],
         },
@@ -242,6 +254,14 @@ const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
           animation: {
             duration: CHARTS_PERFORMANCE_CONFIG.chartAnimationDuration
           },
+          layout: {
+            padding: {
+              top: 48,
+              bottom: 48,
+              left: 24,
+              right: 24,
+            }
+          },
           plugins: {
             legend: { display: false },
             title: { display: false },
@@ -249,12 +269,23 @@ const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
           scales: {
             y: {
               beginAtZero: true,
-              max: 600000,
+              min: 0,
+              // Lower the max to just above the highest value, so each 100,000 is more spread out
+              max: Math.max(...values) > 0 ? Math.ceil(Math.max(...values) * 1.05 / 100000) * 100000 : 800000,
               title: { display: true, text: "Dollars (USD)" },
-              ticks: { callback: (v) => "$" + v.toLocaleString() },
+              ticks: {
+                callback: (v) => "$" + v.toLocaleString(),
+                font: { size: 18 },
+                // Step size to 100,000 for tidy axis
+                stepSize: 100000,
+                // Add extra padding to top tick
+                padding: 10,
+              },
+              grid: { color: '#e0e0e0' },
             },
             x: {
               title: { display: false },
+              ticks: { font: { size: 18 } },
             },
           },
         },
@@ -330,7 +361,9 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
       ...budgetsData.map((b) => b.region),
       ...planningRows.map((r) => r.region),
     ]),
-  ).filter(Boolean);
+  )
+    .filter(Boolean)
+    .filter(region => region !== "X APAC Non English" && region !== "X APAC English");
   if (allRegions.length === 0) {
     console.warn("[BudgetsRegionCharts] No regions found to render.", { allRegions });
     return;
@@ -349,13 +382,15 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
       // Create row container if needed
       if (idx % 4 === 0) {
         const rowDiv = document.createElement("div");
-        rowDiv.className = "budgets-graph-row";
-        rowDiv.style.cssText = `
-          display: flex;
-          flex-direction: row;
-          gap: 24px;
-          margin-bottom: 24px;
-        `;
+    rowDiv.className = "budgets-graph-row";
+    rowDiv.style.cssText = `
+      display: flex;
+      flex-direction: row;
+      gap: 32px;
+      margin-bottom: 32px;
+      width: 100%;
+      justify-content: space-between;
+    `;
         container.appendChild(rowDiv);
       }
 
@@ -380,13 +415,37 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
 // Helper function to process individual region chart
 function processRegionChart(region, rowContainer, budgetsData, planningRows) {
   // Debug: Confirm function is called
-  console.log(`[Region Chart] processRegionChart called for region: ${region}`);
+  // console.log(`[Region Chart] processRegionChart called for region: ${region}`);
   // Debug: About to create chart for region
-  console.log(`[Region Chart] Creating chart for region: ${region}`);
+  // console.log(`[Region Chart] Creating chart for region: ${region}`);
   // Assigned budget
   const budgetObj = budgetsData.find((b) => b.region === region);
   const assignedBudget = budgetObj && budgetObj.assignedBudget
     ? Number(budgetObj.assignedBudget) : 0;
+
+  // Create or select the chart container for this region
+  let chartContainer = rowContainer.querySelector(`.region-chart-container[data-region='${region}']`);
+  if (!chartContainer) {
+    chartContainer = document.createElement('div');
+    chartContainer.className = 'region-chart-container';
+    chartContainer.setAttribute('data-region', region);
+    // Make the chart container take up more width and height
+    chartContainer.style.cssText = `
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 25%;
+      min-height: 240px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      box-sizing: border-box;
+    `;
+    rowContainer.appendChild(chartContainer);
+  }
+  // Clear previous chart content if any
+  chartContainer.innerHTML = '';
+  // ...existing code for chart rendering, now using chartContainer as the parent...
 
   let regionForecasts, forecastedCost, actualCost;
   if (region === "Digital Motions") {
@@ -780,18 +839,18 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
 
   // Debug: Check executionTableInstance and data
   if (!window.executionTableInstance) {
-    console.warn('[ROI DEBUG] executionTableInstance is not defined. Chart will not render.');
+
     return;
   }
   const data = window.executionTableInstance.getData ? window.executionTableInstance.getData() : null;
   if (!data || !Array.isArray(data) || data.length === 0) {
-    console.warn('[ROI DEBUG] executionTableInstance.getData() returned no data. Chart will not render.', data);
+
     return;
   }
-  console.log('[ROI DEBUG] executionTableInstance.getData() sample:', data[0], 'total rows:', data.length);
+
   // Log all unique region values in the data
   const uniqueRegions = Array.from(new Set(data.map(row => row.region))).filter(Boolean);
-  console.log('[ROI DEBUG] Unique region values in data:', uniqueRegions);
+
 
   // Helper function to normalize quarter formats for comparison
   const normalizeQuarter = (quarter) => {
@@ -800,68 +859,68 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
   };
 
   // Debug: Log current filters
-  console.log('[ROI DEBUG] Current filters:', filters);
+
   // Process data with filtering
   data.forEach((row, idx) => {
     // Debug: Log row before filters
     // Only log for first 10 rows to avoid spam
-    if (idx < 10) console.log('[ROI DEBUG] Row before filters:', row);
+
     // Only apply region filter if it's a non-empty array
     if (Array.isArray(filters.region) && filters.region.length > 0 && !filters.region.includes(row.region)) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to region filter:', row.region, 'not in', filters.region);
+
       return;
     }
     // Only apply quarter filter if it's a non-empty array
     if (Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to quarter filter:', row.quarter, 'not in', filters.quarter);
+
       return;
     }
     // Only apply country filter if it's a non-empty array or a string
     if (Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to country filter:', row.country, 'not in', filters.country);
+
       return;
     } else if (typeof filters.country === 'string' && filters.country && row.country !== filters.country) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to country filter:', row.country, '!=', filters.country);
+
       return;
     }
     // Only apply owner filter if it's a non-empty array or a string
     if (Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to owner filter:', row.owner, 'not in', filters.owner);
+
       return;
     } else if (typeof filters.owner === 'string' && filters.owner && row.owner !== filters.owner) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to owner filter:', row.owner, '!=', filters.owner);
+
       return;
     }
     // Only apply status filter if it's a non-empty array or a string
     if (Array.isArray(filters.status) && filters.status.length > 0 && !filters.status.includes(row.status)) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to status filter:', row.status, 'not in', filters.status);
+
       return;
     } else if (typeof filters.status === 'string' && filters.status && row.status !== filters.status) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to status filter:', row.status, '!=', filters.status);
+
       return;
     }
     // Only apply programType filter if it's a non-empty array or a string
     if (Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to programType filter:', row.programType, 'not in', filters.programType);
+
       return;
     } else if (typeof filters.programType === 'string' && filters.programType && row.programType !== filters.programType) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to programType filter:', row.programType, '!=', filters.programType);
+
       return;
     }
     // Only apply strategicPillars filter if it's a non-empty array or a string
     if (Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to strategicPillars filter:', row.strategicPillars, 'not in', filters.strategicPillars);
+
       return;
     } else if (typeof filters.strategicPillars === 'string' && filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to strategicPillars filter:', row.strategicPillars, '!=', filters.strategicPillars);
+
       return;
     }
     // Only apply revenuePlay filter if it's a non-empty array or a string
     if (Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to revenuePlay filter:', row.revenuePlay, 'not in', filters.revenuePlay);
+
       return;
     } else if (typeof filters.revenuePlay === 'string' && filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) {
-      if (idx < 10) console.log('[ROI DEBUG] Skipping row due to revenuePlay filter:', row.revenuePlay, '!=', filters.revenuePlay);
+
       return;
     }
 
@@ -871,12 +930,7 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
       let spend = row.actualCost;
       let pipeline = row.pipelineForecast;
       // Debug: Log each row being summed
-      console.log('[ROI DEBUG] Summing row for region:', region, {
-        actualCost: row.actualCost,
-        pipelineForecast: row.pipelineForecast,
-        spendBefore: regionMap[region].spend,
-        pipelineBefore: regionMap[region].pipeline
-      });
+
       if (typeof spend === "string")
         spend = Number(spend.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(spend)) regionMap[region].spend += Number(spend);
@@ -884,14 +938,11 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
         pipeline = Number(pipeline.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(pipeline)) regionMap[region].pipeline += Number(pipeline);
       // Debug: Log after summing
-      console.log('[ROI DEBUG] After sum for region:', region, {
-        spendAfter: regionMap[region].spend,
-        pipelineAfter: regionMap[region].pipeline
-      });
+
     }
   });
   // Log the final regionMap after processing
-  console.log('[ROI DEBUG] Final regionMap:', regionMap);
+
 
   const roiPercents = targetRegions.map((region) => {
     const vals = regionMap[region];

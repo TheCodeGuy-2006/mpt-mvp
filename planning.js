@@ -1086,13 +1086,16 @@ function initPlanningGrid(rows) {
               debouncedAutosave();
             }, 1000),
           },
-          { title: "MQL", field: "mqlForecast", editable: false, width: 90 },
+          { title: "Forecasted MQL", field: "mqlForecast", editable: false, width: 150, headerSort: true, headerVertical: false, headerWordWrap: false },
           // Removed SQL and Opps columns
           {
-            title: "Pipeline",
+            title: "Forecasted Pipeline",
             field: "pipelineForecast",
             editable: false,
-            width: 120,
+            width: 170,
+            headerSort: true,
+            headerVertical: false,
+            headerWordWrap: false,
             formatter: function (cell) {
               const v = cell.getValue();
               if (v === null || v === undefined || v === "") return "";
@@ -1136,7 +1139,7 @@ function initPlanningGrid(rows) {
             }, 1000),
           },
           {
-            title: "PO raised",
+            title: "PO Raised",
             field: "poRaised",
             editor: "list",
             editorParams: { values: yesNo },

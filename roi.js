@@ -507,7 +507,7 @@ function getRoiFilterValues() {
   };
 
   if (window.DEBUG_FILTERS) {
-    console.log("[ROI] Combined filters (dropdown + universal search):", filterValues);
+
   }
 
   return filterValues;
@@ -926,7 +926,7 @@ function updateReportTotalSpend() {
       createReportSpendByRegionChart(spendByRegion);
     })
     .catch((error) => {
-      console.error("Error loading planning data for reporting:", error);
+
     });
 
   // Calculate actual spend, MQL, and SQL from execution data
@@ -994,7 +994,7 @@ function updateReportTotalSpend() {
       updateReportTotalSpend.retryCount++;
       setTimeout(updateReportTotalSpend, 200);
     } else {
-      console.warn("[ROI] Execution table not available after multiple attempts. Skipping actual spend calculation.");
+
       updateReportTotalSpend.retryCount = 0;
     }
     return;
@@ -1028,7 +1028,7 @@ function setupRoiChartEventHandlers() {
     } else if (attempt < 5) {
       setTimeout(() => attachExecutionTableHandlers(attempt + 1), 200);
     } else {
-      console.warn("[ROI] Execution table not available after multiple attempts. Skipping ROI chart event handler attachment.");
+
     }
   }
   attachExecutionTableHandlers();
@@ -1105,12 +1105,12 @@ function setRoiTabActive(active) {
 function initRoiDataTable() {
   const tableContainer = document.getElementById("roiDataTable");
   if (!tableContainer) {
-    console.error("ROI Data Table container not found");
+
     return null;
   }
 
   if (typeof Tabulator === "undefined") {
-    console.error("Tabulator library not loaded");
+
     return null;
   }
 
@@ -1143,7 +1143,7 @@ function initRoiDataTable() {
           try {
             this.redraw(true);
           } catch (e) {
-            console.warn("Error in ROI table built callback:", e.message);
+
           }
         }, 100);
       },
@@ -1268,7 +1268,7 @@ function initRoiDataTable() {
 
     return table;
   } catch (error) {
-    console.error("Error initializing ROI Data Table:", error);
+
     return null;
   }
 }
@@ -1324,7 +1324,7 @@ function updateRoiDataTable() {
   // Ensure data table is initialized before trying to update it
   const table = ensureRoiDataTableInitialized();
   if (!table) {
-    console.log("ROI Data Table could not be initialized");
+
     return;
   }
 
@@ -1351,9 +1351,8 @@ function updateRoiDataTable() {
 
   // Update table data
   table.replaceData(filteredCampaigns);
-  console.log(
-    `ROI Data Table updated with ${filteredCampaigns.length} campaigns`,
-  );
+
+
 }
 
 // Handle ROI tab routing logic
@@ -1362,37 +1361,37 @@ function handleRoiTabRouting() {
   if (hash === "#roi" && typeof updateRoiTotalSpend === "function") {
     setTimeout(updateRoiTotalSpend, 0);
     setTimeout(initRoiTabSwitching, 100); // Initialize tab switching when ROI tab is viewed
-    console.log("[route] Updated ROI total spend");
+
   }
   if (hash === "#report" && typeof updateReportTotalSpend === "function") {
     setTimeout(updateReportTotalSpend, 0);
-    console.log("[route] Updated report total spend");
+
   }
 }
 
 // Initialize ROI universal search
 function initializeRoiUniversalSearch() {
-  console.log("🔍 ROI: Starting universal search initialization...");
+
   
   // Check if UniversalSearchFilter class is available
   if (!window.UniversalSearchFilter) {
-    console.error("❌ ROI: UniversalSearchFilter class not found!");
-    console.log("Available on window:", Object.keys(window).filter(k => k.includes('Search') || k.includes('Universal')));
+
+
     return;
   }
   
-  console.log("✅ ROI: UniversalSearchFilter class found");
+
   
   // Check if container exists
   const container = document.getElementById('roiUniversalSearch');
   if (!container) {
-    console.error("❌ ROI: Container 'roiUniversalSearch' not found in DOM!");
-    console.log("Available elements with 'roi' in id:", Array.from(document.querySelectorAll('[id*="roi"]')).map(el => el.id));
+
+
     return;
   }
   
-  console.log("✅ ROI: Container found:", container);
-  console.log("✅ ROI: Container visible:", container.offsetParent !== null);
+
+
   
   try {
     // Initialize universal search for ROI
@@ -1400,7 +1399,7 @@ function initializeRoiUniversalSearch() {
       'roiUniversalSearch',
       {
         onFilterChange: (selectedFilters) => {
-          console.log("🔄 ROI: Search filters changed:", selectedFilters);
+
           applyRoiSearchFilters(selectedFilters);
         }
       }
