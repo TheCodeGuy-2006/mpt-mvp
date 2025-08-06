@@ -402,7 +402,7 @@
     "id": "row_36_1752722417590"
   },
   {
-    "programType": "In-Account Events (1:1)",
+    "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
     "strategicPillars": "Account Growth and Product Adoption",
     "revenuePlay": "All",
     "fiscalYear": "FY26",
@@ -422,7 +422,8 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_42_1752722417590"
+    "id": "row_42_1752722417590",
+    "__modified": true
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
