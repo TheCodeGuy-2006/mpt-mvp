@@ -1,3 +1,17 @@
+// --- Unsaved Changes Flag for Execution Tab ---
+window.hasUnsavedExecutionChanges = false;
+
+// --- Warn on Tab Close/Reload if Unsaved Changes in Execution Tab ---
+window.addEventListener('beforeunload', function (e) {
+  if (window.hasUnsavedExecutionChanges) {
+    // Standard message is ignored by most browsers, but setting returnValue triggers the dialog
+    const msg = 'You have unsaved changes in the Execution tab. Are you sure you want to leave?';
+    e.preventDefault();
+    e.returnValue = msg;
+    return msg;
+  }
+});
+
 // Save button setup for execution table
 function setupExecutionSave(table, rows) {
   let btn = document.getElementById("saveExecutionRows");
@@ -18,6 +32,9 @@ function setupExecutionSave(table, rows) {
           alert(
             "✅ Execution data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed."
           );
+          // --- Reset unsaved changes flag after successful save ---
+          console.log("[Execution] Unsaved changes set to false (save successful)");
+          window.hasUnsavedExecutionChanges = false;
           if (window.cloudflareSyncModule.refreshDataAfterSave) {
             window.cloudflareSyncModule.refreshDataAfterSave("planning");
           }
@@ -35,6 +52,9 @@ function setupExecutionSave(table, rows) {
                 alert(
                   "✅ Execution data saved to backend (Worker unavailable)!"
                 );
+                // --- Reset unsaved changes flag after successful save ---
+                console.log("[Execution] Unsaved changes set to false (save successful, backend fallback)");
+                window.hasUnsavedExecutionChanges = false;
               } else {
                 alert(
                   "❌ Failed to save: " + (result.error || "Unknown error")
@@ -55,6 +75,9 @@ function setupExecutionSave(table, rows) {
         .then((result) => {
           if (result.success) {
             alert("✅ Execution data saved to backend!");
+            // --- Reset unsaved changes flag after successful save ---
+            console.log("[Execution] Unsaved changes set to false (save successful, backend only)");
+            window.hasUnsavedExecutionChanges = false;
           } else {
             alert("❌ Failed to save: " + (result.error || "Unknown error"));
           }
@@ -379,6 +402,8 @@ function initExecutionGrid(rows) {
           editorParams: { values: statusOptions },
           cellEdited: debounce((cell) => {
             cell.getRow().getData().__modified = true;
+            window.hasUnsavedExecutionChanges = true;
+            console.log("[Execution] Unsaved changes set to true (cellEdited: Status)");
           }, 500),
         },
         {
@@ -388,6 +413,8 @@ function initExecutionGrid(rows) {
           editorParams: { values: yesNo },
           cellEdited: debounce((cell) => {
             cell.getRow().getData().__modified = true;
+            window.hasUnsavedExecutionChanges = true;
+            console.log("[Execution] Unsaved changes set to true (cellEdited: PO Raised)");
           }, 500),
         },
         {
@@ -411,6 +438,8 @@ function initExecutionGrid(rows) {
           },
           cellEdited: debounce((cell) => {
             cell.getRow().getData().__modified = true;
+            window.hasUnsavedExecutionChanges = true;
+            console.log("[Execution] Unsaved changes set to true (cellEdited: Actual Cost)");
           }, 500),
         },
         { title: "Expected Leads", field: "expectedLeads" },
@@ -420,6 +449,8 @@ function initExecutionGrid(rows) {
           editor: "number",
           cellEdited: debounce((cell) => {
             cell.getRow().getData().__modified = true;
+            window.hasUnsavedExecutionChanges = true;
+            console.log("[Execution] Unsaved changes set to true (cellEdited: Actual Leads)");
           }, 500),
         },
         { title: "MQL", field: "mqlForecast", editable: false },
@@ -429,6 +460,8 @@ function initExecutionGrid(rows) {
           editor: "number",
           cellEdited: debounce((cell) => {
             cell.getRow().getData().__modified = true;
+            window.hasUnsavedExecutionChanges = true;
+            console.log("[Execution] Unsaved changes set to true (cellEdited: Actual MQLs)");
           }, 500),
         },
         {

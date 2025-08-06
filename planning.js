@@ -1,3 +1,15 @@
+// --- Unsaved Changes Flag for Planning Tab ---
+window.hasUnsavedPlanningChanges = false;
+// --- Warn on Tab Close/Reload if Unsaved Changes in Planning Tab ---
+window.addEventListener('beforeunload', function (e) {
+  if (window.hasUnsavedPlanningChanges) {
+    // Standard message is ignored by most browsers, but setting returnValue triggers the dialog
+    const msg = 'You have unsaved changes in the Planning tab. Are you sure you want to leave?';
+    e.preventDefault();
+    e.returnValue = msg;
+    return msg;
+  }
+});
 // --- Description Cell Hover Enlargement CSS (smaller, smarter, avoids cutoff) ---
 function injectDescriptionHoverCSS() {
   if (document.getElementById('desc-hover-style')) return;
@@ -754,6 +766,8 @@ function initPlanningGrid(rows) {
         // Debounced data updates with reasonable delay
         dataChanged: debounce(() => {
           console.log("Planning data changed");
+          window.hasUnsavedPlanningChanges = true;
+          console.log("[Planning] Unsaved changes set to true (dataChanged)");
         }, 500), // Shorter debounce for better responsiveness
         
         // Add pagination callback to prevent scroll errors
@@ -904,6 +918,8 @@ function initPlanningGrid(rows) {
                 }
               }
               rowData.__modified = true;
+              window.hasUnsavedPlanningChanges = true;
+              console.log("[Planning] Unsaved changes set to true (cellEdited: Program Type)");
               debouncedAutosave();
             }, 1000),
           },
@@ -1053,6 +1069,8 @@ function initPlanningGrid(rows) {
                 });
               }
               rowData.__modified = true;
+              window.hasUnsavedPlanningChanges = true;
+              console.log("[Planning] Unsaved changes set to true (cellEdited: Forecasted Cost)");
               debouncedAutosave();
             }, 1000),
           },
@@ -1083,6 +1101,8 @@ function initPlanningGrid(rows) {
                 });
               }
               rowData.__modified = true;
+              window.hasUnsavedPlanningChanges = true;
+              console.log("[Planning] Unsaved changes set to true (cellEdited: Expected Leads)");
               debouncedAutosave();
             }, 1000),
           },
@@ -1135,6 +1155,8 @@ function initPlanningGrid(rows) {
             cellEdited: debounce((cell) => {
               const rowData = cell.getRow().getData();
               rowData.__modified = true;
+              window.hasUnsavedPlanningChanges = true;
+              console.log("[Planning] Unsaved changes set to true (cellEdited: Status)");
               debouncedAutosave();
             }, 1000),
           },
@@ -1209,6 +1231,8 @@ function initPlanningGrid(rows) {
             hozAlign: "center",
             cellClick: function (e, cell) {
               cell.getRow().delete();
+              window.hasUnsavedPlanningChanges = true;
+              console.log("[Planning] Unsaved changes set to true (row delete)");
             },
             headerSort: false,
           },
@@ -1267,6 +1291,10 @@ function initPlanningGrid(rows) {
           });
           if (deleted === 0) {
             alert("No rows selected for deletion.");
+          }
+          if (deleted > 0) {
+            window.hasUnsavedPlanningChanges = true;
+            console.log("[Planning] Unsaved changes set to true (bulk row delete)");
           }
         };
       }
@@ -1683,6 +1711,8 @@ function setupAddRowModalEvents() {
     e.preventDefault();
     
     // Get form data
+    window.hasUnsavedPlanningChanges = true;
+    console.log("[Planning] Unsaved changes set to true (add row modal submit)");
     const formData = {
       id: `program-${Date.now()}`,
       programType: document.getElementById("programType").value,
@@ -1821,8 +1851,13 @@ function setupPlanningSave(table, rows) {
         .then((result) => {
           console.log("Worker save successful:", result);
           alert(
-            "✅ Planning data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed.",
+            "✅ Planning data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed."
           );
+
+          // Reset unsaved changes flag
+          console.log("[Planning] (Worker) About to set unsaved flag to false. Current:", window.hasUnsavedPlanningChanges);
+          window.hasUnsavedPlanningChanges = false;
+          console.log("[Planning] Unsaved changes set to false (after successful save to Worker). Now:", window.hasUnsavedPlanningChanges);
 
           // Refresh data after successful save
           if (window.cloudflareSyncModule.refreshDataAfterSave) {
@@ -1847,11 +1882,15 @@ function setupPlanningSave(table, rows) {
             .then((result) => {
               if (result.success) {
                 alert(
-                  "✅ Planning data saved to backend (Worker unavailable)!",
+                  "✅ Planning data saved to backend (Worker unavailable)!"
                 );
+                // Reset unsaved changes flag
+                console.log("[Planning] (Backend fallback) About to set unsaved flag to false. Current:", window.hasUnsavedPlanningChanges);
+                window.hasUnsavedPlanningChanges = false;
+                console.log("[Planning] Unsaved changes set to false (after successful save to backend fallback). Now:", window.hasUnsavedPlanningChanges);
               } else {
                 alert(
-                  "❌ Failed to save: " + (result.error || "Unknown error"),
+                  "❌ Failed to save: " + (result.error || "Unknown error")
                 );
               }
             })
@@ -1870,6 +1909,10 @@ function setupPlanningSave(table, rows) {
         .then((result) => {
           if (result.success) {
             alert("✅ Planning data saved to backend!");
+            // Reset unsaved changes flag
+            console.log("[Planning] (Backend) About to set unsaved flag to false. Current:", window.hasUnsavedPlanningChanges);
+            window.hasUnsavedPlanningChanges = false;
+            console.log("[Planning] Unsaved changes set to false (after successful save to backend). Now:", window.hasUnsavedPlanningChanges);
 
             // Update ROI metrics
             if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
