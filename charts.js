@@ -819,14 +819,12 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
   const cacheKey = `roi-region-chart-${JSON.stringify(filters)}`;
   const cachedData = chartCache.get(cacheKey);
 
-  // Define the specific regions to display (added missing regions)
+  // Define the specific regions to display (removed X APAC English and X APAC Non English)
   const targetRegions = [
     "JP & Korea",
     "South APAC",
     "SAARC",
-    "Digital Motions",
-    "X APAC English",
-    "X APAC Non English"
+    "Digital Motions"
   ];
 
   // Prepare data
@@ -925,7 +923,7 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
     }
 
     const region = row.region;
-    // Only process data for our target regions
+    // Only process data for our target regions and exclude X APAC English/Non English
     if (targetRegions.includes(region)) {
       let spend = row.actualCost;
       let pipeline = row.pipelineForecast;
