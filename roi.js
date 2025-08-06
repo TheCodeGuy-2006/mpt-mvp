@@ -1119,9 +1119,10 @@ function initRoiDataTable() {
   try {
     const table = new Tabulator(tableContainer, {
       data: campaigns,
-      layout: "fitColumns", // Force columns to fit and not merge visually
+      layout: "fitDataFill", // Force columns to expand and fill available width
       height: "400px",
-      responsiveLayout: "collapse",
+      responsiveLayout: false, // Disable collapse to allow horizontal scroll
+      autoResize: true,
       pagination: "local",
       paginationSize: 10, // Reduced from 15 for faster initial load
       paginationSizeSelector: [5, 10, 15, 25],
@@ -1133,18 +1134,25 @@ function initRoiDataTable() {
       headerHeight: 50,
       virtualDom: true, // Enable virtual DOM for better performance with large datasets
       virtualDomBuffer: 10, // Buffer for smoother scrolling
-      
-      // Add safer scroll configuration to prevent errors
       scrollToRowIfVisible: false,
-      
-      // Add error handling for table operations
       tableBuilt: function() {
         setTimeout(() => {
           try {
             this.redraw(true);
-          } catch (e) {
-
-          }
+            if (this.columnManager && typeof this.columnManager.fitColumns === 'function') {
+              this.columnManager.fitColumns(true);
+            }
+          } catch (e) {}
+        }, 100);
+      },
+      dataLoaded: function() {
+        setTimeout(() => {
+          try {
+            this.redraw(true);
+            if (this.columnManager && typeof this.columnManager.fitColumns === 'function') {
+              this.columnManager.fitColumns(true);
+            }
+          } catch (e) {}
         }, 100);
       },
       columns: [
@@ -1163,7 +1171,6 @@ function initRoiDataTable() {
             </div>
           `;
           },
-          width: 220,
           sorter: (a, b) => {
             const nameA = (a.programType || "").toLowerCase();
             const nameB = (b.programType || "").toLowerCase();
@@ -1177,7 +1184,6 @@ function initRoiDataTable() {
             const value = Number(cell.getValue()) || 0;
             return `$${value.toLocaleString()}`;
           },
-          width: 130,
           sorter: "number",
           hozAlign: "right",
         },
@@ -1188,7 +1194,6 @@ function initRoiDataTable() {
             const value = Number(cell.getValue()) || 0;
             return `$${value.toLocaleString()}`;
           },
-          width: 120,
           sorter: "number",
           hozAlign: "right",
         },
@@ -1199,7 +1204,6 @@ function initRoiDataTable() {
             const value = Number(cell.getValue()) || 0;
             return value.toLocaleString();
           },
-          width: 120,
           sorter: "number",
           hozAlign: "right",
         },
@@ -1214,7 +1218,6 @@ function initRoiDataTable() {
             const value = Number(raw);
             return value.toLocaleString();
           },
-          width: 110,
           sorter: "number",
           hozAlign: "right",
         },
@@ -1229,7 +1232,6 @@ function initRoiDataTable() {
             const value = Number(raw);
             return `$${value.toLocaleString()}`;
           },
-          width: 150,
           sorter: "number",
           hozAlign: "right",
         },
@@ -1239,15 +1241,11 @@ function initRoiDataTable() {
           formatter: (cell) => {
             const data = cell.getData();
             const actualCost = Number(data.actualCost) || 0;
-            
             if (actualCost === 0) return "N/A";
-            
             const roi = Number(cell.getValue()) || 0;
             const color = roi >= 0 ? "#4caf50" : "#f44336";
-
             return `<span style="color: ${color}; font-weight: bold;">${roi.toFixed(1)}%</span>`;
           },
-          width: 100,
           sorter: (a, b) => {
             return (Number(a.roi) || 0) - (Number(b.roi) || 0);
           },
@@ -1264,7 +1262,19 @@ function initRoiDataTable() {
     });
 
     // Store the table instance globally for updates
+
     window.roiDataTableInstance = table;
+
+    // --- ROI Data Table Alignment Fix: Step 5 ---
+    // Force Tabulator redraw on window resize to sync header/columns
+    if (!window._roiTableResizeListener) {
+      window._roiTableResizeListener = true;
+      window.addEventListener('resize', function() {
+        if (window.roiDataTableInstance && typeof window.roiDataTableInstance.redraw === 'function') {
+          window.roiDataTableInstance.redraw(true);
+        }
+      });
+    }
 
     return table;
   } catch (error) {

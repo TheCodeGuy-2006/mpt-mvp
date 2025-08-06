@@ -453,7 +453,7 @@ function initExecutionGrid(rows) {
             console.log("[Execution] Unsaved changes set to true (cellEdited: Actual Leads)");
           }, 500),
         },
-        { title: "MQL", field: "mqlForecast", editable: false },
+        { title: "Forecasted MQL", field: "mqlForecast", editable: false },
         {
           title: "Actual MQLs",
           field: "actualMQLs",
@@ -465,7 +465,7 @@ function initExecutionGrid(rows) {
           }, 500),
         },
         {
-          title: "Pipeline",
+          title: "Forecasted Pipeline",
           field: "pipelineForecast",
           editable: false,
           formatter: function (cell) {
