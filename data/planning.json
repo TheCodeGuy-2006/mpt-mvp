@@ -106,32 +106,6 @@
     "__modified": true
   },
   {
-    "programType": "Targeted Paid Ads & Content Syndication",
-    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
-    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
-    "fiscalYear": "FY26",
-    "quarter": "Q1 - August",
-    "region": "JP & Korea",
-    "country": "South Korea",
-    "owner": "Tomoko Tanaka",
-    "description": "Copilot webpage promo",
-    "forecastedCost": 2143,
-    "expectedLeads": 100,
-    "status": "Planning",
-    "mqlForecast": 10,
-    "sqlForecast": 6,
-    "oppsForecast": 5,
-    "pipelineForecast": 250000,
-    "mql": 30,
-    "sql": 8,
-    "opps": 1,
-    "pipeline": 50000,
-    "id": "row_7_1752722417590",
-    "actualCost": 3459,
-    "actualLeads": 5,
-    "__modified": true
-  },
-  {
     "programType": "Microsoft",
     "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
     "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
@@ -228,7 +202,7 @@
     "id": "row_16_1752722417590"
   },
   {
-    "programType": "Localized Events",
+    "programType": "Webinars",
     "strategicPillars": "New Logo Acquisition",
     "revenuePlay": "All",
     "fiscalYear": "FY26",
@@ -248,7 +222,8 @@
     "sql": 19,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_19_1752722417590"
+    "id": "row_19_1752722417590",
+    "__modified": true
   },
   {
     "programType": "Localized Events",
