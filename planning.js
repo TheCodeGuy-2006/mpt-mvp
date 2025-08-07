@@ -1,3 +1,29 @@
+// --- Highlight Unsaved Rows in Planning Grid ---
+function highlightUnsavedRows() {
+  if (!window.planningTableInstance) return;
+  window.planningTableInstance.getRows().forEach(row => {
+    const data = row.getData();
+    if (data.__modified === true) {
+      row.getElement().classList.add('unsaved-row-highlight');
+    } else {
+      row.getElement().classList.remove('unsaved-row-highlight');
+    }
+  });
+}
+
+// Add CSS for subtle green highlight
+if (!document.getElementById('unsaved-row-highlight-style')) {
+  const style = document.createElement('style');
+  style.id = 'unsaved-row-highlight-style';
+  style.textContent = `
+    .unsaved-row-highlight {
+      background: linear-gradient(90deg, #e6f9ed 80%, #d0f5e3 100%) !important;
+      transition: background 0.3s;
+    }
+  `;
+  document.head.appendChild(style);
+}
+window.highlightUnsavedRows = highlightUnsavedRows;
 // --- Unsaved Changes Flag for Planning Tab ---
 window.hasUnsavedPlanningChanges = false;
 // --- Warn on Tab Close/Reload if Unsaved Changes in Planning Tab ---
@@ -358,6 +384,8 @@ function debounce(func, wait) {
     const later = () => {
       clearTimeout(timeout);
       func(...args);
+      // Highlight unsaved rows after any debounced update
+      if (window.highlightUnsavedRows) setTimeout(window.highlightUnsavedRows, 100);
     };
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
@@ -525,6 +553,10 @@ class PlanningDataStore {
   }
   
   setData(data) {
+    // Clear __modified on all rows when loading new data
+    if (Array.isArray(data)) {
+      data.forEach(row => { if (row && typeof row === 'object') row.__modified = false; });
+    }
     this.data = data;
     this.filteredData = [...data];
   }
@@ -561,6 +593,8 @@ class PlanningDataStore {
     
     // Update table if it exists
     if (planningTableInstance && this.data.length > 0) {
+      // Clear __modified on all rows when replacing data
+      this.data.forEach(row => { if (row && typeof row === 'object') row.__modified = false; });
       planningTableInstance.replaceData(this.data);
     }
   }
@@ -1756,9 +1790,9 @@ function setupAddRowModalEvents() {
 
     // Add row to table
     const newRow = planningTableInstance.addRow(formData, true);
-
-    // Scroll to the new row and make it visible
+    // Highlight unsaved rows
     setTimeout(() => {
+      highlightUnsavedRows();
       if (newRow && typeof newRow.scrollTo === 'function') {
         try {
           newRow.scrollTo();
@@ -1838,8 +1872,12 @@ function setupPlanningSave(table, rows) {
         await new Promise(resolve => setTimeout(resolve, 0));
       }
     }
+
     // Save all planning data
     const data = table.getData();
+    // Clear __modified on all rows after save
+    data.forEach(row => { row.__modified = false; });
+    setTimeout(() => highlightUnsavedRows(), 200); // Remove highlight after save
 
     console.log("Saving planning data:", data.length, "rows");
 
