@@ -1,26 +1,5 @@
 [
   {
-    "id": "program-1754537267503",
-    "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
-    "strategicPillars": "Account Growth and Product Adoption",
-    "owner": "Beverly Leung",
-    "quarter": "Q2 October",
-    "fiscalYear": "FY26",
-    "region": "South APAC",
-    "country": "Lao People's Democratic Republic",
-    "forecastedCost": 12343,
-    "expectedLeads": 111,
-    "revenuePlay": "Expansion",
-    "status": "Planning",
-    "description": "TEST",
-    "__modified": false,
-    "__unsavedPriority": 0,
-    "mqlForecast": 11,
-    "sqlForecast": 7,
-    "oppsForecast": 6,
-    "pipelineForecast": 300000
-  },
-  {
     "programType": "3P Sponsored Events",
     "strategicPillars": "Pipeline Acceleration & Executive Engagement",
     "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
@@ -682,8 +661,12 @@
     "pipeline": 200000,
     "id": "row_115_1753352703039",
     "digitalMotions": true,
-    "__modified": false,
-    "__unsavedPriority": 0
+    "__modified": true,
+    "__unsavedPriority": 0,
+    "poRaised": "Yes",
+    "actualCost": 0,
+    "actualLeads": 2340,
+    "actualMQLs": 2337
   },
   {
     "programType": "Localized Programs",
@@ -988,6 +971,31 @@
     "digitalMotions": true,
     "__modified": false,
     "__unsavedPriority": 0
+  },
+  {
+    "id": "program-1754537267503",
+    "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "owner": "Beverly Leung",
+    "quarter": "Q2 October",
+    "fiscalYear": "FY26",
+    "region": "South APAC",
+    "country": "Lao People's Democratic Republic",
+    "forecastedCost": 12343,
+    "expectedLeads": 111,
+    "revenuePlay": "Expansion",
+    "status": "Planning",
+    "description": "TEST",
+    "__modified": false,
+    "__unsavedPriority": 0,
+    "mqlForecast": 11,
+    "sqlForecast": 7,
+    "oppsForecast": 6,
+    "pipelineForecast": 300000,
+    "mql": 33,
+    "sql": 8,
+    "opps": 1,
+    "pipeline": 50000
   },
   {
     "programType": "Microsoft",
