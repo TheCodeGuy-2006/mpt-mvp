@@ -134,6 +134,120 @@ function safeScrollToRow(table, rowIdentifier, position = "top", ifVisible = fal
     // Fallback to position-based scrolling
     try {
       if (typeof table.scrollToPosition === 'function') {
+
+
+// --- DM Badge for Digital Motions Campaigns in Execution Details ---
+function injectDMBadgeCSS() {
+  if (document.getElementById('dm-badge-style')) return;
+  const style = document.createElement('style');
+  style.id = 'dm-badge-style';
+  style.textContent = `
+    .dm-badge {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: #1976d2;
+      color: #fff;
+      font-weight: bold;
+      font-size: 0.95em;
+      padding: 2px 8px 2px 8px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(25,118,210,0.08);
+      z-index: 10;
+      letter-spacing: 0.04em;
+      user-select: none;
+      pointer-events: none;
+      display: inline-block;
+    }
+    .details-box-dm {
+      position: relative !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+injectDMBadgeCSS();
+
+// Call this after rendering the campaign details box in the Execution tab
+function addDMBadgeToDetailsBox(detailsBoxElem, campaignData) {
+  if (!detailsBoxElem || !campaignData) return;
+  // Only add if digitalMotions is true (boolean or string 'true')
+  if (campaignData.digitalMotions === true || campaignData.digitalMotions === 'true') {
+    detailsBoxElem.classList.add('details-box-dm');
+    // Prevent duplicate badge
+    if (!detailsBoxElem.querySelector('.dm-badge')) {
+      const badge = document.createElement('span');
+      badge.className = 'dm-badge';
+      badge.textContent = 'DM';
+      detailsBoxElem.appendChild(badge);
+    }
+  } else {
+    // Remove badge if present
+    const badge = detailsBoxElem.querySelector('.dm-badge');
+    if (badge) badge.remove();
+    detailsBoxElem.classList.remove('details-box-dm');
+  }
+}
+
+// Example usage (to be called wherever the details box is rendered/refreshed):
+//   addDMBadgeToDetailsBox(detailsBoxElem, campaignData);
+// Where detailsBoxElem is the DOM node for the details box, and campaignData is the campaign's data object.
+
+
+// --- Auto-inject DM badge for all digital motions campaigns in Execution tab ---
+function autoInjectDMBadgesOnExecutionTab() {
+  // Helper: get all visible campaign details boxes
+  function getDetailsBoxes() {
+    // Try common selectors; adjust as needed for your app
+    return Array.from(document.querySelectorAll('.campaign-details-box, .details-box, .execution-details, .execution-campaign-details'));
+  }
+
+  // Helper: get campaign data from DOM node (assumes data is attached or accessible)
+  function getCampaignDataFromBox(box) {
+    // Try to get data from a property or dataset; adjust as needed for your app
+    if (box.campaignData) return box.campaignData;
+    if (box.dataset && box.dataset.campaigndata) {
+      try { return JSON.parse(box.dataset.campaigndata); } catch (e) { return null; }
+    }
+    // Fallback: try to find a global or parent data object
+    return null;
+  }
+
+  // Main logic: add badge to all boxes with digitalMotions true
+  function updateAllBadges() {
+    getDetailsBoxes().forEach(box => {
+      const data = getCampaignDataFromBox(box);
+      if (data && (data.digitalMotions === true || data.digitalMotions === 'true')) {
+        addDMBadgeToDetailsBox(box, data);
+      } else {
+        // Remove badge if present
+        const badge = box.querySelector && box.querySelector('.dm-badge');
+        if (badge) badge.remove();
+        box.classList && box.classList.remove('details-box-dm');
+      }
+    });
+  }
+
+  // Observe DOM changes to auto-update badges
+  const observer = new MutationObserver(() => {
+    if (window.location.hash.includes('#execution')) {
+      updateAllBadges();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Also update on hash change (tab switch)
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash.includes('#execution')) {
+      setTimeout(updateAllBadges, 100);
+    }
+  });
+
+  // Initial run if already on execution tab
+  if (window.location.hash.includes('#execution')) {
+    setTimeout(updateAllBadges, 100);
+  }
+}
+autoInjectDMBadgesOnExecutionTab();
         table.scrollToPosition(0, 0, false);
         return true;
       }

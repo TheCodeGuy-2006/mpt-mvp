@@ -385,7 +385,11 @@ function initExecutionGrid(rows) {
             const description = data.description || "";
             const programType = data.programType || "";
             const quarter = data.quarter || "";
-            let html = '<div style="padding: 4px; line-height: 1.3; font-size: 12px;">';
+            let html = '<div style="padding: 4px; line-height: 1.3; font-size: 12px; position:relative;">';
+            // DM badge for digital motions
+            if (data.digitalMotions === true || data.digitalMotions === 'true') {
+              html += '<span class="dm-badge" style="position:absolute;top:2px;right:2px;background:#1976d2;color:#fff;font-weight:bold;font-size:0.95em;padding:2px 8px;border-radius:8px;box-shadow:0 2px 8px rgba(25,118,210,0.08);z-index:10;letter-spacing:0.04em;user-select:none;pointer-events:none;display:inline-block;">DM</span>';
+            }
             if (region) html += `<div style="font-weight: bold; color: #1976d2;">${region}</div>`;
             if (quarter) html += `<div style="color: #e65100; font-weight: bold; margin-top: 2px;">${quarter}</div>`;
             if (owner) html += `<div style="color: #666; margin-top: 2px;">${owner}</div>`;
