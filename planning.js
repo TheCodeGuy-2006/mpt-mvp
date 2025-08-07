@@ -7,20 +7,13 @@ function injectDescriptionKeywordSearchBar() {
   // Find the filters container and the universal search input inside it
   const filtersBox = document.querySelector('#planningFilters');
   let universalSearch = null;
-  // Debug: log all divs and their classes/IDs
-  if (window && window.console) {
-    const allDivs = Array.from(document.querySelectorAll('div'));
-    window.console.log('[Planning] All divs for selector debug:');
-    allDivs.forEach(div => {
-      window.console.log('DIV:', div, 'class:', div.className, 'id:', div.id);
-    });
-  }
+  // ...existing code...
   if (filtersBox) {
     // Find the first input[type="search"] or input with a search placeholder inside the filters box
     universalSearch = filtersBox.querySelector('input[type="search"]');
     if (!universalSearch) universalSearch = Array.from(filtersBox.querySelectorAll('input')).find(i => i.placeholder && i.placeholder.toLowerCase().includes('search'));
   }
-  if (window && window.console) window.console.log('[Planning] universalSearch:', universalSearch, 'filtersBox:', filtersBox);
+  // ...existing code...
 
   // Create the search bar container
   const container = document.createElement('div');
@@ -29,12 +22,12 @@ function injectDescriptionKeywordSearchBar() {
   container.style.alignItems = 'center';
   container.style.gap = '8px';
   container.style.margin = '18px 0 8px 0';
-  // Debug: force visibility
-  container.style.background = '#ffeeba';
-  container.style.border = '2px solid #d39e00';
-  container.style.zIndex = '99999';
-  container.style.position = 'relative';
-  container.title = 'Description search bar (debug)';
+  // Cleaned up styles
+  container.style.background = '';
+  container.style.border = '';
+  container.style.zIndex = '';
+  container.style.position = '';
+  container.title = '';
 
   // Create the input
   const input = document.createElement('input');
@@ -126,25 +119,12 @@ function injectDescriptionKeywordSearchBar() {
     injected = true;
   } else {
     // Fallback: append to body, fixed at top for debug
-    container.style.position = 'fixed';
-    container.style.top = '80px';
-    container.style.left = '50%';
-    container.style.transform = 'translateX(-50%)';
-    container.style.width = '420px';
+    // ...existing code...
     document.body.appendChild(container);
     injected = false;
-    // Add visible debug message
-    const msg = document.createElement('div');
-    msg.textContent = 'Description search bar fallback: filters box not found.';
-    msg.style.color = '#d1242f';
-    msg.style.fontWeight = 'bold';
-    msg.style.background = '#fff3cd';
-    msg.style.padding = '4px 10px';
-    msg.style.border = '1px solid #d39e00';
-    msg.style.marginTop = '6px';
-    container.appendChild(msg);
+    // ...existing code...
   }
-  if (window && window.console) window.console.log('[Planning] Description search bar injected after filtersBox:', injected, container, filtersBox);
+  // ...existing code...
 }
 
 // Inject on DOMContentLoaded and after a short delay to ensure placement

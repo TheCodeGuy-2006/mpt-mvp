@@ -1,3 +1,133 @@
+// --- Inject Description Keyword Search Bar for Execution Tab ---
+function injectExecutionDescriptionKeywordSearchBar() {
+  // (Filtering logic removed to restore previous state)
+  // Only inject once
+  if (document.getElementById('execution-description-search-bar')) return;
+
+  // Find the filters container in the Execution tab
+  const filtersBox = document.querySelector('#executionFilters');
+
+  // Create the search bar container
+  const container = document.createElement('div');
+  container.id = 'execution-description-search-bar';
+  container.style.display = 'flex';
+  container.style.alignItems = 'center';
+  container.style.gap = '8px';
+  container.style.margin = '18px 0 8px 0';
+
+  // Create the input
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.id = 'execution-description-search';
+  input.placeholder = 'Search campaign descriptions...';
+  input.style.flex = '1';
+  input.style.padding = '8px 12px';
+  input.style.border = '2px solid #d39e00';
+  input.style.borderRadius = '7px';
+  input.style.fontSize = '1em';
+  input.style.background = '#fffbe6';
+
+  // Create the button
+  const button = document.createElement('button');
+  button.id = 'execution-description-search-btn';
+  button.textContent = 'Search';
+  button.style.padding = '8px 18px';
+  button.style.background = '#1976d2';
+  button.style.color = '#fff';
+  button.style.border = '2px solid #d39e00';
+  button.style.borderRadius = '7px';
+  button.style.fontWeight = 'bold';
+  button.style.fontSize = '1em';
+  button.style.cursor = 'pointer';
+
+  container.appendChild(input);
+  container.appendChild(button);
+
+  // --- Filtering Logic ---
+  function handleDescriptionSearch() {
+    const value = input.value.trim();
+    // Split by spaces, remove empty, lowercase
+    const keywords = value.length > 0 ? value.split(/\s+/).filter(Boolean) : [];
+    if (window.executionTableInstance && typeof window.executionTableInstance.replaceData === 'function') {
+      // On first use, cache the original data
+      if (!window.executionDataCache || !Array.isArray(window.executionDataCache) || window.executionDataCache.length === 0) {
+        if (typeof window.executionTableInstance.getData === 'function') {
+          // Clone the data to avoid reference issues
+          window.executionDataCache = window.executionTableInstance.getData().slice();
+        }
+      }
+      let allRows = window.executionDataCache && Array.isArray(window.executionDataCache)
+        ? window.executionDataCache
+        : [];
+      let filtered = allRows;
+      if (keywords.length > 0) {
+        filtered = allRows.filter(row => {
+          if (!row.description) return false;
+          const desc = row.description.toLowerCase();
+          return keywords.every(kw => desc.includes(kw.toLowerCase()));
+        });
+      }
+      window.executionTableInstance.replaceData(filtered);
+    }
+  }
+
+  // Listen for button click and Enter key
+  button.addEventListener('click', handleDescriptionSearch);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleDescriptionSearch();
+    }
+  });
+
+  // Clear filter on empty input (restores all data)
+  input.addEventListener('input', function() {
+    if (input.value.trim() === '') {
+      // Restore all data (clear filters)
+      if (window.executionTableInstance && typeof window.executionTableInstance.replaceData === 'function') {
+        // Always restore from the persistent cache
+        if (window.executionDataCache && Array.isArray(window.executionDataCache)) {
+          window.executionTableInstance.replaceData(window.executionDataCache);
+        } else if (typeof window.executionTableInstance.getData === 'function') {
+          // Fallback: cache and restore current data
+          window.executionDataCache = window.executionTableInstance.getData().slice();
+          window.executionTableInstance.replaceData(window.executionDataCache);
+        }
+      }
+    }
+  });
+
+  // Insert the search bar into the DOM, always after the filters box
+  if (filtersBox && filtersBox.parentNode) {
+    if (filtersBox.nextSibling) {
+      filtersBox.parentNode.insertBefore(container, filtersBox.nextSibling);
+    } else {
+      filtersBox.parentNode.appendChild(container);
+    }
+  } else {
+    // Fallback: append to body, fixed at top for debug
+    container.style.position = 'fixed';
+    container.style.top = '80px';
+    container.style.left = '50%';
+    container.style.transform = 'translateX(-50%)';
+    container.style.width = '420px';
+    document.body.appendChild(container);
+  }
+}
+
+// Inject on DOMContentLoaded and after a short delay to ensure placement
+function tryInjectExecutionDescriptionKeywordSearchBar() {
+  injectExecutionDescriptionKeywordSearchBar();
+  setTimeout(injectExecutionDescriptionKeywordSearchBar, 500);
+  setTimeout(injectExecutionDescriptionKeywordSearchBar, 1500);
+  setTimeout(injectExecutionDescriptionKeywordSearchBar, 3000);
+  setTimeout(injectExecutionDescriptionKeywordSearchBar, 5000);
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', tryInjectExecutionDescriptionKeywordSearchBar);
+} else {
+  tryInjectExecutionDescriptionKeywordSearchBar();
+}
 // --- Unsaved Changes Flag for Execution Tab ---
 window.hasUnsavedExecutionChanges = false;
 
