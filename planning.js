@@ -1,4 +1,165 @@
 // --- Highlight Unsaved Rows in Planning Grid ---
+// --- Inject Description Keyword Search Bar for Planning Tab ---
+function injectDescriptionKeywordSearchBar() {
+  // Only inject once
+  if (document.getElementById('planning-description-search-bar')) return;
+
+  // Find the filters container and the universal search input inside it
+  const filtersBox = document.querySelector('#planningFilters');
+  let universalSearch = null;
+  // Debug: log all divs and their classes/IDs
+  if (window && window.console) {
+    const allDivs = Array.from(document.querySelectorAll('div'));
+    window.console.log('[Planning] All divs for selector debug:');
+    allDivs.forEach(div => {
+      window.console.log('DIV:', div, 'class:', div.className, 'id:', div.id);
+    });
+  }
+  if (filtersBox) {
+    // Find the first input[type="search"] or input with a search placeholder inside the filters box
+    universalSearch = filtersBox.querySelector('input[type="search"]');
+    if (!universalSearch) universalSearch = Array.from(filtersBox.querySelectorAll('input')).find(i => i.placeholder && i.placeholder.toLowerCase().includes('search'));
+  }
+  if (window && window.console) window.console.log('[Planning] universalSearch:', universalSearch, 'filtersBox:', filtersBox);
+
+  // Create the search bar container
+  const container = document.createElement('div');
+  container.id = 'planning-description-search-bar';
+  container.style.display = 'flex';
+  container.style.alignItems = 'center';
+  container.style.gap = '8px';
+  container.style.margin = '18px 0 8px 0';
+  // Debug: force visibility
+  container.style.background = '#ffeeba';
+  container.style.border = '2px solid #d39e00';
+  container.style.zIndex = '99999';
+  container.style.position = 'relative';
+  container.title = 'Description search bar (debug)';
+
+  // Create the input
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.id = 'planning-description-search';
+  input.placeholder = 'Search campaign descriptions...';
+  input.style.flex = '1';
+  input.style.padding = '8px 12px';
+  input.style.border = '2px solid #d39e00';
+  input.style.borderRadius = '7px';
+  input.style.fontSize = '1em';
+  input.style.background = '#fffbe6';
+
+  // Create the button
+  const button = document.createElement('button');
+  button.id = 'planning-description-search-btn';
+  button.textContent = 'Search';
+  button.style.padding = '8px 18px';
+  button.style.background = '#1976d2';
+  button.style.color = '#fff';
+  button.style.border = '2px solid #d39e00';
+  button.style.borderRadius = '7px';
+  button.style.fontWeight = 'bold';
+  button.style.fontSize = '1em';
+  button.style.cursor = 'pointer';
+
+  container.appendChild(input);
+  container.appendChild(button);
+
+  // --- Filtering Logic ---
+  function handleDescriptionSearch() {
+    const value = input.value.trim();
+    // Split by spaces, remove empty, lowercase
+    const keywords = value.length > 0 ? value.split(/\s+/).filter(Boolean) : [];
+    // Compose filters object for PlanningDataStore
+    const filters = {};
+    if (keywords.length > 0) {
+      filters.descriptionKeyword = keywords;
+    } else {
+      filters.descriptionKeyword = [];
+    }
+    // Preserve other filters if needed (future-proof)
+    // Apply filter using planningDataStore
+    if (window.planningDataStore && typeof window.planningDataStore.applyFilters === 'function') {
+      const filtered = window.planningDataStore.applyFilters(filters);
+      // Update grid if available
+      if (window.planningTableInstance && typeof window.planningTableInstance.replaceData === 'function') {
+        window.planningTableInstance.replaceData(filtered);
+      }
+    } else {
+      // Fallback: filter main data cache
+      if (window.planningDataCache && Array.isArray(window.planningDataCache)) {
+        const filtered = window.planningDataCache.filter(row => {
+          if (!row.description) return false;
+          const desc = row.description.toLowerCase();
+          return keywords.every(kw => desc.includes(kw.toLowerCase()));
+        });
+        if (window.planningTableInstance && typeof window.planningTableInstance.replaceData === 'function') {
+          window.planningTableInstance.replaceData(filtered);
+        }
+      }
+    }
+  }
+
+  // Listen for button click and Enter key
+  button.addEventListener('click', handleDescriptionSearch);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleDescriptionSearch();
+    }
+  });
+
+  // Optional: clear filter on empty input
+  input.addEventListener('input', function() {
+    if (input.value.trim() === '') {
+      handleDescriptionSearch();
+    }
+  });
+
+  // Insert the search bar into the DOM, always after the filters box
+  let injected = false;
+  if (filtersBox && filtersBox.parentNode) {
+    if (filtersBox.nextSibling) {
+      filtersBox.parentNode.insertBefore(container, filtersBox.nextSibling);
+    } else {
+      filtersBox.parentNode.appendChild(container);
+    }
+    injected = true;
+  } else {
+    // Fallback: append to body, fixed at top for debug
+    container.style.position = 'fixed';
+    container.style.top = '80px';
+    container.style.left = '50%';
+    container.style.transform = 'translateX(-50%)';
+    container.style.width = '420px';
+    document.body.appendChild(container);
+    injected = false;
+    // Add visible debug message
+    const msg = document.createElement('div');
+    msg.textContent = 'Description search bar fallback: filters box not found.';
+    msg.style.color = '#d1242f';
+    msg.style.fontWeight = 'bold';
+    msg.style.background = '#fff3cd';
+    msg.style.padding = '4px 10px';
+    msg.style.border = '1px solid #d39e00';
+    msg.style.marginTop = '6px';
+    container.appendChild(msg);
+  }
+  if (window && window.console) window.console.log('[Planning] Description search bar injected after filtersBox:', injected, container, filtersBox);
+}
+
+// Inject on DOMContentLoaded and after a short delay to ensure placement
+function tryInjectDescriptionKeywordSearchBar() {
+  injectDescriptionKeywordSearchBar();
+  setTimeout(injectDescriptionKeywordSearchBar, 500);
+  setTimeout(injectDescriptionKeywordSearchBar, 1500);
+  setTimeout(injectDescriptionKeywordSearchBar, 3000);
+  setTimeout(injectDescriptionKeywordSearchBar, 5000);
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', tryInjectDescriptionKeywordSearchBar);
+} else {
+  tryInjectDescriptionKeywordSearchBar();
+}
 function highlightUnsavedRows() {
   if (!window.planningTableInstance) return;
   window.planningTableInstance.getRows().forEach(row => {
@@ -767,6 +928,7 @@ class PlanningDataStore {
 }
 
 const planningDataStore = new PlanningDataStore();
+window.planningDataStore = planningDataStore;
 
 // Loading indicator functions for large dataset processing
 function showLoadingIndicator(message = "Loading...") {
