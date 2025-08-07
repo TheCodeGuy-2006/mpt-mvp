@@ -1383,25 +1383,25 @@ function initPlanningGrid(rows) {
       // Yield before applying sort to prevent blocking
       await yieldToMain();
       
-      // Apply initial sort after all columns are added
-      try {
-        if (planningTableInstance && planningTableInstance.getColumns().length > 0) {
-          // Use requestIdleCallback for non-blocking sort
-          if (window.requestIdleCallback) {
-            requestIdleCallback(() => {
-              planningTableInstance.setSort([{ column: "quarter", dir: "asc" }]);
-              console.log("✅ Planning grid: Initial sort applied");
-            }, { timeout: 100 });
-          } else {
-            setTimeout(() => {
-              planningTableInstance.setSort([{ column: "quarter", dir: "asc" }]);
-              console.log("✅ Planning grid: Initial sort applied");
-            }, 25);
-          }
-        }
-      } catch (e) {
-        console.warn("Planning grid: Could not apply initial sort:", e.message);
-      }
+      // // Apply initial sort after all columns are added (COMMENTED OUT FOR TESTING)
+      // try {
+      //   if (planningTableInstance && planningTableInstance.getColumns().length > 0) {
+      //     // Use requestIdleCallback for non-blocking sort
+      //     if (window.requestIdleCallback) {
+      //       requestIdleCallback(() => {
+      //         planningTableInstance.setSort([{ column: "quarter", dir: "asc" }]);
+      //         console.log("✅ Planning grid: Initial sort applied");
+      //       }, { timeout: 100 });
+      //     } else {
+      //       setTimeout(() => {
+      //         planningTableInstance.setSort([{ column: "quarter", dir: "asc" }]);
+      //         console.log("✅ Planning grid: Initial sort applied");
+      //       }, 25);
+      //     }
+      //   }
+      // } catch (e) {
+      //   console.warn("Planning grid: Could not apply initial sort:", e.message);
+      // }
       
       resolve(planningTableInstance);
     };
@@ -1789,7 +1789,48 @@ function setupAddRowModalEvents() {
     }
 
     // Add row to table
-    const newRow = planningTableInstance.addRow(formData, true);
+    // Force new row to top if addRow does not respect the position flag
+    let newRow;
+    if (planningTableInstance && typeof planningTableInstance.addRow === 'function') {
+      // Try to add at top using Tabulator's API
+      newRow = planningTableInstance.addRow(formData, true);
+      // Double-check: if not at top, forcibly move it
+      let moved = false;
+      const rows = planningTableInstance.getRows();
+      if (rows.length > 1 && rows[0].getData().id !== formData.id) {
+        // Remove the row and re-insert at index 0
+        const insertedRow = rows.find(r => r.getData().id === formData.id);
+        if (insertedRow) {
+          const rowData = insertedRow.getData();
+          insertedRow.delete();
+          planningTableInstance.addRow(rowData, false, 0);
+          // Get the new row reference
+          newRow = planningTableInstance.getRows()[0];
+          moved = true;
+        }
+      }
+      // Ensure highlight and scroll after move
+      setTimeout(() => {
+        highlightUnsavedRows();
+        if (newRow && typeof newRow.scrollTo === 'function') {
+          try {
+            newRow.scrollTo();
+            // If row was moved, force focus/flash
+            if (moved) {
+              const el = newRow.getElement();
+              el.classList.add('unsaved-row-highlight');
+              el.style.transition = 'background 0.3s, box-shadow 0.3s';
+              el.style.boxShadow = '0 0 0 3px #28a74580';
+              setTimeout(() => {
+                el.style.boxShadow = '';
+              }, 1200);
+            }
+          } catch (e) {
+            console.warn("Could not scroll to new row:", e);
+          }
+        }
+      }, 120);
+    }
     // Highlight unsaved rows
     setTimeout(() => {
       highlightUnsavedRows();
