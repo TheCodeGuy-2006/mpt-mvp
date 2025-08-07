@@ -167,11 +167,17 @@ if (!document.getElementById('unsaved-row-highlight-style')) {
 window.highlightUnsavedRows = highlightUnsavedRows;
 // --- Unsaved Changes Flag for Planning Tab ---
 window.hasUnsavedPlanningChanges = false;
+// Call this function after importing campaigns to trigger the unsaved changes warning on refresh/close
+window.setPlanningImportedUnsaved = function() {
+  window.hasUnsavedPlanningChanges = true;
+  console.log('[Planning] Unsaved changes set to true (imported campaigns)');
+};
+// --- Unsaved Changes Warning Banner for Planning Tab ---
 // --- Warn on Tab Close/Reload if Unsaved Changes in Planning Tab ---
 window.addEventListener('beforeunload', function (e) {
   if (window.hasUnsavedPlanningChanges) {
-    // Standard message is ignored by most browsers, but setting returnValue triggers the dialog
-    const msg = 'You have unsaved changes in the Planning tab. Are you sure you want to leave?';
+    // Show a warning if there are unsaved changes, including imported campaigns
+    const msg = 'You have unsaved changes in the Planning tab (including imported campaigns). Are you sure you want to leave?';
     e.preventDefault();
     e.returnValue = msg;
     return msg;
@@ -2421,22 +2427,23 @@ document
           for (let i = 0; i < mappedRows.length; i += batchSize) {
             const batch = mappedRows.slice(i, i + batchSize);
             planningTableInstance.addData(batch);
-            
             // Update progress
             if (mappedRows.length > 100) {
               const progress = Math.round(((i + batch.length) / mappedRows.length) * 100);
               showLoadingIndicator(`Importing... ${progress}%`);
             }
-            
             // Small delay to prevent UI freezing
             if (i + batchSize < mappedRows.length) {
               await new Promise(resolve => setTimeout(resolve, 10));
             }
           }
-          
           // Update ROI metrics to reflect newly imported forecasted costs
           if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
             setTimeout(window.roiModule.updateRoiTotalSpend, 100); // Small delay to ensure data is fully loaded
+          }
+          // Set unsaved changes flag so beforeunload warning is triggered
+          if (typeof window.setPlanningImportedUnsaved === 'function') {
+            window.setPlanningImportedUnsaved();
           }
         }
         
