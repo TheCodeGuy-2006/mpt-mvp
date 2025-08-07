@@ -1,5 +1,26 @@
 [
   {
+    "id": "program-1754537267503",
+    "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "owner": "Beverly Leung",
+    "quarter": "Q2 October",
+    "fiscalYear": "FY26",
+    "region": "South APAC",
+    "country": "Lao People's Democratic Republic",
+    "forecastedCost": 12343,
+    "expectedLeads": 111,
+    "revenuePlay": "Expansion",
+    "status": "Planning",
+    "description": "TEST",
+    "__modified": false,
+    "__unsavedPriority": 0,
+    "mqlForecast": 11,
+    "sqlForecast": 7,
+    "oppsForecast": 6,
+    "pipelineForecast": 300000
+  },
+  {
     "programType": "3P Sponsored Events",
     "strategicPillars": "Pipeline Acceleration & Executive Engagement",
     "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
@@ -22,10 +43,11 @@
     "pipeline": 350000,
     "id": "row_0_1752722417590",
     "poRaised": "Yes",
-    "__modified": true,
+    "__modified": false,
     "actualCost": 6500,
     "actualLeads": 585,
-    "actualMQLs": 20
+    "actualMQLs": 20,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Microsoft",
@@ -50,10 +72,11 @@
     "pipeline": 100000,
     "id": "row_3_1752722417590",
     "actualCost": 5000,
-    "__modified": true,
+    "__modified": false,
     "issueLink": "http://localhost:49934/#planning",
     "actualLeads": "",
-    "actualMQLs": ""
+    "actualMQLs": "",
+    "__unsavedPriority": 0
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -78,32 +101,8 @@
     "pipeline": 0,
     "id": "row_5_1752722417590",
     "actualCost": 49995,
-    "__modified": true
-  },
-  {
-    "programType": "Targeted Paid Ads & Content Syndication",
-    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
-    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
-    "fiscalYear": "FY26",
-    "quarter": "Q1 - July",
-    "region": "JP & Korea",
-    "country": "South Korea",
-    "owner": "Tomoko Tanaka",
-    "description": "Copilot webpage promo",
-    "forecastedCost": 2143,
-    "expectedLeads": 100,
-    "status": "Planning",
-    "mqlForecast": 10,
-    "sqlForecast": 6,
-    "oppsForecast": 5,
-    "pipelineForecast": 250000,
-    "mql": 30,
-    "sql": 8,
-    "opps": 1,
-    "pipeline": 50000,
-    "id": "row_6_1752722417590",
-    "actualCost": 49594,
-    "__modified": true
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Microsoft",
@@ -126,7 +125,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_12_1752722417590"
+    "id": "row_12_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Events",
@@ -151,7 +152,8 @@
     "pipeline": 150000,
     "id": "row_13_1752722417590",
     "actualCost": 324,
-    "__modified": true
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "3P Sponsored Events",
@@ -176,7 +178,8 @@
     "pipeline": 150000,
     "id": "row_14_1752722417590",
     "actualLeads": 318,
-    "__modified": true
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Microsoft",
@@ -199,7 +202,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_16_1752722417590"
+    "id": "row_16_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -223,7 +228,8 @@
     "opps": 3,
     "pipeline": 150000,
     "id": "row_19_1752722417590",
-    "__modified": true
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Events",
@@ -249,111 +255,8 @@
     "id": "row_20_1752722417590",
     "actualCost": 123,
     "actualLeads": 122,
-    "__modified": true
-  },
-  {
-    "programType": "Localized Events",
-    "strategicPillars": "Account Growth and Product Adoption",
-    "revenuePlay": "All",
-    "fiscalYear": "FY26",
-    "quarter": "Q1 - September",
-    "region": "South APAC",
-    "country": "Australia",
-    "owner": "Beverly Leung",
-    "description": "GitHub Connect Melbourne - Updates to targeted accounts",
-    "forecastedCost": 3000,
-    "expectedLeads": 80,
-    "status": "Planning",
-    "mqlForecast": 8,
-    "sqlForecast": 5,
-    "oppsForecast": 4,
-    "pipelineForecast": 200000,
-    "mql": 24,
-    "sql": 6,
-    "opps": 1,
-    "pipeline": 50000,
-    "id": "row_21_1752722417590",
-    "actualCost": 32432,
-    "actualLeads": 22,
-    "__modified": true
-  },
-  {
-    "programType": "CxO Events (1:Few)",
-    "strategicPillars": "Account Growth and Product Adoption",
-    "revenuePlay": "All",
-    "fiscalYear": "FY26",
-    "quarter": "Q1 - September",
-    "region": "JP & Korea",
-    "country": "Japan",
-    "owner": "Tomoko Tanaka",
-    "description": "GitHub Exec and customer engagement",
-    "forecastedCost": 1429,
-    "expectedLeads": 50,
-    "status": "Planning",
-    "mqlForecast": 5,
-    "sqlForecast": 3,
-    "oppsForecast": 2,
-    "pipelineForecast": 100000,
-    "mql": 15,
-    "sql": 4,
-    "opps": 1,
-    "pipeline": 50000,
-    "id": "row_24_1752722417590",
-    "actualCost": 3431,
-    "actualLeads": 218,
-    "__modified": true
-  },
-  {
-    "programType": "In-Account Events (1:1)",
-    "strategicPillars": "Account Growth and Product Adoption",
-    "revenuePlay": "All",
-    "fiscalYear": "FY26",
-    "quarter": "Q1 - August",
-    "region": "SAARC",
-    "country": "India",
-    "owner": "Shruti Narang",
-    "description": "In Account Days - Accounts TBD",
-    "forecastedCost": 4000,
-    "expectedLeads": 0,
-    "status": "Planning",
-    "mqlForecast": 0,
-    "sqlForecast": 0,
-    "oppsForecast": 0,
-    "pipelineForecast": 80000,
-    "mql": 0,
-    "sql": 0,
-    "opps": 0,
-    "pipeline": 0,
-    "id": "row_32_1752722417590",
-    "actualCost": 3429,
-    "actualLeads": 30,
-    "__modified": true,
-    "issueLink": ""
-  },
-  {
-    "programType": "In-Account Events (1:1)",
-    "strategicPillars": "Account Growth and Product Adoption",
-    "revenuePlay": "All",
-    "fiscalYear": "FY26",
-    "quarter": "Q1 - September",
-    "region": "SAARC",
-    "country": "India",
-    "owner": "Shruti Narang",
-    "description": "In Account Days - Accounts TBD",
-    "forecastedCost": 4000,
-    "expectedLeads": 0,
-    "status": "Planning",
-    "mqlForecast": 0,
-    "sqlForecast": 0,
-    "oppsForecast": 0,
-    "pipelineForecast": 80000,
-    "mql": 0,
-    "sql": 0,
-    "opps": 0,
-    "pipeline": 0,
-    "id": "row_33_1752722417590",
-    "actualLeads": 28,
-    "__modified": true
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -376,30 +279,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_34_1752722417590"
-  },
-  {
-    "programType": "In-Account Events (1:1)",
-    "strategicPillars": "Account Growth and Product Adoption",
-    "revenuePlay": "All",
-    "fiscalYear": "FY26",
-    "quarter": "Q1 - July",
-    "region": "SAARC",
-    "country": "India",
-    "owner": "Shruti Narang",
-    "description": "In Account Days - Accounts TBD",
-    "forecastedCost": 4000,
-    "expectedLeads": 0,
-    "status": "Planning",
-    "mqlForecast": 0,
-    "sqlForecast": 0,
-    "oppsForecast": 0,
-    "pipelineForecast": 80000,
-    "mql": 0,
-    "sql": 0,
-    "opps": 0,
-    "pipeline": 0,
-    "id": "row_36_1752722417590"
+    "id": "row_36_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -423,7 +305,8 @@
     "opps": 0,
     "pipeline": 0,
     "id": "row_42_1752722417590",
-    "__modified": true
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -446,7 +329,9 @@
     "sql": 45,
     "opps": 7,
     "pipeline": 350000,
-    "id": "row_46_1752722417590"
+    "id": "row_46_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -469,7 +354,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_47_1752722417590"
+    "id": "row_47_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -492,7 +379,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_48_1752722417590"
+    "id": "row_48_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -515,7 +404,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_49_1752722417590"
+    "id": "row_49_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -538,7 +429,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_50_1752722417590"
+    "id": "row_50_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -561,7 +454,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_54_1752722417590"
+    "id": "row_54_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -584,7 +479,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_57_1752722417590"
+    "id": "row_57_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -607,7 +504,9 @@
     "sql": 19,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_60_1752722417590"
+    "id": "row_60_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -631,7 +530,9 @@
     "opps": 2,
     "pipeline": 100000,
     "id": "row_66_1752722417590",
-    "issueLink": ""
+    "issueLink": "",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -653,7 +554,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_67_1752722417590"
+    "id": "row_67_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Contractor/Infrastructure",
@@ -678,7 +581,8 @@
     "pipeline": 0,
     "id": "row_68_1752722417590",
     "poRaised": "Yes",
-    "__modified": true
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -701,7 +605,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_91_1752722417590"
+    "id": "row_91_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -724,7 +630,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_93_1752722417590"
+    "id": "row_93_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -747,7 +655,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_113_1752722417590"
+    "id": "row_113_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -771,7 +681,9 @@
     "opps": 4,
     "pipeline": 200000,
     "id": "row_115_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -795,7 +707,9 @@
     "opps": 1,
     "pipeline": 50000,
     "id": "row_116_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -819,7 +733,9 @@
     "opps": 1,
     "pipeline": 50000,
     "id": "row_118_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -843,7 +759,9 @@
     "opps": 1,
     "pipeline": 50000,
     "id": "row_122_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -867,7 +785,9 @@
     "opps": 23,
     "pipeline": 1150000,
     "id": "row_123_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -891,7 +811,9 @@
     "opps": 3,
     "pipeline": 150000,
     "id": "row_124_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -915,7 +837,9 @@
     "opps": 3,
     "pipeline": 150000,
     "id": "row_128_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -939,7 +863,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_129_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -963,7 +889,9 @@
     "opps": 6,
     "pipeline": 300000,
     "id": "row_130_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -987,7 +915,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_135_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Operational/Infrastructure/Swag",
@@ -1007,7 +937,9 @@
     "oppsForecast": 0,
     "pipelineForecast": 0,
     "id": "row_144_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Operational/Infrastructure/Swag",
@@ -1027,7 +959,9 @@
     "oppsForecast": 0,
     "pipelineForecast": 0,
     "id": "row_145_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -1051,7 +985,9 @@
     "opps": 3,
     "pipeline": 150000,
     "id": "row_146_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Microsoft",
@@ -1074,7 +1010,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_4_1752722417590"
+    "id": "row_4_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -1097,7 +1035,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_8_1752722417590"
+    "id": "row_8_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -1120,7 +1060,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_11_1752722417590"
+    "id": "row_11_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "3P Sponsored Events",
@@ -1143,7 +1085,9 @@
     "sql": 26,
     "opps": 4,
     "pipeline": 200000,
-    "id": "row_15_1752722417590"
+    "id": "row_15_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -1166,7 +1110,9 @@
     "sql": 2,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_17_1752722417590"
+    "id": "row_17_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Events",
@@ -1189,7 +1135,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_18_1752722417590"
+    "id": "row_18_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Events",
@@ -1212,7 +1160,9 @@
     "sql": 19,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_22_1752722417590"
+    "id": "row_22_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Events",
@@ -1235,7 +1185,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_23_1752722417590"
+    "id": "row_23_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -1258,7 +1210,9 @@
     "sql": 2,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_25_1752722417590"
+    "id": "row_25_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -1281,7 +1235,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_26_1752722417590"
+    "id": "row_26_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -1304,7 +1260,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_27_1752722417590"
+    "id": "row_27_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -1327,7 +1285,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_28_1752722417590"
+    "id": "row_28_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -1350,7 +1310,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_30_1752722417590"
+    "id": "row_30_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -1373,7 +1335,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_35_1752722417590"
+    "id": "row_35_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -1396,7 +1360,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_43_1752722417590"
+    "id": "row_43_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -1419,7 +1385,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_51_1752722417590"
+    "id": "row_51_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -1442,7 +1410,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_53_1752722417590"
+    "id": "row_53_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -1465,7 +1435,9 @@
     "sql": 16,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_55_1752722417590"
+    "id": "row_55_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -1488,7 +1460,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_58_1752722417590"
+    "id": "row_58_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Exec Engagement Programs",
@@ -1511,7 +1485,9 @@
     "sql": 2,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_63_1752722417590"
+    "id": "row_63_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -1534,7 +1510,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_65_1752722417590"
+    "id": "row_65_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Lunch & Learns and Workshops (1:few)",
@@ -1557,7 +1535,9 @@
     "sql": 6,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_69_1752722417590"
+    "id": "row_69_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Events",
@@ -1580,7 +1560,9 @@
     "sql": 19,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_71_1752722417590"
+    "id": "row_71_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -1603,7 +1585,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_73_1752722417590"
+    "id": "row_73_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -1626,7 +1610,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_74_1752722417590"
+    "id": "row_74_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1649,7 +1635,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_77_1752722417590"
+    "id": "row_77_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1672,7 +1660,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_78_1752722417590"
+    "id": "row_78_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -1695,7 +1685,9 @@
     "sql": 2,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_79_1752722417590"
+    "id": "row_79_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1718,7 +1710,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_80_1752722417590"
+    "id": "row_80_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -1741,7 +1735,9 @@
     "sql": 2,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_81_1752722417590"
+    "id": "row_81_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1764,7 +1760,9 @@
     "sql": 14,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_82_1752722417590"
+    "id": "row_82_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "CxO Events (1:Few)",
@@ -1787,7 +1785,9 @@
     "sql": 2,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_83_1752722417590"
+    "id": "row_83_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1810,7 +1810,9 @@
     "sql": 38,
     "opps": 6,
     "pipeline": 300000,
-    "id": "row_84_1752722417590"
+    "id": "row_84_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1833,7 +1835,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_85_1752722417590"
+    "id": "row_85_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1856,7 +1860,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_86_1752722417590"
+    "id": "row_86_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -1879,7 +1885,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_87_1752722417590"
+    "id": "row_87_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -1902,7 +1910,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_88_1752722417590"
+    "id": "row_88_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -1925,7 +1935,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_112_1752722417590"
+    "id": "row_112_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -1948,7 +1960,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_114_1752722417590"
+    "id": "row_114_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -1972,7 +1986,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_119_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -1996,7 +2012,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_120_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -2020,7 +2038,9 @@
     "opps": 3,
     "pipeline": 150000,
     "id": "row_131_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2044,7 +2064,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_132_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2068,7 +2090,9 @@
     "opps": 6,
     "pipeline": 300000,
     "id": "row_133_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2092,7 +2116,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_134_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2116,7 +2142,9 @@
     "opps": 3,
     "pipeline": 150000,
     "id": "row_147_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "3P Sponsored Events",
@@ -2139,7 +2167,9 @@
     "sql": 19,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_2_1752722417590"
+    "id": "row_2_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2162,7 +2192,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_9_1752722417590"
+    "id": "row_9_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -2185,7 +2217,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_37_1752722417590"
+    "id": "row_37_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -2208,7 +2242,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_38_1752722417590"
+    "id": "row_38_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -2231,7 +2267,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_39_1752722417590"
+    "id": "row_39_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -2254,7 +2292,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_40_1752722417590"
+    "id": "row_40_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -2277,7 +2317,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_41_1752722417590"
+    "id": "row_41_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -2300,7 +2342,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_44_1752722417590"
+    "id": "row_44_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Lunch & Learns and Workshops (1:few)",
@@ -2323,7 +2367,9 @@
     "sql": 6,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_52_1752722417590"
+    "id": "row_52_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -2346,7 +2392,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_59_1752722417590"
+    "id": "row_59_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2369,7 +2417,9 @@
     "sql": 19,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_61_1752722417590"
+    "id": "row_61_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Exec Engagement Programs",
@@ -2392,7 +2442,9 @@
     "sql": 2,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_64_1752722417590"
+    "id": "row_64_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Events",
@@ -2415,7 +2467,9 @@
     "sql": 19,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_72_1752722417590"
+    "id": "row_72_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -2438,7 +2492,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_75_1752722417590"
+    "id": "row_75_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -2461,7 +2517,9 @@
     "sql": 5,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_76_1752722417590"
+    "id": "row_76_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -2484,7 +2542,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_89_1752722417590"
+    "id": "row_89_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -2507,7 +2567,9 @@
     "sql": 14,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_92_1752722417590"
+    "id": "row_92_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2530,7 +2592,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_94_1752722417590"
+    "id": "row_94_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2553,7 +2617,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_95_1752722417590"
+    "id": "row_95_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2576,7 +2642,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_102_1752722417590"
+    "id": "row_102_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2599,7 +2667,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_103_1752722417590"
+    "id": "row_103_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2622,7 +2692,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_104_1752722417590"
+    "id": "row_104_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2645,7 +2717,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_105_1752722417590"
+    "id": "row_105_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2668,7 +2742,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_106_1752722417590"
+    "id": "row_106_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2691,7 +2767,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_107_1752722417590"
+    "id": "row_107_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2714,7 +2792,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_108_1752722417590"
+    "id": "row_108_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -2738,7 +2818,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_117_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -2762,7 +2844,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_121_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2786,7 +2870,9 @@
     "opps": 1,
     "pipeline": 50000,
     "id": "row_125_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2810,7 +2896,9 @@
     "opps": 23,
     "pipeline": 1150000,
     "id": "row_126_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -2834,7 +2922,9 @@
     "opps": 3,
     "pipeline": 150000,
     "id": "row_127_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -2858,7 +2948,9 @@
     "opps": 3,
     "pipeline": 150000,
     "id": "row_136_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2882,7 +2974,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_137_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2906,7 +3000,9 @@
     "opps": 6,
     "pipeline": 300000,
     "id": "row_138_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -2930,7 +3026,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_142_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -2954,7 +3052,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_148_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
@@ -2977,7 +3077,9 @@
     "sql": 2,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_1_1752722417590"
+    "id": "row_1_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -3000,7 +3102,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_10_1752722417590"
+    "id": "row_10_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -3023,7 +3127,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_29_1752722417590"
+    "id": "row_29_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -3046,7 +3152,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_31_1752722417590"
+    "id": "row_31_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "In-Account Events (1:1)",
@@ -3069,7 +3177,9 @@
     "sql": 0,
     "opps": 0,
     "pipeline": 0,
-    "id": "row_45_1752722417590"
+    "id": "row_45_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -3092,7 +3202,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_56_1752722417590"
+    "id": "row_56_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3115,7 +3227,9 @@
     "sql": 19,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_62_1752722417590"
+    "id": "row_62_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -3138,7 +3252,9 @@
     "sql": 16,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_70_1752722417590"
+    "id": "row_70_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "User Groups",
@@ -3161,7 +3277,9 @@
     "sql": 8,
     "opps": 1,
     "pipeline": 50000,
-    "id": "row_90_1752722417590"
+    "id": "row_90_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3184,7 +3302,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_96_1752722417590"
+    "id": "row_96_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3207,7 +3327,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_97_1752722417590"
+    "id": "row_97_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3230,7 +3352,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_98_1752722417590"
+    "id": "row_98_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3253,7 +3377,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_99_1752722417590"
+    "id": "row_99_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3276,7 +3402,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_100_1752722417590"
+    "id": "row_100_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3299,7 +3427,9 @@
     "sql": 23,
     "opps": 3,
     "pipeline": 150000,
-    "id": "row_101_1752722417590"
+    "id": "row_101_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3322,7 +3452,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_109_1752722417590"
+    "id": "row_109_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3345,7 +3477,9 @@
     "sql": 11,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_110_1752722417590"
+    "id": "row_110_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3368,7 +3502,9 @@
     "sql": 15,
     "opps": 2,
     "pipeline": 100000,
-    "id": "row_111_1752722417590"
+    "id": "row_111_1752722417590",
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -3392,7 +3528,9 @@
     "opps": 3,
     "pipeline": 150000,
     "id": "row_139_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3416,7 +3554,9 @@
     "opps": 5,
     "pipeline": 250000,
     "id": "row_140_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Webinars",
@@ -3440,7 +3580,9 @@
     "opps": 6,
     "pipeline": 300000,
     "id": "row_141_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -3464,6 +3606,8 @@
     "opps": 6,
     "pipeline": 300000,
     "id": "row_143_1753352703039",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "__modified": false,
+    "__unsavedPriority": 0
   }
 ]
