@@ -879,6 +879,19 @@ function initPlanningGrid(rows) {
       // Chunk 3: Add columns in smaller batches to prevent blocking
       const addColumnsInBatches = async () => {
         const allColumns = [
+          // Hidden column for unsaved row priority
+          {
+            title: '',
+            field: "__unsavedPriority",
+            visible: false,
+            headerSort: false,
+            width: 1,
+            cssClass: 'hidden-col',
+            mutator: function(value, data) {
+              // Always return 1 for unsaved, 0 otherwise
+              return data.__unsavedPriority || 0;
+            },
+          },
           // Sequential number column
           {
             title: "#",
@@ -1762,6 +1775,7 @@ function setupAddRowModalEvents() {
       status: document.getElementById("status").value || "Planning",
       description: document.getElementById("description").value,
       __modified: true,
+      __unsavedPriority: 1, // Mark as unsaved for top placement
     };
 
     // Validate required fields
@@ -1788,43 +1802,40 @@ function setupAddRowModalEvents() {
       formData.pipelineForecast = kpiVals.pipeline;
     }
 
-    // Add row to table
-    // Force new row to top if addRow does not respect the position flag
+
+    // Add row to table and force unsaved to top
     let newRow;
     if (planningTableInstance && typeof planningTableInstance.addRow === 'function') {
-      // Try to add at top using Tabulator's API
-      newRow = planningTableInstance.addRow(formData, true);
-      // Double-check: if not at top, forcibly move it
-      let moved = false;
-      const rows = planningTableInstance.getRows();
-      if (rows.length > 1 && rows[0].getData().id !== formData.id) {
-        // Remove the row and re-insert at index 0
-        const insertedRow = rows.find(r => r.getData().id === formData.id);
-        if (insertedRow) {
-          const rowData = insertedRow.getData();
-          insertedRow.delete();
-          planningTableInstance.addRow(rowData, false, 0);
-          // Get the new row reference
-          newRow = planningTableInstance.getRows()[0];
-          moved = true;
-        }
-      }
-      // Ensure highlight and scroll after move
+      // Remove any existing row with this id (shouldn't happen, but for safety)
+      const existing = planningTableInstance.getRows().find(r => r.getData().id === formData.id);
+      if (existing) existing.delete();
+
+      // Insert at the top by updating the data array directly
+      let data = planningTableInstance.getData();
+      // Remove any other unsaved priority flags (should only be one unsaved at a time)
+      data.forEach(row => { if (row.__unsavedPriority) row.__unsavedPriority = 0; });
+      data = [formData, ...data];
+      planningTableInstance.replaceData(data);
+
+      // Sort by __unsavedPriority desc, then by quarter asc (or any other field as needed)
       setTimeout(() => {
+        planningTableInstance.setSort([
+          { column: "__unsavedPriority", dir: "desc" },
+          // Optionally add more sort fields here
+        ]);
+        const rows = planningTableInstance.getRows();
+        newRow = rows.length > 0 ? rows[0] : null;
         highlightUnsavedRows();
         if (newRow && typeof newRow.scrollTo === 'function') {
           try {
             newRow.scrollTo();
-            // If row was moved, force focus/flash
-            if (moved) {
-              const el = newRow.getElement();
-              el.classList.add('unsaved-row-highlight');
-              el.style.transition = 'background 0.3s, box-shadow 0.3s';
-              el.style.boxShadow = '0 0 0 3px #28a74580';
-              setTimeout(() => {
-                el.style.boxShadow = '';
-              }, 1200);
-            }
+            const el = newRow.getElement();
+            el.classList.add('unsaved-row-highlight');
+            el.style.transition = 'background 0.3s, box-shadow 0.3s';
+            el.style.boxShadow = '0 0 0 3px #28a74580';
+            setTimeout(() => {
+              el.style.boxShadow = '';
+            }, 1200);
           } catch (e) {
             console.warn("Could not scroll to new row:", e);
           }
@@ -1914,11 +1925,18 @@ function setupPlanningSave(table, rows) {
       }
     }
 
+
     // Save all planning data
     const data = table.getData();
-    // Clear __modified on all rows after save
-    data.forEach(row => { row.__modified = false; });
-    setTimeout(() => highlightUnsavedRows(), 200); // Remove highlight after save
+    // Clear __modified and __unsavedPriority on all rows after save
+    data.forEach(row => { row.__modified = false; row.__unsavedPriority = 0; });
+    setTimeout(() => {
+      highlightUnsavedRows();
+      // Remove unsaved sort, optionally restore default sort here
+      if (table && typeof table.setSort === 'function') {
+        table.setSort([]); // Remove sort, or set to your default
+      }
+    }, 200); // Remove highlight after save
 
     console.log("Saving planning data:", data.length, "rows");
 
