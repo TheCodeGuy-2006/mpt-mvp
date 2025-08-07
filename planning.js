@@ -818,7 +818,7 @@ function initPlanningGrid(rows) {
       planningTableInstance = new Tabulator("#planningGrid", {
         data: rows,
         reactiveData: true,
-        selectableRows: 1,
+        selectableRows: true, // Allow multi-row selection
         layout: "fitData", // Back to basic fitData for natural column sizing
         // No initialSort: preserve data order for sequential numbering
         ...performanceConfig,
@@ -1328,21 +1328,15 @@ function initPlanningGrid(rows) {
       if (delBtn) {
         delBtn.textContent = "Delete Highlighted Rows";
         delBtn.onclick = () => {
-          const rows = planningTableInstance.getRows();
-          let deleted = 0;
-          rows.forEach((row) => {
-            if (row.getElement().classList.contains("row-selected")) {
-              row.delete();
-              deleted++;
-            }
-          });
-          if (deleted === 0) {
+          const selectedRows = planningTableInstance.getSelectedRows();
+          if (selectedRows.length === 0) {
             alert("No rows selected for deletion.");
+            return;
           }
-          if (deleted > 0) {
-            window.hasUnsavedPlanningChanges = true;
-            console.log("[Planning] Unsaved changes set to true (bulk row delete)");
-          }
+          if (!confirm(`Are you sure you want to delete ${selectedRows.length} selected row(s)?`)) return;
+          selectedRows.forEach(row => row.delete());
+          window.hasUnsavedPlanningChanges = true;
+          console.log(`[Planning] Unsaved changes set to true (mass delete: ${selectedRows.length} rows)`);
         };
       }
 
