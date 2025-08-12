@@ -2999,10 +2999,12 @@ function populatePlanningFilters() {
 
   // Reapply filters if any are currently active (after multiselects are initialized)
   const currentFilters = getPlanningFilterValues();
-  const hasActiveFilters = currentFilters.region.length > 0 || 
-    currentFilters.quarter.length > 0 || currentFilters.status.length > 0 || 
-    currentFilters.programType.length > 0 || 
-    currentFilters.strategicPillar.length > 0 || currentFilters.owner.length > 0 || 
+  const hasActiveFilters = (currentFilters.region && currentFilters.region.length > 0) || 
+    (currentFilters.quarter && currentFilters.quarter.length > 0) || 
+    (currentFilters.status && currentFilters.status.length > 0) || 
+    (currentFilters.programType && currentFilters.programType.length > 0) || 
+    (currentFilters.strategicPillars && currentFilters.strategicPillars.length > 0) || 
+    (currentFilters.owner && currentFilters.owner.length > 0) || 
     currentFilters.digitalMotions;
 
   if (hasActiveFilters) {

@@ -1035,7 +1035,8 @@ function setupExecutionFilterLogic() {
           programType: [],
           strategicPillar: [],
           owner: [],
-          fiscalYear: []
+          fiscalYear: [],
+          digitalMotions: false
         };
         
         // Clear universal search display if it exists
@@ -1065,7 +1066,8 @@ let universalExecutionSearchFilters = {
   programType: [],
   strategicPillar: [],
   owner: [],
-  fiscalYear: []
+  fiscalYear: [],
+  digitalMotions: false
 };
 
 function getExecutionFilterValues() {
@@ -1106,7 +1108,7 @@ function getExecutionFilterValues() {
     programType: [...new Set([...dropdownFilterValues.programType, ...universalExecutionSearchFilters.programType])],
     strategicPillar: [...new Set([...dropdownFilterValues.strategicPillar, ...universalExecutionSearchFilters.strategicPillar])],
     owner: [...new Set([...dropdownFilterValues.owner, ...universalExecutionSearchFilters.owner])],
-    digitalMotions: digitalMotionsActive,
+    digitalMotions: digitalMotionsActive || !!universalExecutionSearchFilters.digitalMotions,
   };
 
   console.log(
@@ -1118,8 +1120,13 @@ function getExecutionFilterValues() {
     },
   );
 
-  if (window.DEBUG_FILTERS) {
+  if (window.DEBUG_FILTERS || digitalMotionsActive) {
     console.log("[Execution] Combined filters (dropdown + universal search):", filterValues);
+    
+    // Additional debug for Digital Motions
+    if (digitalMotionsActive) {
+      console.log("[Execution] Digital Motions filter is ACTIVE - will filter to show only DM campaigns");
+    }
   }
 
   return filterValues;
@@ -1196,8 +1203,30 @@ function applyExecutionFilters() {
 
       // Apply Digital Motions filter separately as a custom function filter
       if (filters.digitalMotions) {
+        console.log("[Execution] Applying Digital Motions filter - checking data...");
+        
+        // Count total rows and DM rows for debugging
+        const allData = executionTableInstance.getData();
+        const dmCount = allData.filter(row => row.digitalMotions === true || row.digitalMotions === 'true').length;
+        console.log(`[Execution] Total rows: ${allData.length}, Digital Motions rows: ${dmCount}`);
+        
+        // Sample a few DM campaigns for debugging
+        const dmSamples = allData.filter(row => row.digitalMotions === true || row.digitalMotions === 'true').slice(0, 3);
+        if (dmSamples.length > 0) {
+          console.log("[Execution] Sample DM campaigns:", dmSamples.map(r => ({
+            id: r.id,
+            description: r.description,
+            digitalMotions: r.digitalMotions
+          })));
+        }
+        
         executionTableInstance.addFilter(function (data) {
-          return data.digitalMotions === true;
+          // Handle both boolean true and string 'true' values for digitalMotions
+          const isDM = data.digitalMotions === true || data.digitalMotions === 'true';
+          if (isDM) {
+            console.log(`[Execution] Including DM campaign: ${data.description || data.id}`, data.digitalMotions);
+          }
+          return isDM;
         });
       }
 
@@ -1250,6 +1279,7 @@ function syncGridsOnEdit(sourceTable, targetTable) {
 // Sync digital motions data from planning table to execution table
 function syncDigitalMotionsFromPlanning() {
   if (!executionTableInstance || !window.planningModule?.tableInstance) {
+    console.log("[Execution] Sync skipped - missing table instances");
     return;
   }
 
@@ -1257,30 +1287,121 @@ function syncDigitalMotionsFromPlanning() {
   const executionData = executionTableInstance.getData();
 
   let updatedCount = 0;
+  let checkedCount = 0;
+  let dmCampaignsFound = 0;
+  
+  console.log(`[Execution] Syncing Digital Motions data: ${planningData.length} planning rows, ${executionData.length} execution rows`);
+
+  // First, count how many Digital Motions campaigns exist in planning
+  const planningDMCount = planningData.filter(row => row.digitalMotions === true || row.digitalMotions === 'true').length;
+  console.log(`[Execution] Planning has ${planningDMCount} Digital Motions campaigns`);
 
   // Update execution table with digitalMotions values from planning table
   executionData.forEach((execRow) => {
-    const planningRow = planningData.find(
-      (planRow) =>
-        (planRow.id && planRow.id === execRow.id),
-    );
+    checkedCount++;
+    
+    // Try multiple matching strategies
+    const planningRow = planningData.find((planRow) => {
+      // Primary: Match by ID
+      if (planRow.id && execRow.id && planRow.id === execRow.id) {
+        return true;
+      }
+      // Secondary: Match by description + programType (if ID matching fails)
+      if (planRow.description && execRow.description && 
+          planRow.programType && execRow.programType &&
+          planRow.description === execRow.description && 
+          planRow.programType === execRow.programType) {
+        return true;
+      }
+      return false;
+    });
 
-    if (planningRow && planningRow.digitalMotions !== execRow.digitalMotions) {
-      // Find the row in the execution table and update it
-      const execTableRow = executionTableInstance.getRows().find((row) => {
-        const rowData = row.getData();
-        return (
-          (rowData.id && rowData.id === execRow.id)
-        );
-      });
+    if (planningRow) {
+      // Check if digitalMotions value is different
+      const planningDM = planningRow.digitalMotions === true || planningRow.digitalMotions === 'true';
+      const executionDM = execRow.digitalMotions === true || execRow.digitalMotions === 'true';
+      
+      if (planningDM) dmCampaignsFound++;
+      
+      if (planningDM !== executionDM) {
+        // Find the row in the execution table and update it
+        const execTableRow = executionTableInstance.getRows().find((row) => {
+          const rowData = row.getData();
+          return (
+            (rowData.id && rowData.id === execRow.id) ||
+            (rowData.description === execRow.description && rowData.programType === execRow.programType)
+          );
+        });
 
-      if (execTableRow) {
-        execTableRow.update({ digitalMotions: planningRow.digitalMotions });
-        updatedCount++;
+        if (execTableRow) {
+          execTableRow.update({ digitalMotions: planningRow.digitalMotions });
+          updatedCount++;
+          console.log(`[Execution] Updated Digital Motions for ${execRow.id || execRow.description}: ${planningRow.digitalMotions}`);
+        }
       }
     }
   });
+  
+  console.log(`[Execution] Digital Motions sync complete: ${updatedCount} rows updated out of ${checkedCount} checked`);
+  console.log(`[Execution] Found ${dmCampaignsFound} Digital Motions campaigns in matched rows`);
+  
+  // Final verification
+  const finalExecutionDMCount = executionTableInstance.getData().filter(row => 
+    row.digitalMotions === true || row.digitalMotions === 'true'
+  ).length;
+  console.log(`[Execution] Final execution table has ${finalExecutionDMCount} Digital Motions campaigns`);
 }
+
+// Test function to check Digital Motions data
+function testDigitalMotionsData() {
+  console.log("🔍 TESTING Digital Motions Data in Execution Table");
+  console.log("================================================");
+  
+  if (!executionTableInstance) {
+    console.log("❌ Execution table not available");
+    return;
+  }
+  
+  const allData = executionTableInstance.getData();
+  console.log(`📊 Total execution rows: ${allData.length}`);
+  
+  // Check for digitalMotions field presence
+  const rowsWithDMField = allData.filter(row => row.hasOwnProperty('digitalMotions'));
+  console.log(`📊 Rows with digitalMotions field: ${rowsWithDMField.length}`);
+  
+  // Check for true Digital Motions campaigns
+  const dmTrue = allData.filter(row => row.digitalMotions === true);
+  const dmStringTrue = allData.filter(row => row.digitalMotions === 'true');
+  const dmFalse = allData.filter(row => row.digitalMotions === false);
+  const dmStringFalse = allData.filter(row => row.digitalMotions === 'false');
+  const dmUndefined = allData.filter(row => row.digitalMotions === undefined || row.digitalMotions === null);
+  
+  console.log(`🚀 digitalMotions === true: ${dmTrue.length}`);
+  console.log(`🚀 digitalMotions === 'true': ${dmStringTrue.length}`);
+  console.log(`❌ digitalMotions === false: ${dmFalse.length}`);
+  console.log(`❌ digitalMotions === 'false': ${dmStringFalse.length}`);
+  console.log(`❓ digitalMotions undefined/null: ${dmUndefined.length}`);
+  
+  // Sample some data
+  if (dmTrue.length > 0) {
+    console.log("Sample DM (boolean true) campaign:", dmTrue[0]);
+  }
+  if (dmStringTrue.length > 0) {
+    console.log("Sample DM (string 'true') campaign:", dmStringTrue[0]);
+  }
+  
+  // Check a few random samples for their digitalMotions values
+  const samples = allData.slice(0, 5);
+  console.log("First 5 rows digitalMotions values:");
+  samples.forEach((row, index) => {
+    console.log(`  Row ${index}: ${row.description || row.id} -> digitalMotions: ${row.digitalMotions} (type: ${typeof row.digitalMotions})`);
+  });
+  
+  console.log("================================================");
+}
+
+// Make test function globally available
+window.testDigitalMotionsData = testDigitalMotionsData;
 
 // EXPORT EXECUTION MODULE FUNCTIONS
 window.executionModule = {
@@ -1574,7 +1695,7 @@ function applyExecutionSearchFilters(selectedFilters) {
   }
   
   try {
-    // Reset universal search filters
+    // Reset universal search filters (include digitalMotions)
     universalExecutionSearchFilters = {
       region: [],
       quarter: [],
@@ -1582,14 +1703,18 @@ function applyExecutionSearchFilters(selectedFilters) {
       programType: [],
       strategicPillar: [],
       owner: [],
-      fiscalYear: []
+      fiscalYear: [],
+      digitalMotions: false
     };
     
     // selectedFilters is an object with categories as keys and arrays as values
     // e.g., { region: ['SAARC'], status: ['Planning'] }
     if (selectedFilters && typeof selectedFilters === 'object') {
       Object.entries(selectedFilters).forEach(([category, values]) => {
-        if (universalExecutionSearchFilters.hasOwnProperty(category) && Array.isArray(values)) {
+        if (category === 'digitalMotions') {
+          // Handle digitalMotions as boolean (values will be array with 'true' or empty)
+          universalExecutionSearchFilters.digitalMotions = Array.isArray(values) && values.includes('true');
+        } else if (universalExecutionSearchFilters.hasOwnProperty(category) && Array.isArray(values)) {
           universalExecutionSearchFilters[category] = [...values];
         }
       });

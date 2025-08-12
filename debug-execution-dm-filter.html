@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Digital Motions Filter - Execution Tab</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .dm-campaign {
+            background: #e7f5e7;
+            border: 1px solid #4caf50;
+        }
+        .non-dm-campaign {
+            background: #fff5f5;
+            border: 1px solid #ff9999;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #4caf50;
+            color: white;
+        }
+        button.active {
+            background: #2e7d32;
+        }
+        .debug-info {
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Debug Digital Motions Filter - Execution Tab</h1>
+    
+    <div class="test-section">
+        <h2>Test Summary</h2>
+        <p>This page tests the digital motions filter functionality on the execution tab to identify why it's not working properly.</p>
+        <p><strong>Expected behavior:</strong> When the Digital Motions filter is active, only campaigns with DM badges should be visible.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Controls</h2>
+        <button id="loadDataBtn" onclick="loadTestData()">Load Test Data</button>
+        <button id="dmFilterBtn" onclick="toggleDMFilter()">🚀 Digital Motions Filter</button>
+        <button onclick="debugExecution()">🔍 Debug Execution Data</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Current Filter State</h2>
+        <div id="filterState" class="debug-info">
+            Filter not initialized
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Campaign Data</h2>
+        <div id="campaignList"></div>
+    </div>
+
+    <script>
+        // Mock execution data with digital motions campaigns
+        let testExecutionData = [
+            {
+                id: "exec-1",
+                description: "User Groups in SAARC",
+                programType: "User Groups", 
+                region: "SAARC",
+                quarter: "Q1 July",
+                owner: "Shruti Narang",
+                digitalMotions: true,
+                status: "Planning"
+            },
+            {
+                id: "exec-2", 
+                description: "Webinar Series",
+                programType: "Webinars",
+                region: "South APAC", 
+                quarter: "Q1 August",
+                owner: "Beverly Leung",
+                digitalMotions: false,
+                status: "On Track"
+            },
+            {
+                id: "exec-3",
+                description: "Digital Campaign",
+                programType: "Targeted Paid Ads & Content Syndication",
+                region: "JP & Korea",
+                quarter: "Q2 October", 
+                owner: "Tomoko Tanaka",
+                digitalMotions: true,
+                status: "Shipped"
+            },
+            {
+                id: "exec-4",
+                description: "Regular Workshop",
+                programType: "Lunch & Learns and Workshops (1:few)",
+                region: "SAARC",
+                quarter: "Q1 September",
+                owner: "Giorgia Parham",
+                digitalMotions: false,
+                status: "Planning"
+            },
+            {
+                id: "exec-5",
+                description: "DM Event",
+                programType: "In-Account Events (1:1)",
+                region: "South APAC",
+                quarter: "Q2 November",
+                owner: "Beverly Leung", 
+                digitalMotions: true,
+                status: "On Track"
+            }
+        ];
+
+        let isDMFilterActive = false;
+        let filteredData = [];
+
+        function loadTestData() {
+            log("📊 Loading test execution data...");
+            log(`Total campaigns: ${testExecutionData.length}`);
+            
+            const dmCampaigns = testExecutionData.filter(c => c.digitalMotions === true);
+            const nonDmCampaigns = testExecutionData.filter(c => c.digitalMotions !== true);
+            
+            log(`Digital Motions campaigns: ${dmCampaigns.length}`);
+            log(`Non-Digital Motions campaigns: ${nonDmCampaigns.length}`);
+            
+            displayCampaigns(testExecutionData);
+            updateFilterState();
+        }
+
+        function toggleDMFilter() {
+            isDMFilterActive = !isDMFilterActive;
+            
+            const btn = document.getElementById('dmFilterBtn');
+            if (isDMFilterActive) {
+                btn.textContent = '🚀 Digital Motions Filter ✓';
+                btn.classList.add('active');
+                log("🟢 Digital Motions filter ACTIVATED");
+            } else {
+                btn.textContent = '🚀 Digital Motions Filter';
+                btn.classList.remove('active');
+                log("🔴 Digital Motions filter DEACTIVATED");
+            }
+            
+            applyDMFilter();
+            updateFilterState();
+        }
+
+        function applyDMFilter() {
+            log("🔍 Applying Digital Motions filter...");
+            
+            if (isDMFilterActive) {
+                // Filter to show only digital motions campaigns
+                filteredData = testExecutionData.filter(campaign => {
+                    const isDM = campaign.digitalMotions === true;
+                    log(`  Campaign ${campaign.id}: digitalMotions=${campaign.digitalMotions}, included=${isDM}`);
+                    return isDM;
+                });
+                log(`✅ Filter applied - showing ${filteredData.length} Digital Motions campaigns`);
+            } else {
+                // Show all campaigns
+                filteredData = [...testExecutionData];
+                log(`📋 Filter inactive - showing all ${filteredData.length} campaigns`);
+            }
+            
+            displayCampaigns(filteredData);
+        }
+
+        function displayCampaigns(campaigns) {
+            const listDiv = document.getElementById('campaignList');
+            listDiv.innerHTML = '';
+            
+            if (campaigns.length === 0) {
+                listDiv.innerHTML = '<p>No campaigns match the current filter</p>';
+                return;
+            }
+            
+            campaigns.forEach(campaign => {
+                const div = document.createElement('div');
+                div.className = campaign.digitalMotions ? 'dm-campaign' : 'non-dm-campaign';
+                div.style.padding = '10px';
+                div.style.margin = '5px 0';
+                div.style.borderRadius = '5px';
+                
+                const dmBadge = campaign.digitalMotions ? '<span style="background:#1976d2;color:#fff;padding:2px 8px;border-radius:8px;font-weight:bold;margin-left:10px;">DM</span>' : '';
+                
+                div.innerHTML = `
+                    <strong>${campaign.description}</strong> ${dmBadge}
+                    <br><small>
+                        ID: ${campaign.id} | Type: ${campaign.programType} | Region: ${campaign.region} | 
+                        Quarter: ${campaign.quarter} | Owner: ${campaign.owner} | Status: ${campaign.status} |
+                        Digital Motions: ${campaign.digitalMotions}
+                    </small>
+                `;
+                
+                listDiv.appendChild(div);
+            });
+        }
+
+        function updateFilterState() {
+            const stateDiv = document.getElementById('filterState');
+            stateDiv.innerHTML = `
+                <strong>Filter Active:</strong> ${isDMFilterActive}<br>
+                <strong>Total Campaigns:</strong> ${testExecutionData.length}<br>
+                <strong>Filtered Campaigns:</strong> ${filteredData.length}<br>
+                <strong>Digital Motions Campaigns:</strong> ${testExecutionData.filter(c => c.digitalMotions === true).length}
+            `;
+        }
+
+        function debugExecution() {
+            log("🔧 DEBUG: Execution Digital Motions Filter");
+            log("==========================================");
+            
+            // Check if main app is available
+            if (typeof window.executionModule !== 'undefined') {
+                log("✅ executionModule is available");
+                
+                if (window.executionModule.tableInstance) {
+                    log("✅ executionModule.tableInstance exists");
+                    const data = window.executionModule.tableInstance.getData();
+                    log(`📊 Execution table has ${data.length} rows`);
+                    
+                    const dmRows = data.filter(row => row.digitalMotions === true || row.digitalMotions === 'true');
+                    log(`🚀 Digital Motions rows: ${dmRows.length}`);
+                    
+                    // Log sample data for debugging
+                    if (dmRows.length > 0) {
+                        log("Sample DM row:", JSON.stringify(dmRows[0], null, 2));
+                    }
+                    
+                    // Check filter values
+                    if (window.executionModule.getExecutionFilterValues) {
+                        const filters = window.executionModule.getExecutionFilterValues();
+                        log("🔍 Current filter values:", JSON.stringify(filters, null, 2));
+                    }
+                    
+                    // Test filter manually
+                    log("🧪 Testing manual filter...");
+                    if (window.executionModule.applyExecutionFilters) {
+                        // Temporarily enable DM filter for testing
+                        const dmButton = document.getElementById('executionDigitalMotionsFilter');
+                        if (dmButton) {
+                            const originalState = dmButton.dataset.active;
+                            dmButton.dataset.active = "true";
+                            window.executionModule.applyExecutionFilters();
+                            const visibleCount = window.executionModule.tableInstance.getDataCount(true);
+                            log(`🔍 After enabling DM filter: ${visibleCount} rows visible`);
+                            dmButton.dataset.active = originalState;
+                        }
+                    }
+                } else {
+                    log("❌ executionModule.tableInstance not available");
+                }
+                
+                // Check for digital motions button
+                const dmButton = document.getElementById('executionDigitalMotionsFilter');
+                if (dmButton) {
+                    log("✅ Digital Motions button found");
+                    log(`Button state: ${dmButton.dataset.active}`);
+                    log(`Button text: ${dmButton.textContent}`);
+                } else {
+                    log("❌ Digital Motions button not found");
+                }
+                
+                // Check universal search filters
+                if (typeof window.universalExecutionSearchFilters !== 'undefined') {
+                    log("🔍 Universal search filters:", JSON.stringify(window.universalExecutionSearchFilters, null, 2));
+                } else {
+                    log("❌ Universal execution search filters not found");
+                }
+            } else {
+                log("❌ executionModule not available - using test data only");
+            }
+            
+            log("==========================================");
+        }
+
+        function log(message) {
+            const resultsDiv = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<strong>${timestamp}:</strong> ${message}`;
+            resultsDiv.appendChild(logEntry);
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            loadTestData();
+            
+            // Try to debug the real execution module after a delay
+            setTimeout(() => {
+                debugExecution();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
