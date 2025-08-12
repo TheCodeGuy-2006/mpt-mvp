@@ -525,6 +525,18 @@ function processRegionChart(region, rowContainer, budgetsData, planningRows) {
       ctx.chartInstance = chartsPerformanceUtils.cleanupChart(ctx.chartInstance);
     }
     
+    // Ensure all data values are valid numbers
+    const safeAssignedBudget = Number(assignedBudget) || 0;
+    const safeForecastedCost = Number(forecastedCost) || 0;
+    const safeActualCost = Number(actualCost) || 0;
+    
+    // Debug log to see what values we're working with
+    console.log(`[Chart Debug] ${region}:`, {
+      assigned: safeAssignedBudget,
+      forecasted: safeForecastedCost,
+      actual: safeActualCost
+    });
+    
     ctx.chartInstance = new Chart(ctx, {
       type: "bar",
       data: {
@@ -532,7 +544,7 @@ function processRegionChart(region, rowContainer, budgetsData, planningRows) {
         datasets: [
           {
             label: "USD",
-            data: [assignedBudget, forecastedCost, actualCost],
+            data: [safeAssignedBudget, safeForecastedCost, safeActualCost],
             backgroundColor: ["#1976d2", "#42a5f5", "#66bb6a"],
             borderRadius: 8,
             borderSkipped: false,
@@ -550,7 +562,7 @@ function processRegionChart(region, rowContainer, budgetsData, planningRows) {
             left: 10,
             right: 10,
             top: 10,
-            bottom: 25  // Extra bottom padding for x-axis labels
+            bottom: 35  // Increase bottom padding for x-axis labels
           }
         },
         plugins: {
@@ -567,18 +579,17 @@ function processRegionChart(region, rowContainer, budgetsData, planningRows) {
           x: {
             type: 'category',
             title: { display: false },
+            labels: ["Assigned", "Forecasted", "Actual"], // Explicitly set labels
             ticks: {
               display: true,
               maxRotation: 0,
               minRotation: 0,
               font: {
-                size: 11
+                size: 12
               },
-              padding: 5,
-              userCallback: function(label, index, labels) {
-                // Always return the label as-is
-                return label;
-              }
+              padding: 8,
+              autoSkip: false, // Prevent Chart.js from skipping labels
+              maxTicksLimit: 3 // Ensure all 3 labels are shown
             }
           },
         },

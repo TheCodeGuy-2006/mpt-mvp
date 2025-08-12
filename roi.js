@@ -1079,7 +1079,9 @@ function initializeRoiFunctionality() {
 
 // Lazy initialization of ROI data table
 function ensureRoiDataTableInitialized() {
-  if (!window.roiDataTableInstance && isRoiTabActive) {
+  // Always try to initialize if table doesn't exist, regardless of tab state
+  if (!window.roiDataTableInstance) {
+    console.log('Initializing ROI data table...');
     window.roiDataTableInstance = initRoiDataTable();
   }
   return window.roiDataTableInstance;
@@ -1105,68 +1107,98 @@ function setRoiTabActive(active) {
 function initRoiDataTable() {
   const tableContainer = document.getElementById("roiDataTable");
   if (!tableContainer) {
-
+    console.error('ROI table container not found');
     return null;
   }
 
-  if (typeof Tabulator === "undefined") {
+  // Prevent duplicate initialization
+  if (window.roiDataTableInstance) {
+    console.log('ROI table already initialized, destroying previous instance');
+    try {
+      window.roiDataTableInstance.destroy();
+    } catch (e) {
+      console.warn('Error destroying previous ROI table instance:', e);
+    }
+    window.roiDataTableInstance = null;
+  }
 
+  if (typeof Tabulator === "undefined") {
+    console.error('Tabulator library not loaded');
     return null;
   }
 
   const campaigns = getCampaignDataForRoi();
+  console.log('ROI campaigns data:', campaigns ? campaigns.length : 0, 'items');
   
   try {
     const table = new Tabulator(tableContainer, {
       data: campaigns,
-      layout: "fitDataFill", // Force columns to expand and fill available width
-      height: "400px",
+      layout: "fitColumns", // Back to fitColumns for natural column distribution
+      height: "100%", // Use full container height
       responsiveLayout: false, // Disable collapse to allow horizontal scroll
       autoResize: true,
+      columnCalcs: false, // CRITICAL: Disable column calculations that add extra columns
+      placeholder: "No ROI data available",
+      placeholderHeaderFilter: "No matching campaigns...",
+      columnHeaderVertAlign: "middle",
+      layoutColumnsOnNewData: true,
       pagination: "local",
-      paginationSize: 10, // Reduced from 15 for faster initial load
+      paginationSize: 10,
       paginationSizeSelector: [5, 10, 15, 25],
-      movableColumns: true,
-      resizableColumns: true,
-      tooltips: false, // Disabled for better performance
-      tooltipsHeader: false, // Disabled for better performance
+      movableColumns: false, // Disable for stability
+      resizableColumns: false, // Disable for consistent widths
+      tooltips: false,
+      tooltipsHeader: false,
       rowHeight: 60,
       headerHeight: 50,
-      virtualDom: true, // Enable virtual DOM for better performance with large datasets
-      virtualDomBuffer: 10, // Buffer for smoother scrolling
+      virtualDom: true,
+      virtualDomBuffer: 10,
       scrollToRowIfVisible: false,
+      addRowPos: "bottom", // Prevent header row additions
+      history: false, // Disable history that might add columns
+      clipboard: false, // Disable clipboard that might add columns
+      columnDefaults: {
+        headerSort: false, // Disable sorting icons that might add space
+        headerFilter: false, // Disable header filters that might add space
+        editor: false, // Disable editing that might add columns
+      },
       tableBuilt: function() {
         setTimeout(() => {
           try {
             this.redraw(true);
-            if (this.columnManager && typeof this.columnManager.fitColumns === 'function') {
-              this.columnManager.fitColumns(true);
-            }
-          } catch (e) {}
-        }, 100);
+            this.recalc();
+            console.log('ROI table built successfully');
+          } catch (e) {
+            console.warn('ROI table build error:', e);
+          }
+        }, 200);
       },
       dataLoaded: function() {
         setTimeout(() => {
           try {
             this.redraw(true);
-            if (this.columnManager && typeof this.columnManager.fitColumns === 'function') {
-              this.columnManager.fitColumns(true);
-            }
-          } catch (e) {}
-        }, 100);
+            this.recalc();
+            console.log('ROI table data loaded successfully');
+          } catch (e) {
+            console.warn('ROI table data load error:', e);
+          }
+        }, 150);
       },
       columns: [
-        // Add a border to each column to prevent merging appearance
         {
           title: "Campaign Name & Type",
           field: "campaignInfo",
+          width: 420,
+          minWidth: 420,
+          maxWidth: 420,
+          resizable: false,
           formatter: (cell) => {
             const data = cell.getData();
             const name = data.displayName || data.programType || "Untitled Program";
             const type = data.programType || "No Type";
             return `
-            <div style="line-height: 1.4; border-right:1px solid #e0e0e0;">
-              <div style="font-weight: bold; color: #1976d2; font-size: 0.95em;">${name}</div>
+            <div style="line-height: 1.4;">
+              <div style="font-weight: bold; color: #1976d2; font-size: 0.9em;">${name}</div>
               <div style="font-size: 0.8em; color: #666; margin-top: 2px;">${type}</div>
             </div>
           `;
@@ -1180,6 +1212,10 @@ function initRoiDataTable() {
         {
           title: "Forecasted Cost",
           field: "forecastedCost",
+          width: 200,
+          minWidth: 200,
+          maxWidth: 200,
+          resizable: false,
           formatter: (cell) => {
             const value = Number(cell.getValue()) || 0;
             return `$${value.toLocaleString()}`;
@@ -1190,6 +1226,10 @@ function initRoiDataTable() {
         {
           title: "Actual Cost",
           field: "actualCost",
+          width: 180,
+          minWidth: 180,
+          maxWidth: 180,
+          resizable: false,
           formatter: (cell) => {
             const value = Number(cell.getValue()) || 0;
             return `$${value.toLocaleString()}`;
@@ -1200,6 +1240,10 @@ function initRoiDataTable() {
         {
           title: "Expected Leads",
           field: "expectedLeads",
+          width: 190,
+          minWidth: 190,
+          maxWidth: 190,
+          resizable: false,
           formatter: (cell) => {
             const value = Number(cell.getValue()) || 0;
             return value.toLocaleString();
@@ -1210,6 +1254,10 @@ function initRoiDataTable() {
         {
           title: "Actual Leads",
           field: "actualLeads",
+          width: 180,
+          minWidth: 180,
+          maxWidth: 180,
+          resizable: false,
           formatter: (cell) => {
             const raw = cell.getValue();
             if (raw === undefined || raw === null || raw === "" || isNaN(Number(raw))) {
@@ -1224,6 +1272,10 @@ function initRoiDataTable() {
         {
           title: "Pipeline Forecasted",
           field: "pipelineForecast",
+          width: 260,
+          minWidth: 260,
+          maxWidth: 260,
+          resizable: false,
           formatter: (cell) => {
             const raw = cell.getValue();
             if (raw === undefined || raw === null || raw === "" || isNaN(Number(raw))) {
@@ -1238,6 +1290,10 @@ function initRoiDataTable() {
         {
           title: "ROI",
           field: "roi",
+          width: 160,
+          minWidth: 160,
+          maxWidth: 160,
+          resizable: false,
           formatter: (cell) => {
             const data = cell.getData();
             const actualCost = Number(data.actualCost) || 0;
@@ -1251,45 +1307,87 @@ function initRoiDataTable() {
           },
           hozAlign: "right",
         },
-      ],
-      pagination: "local",
-      paginationSize: 15,
-      paginationSizeSelector: [10, 15, 25, 50],
-      movableColumns: true,
-      resizableColumns: true,
-      tooltips: true,
-      tooltipsHeader: true,
+      ] // Exactly 7 columns, no more!
     });
 
     // Store the table instance globally for updates
-
     window.roiDataTableInstance = table;
 
-    // --- ROI Data Table Alignment Fix: Step 5 ---
+    // --- ROI Data Table Alignment Fix: Enhanced resize handling ---
     // Force Tabulator redraw on window resize to sync header/columns
     if (!window._roiTableResizeListener) {
       window._roiTableResizeListener = true;
-      window.addEventListener('resize', function() {
-        if (window.roiDataTableInstance && typeof window.roiDataTableInstance.redraw === 'function') {
-          window.roiDataTableInstance.redraw(true);
+      let resizeTimeout;
+      
+      const handleResize = () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          if (window.roiDataTableInstance && typeof window.roiDataTableInstance.redraw === 'function') {
+            try {
+              // Force complete recalculation
+              window.roiDataTableInstance.recalc();
+              window.roiDataTableInstance.redraw(true);
+            } catch (e) {
+              console.warn('ROI table resize redraw error:', e);
+            }
+          }
+        }, 100);
+      };
+      
+      window.addEventListener('resize', handleResize);
+      
+      // Also handle tab switching with forced recalculation
+      const handleTabChange = () => {
+        setTimeout(() => {
+          if (window.roiDataTableInstance && typeof window.roiDataTableInstance.redraw === 'function') {
+            try {
+              // Force column alignment on tab change
+              window.roiDataTableInstance.recalc();
+              window.roiDataTableInstance.redraw(true);
+            } catch (e) {
+              console.warn('ROI table tab change redraw error:', e);
+            }
+          }
+        }, 200);
+      };
+      
+      // Listen for tab changes (if using hash routing)
+      window.addEventListener('hashchange', handleTabChange);
+      
+      // Listen for visibility change (when tab becomes visible)
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          handleTabChange();
         }
       });
     }
 
     return table;
   } catch (error) {
-
+    console.error('Error initializing ROI data table:', error);
     return null;
   }
 }
 
 // Get campaign data for ROI table
 function getCampaignDataForRoi() {
+  console.log('Getting campaign data for ROI...');
+  
   if (!window.planningModule?.tableInstance) {
+    console.warn('Planning module or table instance not available');
+    
+    // Try fallback data sources
+    if (window.planningDataCache && Array.isArray(window.planningDataCache)) {
+      console.log('Using fallback planning data cache');
+      return window.planningDataCache.slice(0, 10); // Limit to first 10 for initial display
+    }
+    
+    console.log('No data available, returning empty array');
     return [];
   }
 
   let planningData = window.planningModule.tableInstance.getData();
+  console.log('Retrieved planning data:', planningData ? planningData.length : 0, 'items');
 
   // Apply universal search filters if they exist
   if (window.activeRoiSearchFilters && window.activeRoiSearchFilters.length > 0) {
