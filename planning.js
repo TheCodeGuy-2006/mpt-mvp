@@ -437,15 +437,15 @@ const planningPerformance = {
 
 const programTypes = [
   "User Groups",
-  "Targeted paid ads & content sydication",
+  "Targeted Paid Ads & Content Syndication",
   "Flagship Events (Galaxy, Universe Recaps) 1:Many",
   "3P Sponsored Events",
   "Webinars",
   "Microsoft",
   "Lunch & Learns and Workshops (1:few)",
   "Localized Programs",
-  "CxO events (1:few)",
-  "Exec engagement programs",
+  "CxO Events (1:Few)",
+  "Exec Engagement Programs",
   "In-Account Events (1:1)",
   "Contractor/Infrastructure",
   "Paid ads",
@@ -886,13 +886,31 @@ class PlanningDataStore {
       for (const field of multiselectFields) {
         const filterValues = filters[field];
         if (filterValues && Array.isArray(filterValues) && filterValues.length > 0) {
-          // For strategicPillars field, check against 'strategicPillars' in row data
-          let rowValue = field === 'strategicPillar' ? row.strategicPillars : row[field];
+          // Get the correct row value for this field
+          let rowValue = row[field];
 
           // Apply quarter normalization for quarter field comparison (optimized)
           if (field === 'quarter') {
             rowValue = normalizeQuarter(rowValue);
             if (!normalizedQuarterFilters.includes(rowValue)) {
+              return false;
+            }
+          } else if (field === 'programType') {
+            // Case-insensitive comparison for programType to handle data inconsistencies
+            const rowValueLower = (rowValue || '').toLowerCase().trim();
+            const filterMatched = filterValues.some(filterVal => 
+              (filterVal || '').toLowerCase().trim() === rowValueLower
+            );
+            if (!filterMatched) {
+              return false;
+            }
+          } else if (field === 'strategicPillars') {
+            // Case-insensitive comparison for strategicPillars to handle data inconsistencies
+            const rowValueLower = (rowValue || '').toLowerCase().trim();
+            const filterMatched = filterValues.some(filterVal => 
+              (filterVal || '').toLowerCase().trim() === rowValueLower
+            );
+            if (!filterMatched) {
               return false;
             }
           } else {
@@ -1138,6 +1156,11 @@ function initPlanningGrid(rows) {
       // Yield control back to the browser with new aggressive yielding
       await yieldToMain();
       
+      // Create debounced autosave function before columns are defined
+      const debouncedAutosave = debounce(() => {
+        triggerPlanningAutosave(planningTableInstance);
+      }, 3000);
+      
       // Chunk 3: Add columns in smaller batches to prevent blocking
       const addColumnsInBatches = async () => {
         const allColumns = [
@@ -1238,6 +1261,13 @@ function initPlanningGrid(rows) {
             editor: "list",
             editorParams: { values: strategicPillars },
             width: 220,
+            cellEdited: debounce((cell) => {
+              const rowData = cell.getRow().getData();
+              rowData.__modified = true;
+              window.hasUnsavedPlanningChanges = true;
+              console.log("[Planning] Unsaved changes set to true (cellEdited: Strategic Pillar)");
+              debouncedAutosave();
+            }, 1000),
           },
           {
             title: "Description",
@@ -1571,10 +1601,7 @@ function initPlanningGrid(rows) {
       // Chunk 4: Setup remaining functionality with yielding
       await yieldToMain();
       
-      // Create debounced autosave function
-      const debouncedAutosave = debounce(() => {
-        triggerPlanningAutosave(planningTableInstance);
-      }, 3000);
+      // debouncedAutosave function already created above before columns
 
       await yieldToMain(); // Yield before setting up buttons
 
@@ -2954,7 +2981,7 @@ function populatePlanningFilters() {
         quarter: [],
         status: [],
         programType: [],
-        strategicPillar: [],
+        strategicPillars: [],
         owner: [],
         fiscalYear: []
       };
@@ -2989,7 +3016,7 @@ let universalSearchFilters = {
   quarter: [],
   status: [],
   programType: [],
-  strategicPillar: [],
+  strategicPillars: [],
   owner: [],
   fiscalYear: [],
   digitalMotions: false
@@ -3020,7 +3047,7 @@ function getPlanningFilterValues() {
     quarter: getSelectedValues("planningQuarterFilter"),
     status: getSelectedValues("planningStatusFilter"),
     programType: getSelectedValues("planningProgramTypeFilter"),
-    strategicPillar: getSelectedValues("planningStrategicPillarFilter"),
+    strategicPillars: getSelectedValues("planningStrategicPillarFilter"),
     owner: getSelectedValues("planningOwnerFilter"),
     digitalMotions: digitalMotionsActive,
   };
@@ -3031,7 +3058,7 @@ function getPlanningFilterValues() {
     quarter: [...new Set([...dropdownFilterValues.quarter, ...universalSearchFilters.quarter])],
     status: [...new Set([...dropdownFilterValues.status, ...universalSearchFilters.status])],
     programType: [...new Set([...dropdownFilterValues.programType, ...universalSearchFilters.programType])],
-    strategicPillar: [...new Set([...dropdownFilterValues.strategicPillar, ...universalSearchFilters.strategicPillar])],
+    strategicPillars: [...new Set([...dropdownFilterValues.strategicPillars, ...universalSearchFilters.strategicPillars])],
     owner: [...new Set([...dropdownFilterValues.owner, ...universalSearchFilters.owner])],
     digitalMotions: digitalMotionsActive || !!universalSearchFilters.digitalMotions,
   };
@@ -3499,7 +3526,7 @@ function applyPlanningSearchFilters(selectedFilters) {
       quarter: [],
       status: [],
       programType: [],
-      strategicPillar: [],
+      strategicPillars: [],
       owner: [],
       fiscalYear: [],
       digitalMotions: false
