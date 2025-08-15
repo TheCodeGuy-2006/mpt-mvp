@@ -721,6 +721,41 @@ function ensurePlanningUIFunctional() {
     console.log("✅ Delete button wired up");
   }
 
+  // Wire up Delete All Rows button
+  const deleteAllBtn = document.getElementById("deleteAllPlanningRows");
+  console.log("🔍 Delete All button found:", !!deleteAllBtn, "has onclick:", !!deleteAllBtn?.onclick);
+  if (deleteAllBtn && !deleteAllBtn.onclick) {
+    deleteAllBtn.onclick = () => {
+      if (!planningTableInstance) {
+        alert("No campaigns to delete.");
+        return;
+      }
+      const allRows = planningTableInstance.getRows();
+      if (allRows.length === 0) {
+        alert("No rows to delete.");
+        return;
+      }
+      if (!confirm(`Are you sure you want to delete ALL ${allRows.length} rows? This action cannot be undone.`)) return;
+      
+      // Clear all data from the table
+      planningTableInstance.clearData();
+      
+      // Update the data store if it exists
+      if (window.planningDataStore && typeof window.planningDataStore.clearAllData === 'function') {
+        window.planningDataStore.clearAllData();
+      } else if (window.planningDataCache) {
+        window.planningDataCache.length = 0; // Clear the cache array
+      }
+      
+      window.hasUnsavedPlanningChanges = true;
+      console.log(`[Planning] Unsaved changes set to true (delete all rows: ${allRows.length} rows)`);
+      
+      // Show success message
+      console.log("✅ All planning rows deleted successfully");
+    };
+    console.log("✅ Delete All button wired up");
+  }
+
   // Wire up CSV import
   const importBtn = document.getElementById("importCSVBtn");
   const csvInput = document.getElementById("csvFileInput");
@@ -1058,6 +1093,14 @@ class PlanningDataStore {
     console.log(`🔍 Filter applied: ${this.filteredData.length}/${this.data.length} rows (${duration.toFixed(2)}ms)`);
     
     return this.filteredData;
+  }
+  
+  clearAllData() {
+    console.log("🗑️ Clearing all planning data from data store");
+    this.data = [];
+    this.filteredData = [];
+    this.pendingUpdates.clear();
+    this.updateQueue = [];
   }
 }
 

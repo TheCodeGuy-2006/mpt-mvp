@@ -2814,6 +2814,25 @@ button:disabled,
   border-color: #d0d7de;
 }
 
+/* Danger outline button variant */
+.btn-danger-outlined {
+  background: transparent;
+  color: #d1242f;
+  border-color: #d1242f;
+}
+
+.btn-danger-outlined:hover {
+  background: #d1242f;
+  color: #ffffff;
+  border-color: #d1242f;
+}
+
+.btn-danger-outlined:active {
+  background: #b91c1c;
+  color: #ffffff;
+  border-color: #b91c1c;
+}
+
 /* Modal close button */
 .modal-close-btn {
   background: #d1242f;
