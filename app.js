@@ -9,6 +9,98 @@ import { initRoiTabSwitching, renderBudgetsRegionCharts } from "./charts.js";
 window.DEBUG_FILTERS = false; // Set to true to enable filter debug logging
 window.DEBUG_PERFORMANCE = false; // Set to true to enable detailed performance logging
 
+// Initialize TabManager with better timing
+function initializeTabManager() {
+  if (typeof TabManager !== 'undefined' && window.tabManager) {
+    console.log("🎯 TabManager already initialized");
+    registerAllTabs();
+    return;
+  }
+  
+  if (typeof TabManager !== 'undefined') {
+    window.tabManager = new TabManager();
+    console.log("🎯 TabManager initialized and available globally");
+    registerAllTabs();
+  } else {
+    console.warn("🎯 TabManager class not found, retrying...");
+    // Retry after a short delay
+    setTimeout(initializeTabManager, 100);
+  }
+}
+
+function registerAllTabs() {
+  if (!window.tabManager) {
+    console.error("❌ Cannot register tabs: TabManager not available");
+    return;
+  }
+  
+  try {
+    // Register all tabs with their initialization functions
+    window.tabManager.registerTab('planning', 
+      () => {
+        console.log('Loading planning tab');
+        route();
+      }, 
+      () => console.log('Planning tab cleanup')
+    );
+    
+    window.tabManager.registerTab('execution', 
+      () => {
+        console.log('Loading execution tab');
+        route();
+      }, 
+      () => console.log('Execution tab cleanup')
+    );
+    
+    window.tabManager.registerTab('budgets', 
+      () => {
+        console.log('Loading budgets tab');
+        route();
+      }, 
+      () => console.log('Budgets tab cleanup')
+    );
+    
+    window.tabManager.registerTab('roi', 
+      () => {
+        console.log('Loading ROI tab');
+        route();
+      }, 
+      () => console.log('ROI tab cleanup')
+    );
+    
+    window.tabManager.registerTab('calendar', 
+      () => {
+        console.log('Loading calendar tab');
+        route();
+      }, 
+      () => console.log('Calendar tab cleanup')
+    );
+    
+    window.tabManager.registerTab('github-sync', 
+      () => {
+        console.log('Loading GitHub sync tab');
+        route();
+      }, 
+      () => console.log('GitHub Sync tab cleanup')
+    );
+    
+    console.log("✅ All tabs registered successfully");
+  } catch (error) {
+    console.error("❌ Error registering tabs:", error);
+  }
+}
+
+// Initialize on DOMContentLoaded
+window.addEventListener('DOMContentLoaded', initializeTabManager);
+
+// Also try to initialize immediately if DOM is already loaded
+if (document.readyState === 'loading') {
+  // Wait for DOMContentLoaded
+} else {
+  // DOM already loaded, initialize immediately
+  initializeTabManager();
+}
+
 // TABULATOR ERROR SUPPRESSION - Must be early in the load process
 // Suppress Tabulator scroll errors globally by overriding Promise rejection handling
 if (typeof window !== 'undefined') {
@@ -773,13 +865,35 @@ function handleHashChange() {
   }
   rafId = requestAnimationFrame(() => {
     if (location.hash === "#grid") loadProgrammes();
-    debouncedRoute();
+    
+    // Use TabManager if available, otherwise fall back to old routing
+    if (window.tabManager && typeof window.tabManager.switchToTab === 'function') {
+      const hash = location.hash || "#planning";
+      const tabId = hash.replace('#', '');
+      window.tabManager.switchToTab(tabId);
+    } else {
+      debouncedRoute();
+    }
+    
     rafId = null;
   });
 }
 
 // Listen for hash changes and route accordingly
 window.addEventListener("hashchange", handleHashChange);
+
+// Initialize routing when page loads
+window.addEventListener("DOMContentLoaded", () => {
+  // Set default hash if none exists
+  if (!location.hash || location.hash === "#") {
+    location.hash = "#planning";
+  }
+  
+  // Trigger initial routing
+  setTimeout(() => {
+    handleHashChange();
+  }, 100);
+});
 
 // run once the page loads
 // Removed call to loadProgrammes() as it is not defined and not needed
@@ -829,11 +943,31 @@ function showSection(hash) {
 
 // Optimized route function with intelligent caching and reduced operations
 function route() {
-  // Hide ROI chart tabs container by default
+  // Hide ROI chart tabs container by default for ALL tabs except ROI
   const roiChartTabsContainer = document.getElementById('roiChartTabsContainer');
   if (roiChartTabsContainer) {
     roiChartTabsContainer.style.display = 'none';
   }
+  
+  // Hide all ROI-specific content by default
+  const roiSpecificElements = [
+    'roiGaugeChart', 
+    'roiTotalSpendValue', 
+    'roiTotalPipelineValue',
+    'roiTotalLeadsValue',
+    'roiTotalMqlValue'
+  ];
+  roiSpecificElements.forEach(id => {
+    const element = document.getElementById(id);
+    if (element && element.closest('#view-roi')) {
+      // Only hide if it's inside the ROI section
+      const roiSection = document.getElementById('view-roi');
+      if (roiSection) {
+        roiSection.style.display = 'none';
+      }
+    }
+  });
+  
   const hash = location.hash || "#planning";
   lastRouteTime = performance.now();
   
@@ -1280,11 +1414,24 @@ window.addEventListener("DOMContentLoaded", async () => {
       window.budgetsModule.loadBudgets(),
     ]);
     
+    // Handle empty data gracefully
+    if (!rows || !Array.isArray(rows)) {
+      console.warn("No planning data available, initializing with empty array");
+      rows = [];
+    }
+    
+    if (!budgetsObj || typeof budgetsObj !== 'object') {
+      console.warn("No budgets data available, initializing with empty object");
+      budgetsObj = {};
+    }
+    
   } catch (e) {
     console.error("Error loading data:", e);
     rows = [];
     budgetsObj = {};
   }
+  
+  // Always remove loading indicator regardless of data state
   loadingDiv && loadingDiv.remove();
 
   // Store budgets object globally for chart access
@@ -1356,57 +1503,66 @@ window.addEventListener("DOMContentLoaded", async () => {
             });
           }
         }
-        // Sort rows by 'quarter' (and optionally by another field for tie-breaker) before grid init
-        rows.sort((a, b) => {
-          // If quarter is a string like 'Q1', 'Q2', etc., sort numerically
-          const getQuarterNum = q => {
-            if (!q) return 99;
-            const m = q.match(/Q(\d+)/i);
-            return m ? parseInt(m[1], 10) : 99;
-          };
-          const qA = getQuarterNum(a.quarter);
-          const qB = getQuarterNum(b.quarter);
-          if (qA !== qB) return qA - qB;
-          // Tie-breaker: sort by campaign name or id if available
-          if (a.name && b.name) return a.name.localeCompare(b.name);
-          if (a.id && b.id) return a.id - b.id;
-          return 0;
-        });
-        // Use chunked utility for planning
-        let processedRows = [];
-        await processInChunks(
-          rows,
-          1,
-          async (row) => {
-            // Step 1: Calculate metrics
-            if (typeof window.planningModule.calculatePlanningMetrics === 'function') {
-              row.metrics = window.planningModule.calculatePlanningMetrics(row);
-              // Yield after metrics calculation
-              await new Promise(resolve => setTimeout(resolve, 0));
-            }
-            // Step 2: Auto-tick digital motions if owner is Giorgia Parham
-            if (
-              row.owner &&
-              typeof row.owner === 'string' &&
-              row.owner.trim().toLowerCase() === 'giorgia parham'
-            ) {
-              row.digitalMotions = true;
-            }
-            // Step 3: (Optional) Any other heavy per-row logic can go here
-            // If you have more heavy logic, yield again after it
-          },
-          5 // Lower yieldTimeout for more frequent yielding
-        );
-        processedRows = rows;
-        // Store a deep copy of the original order for reset
-        window.originalPlanningRows = JSON.parse(JSON.stringify(processedRows));
-        planningTable = await window.planningModule.initPlanningGrid(processedRows);
-        window.planningTableInstance = planningTable;
-        // Apply default sort immediately after table initialization
-        if (typeof planningTable.setSort === 'function') {
-          planningTable.setSort([
-            { column: 'quarter', dir: 'asc' }
-          ]);
+        
+        // Handle empty data gracefully
+        if (!rows || rows.length === 0) {
+          console.log("No planning data available - creating empty table");
+          // Initialize with empty data but still create the table
+          planningTable = await window.planningModule.initPlanningGrid([]);
+          window.planningTableInstance = planningTable;
+        } else {
+          // Sort rows by 'quarter' (and optionally by another field for tie-breaker) before grid init
+          rows.sort((a, b) => {
+            // If quarter is a string like 'Q1', 'Q2', etc., sort numerically
+            const getQuarterNum = q => {
+              if (!q) return 99;
+              const m = q.match(/Q(\d+)/i);
+              return m ? parseInt(m[1], 10) : 99;
+            };
+            const qA = getQuarterNum(a.quarter);
+            const qB = getQuarterNum(b.quarter);
+            if (qA !== qB) return qA - qB;
+            // Tie-breaker: sort by campaign name or id if available
+            if (a.name && b.name) return a.name.localeCompare(b.name);
+            if (a.id && b.id) return a.id - b.id;
+            return 0;
+          });
+          // Use chunked utility for planning
+          let processedRows = [];
+          await processInChunks(
+            rows,
+            1,
+            async (row) => {
+              // Step 1: Calculate metrics
+              if (typeof window.planningModule.calculatePlanningMetrics === 'function') {
+                row.metrics = window.planningModule.calculatePlanningMetrics(row);
+                // Yield after metrics calculation
+                await new Promise(resolve => setTimeout(resolve, 0));
+              }
+              // Step 2: Auto-tick digital motions if owner is Giorgia Parham
+              if (
+                row.owner &&
+                typeof row.owner === 'string' &&
+                row.owner.trim().toLowerCase() === 'giorgia parham'
+              ) {
+                row.digitalMotions = true;
+              }
+              // Step 3: (Optional) Any other heavy per-row logic can go here
+              // If you have more heavy logic, yield again after it
+            },
+            5 // Lower yieldTimeout for more frequent yielding
+          );
+          processedRows = rows;
+          // Store a deep copy of the original order for reset
+          window.originalPlanningRows = JSON.parse(JSON.stringify(processedRows));
+          planningTable = await window.planningModule.initPlanningGrid(processedRows);
+          window.planningTableInstance = planningTable;
+          // Apply default sort immediately after table initialization
+          if (typeof planningTable.setSort === 'function') {
+            planningTable.setSort([
+              { column: 'quarter', dir: 'asc' }
+            ]);
+          }
         }
 // Global function to reset planning table to original order and reapply default sort
 window.resetPlanningTableOrder = function() {
@@ -1447,7 +1603,9 @@ window.resetPlanningTableOrder = function() {
     // Chunk 2: Execution table
     try {
       if (window.executionModule?.initExecutionGrid) {
-        executionTable = await window.executionModule.initExecutionGrid(rows);
+        // Handle empty data gracefully for execution grid too
+        const executionRows = rows && rows.length > 0 ? rows : [];
+        executionTable = await window.executionModule.initExecutionGrid(executionRows);
         window.executionTableInstance = executionTable;
       }
     } catch (e) {

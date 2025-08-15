@@ -23,12 +23,13 @@ class TabManager {
   
   // Setup event listeners for tab switching
   setupTabListeners() {
-    // Listen for tab button clicks
+    // Listen for navigation link clicks
     document.addEventListener('click', (e) => {
-      const tabButton = e.target.closest('[data-tab]');
-      if (tabButton && !this.isTransitioning) {
+      const navLink = e.target.closest('nav a[href^="#"]');
+      if (navLink && !this.isTransitioning) {
         e.preventDefault();
-        const tabId = tabButton.getAttribute('data-tab');
+        const href = navLink.getAttribute('href');
+        const tabId = href.replace('#', '');
         this.switchToTab(tabId);
       }
     });
@@ -47,6 +48,22 @@ class TabManager {
   async switchToTab(tabId) {
     if (this.currentTab === tabId || this.isTransitioning) {
       return;
+    }
+    
+    // Check if tab is registered
+    if (!this.tabStates.has(tabId)) {
+      console.warn(`⚠️ Tab ${tabId} not registered, registering it now with default behavior`);
+      // Auto-register with a simple callback
+      this.registerTab(tabId, 
+        () => {
+          console.log(`Auto-initialized tab: ${tabId}`);
+          // Call route for backward compatibility
+          if (typeof route === 'function') {
+            route();
+          }
+        },
+        () => console.log(`Auto-cleanup tab: ${tabId}`)
+      );
     }
     
     console.log(`🔄 Switching to tab: ${tabId}`);
@@ -71,20 +88,27 @@ class TabManager {
       }
       
       // Show minimal loading indicator
+      console.log(`📍 TabManager: Showing loading indicator for tab: ${tabId}`);
       this.showTabLoadingIndicator(`Loading ${tabId}...`);
       
       // Cleanup previous tab in background
       requestAnimationFrame(async () => {
+        console.log(`🔄 TabManager: Starting async tab initialization for: ${tabId}`);
         if (this.currentTab === tabId) { // Make sure user hasn't switched again
           try {
+            console.log(`🚀 TabManager: Calling initializeTab for: ${tabId}`);
             // Initialize new tab
             await this.initializeTab(tabId);
-            console.log(`✅ Successfully switched to tab: ${tabId}`);
+            console.log(`✅ TabManager: Successfully switched to tab: ${tabId}`);
           } catch (error) {
-            console.error(`❌ Error initializing tab ${tabId}:`, error);
+            console.error(`❌ TabManager: Error initializing tab ${tabId}:`, error);
           } finally {
+            console.log(`⚡ TabManager: Hiding loading indicator for tab: ${tabId}`);
             this.hideTabLoadingIndicator();
           }
+        } else {
+          console.log(`⚠️ TabManager: Tab changed during initialization, was ${tabId}, now ${this.currentTab}`);
+          this.hideTabLoadingIndicator();
         }
       });
       
@@ -101,7 +125,9 @@ class TabManager {
   async initializeTab(tabId) {
     const tabState = this.tabStates.get(tabId);
     if (!tabState) {
-      throw new Error(`Tab ${tabId} not registered`);
+      console.error(`❌ Tab ${tabId} not registered. Available tabs:`, Array.from(this.tabStates.keys()));
+      // Don't throw error, just log it and return
+      return;
     }
     
     if (tabState.initialized) {
@@ -112,8 +138,14 @@ class TabManager {
     const initCallback = this.initCallbacks.get(tabId);
     if (initCallback) {
       console.log(`🚀 Initializing tab: ${tabId}`);
-      await initCallback();
-      tabState.initialized = true;
+      try {
+        await initCallback();
+        tabState.initialized = true;
+      } catch (error) {
+        console.error(`❌ Error initializing tab ${tabId}:`, error);
+        // Mark as not initialized so it can be retried later
+        tabState.initialized = false;
+      }
     }
   }
   
@@ -134,33 +166,68 @@ class TabManager {
   
   // Show tab content
   showTab(tabId) {
-    // Hide all tab contents
-    document.querySelectorAll('.tab-content').forEach(tab => {
-      tab.style.display = 'none';
+    // Hide all sections first
+    document.querySelectorAll('section').forEach(section => {
+      section.style.display = 'none';
     });
     
-    // Show target tab
-    const targetTab = document.getElementById(tabId);
-    if (targetTab) {
-      targetTab.style.display = 'block';
+    // Hide any ROI-specific elements that might be bleeding through
+    const roiChartTabsContainer = document.getElementById('roiChartTabsContainer');
+    if (roiChartTabsContainer && tabId !== 'roi') {
+      roiChartTabsContainer.style.display = 'none';
     }
     
-    // Update tab button states
-    document.querySelectorAll('[data-tab]').forEach(btn => {
-      btn.classList.remove('active');
+    // Map tab ID to section ID
+    const sectionIdMap = {
+      'planning': 'view-planning',
+      'execution': 'view-execution',
+      'budgets': 'view-budgets',
+      'roi': 'view-roi',
+      'calendar': 'view-calendar',
+      'github-sync': 'view-github-sync'
+    };
+    
+    // Show target section
+    const sectionId = sectionIdMap[tabId] || `view-${tabId}`;
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+      targetSection.style.display = 'block';
+      console.log(`📱 Showing section: ${sectionId}`);
+      
+      // Special handling for ROI tab - show ROI chart container
+      if (tabId === 'roi' && roiChartTabsContainer) {
+        roiChartTabsContainer.style.display = 'block';
+      }
+    } else {
+      console.warn(`📱 Section not found: ${sectionId}`);
+    }
+    
+    // Update tab button states (look for navigation links)
+    document.querySelectorAll('nav a').forEach(link => {
+      link.classList.remove('active');
     });
     
-    const activeButton = document.querySelector(`[data-tab="${tabId}"]`);
-    if (activeButton) {
-      activeButton.classList.add('active');
+    const activeLink = document.querySelector(`nav a[href="#${tabId}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
     }
   }
   
   // Hide tab content
   hideTab(tabId) {
-    const tab = document.getElementById(tabId);
-    if (tab) {
-      tab.style.display = 'none';
+    const sectionIdMap = {
+      'planning': 'view-planning',
+      'execution': 'view-execution', 
+      'budgets': 'view-budgets',
+      'roi': 'view-roi',
+      'calendar': 'view-calendar',
+      'github-sync': 'view-github-sync'
+    };
+    
+    const sectionId = sectionIdMap[tabId] || `view-${tabId}`;
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.style.display = 'none';
     }
   }
   
@@ -182,8 +249,12 @@ class TabManager {
   
   // Show loading indicator for tab transitions
   showTabLoadingIndicator(message = "Loading...") {
+    console.log("📍 TabManager: Showing loading indicator:", message);
     const existing = document.getElementById("tabLoadingIndicator");
-    if (existing) existing.remove();
+    if (existing) {
+      console.log("📍 TabManager: Removing existing loading indicator");
+      existing.remove();
+    }
     
     const indicator = document.createElement("div");
     indicator.id = "tabLoadingIndicator";
@@ -223,8 +294,14 @@ class TabManager {
   
   // Hide loading indicator
   hideTabLoadingIndicator() {
+    console.log("📍 TabManager: Attempting to hide loading indicator...");
     const indicator = document.getElementById("tabLoadingIndicator");
-    if (indicator) indicator.remove();
+    if (indicator) {
+      indicator.remove();
+      console.log("✅ TabManager: Loading indicator removed");
+    } else {
+      console.log("ℹ️ TabManager: No loading indicator found to remove");
+    }
   }
   
   // Get current tab info

@@ -687,21 +687,93 @@ function processRowsInBatches(rows, batchSize = 15, callback) {
   });
 }
 
-// Load planning data via Worker API for real-time updates
+// Ensure planning UI is functional even with empty data
+function ensurePlanningUIFunctional() {
+  console.log("🔧 ENTER: ensurePlanningUIFunctional");
+  
+  // Wire up buttons even if table isn't ready
+  const addBtn = document.getElementById("addPlanningRow");
+  console.log("🔍 Add button found:", !!addBtn, "has onclick:", !!addBtn?.onclick);
+  if (addBtn && !addBtn.onclick) {
+    addBtn.onclick = () => showAddRowModal();
+    console.log("✅ Add campaign button wired up");
+  }
+
+  const delBtn = document.getElementById("deletePlanningRow");
+  console.log("🔍 Delete button found:", !!delBtn, "has onclick:", !!delBtn?.onclick);
+  if (delBtn && !delBtn.onclick) {
+    delBtn.textContent = "Delete Highlighted Rows";
+    delBtn.onclick = () => {
+      if (!planningTableInstance) {
+        alert("No campaigns to delete.");
+        return;
+      }
+      const selectedRows = planningTableInstance.getSelectedRows();
+      if (selectedRows.length === 0) {
+        alert("No rows selected for deletion.");
+        return;
+      }
+      if (!confirm(`Are you sure you want to delete ${selectedRows.length} selected row(s)?`)) return;
+      selectedRows.forEach(row => row.delete());
+      window.hasUnsavedPlanningChanges = true;
+      console.log(`[Planning] Unsaved changes set to true (mass delete: ${selectedRows.length} rows)`);
+    };
+    console.log("✅ Delete button wired up");
+  }
+
+  // Wire up CSV import
+  const importBtn = document.getElementById("importCSVBtn");
+  const csvInput = document.getElementById("csvFileInput");
+  console.log("🔍 Import button found:", !!importBtn, "CSV input found:", !!csvInput);
+  if (importBtn && csvInput && !importBtn.onclick) {
+    importBtn.onclick = () => csvInput.click();
+    console.log("✅ Import button wired up");
+  }
+
+  // Wire up save button
+  const saveBtn = document.getElementById("savePlanningRows");
+  console.log("🔍 Save button found:", !!saveBtn, "has onclick:", !!saveBtn?.onclick);
+  if (saveBtn && !saveBtn.onclick) {
+    saveBtn.onclick = async () => {
+      if (!planningTableInstance) {
+        alert("No data to save.");
+        return;
+      }
+      // Use existing save functionality
+      setupPlanningSave(planningTableInstance, planningTableInstance.getData());
+      saveBtn.click(); // Trigger the actual save
+    };
+    console.log("✅ Save button wired up");
+  }
+
+  // Ensure filters are populated
+  console.log("🔍 About to populate filters...");
+  populatePlanningFilters();
+  
+  console.log("✅ EXIT: Planning UI functionality ensured");
+}
+
+// Call during loading to handle empty data case
 async function loadPlanning(retryCount = 0, useCache = true) {
+  console.log("🔄 loadPlanning called with:", { retryCount, useCache });
+  
   // Return cached data if available
   if (useCache && planningDataCache && planningDataCache.length > 0) {
+    console.log("✅ Returning cached data:", planningDataCache.length, "rows");
     return planningDataCache;
   }
 
   // Prevent multiple simultaneous loads
   if (isDataLoading) {
+    console.log("⏳ Data already loading, waiting...");
     while (isDataLoading) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
+    console.log("⏳ Wait finished, returning cache:", planningDataCache?.length || 0, "rows");
     return planningDataCache || [];
   }
 
+  console.log("🚀 Starting data load process...");
   isDataLoading = true;
   planningPerformance.start('data loading');
   
@@ -709,23 +781,28 @@ async function loadPlanning(retryCount = 0, useCache = true) {
     let rows;
 
     try {
+      console.log("🌐 Attempting to fetch from Worker API...");
       // Use Worker API endpoint
       const workerEndpoint =
         window.cloudflareSyncModule?.getWorkerEndpoint() ||
         "https://mpt-mvp-sync.jordanradford.workers.dev";
       const workerUrl = `${workerEndpoint}/data/planning`;
 
+      console.log("🌐 Worker URL:", workerUrl);
       const response = await fetch(workerUrl, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
 
+      console.log("🌐 Worker API response status:", response.status);
       if (response.ok) {
         const result = await response.json();
         rows = result.data;
+        console.log("✅ Worker API success, data:", rows?.length || 0, "rows");
 
         if (!rows || rows.length === 0) {
           if (retryCount < 2) {
+            console.log("🔄 Worker returned empty data, retrying...");
             await new Promise((resolve) =>
               setTimeout(resolve, (retryCount + 1) * 2000),
             );
@@ -736,14 +813,56 @@ async function loadPlanning(retryCount = 0, useCache = true) {
         throw new Error(`Worker API failed: ${response.status} ${response.statusText}`);
       }
     } catch (workerError) {
+      console.log("⚠️ Worker API failed:", workerError.message);
       // Fallback: Try local file
       try {
+        console.log("📁 Falling back to local file...");
         const r = await fetch("data/planning.json");
+        console.log("📁 Local file response status:", r.status);
         if (!r.ok) throw new Error("Failed to fetch planning.json");
         rows = await r.json();
+        console.log("✅ Local file success, data:", rows?.length || 0, "rows");
       } catch (localError) {
-        throw new Error("Failed to load planning data from both Worker API and local file");
+        console.error("❌ Local file also failed:", localError.message);
+        // Don't throw error, just use empty array
+        console.log("🔧 Using empty array as fallback");
+        rows = [];
       }
+    }
+    
+    // Handle empty data gracefully
+    if (!rows || !Array.isArray(rows)) {
+      console.warn("⚠️ No planning data available or invalid data format, type:", typeof rows);
+      rows = [];
+    }
+    
+    console.log("📊 Planning data loaded - rows count:", rows.length);
+    
+    if (rows.length === 0) {
+      console.log("📭 Planning data is empty - this is normal for new installations");
+      console.log("🔧 Initializing empty state handling...");
+      planningDataCache = [];
+      isDataLoading = false;
+      hideLoadingIndicator();
+      
+      // Ensure UI is functional even with no data
+      console.log("⏰ Scheduling UI functionality setup...");
+      setTimeout(() => {
+        console.log("🎛️ Running ensurePlanningUIFunctional...");
+        ensurePlanningUIFunctional();
+      }, 100);
+      
+      // Initialize empty grid immediately
+      if (!isGridInitialized) {
+        console.log("⏰ Scheduling empty grid initialization...");
+        setTimeout(() => {
+          console.log("🏗️ Initializing empty grid...");
+          initPlanningGrid([]);
+        }, 200);
+      }
+      
+      console.log("✅ Empty data handling complete, returning empty array");
+      return [];
     }
     
     // Show loading indicator for medium to large datasets
@@ -790,10 +909,19 @@ async function loadPlanning(retryCount = 0, useCache = true) {
     
     return rows;
   } catch (e) {
-    console.error("Error loading planning.json:", e);
+    console.error("❌ Error in loadPlanning:", e);
+    console.log("🔧 Resetting loading state and returning empty array");
     isDataLoading = false;
-    alert("Failed to fetch planning.json");
-    return planningDataCache || [];
+    hideLoadingIndicator();
+    // Return empty array instead of cached data when there's an error
+    planningDataCache = [];
+    return [];
+  } finally {
+    // Ensure isDataLoading is always reset
+    if (isDataLoading) {
+      console.log("🔧 Finally block: Ensuring isDataLoading is reset");
+      isDataLoading = false;
+    }
   }
 }
 
@@ -987,8 +1115,14 @@ function showLoadingIndicator(message = "Loading...") {
 }
 
 function hideLoadingIndicator() {
+  console.log("⚡ Attempting to hide loading indicator...");
   const indicator = document.getElementById("planningLoadingIndicator");
-  if (indicator) indicator.remove();
+  if (indicator) {
+    indicator.remove();
+    console.log("✅ Loading indicator removed");
+  } else {
+    console.log("ℹ️ No loading indicator found to remove");
+  }
 }
 
 // Lazy initialization function for planning grid
@@ -1017,12 +1151,23 @@ async function initPlanningGridLazy() {
 }
 
 function initPlanningGrid(rows) {
+  console.log("🏗️ ENTER: initPlanningGrid with", rows?.length || 0, "rows");
   planningPerformance.start('grid initialization');
   
+  // Handle empty data gracefully
+  if (!rows || !Array.isArray(rows)) {
+    console.warn("⚠️ Invalid data provided to initPlanningGrid, using empty array, type:", typeof rows);
+    rows = [];
+  }
+  
+  console.log("📊 Grid will be initialized with", rows.length, "rows");
+  
   // Initialize data store
+  console.log("🗃️ Setting data in data store...");
   planningDataStore.setData(rows);
   
   return new Promise((resolve) => {
+    console.log("🚀 Starting chunked grid initialization...");
     // Break up the initialization into smaller chunks to prevent long tasks
     const initializeInChunks = async () => {
       
@@ -1105,7 +1250,19 @@ function initPlanningGrid(rows) {
         scrollToRowPosition: "top",
         scrollToColumnPosition: "left",
         scrollToRowIfVisible: false,
+        // Handle empty data state
+        placeholder: rows.length === 0 ? 
+          "<div style='padding: 60px; text-align: center; color: #444; font-size: 1.2em; background: #f8f9fa; border-radius: 8px; margin: 20px;'>" +
+          "<h3 style='margin: 0 0 15px 0; color: #333;'>📊 No campaigns currently</h3>" +
+          "<p style='margin: 0 0 20px 0; font-size: 1em; color: #666;'>Get started by adding campaigns through:</p>" +
+          "<div style='display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;'>" +
+          "<button onclick='document.getElementById(\"addPlanningRow\").click()' style='padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;'>➕ Add Campaign</button>" +
+          "<button onclick='document.getElementById(\"importCSVBtn\").click()' style='padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;'>📁 Import Campaigns</button>" +
+          "</div>" +
+          "</div>" : 
+          "No Data Available",
         tableBuilt: function() {
+          console.log(`Planning table built with ${this.getData().length} rows`);
           // Use requestIdleCallback for non-blocking redraw
           const scheduleRedraw = () => {
             if (window.requestIdleCallback) {
@@ -2809,6 +2966,8 @@ function ensurePlanningGridVisible() {
 }
 
 function populatePlanningFilters() {
+  console.log("🔧 Populating planning filters...");
+  
   const regionSelect = document.getElementById("planningRegionFilter");
   const quarterSelect = document.getElementById("planningQuarterFilter");
   const statusSelect = document.getElementById("planningStatusFilter");
@@ -2819,8 +2978,12 @@ function populatePlanningFilters() {
 
   if (!regionSelect || !quarterSelect || !statusSelect || 
       !programTypeSelect || !strategicPillarSelect || !ownerSelect || !digitalMotionsButton) {
+    console.warn("⚠️ Some filter elements not found, retrying in 500ms");
+    setTimeout(populatePlanningFilters, 500);
     return;
   }
+
+  console.log("✅ All filter elements found, proceeding with population");
 
   // Initialize Digital Motions button state
   if (!digitalMotionsButton.hasAttribute("data-active")) {
@@ -2829,14 +2992,16 @@ function populatePlanningFilters() {
 
   updateDigitalMotionsButtonVisual(digitalMotionsButton);
 
-  // Get options from planning data
+  // Get options from planning data - handle empty data gracefully
   const planningData = planningTableInstance?.getData() || [];
-  const uniqueRegions = Array.from(
-    new Set(planningData.map((c) => c.region).filter(Boolean)),
-  ).sort();
-  const uniqueOwners = Array.from(
-    new Set(planningData.map((c) => c.owner).filter(Boolean)),
-  ).sort();
+  
+  // If there's no data, still set up the filters but with empty options
+  const uniqueRegions = planningData.length > 0 ? 
+    Array.from(new Set(planningData.map((c) => c.region).filter(Boolean))).sort() : 
+    [];
+  const uniqueOwners = planningData.length > 0 ? 
+    Array.from(new Set(planningData.map((c) => c.owner).filter(Boolean))).sort() : 
+    [];
 
   // Set placeholder attributes for custom multiselects
   regionSelect.setAttribute('data-placeholder', 'Regions');
@@ -3181,6 +3346,7 @@ window.planningModule = {
   cleanupPlanningGrid,
   clearPlanningCache,
   ensurePlanningGridVisible, // Add grid visibility function
+  ensurePlanningUIFunctional, // Add UI functionality function
   initPlanningWorker,
   cleanupPlanningWorker,
   initializePlanningUniversalSearch,
@@ -3207,18 +3373,43 @@ window.planningModule = {
 
 // Register with tab manager if available
 if (window.tabManager) {
+  console.log("🎯 TabManager found, registering planning tab...");
   window.tabManager.registerTab(
     'planning',
     async () => {
       // Tab initialization callback
-      console.log("🎯 Initializing planning tab via TabManager");
-      await initPlanningGridLazy();
-      populatePlanningFilters();
+      console.log("🎯 ENTER: Planning tab initialization via TabManager");
       
-      // Add a small delay to ensure DOM is ready
-      setTimeout(() => {
-        initializePlanningUniversalSearch();
-      }, 100);
+      // Always ensure UI is functional first
+      console.log("🎛️ Step 1: Ensuring UI functionality...");
+      ensurePlanningUIFunctional();
+      
+      try {
+        console.log("🏗️ Step 2: Initializing planning grid...");
+        await initPlanningGridLazy();
+        
+        console.log("🔧 Step 3: Populating filters...");
+        populatePlanningFilters();
+        
+        // Add a small delay to ensure DOM is ready
+        console.log("🔍 Step 4: Scheduling universal search initialization...");
+        setTimeout(() => {
+          console.log("🔍 Initializing universal search...");
+          initializePlanningUniversalSearch();
+        }, 100);
+        
+        // Hide loading indicator if still showing
+        console.log("⚡ Step 5: Hiding loading indicator...");
+        hideLoadingIndicator();
+        
+        console.log("✅ Planning tab initialization COMPLETE");
+      } catch (error) {
+        console.error("❌ Failed to initialize planning tab:", error);
+        hideLoadingIndicator();
+        // Still ensure UI is functional even if grid fails
+        console.log("🔧 Fallback: Ensuring UI functionality after error...");
+        ensurePlanningUIFunctional();
+      }
     },
     async () => {
       // Tab cleanup callback
@@ -3228,12 +3419,17 @@ if (window.tabManager) {
   );
   console.log("✅ Planning tab registered with TabManager");
 } else {
+  console.log("⚠️ TabManager not available, setting up fallback initialization");
   // Fallback: Initialize when explicitly needed
   console.log("🎯 TabManager not available, planning will initialize on demand");
   
   // Store fallback initialization function for later use
   window.planningModule.initializeFallback = async () => {
     try {
+      console.log("🎯 ENTER: Planning fallback initialization");
+      // Always ensure UI is functional first
+      ensurePlanningUIFunctional();
+      
       await initPlanningGridLazy();
       populatePlanningFilters();
       
@@ -3242,9 +3438,14 @@ if (window.tabManager) {
         initializePlanningUniversalSearch();
       }, 100);
       
+      // Hide loading indicator if still showing
+      hideLoadingIndicator();
       console.log("✅ Planning tab initialized via fallback");
     } catch (error) {
       console.error("❌ Failed to initialize planning tab:", error);
+      hideLoadingIndicator();
+      // Still ensure UI is functional even if grid fails
+      ensurePlanningUIFunctional();
     }
   };
 }
