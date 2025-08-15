@@ -211,7 +211,7 @@ function injectDescriptionHoverCSS() {
   document.head.appendChild(style);
 }
 injectDescriptionHoverCSS();
-import { kpis } from "./src/calc.js";
+import { kpis, calculatePipeline } from "./src/calc.js";
 
 // Utility function for safe table scrolling
 function safeScrollToRow(table, rowIdentifier, position = "top", ifVisible = false) {
@@ -893,7 +893,9 @@ async function loadPlanning(retryCount = 0, useCache = true) {
       // Fallback to main thread processing for smaller datasets
       await processRowsInBatches(rows, 5, (row, i) => {
         if (typeof row.expectedLeads === "number") {
-          Object.assign(row, kpis(row.expectedLeads));
+          // Only set the fields we actually use (no SQL/Opps since columns removed)
+          row.mqlForecast = Math.round(row.expectedLeads * 0.1);
+          row.pipelineForecast = calculatePipeline(row.expectedLeads);
         }
         if (!row.id) {
           row.id = `row_${i}_${Date.now()}`;
@@ -1391,18 +1393,13 @@ function initPlanningGrid(rows) {
                 r.update({
                   expectedLeads: 0,
                   mqlForecast: 0,
-                  sqlForecast: 0,
-                  oppsForecast: 0,
                   pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
                 });
               } else {
                 if (typeof rowData.expectedLeads === "number" && rowData.expectedLeads > 0) {
-                  const kpiVals = kpis(rowData.expectedLeads);
                   r.update({
-                    mqlForecast: kpiVals.mql,
-                    sqlForecast: kpiVals.sql,
-                    oppsForecast: kpiVals.opps,
-                    pipelineForecast: kpiVals.pipeline,
+                    mqlForecast: Math.round(rowData.expectedLeads * 0.1),
+                    pipelineForecast: calculatePipeline(rowData.expectedLeads),
                   });
                 }
               }
@@ -1559,8 +1556,6 @@ function initPlanningGrid(rows) {
                 r.update({
                   expectedLeads: 0,
                   mqlForecast: 0,
-                  sqlForecast: 0,
-                  oppsForecast: 0,
                   pipelineForecast: cell.getValue() ? Number(cell.getValue()) * 20 : 0,
                 });
               }
@@ -1583,17 +1578,12 @@ function initPlanningGrid(rows) {
                 r.update({
                   expectedLeads: 0,
                   mqlForecast: 0,
-                  sqlForecast: 0,
-                  oppsForecast: 0,
                   pipelineForecast: rowData.forecastedCost ? Number(rowData.forecastedCost) * 20 : 0,
                 });
               } else {
-                const kpiVals = kpis(cell.getValue());
                 r.update({
-                  mqlForecast: kpiVals.mql,
-                  sqlForecast: kpiVals.sql,
-                  oppsForecast: kpiVals.opps,
-                  pipelineForecast: kpiVals.pipeline,
+                  mqlForecast: Math.round(cell.getValue() * 0.1),
+                  pipelineForecast: calculatePipeline(cell.getValue()),
                 });
               }
               rowData.__modified = true;
@@ -2231,15 +2221,10 @@ function setupAddRowModalEvents() {
     if (formData.programType === "In-Account Events (1:1)") {
       formData.expectedLeads = 0;
       formData.mqlForecast = 0;
-      formData.sqlForecast = 0;
-      formData.oppsForecast = 0;
       formData.pipelineForecast = formData.forecastedCost * 20;
     } else if (formData.expectedLeads > 0) {
-      const kpiVals = kpis(formData.expectedLeads);
-      formData.mqlForecast = kpiVals.mql;
-      formData.sqlForecast = kpiVals.sql;
-      formData.oppsForecast = kpiVals.opps;
-      formData.pipelineForecast = kpiVals.pipeline;
+      formData.mqlForecast = Math.round(formData.expectedLeads * 0.1);
+      formData.pipelineForecast = calculatePipeline(formData.expectedLeads);
     }
 
 
@@ -2342,19 +2327,22 @@ function setupPlanningSave(table, rows) {
       
       batch.forEach((row) => {
         if (typeof row.expectedLeads === "number") {
-          const kpiVals = kpis(row.expectedLeads);
           let changed = false;
-          [
-            "mqlForecast",
-            "sqlForecast",
-            "oppsForecast",
-            "pipelineForecast",
-          ].forEach((field) => {
-            if (row[field] !== kpiVals[field]) {
-              row[field] = kpiVals[field];
-              changed = true;
-            }
-          });
+          
+          // Calculate MQL
+          const newMql = Math.round(row.expectedLeads * 0.1);
+          if (row.mqlForecast !== newMql) {
+            row.mqlForecast = newMql;
+            changed = true;
+          }
+          
+          // Calculate Pipeline directly
+          const newPipeline = calculatePipeline(row.expectedLeads);
+          if (row.pipelineForecast !== newPipeline) {
+            row.pipelineForecast = newPipeline;
+            changed = true;
+          }
+          
           if (changed) row.__modified = true;
         }
       });
@@ -2586,8 +2574,6 @@ document
           if (row.programType === "In-Account Events (1:1)") {
             row.expectedLeads = 0;
             row.mqlForecast = 0;
-            row.sqlForecast = 0;
-            row.oppsForecast = 0;
             row.pipelineForecast = row.forecastedCost
               ? Number(row.forecastedCost) * 20
               : 0;
@@ -2597,11 +2583,9 @@ document
               row.expectedLeads !== undefined &&
               row.expectedLeads !== "")
           ) {
-            const kpiVals = kpis(Number(row.expectedLeads));
-            row.mqlForecast = kpiVals.mql;
-            row.sqlForecast = kpiVals.sql;
-            row.oppsForecast = kpiVals.opps;
-            row.pipelineForecast = kpiVals.pipeline;
+            const leadCount = Number(row.expectedLeads);
+            row.mqlForecast = Math.round(leadCount * 0.1);
+            row.pipelineForecast = calculatePipeline(leadCount);
           }
         });
         

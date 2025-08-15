@@ -66,8 +66,9 @@ function processPlanningData(rows, options = {}) {
       
       // Calculate KPIs if expectedLeads is present
       if (typeof row.expectedLeads === "number" && row.expectedLeads > 0) {
-        const kpiResults = kpis(row.expectedLeads);
-        Object.assign(row, kpiResults);
+        // Only calculate MQL and Pipeline (SQL/Opps columns removed from planning tab)
+        row.mqlForecast = Math.round(row.expectedLeads * 0.1);
+        row.pipelineForecast = Math.round(row.expectedLeads * 0.06 * 0.8) * 50000;
       }
       
       // Ensure row has an ID
