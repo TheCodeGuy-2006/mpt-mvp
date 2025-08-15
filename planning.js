@@ -690,6 +690,8 @@ function processRowsInBatches(rows, batchSize = 15, callback) {
 // Ensure planning UI is functional even with empty data
 function ensurePlanningUIFunctional() {
   console.log("🔧 ENTER: ensurePlanningUIFunctional");
+  console.log("🔧 Current DOM ready state:", document.readyState);
+  console.log("🔧 Planning table instance exists:", !!window.planningTableInstance);
   
   // Wire up buttons even if table isn't ready
   const addBtn = document.getElementById("addPlanningRow");
@@ -722,38 +724,187 @@ function ensurePlanningUIFunctional() {
   }
 
   // Wire up Delete All Rows button
+  console.log("🔧 === DELETE ALL BUTTON DEBUGGING START ===");
   const deleteAllBtn = document.getElementById("deleteAllPlanningRows");
-  console.log("🔍 Delete All button found:", !!deleteAllBtn, "has onclick:", !!deleteAllBtn?.onclick);
-  if (deleteAllBtn && !deleteAllBtn.onclick) {
-    deleteAllBtn.onclick = () => {
-      if (!planningTableInstance) {
-        alert("No campaigns to delete.");
+  console.log("🔍 Delete All button element:", deleteAllBtn);
+  console.log("🔍 Delete All button found:", !!deleteAllBtn);
+  console.log("🔍 Delete All button ID:", deleteAllBtn?.id);
+  console.log("🔍 Delete All button classes:", deleteAllBtn?.className);
+  console.log("🔍 Delete All button parent:", deleteAllBtn?.parentElement?.className);
+  console.log("🔍 Delete All button has onclick:", !!deleteAllBtn?.onclick);
+  console.log("🔍 Delete All button has addEventListener:", typeof deleteAllBtn?.addEventListener);
+  
+  if (deleteAllBtn) {
+    console.log("🔧 Attempting to wire up Delete All button...");
+    
+    // Clear any existing handlers
+    deleteAllBtn.onclick = null;
+    console.log("🔧 Cleared existing onclick handler");
+    
+    // Remove any existing event listeners by cloning (but keep it simpler)
+    deleteAllBtn.removeEventListener('click', deleteAllBtn._deleteAllHandler);
+    
+    // Create the handler function
+    const deleteAllHandler = function(event) {
+      console.log("🗑️ === DELETE ALL BUTTON CLICKED ===");
+      console.log("🗑️ Event object:", event);
+      console.log("🗑️ Event target:", event.target);
+      console.log("🗑️ Button element:", this);
+      
+      // Prevent any default behavior
+      event.preventDefault();
+      event.stopPropagation();
+      
+      console.log("🔍 Checking planningTableInstance...");
+      console.log("🔍 window.planningTableInstance exists:", !!window.planningTableInstance);
+      console.log("🔍 planningTableInstance type:", typeof window.planningTableInstance);
+      
+      if (!window.planningTableInstance) {
+        console.log("❌ No planningTableInstance found");
+        alert("No table instance found. Please reload the page and try again.");
         return;
       }
-      const allRows = planningTableInstance.getRows();
+      
+      console.log("✅ planningTableInstance found, getting rows...");
+      let allRows;
+      try {
+        allRows = window.planningTableInstance.getRows();
+        console.log("📊 Found rows:", allRows.length);
+        console.log("📊 Rows data sample:", allRows.slice(0, 3));
+      } catch (error) {
+        console.log("❌ Error getting rows:", error);
+        alert("Error accessing table data: " + error.message);
+        return;
+      }
+      
+      if (allRows.length === 0) {
+        console.log("ℹ️ No rows to delete");
+        alert("No rows to delete.");
+        return;
+      }
+      
+      console.log("🤔 Showing confirmation dialog for", allRows.length, "rows...");
+      const confirmed = confirm(`Are you sure you want to delete ALL ${allRows.length} rows? This action cannot be undone.`);
+      console.log("🤔 User confirmation result:", confirmed);
+      
+      if (!confirmed) {
+        console.log("❌ User cancelled deletion");
+        return;
+      }
+      
+      console.log("🗑️ Proceeding with deletion of", allRows.length, "rows");
+      
+      try {
+        // Clear all data from the table
+        console.log("🗑️ Calling clearData()...");
+        window.planningTableInstance.clearData();
+        console.log("✅ Table data cleared successfully");
+        
+        // Update the data store if it exists
+        if (window.planningDataStore && typeof window.planningDataStore.clearAllData === 'function') {
+          console.log("🗑️ Clearing data store...");
+          window.planningDataStore.clearAllData();
+          console.log("✅ Data store cleared");
+        } else if (window.planningDataCache) {
+          console.log("🗑️ Clearing data cache...");
+          window.planningDataCache.length = 0;
+          console.log("✅ Data cache cleared");
+        } else {
+          console.log("⚠️ No data store or cache found to clear");
+        }
+        
+        window.hasUnsavedPlanningChanges = true;
+        console.log("✅ Set hasUnsavedPlanningChanges to true");
+        
+        // Show success message
+        console.log("✅ All planning rows deleted successfully");
+        alert("All rows have been deleted successfully!");
+        
+      } catch (error) {
+        console.log("❌ Error during deletion process:", error);
+        alert("Error during deletion: " + error.message);
+      }
+    };
+    
+    // Store reference to handler for potential cleanup
+    deleteAllBtn._deleteAllHandler = deleteAllHandler;
+    
+    // Add the event listener
+    deleteAllBtn.addEventListener('click', deleteAllHandler);
+    console.log("✅ Delete All button wired up with addEventListener");
+    console.log("🔧 === DELETE ALL BUTTON DEBUGGING END ===");
+  } else {
+    console.log("❌ Delete All button not found in DOM");
+    console.log("🔍 Available buttons in button-group:");
+    const buttonGroup = document.querySelector('.button-group');
+    if (buttonGroup) {
+      const buttons = buttonGroup.querySelectorAll('button');
+      buttons.forEach((btn, index) => {
+        console.log(`  Button ${index + 1}: ID="${btn.id}", Class="${btn.className}", Text="${btn.textContent?.trim()}"`);
+      });
+    } else {
+      console.log("❌ Button group not found");
+    }
+    
+    // Try again after a short delay
+    setTimeout(() => {
+      console.log("🔄 Retrying Delete All button search after delay...");
+      const retryBtn = document.getElementById("deleteAllPlanningRows");
+      if (retryBtn && !retryBtn.onclick) {
+        console.log("🔄 Retrying Delete All button wiring...");
+        wireUpDeleteAllButton();
+      } else {
+        console.log("🔄 Retry: button still not found or already has onclick");
+      }
+    }, 1000);
+  }
+}
+
+// Dedicated function to wire up the Delete All button
+function wireUpDeleteAllButton() {
+  const deleteAllBtn = document.getElementById("deleteAllPlanningRows");
+  if (deleteAllBtn) {
+    deleteAllBtn.addEventListener('click', function() {
+      console.log("🗑️ Delete All button clicked (retry wiring)!");
+      
+      if (!window.planningTableInstance) {
+        console.log("❌ No planningTableInstance found");
+        alert("No table instance found. Please reload the page and try again.");
+        return;
+      }
+      
+      const allRows = window.planningTableInstance.getRows();
+      console.log("📊 Found rows:", allRows.length);
+      
       if (allRows.length === 0) {
         alert("No rows to delete.");
         return;
       }
-      if (!confirm(`Are you sure you want to delete ALL ${allRows.length} rows? This action cannot be undone.`)) return;
+      
+      if (!confirm(`Are you sure you want to delete ALL ${allRows.length} rows? This action cannot be undone.`)) {
+        console.log("❌ User cancelled deletion");
+        return;
+      }
+      
+      console.log("🗑️ Proceeding with deletion of", allRows.length, "rows");
       
       // Clear all data from the table
-      planningTableInstance.clearData();
+      window.planningTableInstance.clearData();
+      console.log("✅ Table data cleared");
       
       // Update the data store if it exists
       if (window.planningDataStore && typeof window.planningDataStore.clearAllData === 'function') {
         window.planningDataStore.clearAllData();
+        console.log("✅ Data store cleared");
       } else if (window.planningDataCache) {
-        window.planningDataCache.length = 0; // Clear the cache array
+        window.planningDataCache.length = 0;
+        console.log("✅ Data cache cleared");
       }
       
       window.hasUnsavedPlanningChanges = true;
-      console.log(`[Planning] Unsaved changes set to true (delete all rows: ${allRows.length} rows)`);
-      
-      // Show success message
       console.log("✅ All planning rows deleted successfully");
-    };
-    console.log("✅ Delete All button wired up");
+    });
+    console.log("✅ Delete All button successfully wired up (retry)");
   }
 
   // Wire up CSV import
@@ -1308,6 +1459,11 @@ function initPlanningGrid(rows) {
           "No Data Available",
         tableBuilt: function() {
           console.log(`Planning table built with ${this.getData().length} rows`);
+          
+          // Wire up button functionality now that table is built
+          console.log("🔧 Table built, wiring up UI functionality...");
+          ensurePlanningUIFunctional();
+          
           // Use requestIdleCallback for non-blocking redraw
           const scheduleRedraw = () => {
             if (window.requestIdleCallback) {
@@ -1823,6 +1979,10 @@ function initPlanningGrid(rows) {
 
       // Update global reference
       window.planningTableInstance = planningTableInstance;
+      
+      // Wire up button functionality now that table is created
+      console.log("🔧 Table instance created, wiring up UI functionality...");
+      ensurePlanningUIFunctional();
 
       // Add event handlers
       const resizeHandler = debounce(() => {
@@ -3784,3 +3944,95 @@ function applyPlanningSearchFilters(selectedFilters) {
     console.error("❌ PLANNING: Error applying search filters:", error);
   }
 }
+
+// Debug function to test the Delete All button - can be called from console
+window.testDeleteAllButton = function() {
+  console.log("🧪 === TESTING DELETE ALL BUTTON ===");
+  const btn = document.getElementById("deleteAllPlanningRows");
+  console.log("🧪 Button found:", !!btn);
+  console.log("🧪 Button element:", btn);
+  console.log("🧪 Button classes:", btn?.className);
+  console.log("🧪 Button text:", btn?.textContent?.trim());
+  console.log("🧪 Button visible:", btn?.offsetWidth > 0 && btn?.offsetHeight > 0);
+  console.log("🧪 Button disabled:", btn?.disabled);
+  
+  if (btn) {
+    console.log("🧪 Simulating click...");
+    btn.click();
+  } else {
+    console.log("🧪 Button not found - listing all buttons:");
+    const allButtons = document.querySelectorAll('button');
+    allButtons.forEach((button, index) => {
+      console.log(`  Button ${index + 1}: ID="${button.id}", Text="${button.textContent?.trim()?.substring(0, 30)}"`);
+    });
+  }
+};
+
+// Additional debug function to check button group
+window.debugButtonGroup = function() {
+  console.log("🧪 === DEBUGGING BUTTON GROUP ===");
+  const buttonGroup = document.querySelector('.button-group');
+  console.log("🧪 Button group found:", !!buttonGroup);
+  
+  if (buttonGroup) {
+    const buttons = buttonGroup.querySelectorAll('button');
+    console.log("🧪 Buttons in group:", buttons.length);
+    buttons.forEach((btn, index) => {
+      console.log(`  ${index + 1}. ID: "${btn.id}", Class: "${btn.className}", Text: "${btn.textContent?.trim()}"`);
+    });
+  }
+  
+  // Check if planning view is visible
+  const planningView = document.getElementById('view-planning');
+  console.log("🧪 Planning view found:", !!planningView);
+  console.log("🧪 Planning view display:", planningView?.style.display);
+  console.log("🧪 Planning view visible:", planningView?.offsetWidth > 0 && planningView?.offsetHeight > 0);
+};
+
+// Force wire up the button with simpler approach
+window.forceWireDeleteAllButton = function() {
+  console.log("🔧 === FORCE WIRING DELETE ALL BUTTON ===");
+  const btn = document.getElementById("deleteAllPlanningRows");
+  if (btn) {
+    console.log("🔧 Button found, adding onclick handler...");
+    btn.onclick = function(e) {
+      console.log("🚨 ONCLICK TRIGGERED! Event:", e);
+      alert("DELETE ALL BUTTON CLICKED! Check console for details.");
+      console.log("🗑️ Delete All button onclick triggered!");
+      
+      if (!window.planningTableInstance) {
+        console.log("❌ No planningTableInstance");
+        alert("No table found");
+        return;
+      }
+      
+      try {
+        const rows = window.planningTableInstance.getRows();
+        console.log("📊 Rows found:", rows.length);
+        
+        if (rows.length === 0) {
+          alert("No rows to delete");
+          return;
+        }
+        
+        if (confirm(`Delete ALL ${rows.length} rows?`)) {
+          window.planningTableInstance.clearData();
+          console.log("✅ Data cleared");
+          alert("All rows deleted!");
+        }
+      } catch (error) {
+        console.log("❌ Error:", error);
+        alert("Error: " + error.message);
+      }
+    };
+    console.log("✅ Onclick handler added");
+    
+    // Also add event listener as backup
+    btn.addEventListener('click', function(e) {
+      console.log("🚨 EVENT LISTENER TRIGGERED! Event:", e);
+    });
+    console.log("✅ Event listener added as backup");
+  } else {
+    console.log("❌ Button not found!");
+  }
+};
