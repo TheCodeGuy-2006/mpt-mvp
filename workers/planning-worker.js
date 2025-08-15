@@ -68,7 +68,7 @@ function processPlanningData(rows, options = {}) {
       if (typeof row.expectedLeads === "number" && row.expectedLeads > 0) {
         // Only calculate MQL and Pipeline (SQL/Opps columns removed from planning tab)
         row.mqlForecast = Math.round(row.expectedLeads * 0.1);
-        row.pipelineForecast = Math.round(row.expectedLeads * 0.06 * 0.8) * 50000;
+        row.pipelineForecast = Math.round(row.expectedLeads * 2400);
       }
       
       // Ensure row has an ID

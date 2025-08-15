@@ -10,8 +10,8 @@ export function kpis(leads = 0) {
 // Simplified pipeline calculation for planning tab (since SQL/Opps columns removed)
 export function calculatePipeline(leads = 0) {
   // Direct calculation: leads -> 6% -> 80% -> $50K per opp
-  // This is equivalent to: leads * 0.06 * 0.8 * 50000 = leads * 2400
-  return Math.round(leads * 0.06 * 0.8) * 50000;
+  // Calculate directly without intermediate rounding: leads * 0.06 * 0.8 * 50000 = leads * 2400
+  return Math.round(leads * 2400);
 }
 
 // regionMetrics: Summarise region totals for reporting and budget alerts
