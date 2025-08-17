@@ -1071,6 +1071,11 @@ function route() {
       window.planningModule &&
       window.planningModule.tableInstance
     ) {
+      // Pre-populate filters immediately for better UX (no loading delay)
+      if (typeof window.planningModule.prePopulatePlanningFilters === "function") {
+        window.planningModule.prePopulatePlanningFilters();
+      }
+      
       setTimeout(() => {
         // Use the enhanced grid visibility function
         if (typeof window.planningModule.ensurePlanningGridVisible === "function") {
@@ -1081,7 +1086,7 @@ function route() {
         }
         // Do not apply any default sort when switching to planning tab
         // This ensures the table order matches the data array and the '#' column is sequential 1-N.
-        // Initialize filters when planning tab is shown
+        // Initialize filters when planning tab is shown (this will update with dynamic data)
         if (typeof window.planningModule.populatePlanningFilters === "function") {
           window.planningModule.populatePlanningFilters();
         }
@@ -1375,14 +1380,54 @@ window.addEventListener("DOMContentLoaded", async () => {
     setTimeout(checkWorkerApiStatus, 2000); // Delay to allow page to load
   }
 
-  // Show loading indicator
+  // Show optimized loading indicator with immediate feedback
   const mainSection = document.querySelector("section#view-planning");
   const loadingDiv = document.createElement("div");
   loadingDiv.id = "loadingIndicator";
-  loadingDiv.textContent = "Loading...";
-  loadingDiv.style.fontSize = "2rem";
-  loadingDiv.style.textAlign = "center";
+  loadingDiv.innerHTML = `
+    <div style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    ">
+      <div style="
+        width: 40px;
+        height: 40px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #1976d2;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+      "></div>
+      <div style="font-size: 1.2rem; color: #666; margin-bottom: 8px;">Loading Planning Data...</div>
+      <div id="loadingStatus" style="font-size: 0.9rem; color: #888;">Initializing filters...</div>
+    </div>
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  `;
   mainSection && mainSection.prepend(loadingDiv);
+
+  // Update loading status to show progress
+  const updateLoadingStatus = (message) => {
+    const statusEl = document.getElementById("loadingStatus");
+    if (statusEl) {
+      statusEl.textContent = message;
+    }
+  };
+
+  // Pre-populate filters immediately for better perceived performance
+  if (window.planningModule?.prePopulatePlanningFilters) {
+    updateLoadingStatus("Setting up filters...");
+    window.planningModule.prePopulatePlanningFilters();
+    updateLoadingStatus("Loading data...");
+  }
 
   // Optimized data loading with intelligent module waiting
   let rows = [];
@@ -1479,6 +1524,8 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     // Chunk 1: Planning table
     try {
+      updateLoadingStatus && updateLoadingStatus("Preparing planning table...");
+      
       if (window.planningModule?.initPlanningGrid) {
         if (window.planningModule.PLANNING_COLUMNS) {
           window.planningModule.PLANNING_COLUMNS = window.planningModule.PLANNING_COLUMNS.filter(
@@ -1507,10 +1554,12 @@ window.addEventListener("DOMContentLoaded", async () => {
         // Handle empty data gracefully
         if (!rows || rows.length === 0) {
           console.log("No planning data available - creating empty table");
+          updateLoadingStatus && updateLoadingStatus("Creating table interface...");
           // Initialize with empty data but still create the table
           planningTable = await window.planningModule.initPlanningGrid([]);
           window.planningTableInstance = planningTable;
         } else {
+          updateLoadingStatus && updateLoadingStatus(`Processing ${rows.length} planning items...`);
           // Sort rows by 'quarter' (and optionally by another field for tie-breaker) before grid init
           rows.sort((a, b) => {
             // If quarter is a string like 'Q1', 'Q2', etc., sort numerically
@@ -1699,7 +1748,13 @@ window.resetPlanningTableOrder = function() {
 
   await initTables();
 
-  // Performance-optimized module initialization with chunking
+  // Remove loading indicator and show completion
+  if (loadingDiv) {
+    updateLoadingStatus && updateLoadingStatus("Ready!");
+    setTimeout(() => {
+      loadingDiv.remove();
+    }, 300); // Brief delay to show completion
+  }
   const initializeModules = async () => {
     // Chunk 1: ROI functionality
     await new Promise(resolve => {

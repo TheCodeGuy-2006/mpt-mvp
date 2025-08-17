@@ -135,11 +135,36 @@ function tryInjectDescriptionKeywordSearchBar() {
   setTimeout(injectDescriptionKeywordSearchBar, 3000);
   setTimeout(injectDescriptionKeywordSearchBar, 5000);
 }
+
+// Pre-populate filters as soon as DOM is ready for faster initial load
+function initializeFiltersEarly() {
+  const attemptPrePopulation = () => {
+    if (window.planningModule?.prePopulatePlanningFilters) {
+      window.planningModule.prePopulatePlanningFilters();
+    } else {
+      // Module not ready yet, try again soon
+      setTimeout(attemptPrePopulation, 50);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(attemptPrePopulation, 50); // Small delay to ensure elements exist
+    });
+  } else {
+    // DOM already loaded
+    setTimeout(attemptPrePopulation, 50);
+  }
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', tryInjectDescriptionKeywordSearchBar);
 } else {
   tryInjectDescriptionKeywordSearchBar();
 }
+
+// Initialize filters early for better performance
+initializeFiltersEarly();
 function highlightUnsavedRows() {
   if (!window.planningTableInstance) return;
   window.planningTableInstance.getRows().forEach(row => {
@@ -3165,8 +3190,8 @@ function populatePlanningFilters() {
 
   if (!regionSelect || !quarterSelect || !statusSelect || 
       !programTypeSelect || !strategicPillarSelect || !ownerSelect || !digitalMotionsButton) {
-    console.warn("⚠️ Some filter elements not found, retrying in 500ms");
-    setTimeout(populatePlanningFilters, 500);
+    console.warn("⚠️ Some filter elements not found, retrying in 100ms (reduced delay)");
+    setTimeout(populatePlanningFilters, 100); // Reduced from 500ms to 100ms
     return;
   }
 
@@ -3190,7 +3215,7 @@ function populatePlanningFilters() {
     Array.from(new Set(planningData.map((c) => c.owner).filter(Boolean))).sort() : 
     [];
 
-  // Set placeholder attributes for custom multiselects
+  // Set placeholder attributes for custom multiselects with visual feedback
   regionSelect.setAttribute('data-placeholder', 'Regions');
   quarterSelect.setAttribute('data-placeholder', 'Quarters');
   statusSelect.setAttribute('data-placeholder', 'Statuses');
@@ -3198,81 +3223,68 @@ function populatePlanningFilters() {
   strategicPillarSelect.setAttribute('data-placeholder', 'Strategic Pillars');
   ownerSelect.setAttribute('data-placeholder', 'Owners');
 
-  // Only populate if not already populated
-  if (regionSelect.children.length === 0) {
-    regionOptions.forEach((region) => {
-      const option = document.createElement("option");
-      option.value = region;
-      option.textContent = region;
-      regionSelect.appendChild(option);
-    });
-  }
-
-  if (quarterSelect.children.length === 0) {
-    quarterOptions.forEach((quarter) => {
-      const option = document.createElement("option");
-      const normalizedQuarter = normalizeQuarter(quarter);
-      option.value = normalizedQuarter;
-      option.textContent = normalizedQuarter;
-      quarterSelect.appendChild(option);
-    });
-  }
-
-  if (statusSelect.children.length === 0) {
-    statusOptions.forEach((status) => {
-      const option = document.createElement("option");
-      option.value = status;
-      option.textContent = status;
-      statusSelect.appendChild(option);
-    });
-  }
-
-  if (programTypeSelect.children.length === 0) {
-    programTypes.forEach((type) => {
-      const option = document.createElement("option");
-      option.value = type;
-      option.textContent = type;
-      programTypeSelect.appendChild(option);
-    });
-  }
-
-  if (strategicPillarSelect.children.length === 0) {
-    strategicPillars.forEach((pillar) => {
-      const option = document.createElement("option");
-      option.value = pillar;
-      option.textContent = pillar;
-      strategicPillarSelect.appendChild(option);
-    });
-  }
-
-  if (ownerSelect.children.length === 0) {
-    names.forEach((owner) => {
-      const option = document.createElement("option");
-      option.value = owner;
-      option.textContent = owner;
-      ownerSelect.appendChild(option);
-    });
-  }
-
-  // Initialize custom multiselects if not already done
-  const selectElements = [
-    regionSelect, quarterSelect, statusSelect, 
-    programTypeSelect, strategicPillarSelect, ownerSelect
-  ];
-
-  selectElements.forEach(select => {
-    if (!select._multiselectContainer) {
-      createMultiselect(select);
+  // Add loading state visual feedback during filter population
+  const showFilterLoadingState = (select) => {
+    if (select.children.length === 0) {
+      const loadingOption = document.createElement("option");
+      loadingOption.value = "";
+      loadingOption.textContent = "Loading...";
+      loadingOption.disabled = true;
+      select.appendChild(loadingOption);
     }
-  });
+  };
 
-  // Set up event listeners for all filters (only if not already attached)
-  selectElements.forEach((select) => {
-    if (!select.hasAttribute("data-listener-attached")) {
-      select.addEventListener("change", applyPlanningFilters);
-      select.setAttribute("data-listener-attached", "true");
-    }
-  });
+  // Show loading state for empty filters
+  [regionSelect, quarterSelect, statusSelect, programTypeSelect, strategicPillarSelect, ownerSelect].forEach(showFilterLoadingState);
+
+  // Use requestAnimationFrame to populate filters without blocking
+  requestAnimationFrame(() => {
+    // Clear loading states and populate filters efficiently
+    const populateSelect = (select, options, clearFirst = true) => {
+      if (clearFirst && select.children.length > 0) {
+        select.innerHTML = '';
+      }
+      
+      if (select.children.length === 0) {
+        options.forEach((optionValue) => {
+          const option = document.createElement("option");
+          option.value = optionValue;
+          option.textContent = optionValue;
+          select.appendChild(option);
+        });
+      }
+    };
+
+    // Populate filters in batches to avoid blocking
+    populateSelect(regionSelect, regionOptions, true);
+    populateSelect(quarterSelect, quarterOptions.map(normalizeQuarter), true);
+    populateSelect(statusSelect, statusOptions, true);
+    populateSelect(programTypeSelect, programTypes, true);
+    populateSelect(strategicPillarSelect, strategicPillars, true);
+    populateSelect(ownerSelect, names, true);
+
+    // Initialize custom multiselects if not already done
+    const selectElements = [
+      regionSelect, quarterSelect, statusSelect, 
+      programTypeSelect, strategicPillarSelect, ownerSelect
+    ];
+
+    selectElements.forEach(select => {
+      if (!select._multiselectContainer) {
+        createMultiselect(select);
+      }
+    });
+
+    // Set up event listeners for all filters (only if not already attached)
+    selectElements.forEach((select) => {
+      if (!select.hasAttribute("data-listener-attached")) {
+        select.addEventListener("change", applyPlanningFilters);
+        select.setAttribute("data-listener-attached", "true");
+      }
+    });
+
+    console.log("✅ Planning filters populated successfully");
+  }); // Close requestAnimationFrame callback
 
   // Digital Motions filter button toggle (only attach once)
   if (!digitalMotionsButton.hasAttribute("data-listener-attached")) {
@@ -3511,6 +3523,75 @@ function updatePlanningFilterSummary(filters, resultCount) {
   }
 }
 
+// Pre-populate planning filters with static data for immediate display
+function prePopulatePlanningFilters() {
+  console.log("🚀 Pre-populating planning filters for faster initial load...");
+  
+  // Use requestAnimationFrame to avoid blocking initial page load
+  requestAnimationFrame(() => {
+    const regionSelect = document.getElementById("planningRegionFilter");
+    const quarterSelect = document.getElementById("planningQuarterFilter");
+    const statusSelect = document.getElementById("planningStatusFilter");
+    const programTypeSelect = document.getElementById("planningProgramTypeFilter");
+    const strategicPillarSelect = document.getElementById("planningStrategicPillarFilter");
+    const ownerSelect = document.getElementById("planningOwnerFilter");
+    const digitalMotionsButton = document.getElementById("planningDigitalMotionsFilter");
+
+    if (!regionSelect || !quarterSelect || !statusSelect || 
+        !programTypeSelect || !strategicPillarSelect || !ownerSelect || !digitalMotionsButton) {
+      console.log("⏳ Filter elements not ready yet, will populate later");
+      return;
+    }
+
+    console.log("✅ Pre-populating filters with static data");
+
+    // Pre-populate with static data immediately for better UX
+    const populateSelectFast = (select, options, placeholder) => {
+      if (select.children.length === 0) {
+        select.setAttribute('data-placeholder', placeholder);
+        options.forEach((optionValue) => {
+          const option = document.createElement("option");
+          option.value = optionValue;
+          option.textContent = optionValue;
+          select.appendChild(option);
+        });
+      }
+    };
+
+    // Populate with static data for immediate display
+    populateSelectFast(regionSelect, regionOptions, 'Regions');
+    populateSelectFast(quarterSelect, quarterOptions.map(normalizeQuarter), 'Quarters');
+    populateSelectFast(statusSelect, statusOptions, 'Statuses');
+    populateSelectFast(programTypeSelect, programTypes, 'Program Types');
+    populateSelectFast(strategicPillarSelect, strategicPillars, 'Strategic Pillars');
+    populateSelectFast(ownerSelect, names, 'Owners');
+
+    // Initialize Digital Motions button
+    if (!digitalMotionsButton.hasAttribute("data-active")) {
+      digitalMotionsButton.dataset.active = "false";
+      updateDigitalMotionsButtonVisual(digitalMotionsButton);
+    }
+
+    // Initialize multiselects immediately
+    const selectElements = [
+      regionSelect, quarterSelect, statusSelect, 
+      programTypeSelect, strategicPillarSelect, ownerSelect
+    ];
+
+    selectElements.forEach(select => {
+      if (!select._multiselectContainer) {
+        try {
+          createMultiselect(select);
+        } catch (e) {
+          console.warn("Failed to initialize multiselect for", select.id, e);
+        }
+      }
+    });
+
+    console.log("✅ Planning filters pre-populated successfully");
+  });
+}
+
 // Initialize planning filters when planning grid is ready
 function initializePlanningFilters() {
   // Wait a bit for the planning grid to be initialized
@@ -3528,6 +3609,7 @@ window.planningModule = {
   getAllCountries,
   getCountryOptionsForRegion,
   populatePlanningFilters,
+  prePopulatePlanningFilters, // Add pre-population function
   applyPlanningFilters,
   initializePlanningFilters,
   cleanupPlanningGrid,
