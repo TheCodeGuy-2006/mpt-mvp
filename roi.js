@@ -1099,7 +1099,6 @@ function initializeRoiFunctionality() {
 function ensureRoiDataTableInitialized() {
   // Always try to initialize if table doesn't exist, regardless of tab state
   if (!window.roiDataTableInstance) {
-    console.log('Initializing ROI data table...');
     window.roiDataTableInstance = initRoiDataTable();
   }
   return window.roiDataTableInstance;
@@ -1131,7 +1130,6 @@ function initRoiDataTable() {
 
   // Prevent duplicate initialization
   if (window.roiDataTableInstance) {
-    console.log('ROI table already initialized, destroying previous instance');
     try {
       window.roiDataTableInstance.destroy();
     } catch (e) {
@@ -1146,7 +1144,6 @@ function initRoiDataTable() {
   }
 
   const campaigns = getCampaignDataForRoi();
-  console.log('ROI campaigns data:', campaigns ? campaigns.length : 0, 'items');
   
   try {
     const table = new Tabulator(tableContainer, {
@@ -1185,7 +1182,6 @@ function initRoiDataTable() {
           try {
             this.redraw(true);
             this.recalc();
-            console.log('ROI table built successfully');
           } catch (e) {
             console.warn('ROI table build error:', e);
           }
@@ -1196,7 +1192,6 @@ function initRoiDataTable() {
           try {
             this.redraw(true);
             this.recalc();
-            console.log('ROI table data loaded successfully');
           } catch (e) {
             console.warn('ROI table data load error:', e);
           }
@@ -1389,23 +1384,17 @@ function initRoiDataTable() {
 
 // Get campaign data for ROI table
 function getCampaignDataForRoi() {
-  console.log('Getting campaign data for ROI...');
-  
   if (!window.planningModule?.tableInstance) {
-    console.warn('Planning module or table instance not available');
-    
-    // Try fallback data sources
+    // Try fallback data sources silently
     if (window.planningDataCache && Array.isArray(window.planningDataCache)) {
-      console.log('Using fallback planning data cache');
       return window.planningDataCache.slice(0, 10); // Limit to first 10 for initial display
     }
     
-    console.log('No data available, returning empty array');
+    // Return empty array if no data available yet (normal during initialization)
     return [];
   }
 
   let planningData = window.planningModule.tableInstance.getData();
-  console.log('Retrieved planning data:', planningData ? planningData.length : 0, 'items');
 
   // Apply universal search filters if they exist
   if (window.activeRoiSearchFilters && window.activeRoiSearchFilters.length > 0) {

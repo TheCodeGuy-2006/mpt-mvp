@@ -290,11 +290,9 @@ const calendarCache = {
       // Fallback: try to load from cached data
       else if (window.planningDataCache && Array.isArray(window.planningDataCache)) {
         rawCampaigns = window.planningDataCache;
-        console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningDataCache`);
       }
       else {
-        console.warn('Calendar: No planning data source available - returning empty array for now');
-        // Return empty array instead of blocking, skeleton will show
+        // Return empty array during initialization - this is normal behavior
         return this.campaigns || [];
       }
       
@@ -1800,13 +1798,20 @@ function applyCalendarSearchFilters(selectedFilters) {
 // Update calendar search data
 function updateCalendarSearchData() {
   if (!window.calendarUniversalSearch) {
-    console.log("🔍 CALENDAR: Universal search not initialized yet");
+    // Only warn once to avoid console spam during initialization
+    if (!window.calendarSearchWarningShown) {
+      console.log("🔍 CALENDAR: Universal search not initialized yet");
+      window.calendarSearchWarningShown = true;
+    }
     return;
   }
   
   try {
     const campaigns = getCampaignData();
-    console.log(`🔍 CALENDAR: Updating search data with ${campaigns.length} campaigns`);
+    // Only log when there's actually data to avoid spam
+    if (campaigns.length > 0) {
+      console.log(`🔍 CALENDAR: Updating search data with ${campaigns.length} campaigns`);
+    }
     
     // Get filter values for calendar
     const filterValues = getCalendarFilterValues();
@@ -1831,7 +1836,10 @@ function updateCalendarSearchData() {
       }
     });
     
-    console.log(`🔍 CALENDAR: Generated ${filterOptions.length} filter options`);
+    // Only log when there are actually filter options to avoid spam
+    if (filterOptions.length > 0) {
+      console.log(`🔍 CALENDAR: Generated ${filterOptions.length} filter options`);
+    }
     window.calendarUniversalSearch.updateData(filterOptions);
   } catch (error) {
     console.error("❌ CALENDAR: Error updating search data:", error);
