@@ -273,7 +273,7 @@ const calendarCache = {
   // Get cached campaigns or fetch fresh data
   getCampaigns() {
     const now = Date.now();
-    if (!this.campaigns || (now - this.lastUpdate) > 30000) { // 30 second cache
+    if (!this.campaigns || (now - this.lastUpdate) > 10000) { // Reduced cache time to 10 seconds for faster updates
       // Try multiple ways to access planning data
       let rawCampaigns = [];
       
@@ -293,8 +293,9 @@ const calendarCache = {
         console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningDataCache`);
       }
       else {
-        console.warn('Calendar: No planning data source available');
-        rawCampaigns = [];
+        console.warn('Calendar: No planning data source available - returning empty array for now');
+        // Return empty array instead of blocking, skeleton will show
+        return this.campaigns || [];
       }
       
       // Add index numbers to campaigns for display
@@ -1296,6 +1297,8 @@ const renderCalendar = debounce(() => {
 
   // Use requestAnimationFrame for smooth rendering
   requestAnimationFrame(() => {
+    const startTime = performance.now();
+    
     // Update FY tabs
     renderFYTabs();
 
@@ -1532,6 +1535,15 @@ const renderCalendar = debounce(() => {
     calendarGrid.appendChild(monthDiv);
   });
   
+  // Performance monitoring
+  const endTime = performance.now();
+  const renderTime = endTime - startTime;
+  console.log(`📊 Calendar rendered in ${renderTime.toFixed(2)}ms`);
+  
+  if (renderTime > 100) {
+    console.warn(`⚠️ Calendar render time exceeded 100ms: ${renderTime.toFixed(2)}ms`);
+  }
+  
   }); // Close requestAnimationFrame
 }, CALENDAR_PERFORMANCE_CONFIG.RENDER_DEBOUNCE); // Close debounce
 
@@ -1557,6 +1569,115 @@ function renderMonthInBatches(monthData, container) {
   }
   
   processBatch();
+}
+
+// Pre-populate calendar with skeleton structure for immediate display
+function prePopulateCalendar() {
+  console.log('🗓️ Pre-populating calendar with skeleton structure...');
+  
+  const calendarGrid = document.getElementById("calendarGrid");
+  if (!calendarGrid) return;
+  
+  // Use requestAnimationFrame for smooth rendering
+  requestAnimationFrame(() => {
+    // Clear any existing content
+    calendarGrid.innerHTML = "";
+    
+    // Create skeleton calendar structure with loading states
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    
+    // Create skeleton months for current fiscal year
+    const skeletonMonths = [
+      { name: "July", month: 6, year: currentYear },
+      { name: "August", month: 7, year: currentYear },
+      { name: "September", month: 8, year: currentYear },
+      { name: "October", month: 9, year: currentYear },
+      { name: "November", month: 10, year: currentYear },
+      { name: "December", month: 11, year: currentYear },
+      { name: "January", month: 0, year: currentYear + 1 },
+      { name: "February", month: 1, year: currentYear + 1 },
+      { name: "March", month: 2, year: currentYear + 1 },
+      { name: "April", month: 3, year: currentYear + 1 },
+      { name: "May", month: 4, year: currentYear + 1 },
+      { name: "June", month: 5, year: currentYear + 1 },
+    ];
+    
+    // Set grid layout
+    calendarGrid.style.cssText = `
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      padding: 16px;
+    `;
+    
+    // Create skeleton month cards
+    skeletonMonths.forEach((monthInfo) => {
+      const monthDiv = document.createElement("div");
+      monthDiv.style.cssText = `
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 16px;
+        background: white;
+        height: 300px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        opacity: 0.8;
+      `;
+      
+      // Month header
+      const monthHeader = document.createElement("h3");
+      monthHeader.textContent = `${monthInfo.name} ${monthInfo.year}`;
+      monthHeader.style.cssText = `
+        margin: 0 0 16px 0;
+        color: #1976d2;
+        text-align: center;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e3f2fd;
+        flex-shrink: 0;
+      `;
+      monthDiv.appendChild(monthHeader);
+      
+      // Loading indicator
+      const loadingDiv = document.createElement("div");
+      loadingDiv.textContent = "Loading events...";
+      loadingDiv.style.cssText = `
+        color: #666;
+        font-style: italic;
+        text-align: center;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        font-size: 14px;
+      `;
+      monthDiv.appendChild(loadingDiv);
+      
+      calendarGrid.appendChild(monthDiv);
+    });
+    
+    console.log('✅ Calendar skeleton structure pre-populated');
+  });
+}
+
+// Initialize calendar early with DOM-ready optimization
+function initializeCalendarEarly() {
+  console.log('🗓️ Early calendar initialization...');
+  
+  // Pre-populate calendar structure immediately
+  prePopulateCalendar();
+  
+  // Initialize universal search early
+  if (typeof initializeCalendarUniversalSearch === 'function') {
+    try {
+      initializeCalendarUniversalSearch();
+    } catch (error) {
+      console.warn('Early calendar universal search initialization failed:', error);
+    }
+  }
 }
 
 // Initialize calendar functionality
@@ -1605,16 +1726,19 @@ function initializeCalendar() {
           currentFY = availableFYs[0];
         }
         
-        // Force cache invalidation and re-render
+        // Force cache invalidation and re-render with performance monitoring
         calendarCache.invalidate();
-        renderCalendar();
+        requestAnimationFrame(() => {
+          renderCalendar();
+        });
       }
-    }, 2000); // Check every 2 seconds
+    }, 500); // Check every 500ms for faster data detection
     
-    // Stop checking after 30 seconds
+    // Stop checking after 15 seconds (reduced from 30)
     setTimeout(() => {
       clearInterval(dataCheckInterval);
-    }, 30000);
+      console.log('🗓️ Calendar: Stopped waiting for planning data after 15 seconds');
+    }, 15000);
   }
 }
 
@@ -1735,16 +1859,21 @@ function updateCalendarSearchData() {
 function handleCalendarRouting() {
   const hash = location.hash;
   if (hash === "#calendar") {
-    // Refresh calendar when tab is viewed
-    setTimeout(() => {
+    // Pre-populate calendar immediately for better UX
+    prePopulateCalendar();
+    
+    // Then refresh with actual data using requestAnimationFrame
+    requestAnimationFrame(() => {
       renderCalendar();
-    }, 100);
+    });
   }
 }
 
 // Module exports with performance optimizations
 const calendarModule = {
   initializeCalendar,
+  initializeCalendarEarly,
+  prePopulateCalendar,
   initializeCalendarUniversalSearch,
   handleCalendarRouting,
   renderCalendar,

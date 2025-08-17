@@ -123,11 +123,36 @@ function tryInjectExecutionDescriptionKeywordSearchBar() {
   setTimeout(injectExecutionDescriptionKeywordSearchBar, 3000);
   setTimeout(injectExecutionDescriptionKeywordSearchBar, 5000);
 }
+
+// Pre-populate execution filters as soon as DOM is ready for faster initial load
+function initializeExecutionFiltersEarly() {
+  const attemptPrePopulation = () => {
+    if (window.executionModule?.prePopulateExecutionFilters) {
+      window.executionModule.prePopulateExecutionFilters();
+    } else {
+      // Module not ready yet, try again soon
+      setTimeout(attemptPrePopulation, 50);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(attemptPrePopulation, 50); // Small delay to ensure elements exist
+    });
+  } else {
+    // DOM already loaded
+    setTimeout(attemptPrePopulation, 50);
+  }
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', tryInjectExecutionDescriptionKeywordSearchBar);
 } else {
   tryInjectExecutionDescriptionKeywordSearchBar();
 }
+
+// Initialize execution filters early for better performance
+initializeExecutionFiltersEarly();
 // --- Unsaved Changes Flag for Execution Tab ---
 window.hasUnsavedExecutionChanges = false;
 
@@ -796,8 +821,104 @@ function setupExecutionFilters() {
   setupExecutionFilterLogic();
 }
 
-// Function to populate execution filter dropdowns
+// Pre-populate execution filters with static data for immediate display
+function prePopulateExecutionFilters() {
+  console.log("🚀 Pre-populating execution filters for faster initial load...");
+  
+  // Use requestAnimationFrame to avoid blocking initial page load
+  requestAnimationFrame(() => {
+    const regionSelect = document.getElementById("executionRegionFilter");
+    const quarterSelect = document.getElementById("executionQuarterFilter");
+    const statusSelect = document.getElementById("executionStatusFilter");
+    const programTypeSelect = document.getElementById("executionProgramTypeFilter");
+    const strategicPillarSelect = document.getElementById("executionStrategicPillarFilter");
+    const ownerSelect = document.getElementById("executionOwnerFilter");
+    const digitalMotionsButton = document.getElementById("executionDigitalMotionsFilter");
+
+    if (!regionSelect || !quarterSelect || !statusSelect || 
+        !programTypeSelect || !strategicPillarSelect || !ownerSelect || !digitalMotionsButton) {
+      console.log("⏳ Execution filter elements not ready yet, will populate later");
+      return;
+    }
+
+    console.log("✅ Pre-populating execution filters with static data");
+
+    // Get constants from planning module for consistency
+    const regionOptions = window.planningModule?.constants?.regionOptions || [
+      "JP & Korea", "South APAC", "SAARC",
+    ];
+    const statusOptions = window.planningModule?.constants?.statusOptions || [
+      "Planning", "On Track", "Shipped", "Cancelled",
+    ];
+    const programTypes = window.planningModule?.constants?.programTypes || [
+      "User Groups", "Targeted paid ads & content sydication", "Flagship Events (Galaxy, Universe Recaps) 1:Many",
+      "3P Sponsored Events", "Webinars", "Microsoft", "Lunch & Learns and Workshops (1:few)",
+      "Localized Programs", "CxO events (1:few)", "Exec engagement programs", "In-Account Events (1:1)",
+      "Contractor/Infrastructure", "Paid ads", "Operational/Infrastructure/Swag",
+    ];
+    const strategicPillars = window.planningModule?.constants?.strategicPillars || [
+      "Account Growth and Product Adoption", "Pipeline Acceleration & Executive Engagement", 
+      "Brand Awareness & Top of Funnel Demand Generation", "New Logo Acquisition",
+    ];
+    const quarterOptions = window.planningModule?.constants?.quarterOptions || [
+      "Q1 July", "Q1 August", "Q1 September", "Q2 October", "Q2 November", "Q2 December",
+      "Q3 January", "Q3 February", "Q3 March", "Q4 April", "Q4 May", "Q4 June",
+    ];
+    const names = window.planningModule?.constants?.names || [
+      "Shruti Narang", "Beverly Leung", "Giorgia Parham", "Tomoko Tanaka",
+    ];
+
+    // Pre-populate with static data immediately for better UX
+    const populateSelectFast = (select, options, placeholder) => {
+      if (select.children.length === 0) {
+        select.setAttribute('data-placeholder', placeholder);
+        options.forEach((optionValue) => {
+          const option = document.createElement("option");
+          option.value = optionValue;
+          option.textContent = optionValue;
+          select.appendChild(option);
+        });
+      }
+    };
+
+    // Populate with static data for immediate display
+    populateSelectFast(regionSelect, regionOptions, 'Regions');
+    populateSelectFast(quarterSelect, quarterOptions, 'Quarters');
+    populateSelectFast(statusSelect, statusOptions, 'Statuses');
+    populateSelectFast(programTypeSelect, programTypes, 'Program Types');
+    populateSelectFast(strategicPillarSelect, strategicPillars, 'Strategic Pillars');
+    populateSelectFast(ownerSelect, names, 'Owners');
+
+    // Initialize Digital Motions button
+    if (!digitalMotionsButton.hasAttribute("data-active")) {
+      digitalMotionsButton.dataset.active = "false";
+      updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
+    }
+
+    // Initialize multiselects immediately
+    const selectElements = [
+      regionSelect, quarterSelect, statusSelect, 
+      programTypeSelect, strategicPillarSelect, ownerSelect
+    ].filter(Boolean);
+
+    selectElements.forEach(select => {
+      if (!select._multiselectContainer) {
+        try {
+          createExecutionMultiselect(select);
+        } catch (e) {
+          console.warn("Failed to initialize execution multiselect for", select.id, e);
+        }
+      }
+    });
+
+    console.log("✅ Execution filters pre-populated successfully");
+  });
+}
+
+// Function to populate execution filter dropdowns (optimized)
 function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names) {
+  console.log("🔧 Populating execution filters...");
+  
   // Set placeholder attributes for custom multiselects
   const regionSelect = document.getElementById("executionRegionFilter");
   const quarterSelect = document.getElementById("executionQuarterFilter");
@@ -806,6 +927,18 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
   const strategicPillarSelect = document.getElementById("executionStrategicPillarFilter");
   const ownerSelect = document.getElementById("executionOwnerFilter");
 
+  if (!regionSelect || !quarterSelect || !statusSelect || 
+      !programTypeSelect || !strategicPillarSelect || !ownerSelect) {
+    console.warn("⚠️ Some execution filter elements not found, retrying in 100ms (reduced delay)");
+    setTimeout(() => {
+      populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names);
+    }, 100); // Reduced from potential longer delays
+    return;
+  }
+
+  console.log("✅ All execution filter elements found, proceeding with population");
+
+  // Set placeholders with visual feedback
   if (regionSelect) regionSelect.setAttribute('data-placeholder', 'Regions');
   if (quarterSelect) quarterSelect.setAttribute('data-placeholder', 'Quarters');
   if (statusSelect) statusSelect.setAttribute('data-placeholder', 'Statuses');
@@ -813,77 +946,67 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
   if (strategicPillarSelect) strategicPillarSelect.setAttribute('data-placeholder', 'Strategic Pillars');
   if (ownerSelect) ownerSelect.setAttribute('data-placeholder', 'Owners');
 
-  // Region filter
-  if (regionSelect && regionSelect.children.length === 0) {
-    regionOptions.forEach((region) => {
-      const option = document.createElement("option");
-      option.value = region;
-      option.textContent = region;
-      regionSelect.appendChild(option);
-    });
-  }
-
-  // Quarter filter
-  if (quarterSelect && quarterSelect.children.length === 0) {
-    quarterOptions.forEach((quarter) => {
-      const option = document.createElement("option");
-      option.value = quarter;
-      option.textContent = quarter;
-      quarterSelect.appendChild(option);
-    });
-  }
-
-  // Status filter
-  if (statusSelect && statusSelect.children.length === 0) {
-    statusOptions.forEach((status) => {
-      const option = document.createElement("option");
-      option.value = status;
-      option.textContent = status;
-      statusSelect.appendChild(option);
-    });
-  }
-
-  // Program Type filter
-  if (programTypeSelect && programTypeSelect.children.length === 0) {
-    programTypes.forEach((type) => {
-      const option = document.createElement("option");
-      option.value = type;
-      option.textContent = type;
-      programTypeSelect.appendChild(option);
-    });
-  }
-
-  // Strategic Pillar filter
-  if (strategicPillarSelect && strategicPillarSelect.children.length === 0) {
-    strategicPillars.forEach((pillar) => {
-      const option = document.createElement("option");
-      option.value = pillar;
-      option.textContent = pillar;
-      strategicPillarSelect.appendChild(option);
-    });
-  }
-
-  // Owner filter
-  if (ownerSelect && ownerSelect.children.length === 0) {
-    names.forEach((owner) => {
-      const option = document.createElement("option");
-      option.value = owner;
-      option.textContent = owner;
-      ownerSelect.appendChild(option);
-    });
-  }
-
-  // Initialize custom multiselects if not already done
-  const selectElements = [
-    regionSelect, quarterSelect, statusSelect, 
-    programTypeSelect, strategicPillarSelect, ownerSelect
-  ].filter(Boolean);
-
-  selectElements.forEach(select => {
-    if (!select._multiselectContainer) {
-      createExecutionMultiselect(select);
+  // Add loading state visual feedback during filter population
+  const showFilterLoadingState = (select) => {
+    if (select && select.children.length === 0) {
+      const loadingOption = document.createElement("option");
+      loadingOption.value = "";
+      loadingOption.textContent = "Loading...";
+      loadingOption.disabled = true;
+      select.appendChild(loadingOption);
     }
-  });
+  };
+
+  // Show loading state for empty filters
+  [regionSelect, quarterSelect, statusSelect, programTypeSelect, strategicPillarSelect, ownerSelect]
+    .filter(Boolean).forEach(showFilterLoadingState);
+
+  // Use requestAnimationFrame to populate filters without blocking
+  requestAnimationFrame(() => {
+    // Clear loading states and populate filters efficiently
+    const populateSelect = (select, options, clearFirst = true) => {
+      if (!select) return;
+      
+      if (clearFirst && select.children.length > 0) {
+        select.innerHTML = '';
+      }
+      
+      if (select.children.length === 0) {
+        options.forEach((optionValue) => {
+          const option = document.createElement("option");
+          option.value = optionValue;
+          option.textContent = optionValue;
+          select.appendChild(option);
+        });
+      }
+    };
+
+    // Populate filters in batches to avoid blocking
+    populateSelect(regionSelect, regionOptions, true);
+    populateSelect(quarterSelect, quarterOptions, true);
+    populateSelect(statusSelect, statusOptions, true);
+    populateSelect(programTypeSelect, programTypes, true);
+    populateSelect(strategicPillarSelect, strategicPillars, true);
+    populateSelect(ownerSelect, names, true);
+
+    // Initialize custom multiselects if not already done
+    const selectElements = [
+      regionSelect, quarterSelect, statusSelect, 
+      programTypeSelect, strategicPillarSelect, ownerSelect
+    ].filter(Boolean);
+
+    selectElements.forEach(select => {
+      if (!select._multiselectContainer) {
+        try {
+          createExecutionMultiselect(select);
+        } catch (e) {
+          console.warn("Failed to initialize execution multiselect for", select.id, e);
+        }
+      }
+    });
+
+    console.log("✅ Execution filters populated successfully");
+  }); // Close requestAnimationFrame
 }
 
 // Helper function to update Digital Motions button visual state
@@ -1408,6 +1531,7 @@ window.executionModule = {
   initExecutionGrid,
   setupExecutionSave,
   setupExecutionFilters,
+  prePopulateExecutionFilters, // Add pre-population function
   syncGridsOnEdit,
   applyExecutionFilters,
   getExecutionFilterValues,

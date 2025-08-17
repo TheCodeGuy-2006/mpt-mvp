@@ -889,6 +889,14 @@ window.addEventListener("DOMContentLoaded", () => {
     location.hash = "#planning";
   }
   
+  // Early initialization for faster loading
+  setTimeout(() => {
+    // Initialize calendar early for better perceived performance
+    if (typeof window.calendarModule?.initializeCalendarEarly === "function") {
+      window.calendarModule.initializeCalendarEarly();
+    }
+  }, 50);
+  
   // Trigger initial routing
   setTimeout(() => {
     handleHashChange();
@@ -1097,6 +1105,11 @@ function route() {
       }, 0);
     }
     if (hash === "#execution") {
+      // Pre-populate filters immediately for better UX (no loading delay)
+      if (typeof window.executionModule?.prePopulateExecutionFilters === "function") {
+        window.executionModule.prePopulateExecutionFilters();
+      }
+      
       setTimeout(() => {
         if (window.executionModule && window.executionModule.tableInstance) {
           window.executionModule.tableInstance.redraw(true);
@@ -1115,7 +1128,7 @@ function route() {
               ) {
                 window.executionModule.syncDigitalMotionsFromPlanning();
               }
-              // Initialize filters when execution tab is shown
+              // Initialize filters when execution tab is shown (this will update with dynamic data)
               if (
                 typeof window.executionModule.setupExecutionFilters === "function"
               ) {
@@ -1138,6 +1151,11 @@ function route() {
             }, { timeout: 100 });
           } else {
             setTimeout(() => {
+              // Pre-populate filters immediately
+              if (typeof window.executionModule.prePopulateExecutionFilters === "function") {
+                window.executionModule.prePopulateExecutionFilters();
+              }
+              
               if (
                 typeof window.executionModule.syncDigitalMotionsFromPlanning ===
                 "function"
@@ -1224,6 +1242,11 @@ function route() {
       hash === "#calendar" &&
       typeof window.calendarModule?.handleCalendarRouting === "function"
     ) {
+      // Pre-populate calendar immediately for better UX
+      if (typeof window.calendarModule?.prePopulateCalendar === "function") {
+        window.calendarModule.prePopulateCalendar();
+      }
+      
       window.calendarModule.handleCalendarRouting();
       // Initialize universal search for calendar if not already done
       if (typeof window.calendarModule?.initializeCalendarUniversalSearch === "function") {
