@@ -1039,11 +1039,31 @@ function initializeRoiFunctionality() {
   // Mark ROI tab as active
   isRoiTabActive = true;
   
-  // Only initialize once
+  // If already initialized, force update all components to ensure visibility
   if (roiInitialized) {
-    // Just update the data if already initialized
-    if (typeof populateRoiFilters === 'function') populateRoiFilters();
-    if (typeof updateRoiTotalSpend === 'function') updateRoiTotalSpend();
+    // Force chart re-rendering
+    setTimeout(() => {
+      renderRoiByRegionChart();
+      renderRoiByProgramTypeChart();
+      renderRoiByQuarterChart();
+      
+      // Ensure tab switching is working
+      initRoiTabSwitching();
+      
+      // Update data components
+      if (typeof populateRoiFilters === 'function') populateRoiFilters();
+      if (typeof updateRoiTotalSpend === 'function') updateRoiTotalSpend();
+      
+      // Force budget updates
+      updateRemainingBudget({});
+      updateForecastedBudgetUsage({});
+      
+      // Ensure data table is visible if on ROI tab
+      if (window.location.hash === '#roi' && typeof ensureRoiDataTableInitialized === 'function') {
+        ensureRoiDataTableInitialized();
+      }
+    }, 50);
+    
     return;
   }
   
@@ -1052,11 +1072,9 @@ function initializeRoiFunctionality() {
   // Initialize universal search
   initializeRoiUniversalSearch();
   
+  // Use the new DOM element wait function for more reliable initialization
   setTimeout(() => {
-    renderRoiByRegionChart();
-    renderRoiByProgramTypeChart();
-    renderRoiByQuarterChart();
-    initRoiTabSwitching(); // Initialize ROI tab functionality
+    waitForRoiElementsAndInitialize();
 
     // Populate ROI filters
     populateRoiFilters();
@@ -1716,10 +1734,16 @@ const roiModule = {
   preCachePlanningData, // New function for pre-caching data
   ensureRoiDataTableInitialized, // New function for lazy data table initialization
   getFilterState, // Export filter state function for charts
+  forceRefreshRoiComponents, // Force refresh function for troubleshooting
+  waitForRoiElementsAndInitialize, // Wait for DOM elements before initialization
+  debugRoiState, // Debug function to troubleshoot initialization issues
 };
 
 // Export to window for access from other modules
 window.roiModule = roiModule;
+
+// Make debug function globally accessible
+window.debugRoi = debugRoiState;
 
 // Remaining Budget Calculation Functions
 let budgetsData = null;
@@ -1940,4 +1964,165 @@ async function updateForecastedBudgetUsage(filters) {
       forecastedBudgetEl.textContent = "$0";
     }
   }
+}
+
+// Debug function to troubleshoot ROI initialization issues (available as window.debugRoi)
+function debugRoiState() {
+  console.log('🔍 ROI Debug State:');
+  console.log('- roiInitialized:', roiInitialized);
+  console.log('- isRoiTabActive:', isRoiTabActive);
+  console.log('- Current hash:', window.location.hash);
+  
+  const elements = [
+    'view-roi',
+    'roiRegionChart',
+    'roiQuarterChart', 
+    'roiProgramTypeChartContainer',
+    'roiRegionTabBtn',
+    'roiProgramTypeTabBtn',
+    'roiQuarterTabBtn'
+  ];
+  
+  console.log('🔍 Element Status:');
+  elements.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      const isVisible = element.offsetParent !== null;
+      const computed = window.getComputedStyle(element);
+      console.log(`- ${id}: exists=${!!element}, visible=${isVisible}, display=${computed.display}, visibility=${computed.visibility}`);
+    } else {
+      console.log(`- ${id}: NOT FOUND`);
+    }
+  });
+  
+  console.log('🔍 Chart Instances:');
+  console.log('- roiRegionChartInstance:', !!window.roiRegionChartInstance);
+  console.log('- roiQuarterChartInstance:', !!window.roiQuarterChartInstance);
+  console.log('- roiDataTableInstance:', !!window.roiDataTableInstance);
+  
+  return {
+    roiInitialized,
+    isRoiTabActive,
+    currentHash: window.location.hash,
+    elements: elements.map(id => ({
+      id,
+      exists: !!document.getElementById(id),
+      visible: document.getElementById(id)?.offsetParent !== null
+    }))
+  };
+}
+
+// Wait for DOM elements to be visible before initializing
+function waitForRoiElementsAndInitialize() {
+  const requiredElements = [
+    'roiRegionChart',
+    'roiQuarterChart', 
+    'roiProgramTypeChartContainer',
+    'roiRegionTabBtn',
+    'roiProgramTypeTabBtn',
+    'roiQuarterTabBtn'
+  ];
+  
+  const checkElements = () => {
+    // First check if the chart tabs container is visible
+    const tabsContainer = document.getElementById('roiChartTabsContainer');
+    if (!tabsContainer || tabsContainer.style.display === 'none') {
+      return false;
+    }
+    
+    const missingElements = requiredElements.filter(id => {
+      const element = document.getElementById(id);
+      if (!element) {
+        return true;
+      }
+      
+      // Check if element is actually visible (not just existing)
+      const isVisible = element.offsetParent !== null;
+      if (!isVisible) {
+        return true;
+      }
+      
+      return false;
+    });
+    
+    if (missingElements.length === 0) {
+      // All elements are visible, proceed with initialization
+      setTimeout(() => {
+        renderRoiByRegionChart();
+        renderRoiByProgramTypeChart();
+        renderRoiByQuarterChart();
+        initRoiTabSwitching();
+      }, 50);
+      return true;
+    } else {
+      return false;
+    }
+  };
+  
+  // Try immediately
+  if (!checkElements()) {
+    // If not ready, retry up to 15 times with 200ms intervals (3 seconds total)
+    let attempts = 0;
+    const maxAttempts = 15;
+    
+    const retryInterval = setInterval(() => {
+      attempts++;
+      
+      if (checkElements() || attempts >= maxAttempts) {
+        clearInterval(retryInterval);
+        
+        if (attempts >= maxAttempts) {
+          // Force show the tabs container one more time
+          const tabsContainer = document.getElementById('roiChartTabsContainer');
+          if (tabsContainer) {
+            tabsContainer.style.display = 'block';
+            tabsContainer.style.visibility = 'visible';
+          }
+          
+          renderRoiByRegionChart();
+          renderRoiByProgramTypeChart();
+          renderRoiByQuarterChart();
+          initRoiTabSwitching();
+        }
+      }
+    }, 200);
+  }
+}
+
+// Force refresh all ROI components (charts, tables, data)
+function forceRefreshRoiComponents() {
+  return new Promise((resolve) => {
+    // Set active flag
+    isRoiTabActive = true;
+    
+    // Ensure ROI section is visible
+    const roiSection = document.getElementById('view-roi');
+    if (roiSection) {
+      roiSection.style.display = 'block';
+    }
+    
+    // Use requestAnimationFrame for smoother updates
+    requestAnimationFrame(() => {
+      try {
+        // Use the wait function for more reliable initialization
+        waitForRoiElementsAndInitialize();
+        
+        // Update all data components
+        populateRoiFilters();
+        updateRoiTotalSpend();
+        updateRemainingBudget({});
+        updateForecastedBudgetUsage({});
+        
+        // Ensure data table is initialized if on ROI tab
+        if (window.location.hash === '#roi') {
+          ensureRoiDataTableInitialized();
+        }
+        
+        resolve();
+      } catch (error) {
+        console.error('❌ Error during ROI components force refresh:', error);
+        resolve(); // Still resolve to avoid hanging
+      }
+    });
+  });
 }

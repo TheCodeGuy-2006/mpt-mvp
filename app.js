@@ -946,15 +946,31 @@ function showSection(hash) {
   const targetSection = sectionDisplayCache.get(sectionId);
   if (targetSection) {
     targetSection.style.display = "block";
+    
+    // Special handling for ROI tab - show the chart tabs container
+    if (sectionId === "view-roi") {
+      const roiChartTabsContainer = document.getElementById('roiChartTabsContainer');
+      if (roiChartTabsContainer) {
+        roiChartTabsContainer.style.display = 'block';
+        roiChartTabsContainer.style.visibility = 'visible';
+      }
+    }
   }
 }
 
 // Optimized route function with intelligent caching and reduced operations
 function route() {
+  const currentHash = location.hash;
+  
   // Hide ROI chart tabs container by default for ALL tabs except ROI
   const roiChartTabsContainer = document.getElementById('roiChartTabsContainer');
   if (roiChartTabsContainer) {
-    roiChartTabsContainer.style.display = 'none';
+    if (currentHash === "#roi") {
+      roiChartTabsContainer.style.display = 'block';
+      roiChartTabsContainer.style.visibility = 'visible';
+    } else {
+      roiChartTabsContainer.style.display = 'none';
+    }
   }
   
   // Hide all ROI-specific content by default
@@ -1191,13 +1207,26 @@ function route() {
       hash === "#roi" &&
       typeof window.roiModule.updateRoiTotalSpend === "function"
     ) {
-      // Show ROI chart tabs container only on ROI tab
-      if (roiChartTabsContainer) {
-        roiChartTabsContainer.style.display = '';
+      // Ensure ROI section is visible first
+      const roiSection = document.getElementById('view-roi');
+      if (roiSection) {
+        roiSection.style.display = 'block';
       }
+      
+      // Show ROI chart tabs container immediately
+      if (roiChartTabsContainer) {
+        roiChartTabsContainer.style.display = 'block';
+        roiChartTabsContainer.style.visibility = 'visible';
+      }
+      
       // Mark ROI tab as active for performance optimization
       if (typeof window.roiModule.setRoiTabActive === "function") {
         window.roiModule.setRoiTabActive(true);
+      }
+      
+      // Initialize ROI functionality immediately - no delay
+      if (typeof window.roiModule.initializeRoiFunctionality === "function") {
+        window.roiModule.initializeRoiFunctionality();
       }
       
       setTimeout(() => {
@@ -1213,8 +1242,21 @@ function route() {
         if (typeof window.roiModule.initializeRoiUniversalSearch === "function") {
           window.roiModule.initializeRoiUniversalSearch();
         }
-      }, 0);
-      setTimeout(initRoiTabSwitching, 100); // Initialize tab switching when ROI tab is viewed
+        
+        // Force chart updates to ensure they're visible
+        if (typeof window.roiModule.updateRoiCharts === "function") {
+          window.roiModule.updateRoiCharts();
+        }
+        
+        // As a final safety measure, force refresh all components after a short delay
+        setTimeout(() => {
+          if (typeof window.roiModule.forceRefreshRoiComponents === "function") {
+            window.roiModule.forceRefreshRoiComponents();
+          }
+        }, 300);
+      }, 50); // Reduced delay
+      
+      setTimeout(initRoiTabSwitching, 200); // Initialize tab switching when ROI tab is viewed
       // ...existing code...
     } else {
       // Mark ROI tab as inactive when switching to other tabs

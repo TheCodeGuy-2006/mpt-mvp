@@ -963,6 +963,10 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
 
   // Use the predefined chart container
   const ctx = document.getElementById("roiRegionChart");
+  if (!ctx) {
+    setTimeout(() => renderRoiByRegionChart(), 100);
+    return;
+  }
   if (!ctx) return;
 
   // Destroy previous chart if exists
@@ -1027,6 +1031,10 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
 const renderRoiByProgramTypeChart = chartsPerformanceUtils.debounce(() => {
   // Get the chart container and replace it with a table
   const container = document.getElementById("roiProgramTypeChartContainer");
+  if (!container) {
+    setTimeout(() => renderRoiByProgramTypeChart(), 100);
+    return;
+  }
   if (!container) return;
 
   // Find the chart div and replace it with a table container
@@ -1168,6 +1176,10 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
 
   // Use the predefined chart container
   const ctx = document.getElementById("roiQuarterChart");
+  if (!ctx) {
+    setTimeout(() => renderRoiByQuarterChart(), 100);
+    return;
+  }
   if (!ctx) return;
 
   // Destroy previous chart if exists
@@ -1286,6 +1298,9 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
 // ROI Gauge Chart (optimized with performance settings)
 const updateRoiGauge = chartsPerformanceUtils.throttle((roiPercent) => {
   const ctx = document.getElementById("roiGaugeChart");
+  if (!ctx) {
+    return;
+  }
   if (!ctx) return;
 
   // Destroy existing chart if it exists
@@ -1459,6 +1474,12 @@ const initRoiTabSwitching = chartsPerformanceUtils.debounce(() => {
     "roiProgramTypeChartContainer",
   );
   const quarterPanel = document.getElementById("roiQuarterChartContainer");
+  
+  // Safety check - ensure all required elements exist
+  if (!regionTabBtn || !dataTableTabBtn || !quarterTabBtn || !regionPanel || !dataTablePanel || !quarterPanel) {
+    setTimeout(() => initRoiTabSwitching(), 100);
+    return;
+  }
 
   if (
     !regionTabBtn ||

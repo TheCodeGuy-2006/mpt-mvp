@@ -1573,8 +1573,6 @@ function renderMonthInBatches(monthData, container) {
 
 // Pre-populate calendar with skeleton structure for immediate display
 function prePopulateCalendar() {
-  console.log('🗓️ Pre-populating calendar with skeleton structure...');
-  
   const calendarGrid = document.getElementById("calendarGrid");
   if (!calendarGrid) return;
   
@@ -1658,15 +1656,11 @@ function prePopulateCalendar() {
       
       calendarGrid.appendChild(monthDiv);
     });
-    
-    console.log('✅ Calendar skeleton structure pre-populated');
   });
 }
 
 // Initialize calendar early with DOM-ready optimization
 function initializeCalendarEarly() {
-  console.log('🗓️ Early calendar initialization...');
-  
   // Pre-populate calendar structure immediately
   prePopulateCalendar();
   
@@ -1682,8 +1676,6 @@ function initializeCalendarEarly() {
 
 // Initialize calendar functionality
 function initializeCalendar() {
-  console.log('🗓️ Initializing calendar...');
-  
   // Initialize universal search
   initializeCalendarUniversalSearch();
   
@@ -1717,7 +1709,6 @@ function initializeCalendar() {
     const dataCheckInterval = setInterval(() => {
       const newCampaigns = getCampaignData();
       if (newCampaigns.length > 0) {
-        console.log(`🗓️ Calendar: Planning data now available with ${newCampaigns.length} campaigns - refreshing calendar`);
         clearInterval(dataCheckInterval);
         
         // Update available fiscal years
@@ -1737,7 +1728,6 @@ function initializeCalendar() {
     // Stop checking after 15 seconds (reduced from 30)
     setTimeout(() => {
       clearInterval(dataCheckInterval);
-      console.log('🗓️ Calendar: Stopped waiting for planning data after 15 seconds');
     }, 15000);
   }
 }
@@ -1772,13 +1762,10 @@ function initializeCalendarUniversalSearch() {
       'calendarUniversalSearch',
       {
         onFilterChange: (selectedFilters) => {
-          console.log("🔄 CALENDAR: Search filters changed:", selectedFilters);
           applyCalendarSearchFilters(selectedFilters);
         }
       }
     );
-    
-    console.log("✅ CALENDAR: Universal search initialized successfully!");
     
     // Update search data with current calendar data
     updateCalendarSearchData();
@@ -1791,8 +1778,6 @@ function initializeCalendarUniversalSearch() {
 
 // Apply search filters to calendar view
 function applyCalendarSearchFilters(selectedFilters) {
-  console.log("🔍 CALENDAR: Applying search filters:", selectedFilters);
-  
   // Clear existing universal search filters
   universalCalendarSearchFilters.clear();
   
@@ -1848,8 +1833,6 @@ function updateCalendarSearchData() {
     
     console.log(`🔍 CALENDAR: Generated ${filterOptions.length} filter options`);
     window.calendarUniversalSearch.updateData(filterOptions);
-    console.log("✅ CALENDAR: Search data updated successfully");
-    
   } catch (error) {
     console.error("❌ CALENDAR: Error updating search data:", error);
   }
