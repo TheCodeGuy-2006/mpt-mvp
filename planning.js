@@ -252,7 +252,8 @@ function safeScrollToRow(table, rowIdentifier, position = "top", ifVisible = fal
       return false;
     }
     
-// ...existing code...
+    // Get current table data
+    const data = table.getData ? table.getData() : [];
     if (!data || data.length === 0) {
       console.warn("No data available for scrolling");
       return false;
