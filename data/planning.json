@@ -13,10 +13,14 @@
     "revenuePlay": "Expansion",
     "status": "Shipped",
     "description": "TEST TEST TEST",
-    "__modified": false,
+    "__modified": true,
     "__unsavedPriority": 0,
     "mqlForecast": 12,
-    "pipelineForecast": 292800
+    "pipelineForecast": 292800,
+    "poRaised": "Yes",
+    "actualCost": 21000,
+    "actualLeads": 120,
+    "actualMQLs": 20
   },
   {
     "id": "program-1755752256451",
@@ -32,9 +36,13 @@
     "revenuePlay": "Expansion",
     "status": "Shipped",
     "description": "TEST TEST TEST",
-    "__modified": false,
+    "__modified": true,
     "__unsavedPriority": 0,
     "mqlForecast": 20,
-    "pipelineForecast": 480000
+    "pipelineForecast": 480000,
+    "poRaised": "No",
+    "actualCost": 120000,
+    "actualLeads": 190,
+    "actualMQLs": 20
   }
 ]
