@@ -17,7 +17,11 @@
     "__unsavedPriority": 0,
     "__modified": true,
     "id": "row_1_1755742975703",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "poRaised": "Yes",
+    "actualCost": 9,
+    "actualLeads": 103,
+    "actualMQLs": 10
   },
   {
     "programType": "Localized Programs",
@@ -37,7 +41,11 @@
     "__unsavedPriority": 0,
     "__modified": true,
     "id": "row_3_1755742975703",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "poRaised": "No",
+    "actualCost": 0,
+    "actualLeads": 64,
+    "actualMQLs": 2
   },
   {
     "programType": "Localized Programs",
@@ -57,7 +65,8 @@
     "__unsavedPriority": 0,
     "__modified": false,
     "id": "row_2_1755744192820",
-    "digitalMotions": true
+    "digitalMotions": true,
+    "actualMQLs": ""
   },
   {
     "programType": "Localized Programs",
