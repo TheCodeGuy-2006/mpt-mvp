@@ -15,8 +15,12 @@
     "mqlForecast": 25,
     "pipelineForecast": 600000,
     "__unsavedPriority": 0,
-    "__modified": false,
-    "id": "row_1_1755741562563"
+    "__modified": true,
+    "id": "row_1_1755741562563",
+    "poRaised": "No",
+    "actualCost": 2000,
+    "actualLeads": 230,
+    "actualMQLs": 30
   },
   {
     "programType": "3P Sponsored Events",
