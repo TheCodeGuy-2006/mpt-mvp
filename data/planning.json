@@ -11,7 +11,7 @@
     "description": "1!gh",
     "forecastedCost": 10714,
     "expectedLeads": 250,
-    "status": "Planning",
+    "status": "Cancelled",
     "mqlForecast": 25,
     "pipelineForecast": 600000,
     "__unsavedPriority": 0,
@@ -57,7 +57,7 @@
     "mqlForecast": 0,
     "pipelineForecast": 80000,
     "__unsavedPriority": 0,
-    "__modified": false,
+    "__modified": true,
     "id": "row_3_1755741562563"
   },
   {
