@@ -1241,7 +1241,7 @@ class PlanningDataStore {
       }
 
       // Multiselect filters - check if row value is in the selected array
-      const multiselectFields = ['region', 'quarter', 'status', 'programType', 'strategicPillars', 'owner'];
+      const multiselectFields = ['region', 'quarter', 'status', 'programType', 'strategicPillars', 'owner', 'revenuePlay', 'country'];
       for (const field of multiselectFields) {
         const filterValues = filters[field];
         if (filterValues && Array.isArray(filterValues) && filterValues.length > 0) {
@@ -3285,14 +3285,14 @@ function populatePlanningFilters() {
     };
 
     // Populate filters in batches to avoid blocking
-    populateSelect(regionSelect, regionOptions, true);
+    populateSelect(regionSelect, uniqueRegions.length > 0 ? uniqueRegions : regionOptions, true);
     populateSelect(quarterSelect, quarterOptions.map(normalizeQuarter), true);
     populateSelect(statusSelect, statusOptions, true);
     populateSelect(programTypeSelect, programTypes, true);
     populateSelect(strategicPillarSelect, strategicPillars, true);
-    populateSelect(ownerSelect, names, true);
-    populateSelect(revenuePlaySelect, revenuePlayOptions, true);
-    populateSelect(countrySelect, countryOptions, true);
+    populateSelect(ownerSelect, uniqueOwners.length > 0 ? uniqueOwners : names, true);
+    populateSelect(revenuePlaySelect, uniqueRevenuePlays.length > 0 ? uniqueRevenuePlays : revenuePlayOptions, true);
+    populateSelect(countrySelect, uniqueCountries.length > 0 ? uniqueCountries : countryOptions, true);
 
     // Initialize custom multiselects if not already done
     const selectElements = [
@@ -3671,7 +3671,8 @@ window.planningModule = {
     programTypes,
     strategicPillars,
     names,
-    revenuePlays,
+    revenuePlayOptions,
+    countryOptions,
     fyOptions,
     quarterOptions,
     monthOptions,
