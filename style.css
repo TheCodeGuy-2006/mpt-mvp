@@ -1425,6 +1425,10 @@ table#planTable td input[type="text"]:focus {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.filter-row-additional {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
 /* Filter groups */
 .filter-group {
   display: flex;

@@ -833,10 +833,13 @@ function prePopulateExecutionFilters() {
     const programTypeSelect = document.getElementById("executionProgramTypeFilter");
     const strategicPillarSelect = document.getElementById("executionStrategicPillarFilter");
     const ownerSelect = document.getElementById("executionOwnerFilter");
+    const revenuePlaySelect = document.getElementById("executionRevenuePlayFilter");
+    const countrySelect = document.getElementById("executionCountryFilter");
     const digitalMotionsButton = document.getElementById("executionDigitalMotionsFilter");
 
     if (!regionSelect || !quarterSelect || !statusSelect || 
-        !programTypeSelect || !strategicPillarSelect || !ownerSelect || !digitalMotionsButton) {
+        !programTypeSelect || !strategicPillarSelect || !ownerSelect || 
+        !revenuePlaySelect || !countrySelect || !digitalMotionsButton) {
       console.log("⏳ Execution filter elements not ready yet, will populate later");
       return;
     }
@@ -867,6 +870,14 @@ function prePopulateExecutionFilters() {
     const names = window.planningModule?.constants?.names || [
       "Shruti Narang", "Beverly Leung", "Giorgia Parham", "Tomoko Tanaka",
     ];
+    const revenuePlayOptions = window.planningModule?.constants?.revenuePlayOptions || [
+      "New Logo Acquisition", "Account Expansion", "Customer Retention", "Cross-sell/Upsell", "Market Development", "Partner Channel",
+    ];
+    const countryOptions = window.planningModule?.constants?.countryOptions || [
+      "Afghanistan", "Australia", "Bangladesh", "Bhutan", "Brunei Darussalam", "Cambodia", "China", "Hong Kong", "India", "Indonesia", "Japan", 
+      "Lao People's Democratic Republic", "Malaysia", "Maldives", "Myanmar", "Nepal", "New Zealand", "Pakistan", "Philippines", "Singapore", 
+      "South Korea", "Sri Lanka", "Taiwan", "Thailand", "Vietnam"
+    ];
 
     // Pre-populate with static data immediately for better UX
     const populateSelectFast = (select, options, placeholder) => {
@@ -888,6 +899,8 @@ function prePopulateExecutionFilters() {
     populateSelectFast(programTypeSelect, programTypes, 'Program Types');
     populateSelectFast(strategicPillarSelect, strategicPillars, 'Strategic Pillars');
     populateSelectFast(ownerSelect, names, 'Owners');
+    populateSelectFast(revenuePlaySelect, revenuePlayOptions, 'Revenue Plays');
+    populateSelectFast(countrySelect, countryOptions, 'Countries');
 
     // Initialize Digital Motions button
     if (!digitalMotionsButton.hasAttribute("data-active")) {
@@ -898,7 +911,8 @@ function prePopulateExecutionFilters() {
     // Initialize multiselects immediately
     const selectElements = [
       regionSelect, quarterSelect, statusSelect, 
-      programTypeSelect, strategicPillarSelect, ownerSelect
+      programTypeSelect, strategicPillarSelect, ownerSelect,
+      revenuePlaySelect, countrySelect
     ].filter(Boolean);
 
     selectElements.forEach(select => {
@@ -916,7 +930,7 @@ function prePopulateExecutionFilters() {
 }
 
 // Function to populate execution filter dropdowns (optimized)
-function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names) {
+function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names, revenuePlayOptions, countryOptions) {
   console.log("🔧 Populating execution filters...");
   
   // Set placeholder attributes for custom multiselects
@@ -926,12 +940,15 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
   const programTypeSelect = document.getElementById("executionProgramTypeFilter");
   const strategicPillarSelect = document.getElementById("executionStrategicPillarFilter");
   const ownerSelect = document.getElementById("executionOwnerFilter");
+  const revenuePlaySelect = document.getElementById("executionRevenuePlayFilter");
+  const countrySelect = document.getElementById("executionCountryFilter");
 
   if (!regionSelect || !quarterSelect || !statusSelect || 
-      !programTypeSelect || !strategicPillarSelect || !ownerSelect) {
+      !programTypeSelect || !strategicPillarSelect || !ownerSelect ||
+      !revenuePlaySelect || !countrySelect) {
     console.warn("⚠️ Some execution filter elements not found, retrying in 100ms (reduced delay)");
     setTimeout(() => {
-      populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names);
+      populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names, revenuePlayOptions, countryOptions);
     }, 100); // Reduced from potential longer delays
     return;
   }
@@ -1158,6 +1175,8 @@ function setupExecutionFilterLogic() {
           programType: [],
           strategicPillar: [],
           owner: [],
+          revenuePlay: [],
+          country: [],
           fiscalYear: [],
           digitalMotions: false
         };
@@ -1189,6 +1208,8 @@ let universalExecutionSearchFilters = {
   programType: [],
   strategicPillar: [],
   owner: [],
+  revenuePlay: [],
+  country: [],
   fiscalYear: [],
   digitalMotions: false
 };
@@ -1220,6 +1241,8 @@ function getExecutionFilterValues() {
     programType: getSelectedValues("executionProgramTypeFilter"),
     strategicPillar: getSelectedValues("executionStrategicPillarFilter"),
     owner: getSelectedValues("executionOwnerFilter"),
+    revenuePlay: getSelectedValues("executionRevenuePlayFilter"),
+    country: getSelectedValues("executionCountryFilter"),
     digitalMotions: digitalMotionsActive,
   };
 
@@ -1231,6 +1254,8 @@ function getExecutionFilterValues() {
     programType: [...new Set([...dropdownFilterValues.programType, ...universalExecutionSearchFilters.programType])],
     strategicPillar: [...new Set([...dropdownFilterValues.strategicPillar, ...universalExecutionSearchFilters.strategicPillar])],
     owner: [...new Set([...dropdownFilterValues.owner, ...universalExecutionSearchFilters.owner])],
+    revenuePlay: [...new Set([...dropdownFilterValues.revenuePlay, ...universalExecutionSearchFilters.revenuePlay])],
+    country: [...new Set([...dropdownFilterValues.country, ...universalExecutionSearchFilters.country])],
     digitalMotions: digitalMotionsActive || !!universalExecutionSearchFilters.digitalMotions,
   };
 
