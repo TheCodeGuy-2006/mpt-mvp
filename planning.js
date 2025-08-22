@@ -485,6 +485,23 @@ const strategicPillars = [
   "New Logo Acquisition",
 ];
 
+const revenuePlayOptions = [
+  "New Logo Acquisition",
+  "Account Expansion",
+  "Customer Retention",
+  "Cross-sell/Upsell",
+  "Market Development",
+  "Partner Channel",
+];
+
+const countryOptions = [
+  "Afghanistan", "Australia", "Bangladesh", "Bhutan", "Brunei Darussalam", 
+  "Cambodia", "China", "Hong Kong", "India", "Indonesia", "Japan", 
+  "Lao People's Democratic Republic", "Malaysia", "Maldives", "Myanmar", 
+  "Nepal", "New Zealand", "Pakistan", "Philippines", "Singapore", 
+  "South Korea", "Sri Lanka", "Taiwan", "Thailand", "Vietnam"
+];
+
 const names = [
   "Shruti Narang",
   "Beverly Leung",
@@ -3187,10 +3204,13 @@ function populatePlanningFilters() {
   const programTypeSelect = document.getElementById("planningProgramTypeFilter");
   const strategicPillarSelect = document.getElementById("planningStrategicPillarFilter");
   const ownerSelect = document.getElementById("planningOwnerFilter");
+  const revenuePlaySelect = document.getElementById("planningRevenuePlayFilter");
+  const countrySelect = document.getElementById("planningCountryFilter");
   const digitalMotionsButton = document.getElementById("planningDigitalMotionsFilter");
 
   if (!regionSelect || !quarterSelect || !statusSelect || 
-      !programTypeSelect || !strategicPillarSelect || !ownerSelect || !digitalMotionsButton) {
+      !programTypeSelect || !strategicPillarSelect || !ownerSelect || 
+      !revenuePlaySelect || !countrySelect || !digitalMotionsButton) {
     console.warn("⚠️ Some filter elements not found, retrying in 100ms (reduced delay)");
     setTimeout(populatePlanningFilters, 100); // Reduced from 500ms to 100ms
     return;
@@ -3215,6 +3235,12 @@ function populatePlanningFilters() {
   const uniqueOwners = planningData.length > 0 ? 
     Array.from(new Set(planningData.map((c) => c.owner).filter(Boolean))).sort() : 
     [];
+  const uniqueRevenuePlays = planningData.length > 0 ? 
+    Array.from(new Set(planningData.map((c) => c.revenuePlay).filter(Boolean))).sort() : 
+    [];
+  const uniqueCountries = planningData.length > 0 ? 
+    Array.from(new Set(planningData.map((c) => c.country).filter(Boolean))).sort() : 
+    [];
 
   // Set placeholder attributes for custom multiselects with visual feedback
   regionSelect.setAttribute('data-placeholder', 'Regions');
@@ -3223,6 +3249,8 @@ function populatePlanningFilters() {
   programTypeSelect.setAttribute('data-placeholder', 'Program Types');
   strategicPillarSelect.setAttribute('data-placeholder', 'Strategic Pillars');
   ownerSelect.setAttribute('data-placeholder', 'Owners');
+  revenuePlaySelect.setAttribute('data-placeholder', 'Revenue Plays');
+  countrySelect.setAttribute('data-placeholder', 'Countries');
 
   // Add loading state visual feedback during filter population
   const showFilterLoadingState = (select) => {
@@ -3236,7 +3264,7 @@ function populatePlanningFilters() {
   };
 
   // Show loading state for empty filters
-  [regionSelect, quarterSelect, statusSelect, programTypeSelect, strategicPillarSelect, ownerSelect].forEach(showFilterLoadingState);
+  [regionSelect, quarterSelect, statusSelect, programTypeSelect, strategicPillarSelect, ownerSelect, revenuePlaySelect, countrySelect].forEach(showFilterLoadingState);
 
   // Use requestAnimationFrame to populate filters without blocking
   requestAnimationFrame(() => {
@@ -3263,11 +3291,14 @@ function populatePlanningFilters() {
     populateSelect(programTypeSelect, programTypes, true);
     populateSelect(strategicPillarSelect, strategicPillars, true);
     populateSelect(ownerSelect, names, true);
+    populateSelect(revenuePlaySelect, revenuePlayOptions, true);
+    populateSelect(countrySelect, countryOptions, true);
 
     // Initialize custom multiselects if not already done
     const selectElements = [
       regionSelect, quarterSelect, statusSelect, 
-      programTypeSelect, strategicPillarSelect, ownerSelect
+      programTypeSelect, strategicPillarSelect, ownerSelect,
+      revenuePlaySelect, countrySelect
     ];
 
     selectElements.forEach(select => {
@@ -3348,6 +3379,8 @@ function populatePlanningFilters() {
         programType: [],
         strategicPillars: [],
         owner: [],
+        revenuePlay: [],
+        country: [],
         fiscalYear: []
       };
       
@@ -3370,6 +3403,8 @@ function populatePlanningFilters() {
     (currentFilters.programType && currentFilters.programType.length > 0) || 
     (currentFilters.strategicPillars && currentFilters.strategicPillars.length > 0) || 
     (currentFilters.owner && currentFilters.owner.length > 0) || 
+    (currentFilters.revenuePlay && currentFilters.revenuePlay.length > 0) || 
+    (currentFilters.country && currentFilters.country.length > 0) || 
     currentFilters.digitalMotions;
 
   if (hasActiveFilters) {
@@ -3385,6 +3420,8 @@ let universalSearchFilters = {
   programType: [],
   strategicPillars: [],
   owner: [],
+  revenuePlay: [],
+  country: [],
   fiscalYear: [],
   digitalMotions: false
 };
@@ -3416,6 +3453,8 @@ function getPlanningFilterValues() {
     programType: getSelectedValues("planningProgramTypeFilter"),
     strategicPillars: getSelectedValues("planningStrategicPillarFilter"),
     owner: getSelectedValues("planningOwnerFilter"),
+    revenuePlay: getSelectedValues("planningRevenuePlayFilter"),
+    country: getSelectedValues("planningCountryFilter"),
     digitalMotions: digitalMotionsActive,
   };
 
@@ -3427,6 +3466,8 @@ function getPlanningFilterValues() {
     programType: [...new Set([...dropdownFilterValues.programType, ...universalSearchFilters.programType])],
     strategicPillars: [...new Set([...dropdownFilterValues.strategicPillars, ...universalSearchFilters.strategicPillars])],
     owner: [...new Set([...dropdownFilterValues.owner, ...universalSearchFilters.owner])],
+    revenuePlay: [...new Set([...dropdownFilterValues.revenuePlay, ...universalSearchFilters.revenuePlay])],
+    country: [...new Set([...dropdownFilterValues.country, ...universalSearchFilters.country])],
     digitalMotions: digitalMotionsActive || !!universalSearchFilters.digitalMotions,
   };
 
