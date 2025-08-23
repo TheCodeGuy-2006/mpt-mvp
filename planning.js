@@ -3347,6 +3347,22 @@ function populatePlanningFilters() {
   const clearButton = document.getElementById("planningClearFilters");
   if (clearButton && !clearButton.hasAttribute("data-listener-attached")) {
     clearButton.addEventListener("click", () => {
+      // Get all select elements
+      const regionSelect = document.getElementById("planningRegionFilter");
+      const quarterSelect = document.getElementById("planningQuarterFilter");
+      const statusSelect = document.getElementById("planningStatusFilter");
+      const programTypeSelect = document.getElementById("planningProgramTypeFilter");
+      const strategicPillarSelect = document.getElementById("planningStrategicPillarFilter");
+      const ownerSelect = document.getElementById("planningOwnerFilter");
+      const revenuePlaySelect = document.getElementById("planningRevenuePlayFilter");
+      const countrySelect = document.getElementById("planningCountryFilter");
+      
+      const selectElements = [
+        regionSelect, quarterSelect, statusSelect, 
+        programTypeSelect, strategicPillarSelect, ownerSelect,
+        revenuePlaySelect, countrySelect
+      ];
+      
       // Clear all multiselect values
       selectElements.forEach(select => {
         if (select && select.multiple) {
@@ -3381,12 +3397,22 @@ function populatePlanningFilters() {
         owner: [],
         revenuePlay: [],
         country: [],
-        fiscalYear: []
+        fiscalYear: [],
+        digitalMotions: false
       };
       
       // Clear universal search display if it exists
       if (window.planningUniversalSearch && typeof window.planningUniversalSearch.clearAllFilters === 'function') {
         window.planningUniversalSearch.clearAllFilters();
+      }
+      
+      // Clear description keyword search input
+      const descriptionSearchInput = document.getElementById('planning-description-search');
+      if (descriptionSearchInput) {
+        descriptionSearchInput.value = '';
+        // Trigger the search to clear the description filters
+        const event = new Event('input', { bubbles: true });
+        descriptionSearchInput.dispatchEvent(event);
       }
       
       // Apply filters (which will show all data since no filters are selected)
@@ -3460,14 +3486,14 @@ function getPlanningFilterValues() {
 
   // Combine dropdown filters with universal search filters
   const filterValues = {
-    region: [...new Set([...dropdownFilterValues.region, ...universalSearchFilters.region])],
-    quarter: [...new Set([...dropdownFilterValues.quarter, ...universalSearchFilters.quarter])],
-    status: [...new Set([...dropdownFilterValues.status, ...universalSearchFilters.status])],
-    programType: [...new Set([...dropdownFilterValues.programType, ...universalSearchFilters.programType])],
-    strategicPillars: [...new Set([...dropdownFilterValues.strategicPillars, ...universalSearchFilters.strategicPillars])],
-    owner: [...new Set([...dropdownFilterValues.owner, ...universalSearchFilters.owner])],
-    revenuePlay: [...new Set([...dropdownFilterValues.revenuePlay, ...universalSearchFilters.revenuePlay])],
-    country: [...new Set([...dropdownFilterValues.country, ...universalSearchFilters.country])],
+    region: [...new Set([...dropdownFilterValues.region, ...(Array.isArray(universalSearchFilters.region) ? universalSearchFilters.region : [])])],
+    quarter: [...new Set([...dropdownFilterValues.quarter, ...(Array.isArray(universalSearchFilters.quarter) ? universalSearchFilters.quarter : [])])],
+    status: [...new Set([...dropdownFilterValues.status, ...(Array.isArray(universalSearchFilters.status) ? universalSearchFilters.status : [])])],
+    programType: [...new Set([...dropdownFilterValues.programType, ...(Array.isArray(universalSearchFilters.programType) ? universalSearchFilters.programType : [])])],
+    strategicPillars: [...new Set([...dropdownFilterValues.strategicPillars, ...(Array.isArray(universalSearchFilters.strategicPillars) ? universalSearchFilters.strategicPillars : [])])],
+    owner: [...new Set([...dropdownFilterValues.owner, ...(Array.isArray(universalSearchFilters.owner) ? universalSearchFilters.owner : [])])],
+    revenuePlay: [...new Set([...dropdownFilterValues.revenuePlay, ...(Array.isArray(universalSearchFilters.revenuePlay) ? universalSearchFilters.revenuePlay : [])])],
+    country: [...new Set([...dropdownFilterValues.country, ...(Array.isArray(universalSearchFilters.country) ? universalSearchFilters.country : [])])],
     digitalMotions: digitalMotionsActive || !!universalSearchFilters.digitalMotions,
   };
 
@@ -4044,6 +4070,8 @@ function applyPlanningSearchFilters(selectedFilters) {
       programType: [],
       strategicPillars: [],
       owner: [],
+      revenuePlay: [],
+      country: [],
       fiscalYear: [],
       digitalMotions: false
     };
