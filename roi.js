@@ -335,8 +335,8 @@ function updateRoiTotalSpend() {
     }
     if (!isNaN(leadsVal)) totalLeads += Number(leadsVal);
 
-    // Total MQL calculation
-    let mqlVal = row.actualMQLs || row.mqlForecast;
+    // Total MQL calculation - use only actual MQLs from execution data
+    let mqlVal = row.actualMQLs || 0; // Only use actual MQLs, not forecast
     if (typeof mqlVal === "string") {
       mqlVal = Number(mqlVal.toString().replace(/[^\d.-]/g, ""));
     }
@@ -603,10 +603,10 @@ updateRoiTotalSpend = function () {
     roiEl.textContent = isNaN(roiPercent) ? "0%" : roiPercent.toFixed(1) + "%";
   }
 
-  // Update Total MQL value
+  // Update Total MQL value - use only actual MQLs from execution data
   let totalMql = 0;
   totalMql = filteredData.reduce((sum, row) => {
-    let val = row.actualMQLs || row.mqlForecast; // Use actual MQLs if available, otherwise forecast
+    let val = row.actualMQLs || 0; // Only use actual MQLs, not forecast
     if (typeof val === "string")
       val = Number(val.toString().replace(/[^\d.-]/g, ""));
     if (!isNaN(val)) sum += Number(val);
