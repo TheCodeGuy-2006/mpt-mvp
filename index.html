@@ -65,7 +65,7 @@
         </div>
         <div class="section-content">
           <!-- Planning Filters Section -->
-          <div id="planningFilters" class="filter-container">
+          <div id="planningFilters" class="filter-container filter-card">
             <div class="filter-content">
               <!-- Universal Search Filter -->
               <div id="planningUniversalSearch"></div>
@@ -198,7 +198,7 @@
         </div>
         <div class="section-content">
           <!-- Execution Filters -->
-          <div id="executionFilters" class="filter-container">
+          <div id="executionFilters" class="filter-container filter-card">
             <div class="filter-content">
               <!-- Universal Search Filter -->
               <div id="executionUniversalSearch"></div>
@@ -341,7 +341,7 @@
           <div id="calendarUniversalSearch"></div>
           
           <!-- Calendar Filters Card -->
-          <div class="content-card spaced-element">
+          <div class="content-card filter-card spaced-element">
             <div class="content-card-header">
               <i class="octicon octicon-filter" aria-hidden="true"></i>
               <h2>Calendar Filters</h2>
@@ -572,7 +572,7 @@
           <div id="roiUniversalSearch"></div>
           
           <!-- ROI Filters Card -->
-          <div class="content-card spaced-element">
+          <div class="content-card filter-card spaced-element">
             <div class="content-card-header">
               <i class="octicon octicon-filter" aria-hidden="true"></i>
               <h2>Performance Filters</h2>
@@ -582,44 +582,44 @@
                 <div class="filter-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; width: 100%;">
                   <div class="filter-group">
                     <label for="roiRegionFilter">Filter by Region:</label>
-                    <select id="roiRegionFilter" multiple data-placeholder="Regions">
+                    <select id="roiRegionFilter" class="filter-select" multiple data-placeholder="Regions">
                     </select>
                   </div>
                   <div class="filter-group">
                     <label for="roiQuarterFilter">Filter by Quarter:</label>
-                    <select id="roiQuarterFilter" multiple data-placeholder="Quarters">
+                    <select id="roiQuarterFilter" class="filter-select" multiple data-placeholder="Quarters">
                     </select>
                   </div>
                   <div class="filter-group">
                     <label for="roiCountryFilter">Country:</label>
-                    <select id="roiCountryFilter" multiple data-placeholder="Countries">
+                    <select id="roiCountryFilter" class="filter-select" multiple data-placeholder="Countries">
                     </select>
                   </div>
                   <div class="filter-group">
                     <label for="roiOwnerFilter">Owner:</label>
-                    <select id="roiOwnerFilter" multiple data-placeholder="Owners">
+                    <select id="roiOwnerFilter" class="filter-select" multiple data-placeholder="Owners">
                     </select>
                   </div>
                 </div>
                 <div class="filter-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; width: 100%; margin-top: 16px;">
                   <div class="filter-group">
                     <label for="roiStatusFilter">Status:</label>
-                    <select id="roiStatusFilter" multiple data-placeholder="Statuses">
+                    <select id="roiStatusFilter" class="filter-select" multiple data-placeholder="Statuses">
                     </select>
                   </div>
                   <div class="filter-group">
                     <label for="roiProgramTypeFilter">Program Type:</label>
-                    <select id="roiProgramTypeFilter" multiple data-placeholder="Program Types">
+                    <select id="roiProgramTypeFilter" class="filter-select" multiple data-placeholder="Program Types">
                     </select>
                   </div>
                   <div class="filter-group">
                     <label for="roiStrategicPillarsFilter">Strategic Pillars:</label>
-                    <select id="roiStrategicPillarsFilter" multiple data-placeholder="Strategic Pillars">
+                    <select id="roiStrategicPillarsFilter" class="filter-select" multiple data-placeholder="Strategic Pillars">
                     </select>
                   </div>
                   <div class="filter-group">
                     <label for="roiRevenuePlayFilter">Revenue Play:</label>
-                    <select id="roiRevenuePlayFilter" multiple data-placeholder="Revenue Plays">
+                    <select id="roiRevenuePlayFilter" class="filter-select" multiple data-placeholder="Revenue Plays">
                     </select>
                   </div>
                 </div>

@@ -730,8 +730,20 @@ function populateRoiFilters() {
   const strategicPillarsSelect = document.getElementById("roiStrategicPillarsFilter");
   const revenuePlaySelect = document.getElementById("roiRevenuePlayFilter");
 
-  if (!regionSelect || !quarterSelect || !countrySelect || !ownerSelect || 
-      !statusSelect || !programTypeSelect || !strategicPillarsSelect || !revenuePlaySelect) {
+  // Check which elements are missing
+  const filterSelectElements = [
+    { name: 'regionSelect', element: regionSelect },
+    { name: 'quarterSelect', element: quarterSelect },
+    { name: 'countrySelect', element: countrySelect },
+    { name: 'ownerSelect', element: ownerSelect },
+    { name: 'statusSelect', element: statusSelect },
+    { name: 'programTypeSelect', element: programTypeSelect },
+    { name: 'strategicPillarsSelect', element: strategicPillarsSelect },
+    { name: 'revenuePlaySelect', element: revenuePlaySelect }
+  ];
+
+  const missingElements = filterSelectElements.filter(s => !s.element);
+  if (missingElements.length > 0) {
     return;
   }
 
@@ -800,6 +812,17 @@ function populateRoiFilters() {
   populateSelect(strategicPillarsSelect, cachedFilterOptions.strategicPillarsOptions, strategicPillarsSelect.children.length > 0);
   populateSelect(revenuePlaySelect, cachedFilterOptions.revenuePlayOptions, revenuePlaySelect.children.length > 0);
 
+  console.log('ROI Filter options populated:', {
+    regions: cachedFilterOptions.regionOptions.length,
+    quarters: cachedFilterOptions.quarterOptions.length,
+    countries: cachedFilterOptions.countryOptions.length,
+    owners: cachedFilterOptions.ownerOptions.length,
+    statuses: cachedFilterOptions.statusOptions.length,
+    programTypes: cachedFilterOptions.programTypeOptions.length,
+    strategicPillars: cachedFilterOptions.strategicPillarsOptions.length,
+    revenuePlays: cachedFilterOptions.revenuePlayOptions.length
+  });
+
   // Initialize custom multiselects if not already done
   const selectElements = [
     regionSelect, quarterSelect, countrySelect, ownerSelect, 
@@ -808,7 +831,16 @@ function populateRoiFilters() {
 
   selectElements.forEach(select => {
     if (!select._multiselectContainer) {
-      createRoiMultiselect(select);
+      // Use planning module's multiselect if available, otherwise fall back to ROI implementation
+      if (window.planningModule && typeof window.planningModule.createMultiselect === 'function') {
+        console.log('Using planning multiselect for:', select.id);
+        window.planningModule.createMultiselect(select);
+      } else {
+        console.log('Using ROI multiselect for:', select.id);
+        createRoiMultiselect(select);
+      }
+    } else {
+      console.log('Multiselect already exists for:', select.id);
     }
   });
 
@@ -1075,6 +1107,57 @@ function initializeRoiFunctionality() {
   
   // Initialize universal search
   initializeRoiUniversalSearch();
+  
+  // Set up a data watcher to repopulate filters when planning data becomes available
+  let dataCheckAttempts = 0;
+  const maxDataCheckAttempts = 50; // Check for up to 5 seconds
+  
+  // Clear cached data to force repopulation with fresh data
+  const checkForPlanningData = () => {
+    dataCheckAttempts++;
+    
+    if (window.planningModule?.tableInstance) {
+      const planningData = window.planningModule.tableInstance.getData();
+      if (planningData && planningData.length > 0) {
+        // Clear cached data to force repopulation
+        cachedPlanningData = null;
+        cachedFilterOptions = null;
+        
+        // Force recreate multiselects with fresh data
+        const selectElements = [
+          document.getElementById("roiRegionFilter"),
+          document.getElementById("roiQuarterFilter"), 
+          document.getElementById("roiCountryFilter"),
+          document.getElementById("roiOwnerFilter"),
+          document.getElementById("roiStatusFilter"),
+          document.getElementById("roiProgramTypeFilter"),
+          document.getElementById("roiStrategicPillarsFilter"),
+          document.getElementById("roiRevenuePlayFilter")
+        ].filter(Boolean);
+        
+        // Destroy existing multiselects
+        selectElements.forEach(select => {
+          if (select._multiselectAPI) {
+            select._multiselectAPI.destroy();
+          }
+        });
+        
+        // Repopulate filters with new data
+        populateRoiFilters();
+        
+        console.log('ROI filters repopulated with planning data');
+        return; // Stop checking
+      }
+    }
+    
+    // Continue checking if data not available and we haven't reached max attempts
+    if (dataCheckAttempts < maxDataCheckAttempts) {
+      setTimeout(checkForPlanningData, 100);
+    }
+  };
+  
+  // Start checking for planning data
+  setTimeout(checkForPlanningData, 100);
   
   // Use the new DOM element wait function for more reliable initialization
   setTimeout(() => {

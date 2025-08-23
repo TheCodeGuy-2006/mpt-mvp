@@ -441,10 +441,30 @@ section {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #d0d7de;
   margin-bottom: 20px;
-  overflow: hidden;
+  overflow: hidden; /* Default overflow hidden */
   transition: 
     box-shadow 0.3s ease,
     transform 0.2s ease;
+}
+
+/* Specific override for filter cards to allow dropdown overflow */
+.content-card.filter-card {
+  overflow: visible;
+}
+
+/* Alternative selectors for filter containers */
+div[id*="Filter"]:not(.content-card),
+div[id*="Filters"]:not(.content-card) {
+  overflow: visible !important;
+}
+
+/* Ensure filter containers themselves allow overflow */
+.filter-container,
+#calendarFilters,
+#planningFilters, 
+#executionFilters,
+#roiFiltersDiv {
+  overflow: visible !important;
 }
 
 .content-card:hover {
@@ -1644,9 +1664,9 @@ table#planTable td input[type="text"]:focus {
   border-radius: 0 0 6px 6px;
   max-height: 200px;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 9999;
   display: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .multiselect-dropdown.open {
