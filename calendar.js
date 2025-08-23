@@ -847,10 +847,18 @@ function clearAllFilters() {
       Array.from(element.options).forEach(option => option.selected = false);
       
       // Update multiselect display if it exists
-      if (element._multiselectContainer) {
+      if (element._multiselectAPI) {
+        // Use the multiselect API to properly clear the values
+        element._multiselectAPI.setSelectedValues([]);
+      } else if (element._multiselectContainer) {
+        // Fallback for older multiselect implementation
         const display = element._multiselectContainer.querySelector('.multiselect-display');
         if (display) {
-          display.innerHTML = element.getAttribute('data-placeholder') || 'Select options...';
+          display.innerHTML = '';
+          const placeholder = document.createElement('span');
+          placeholder.className = 'multiselect-placeholder';
+          placeholder.textContent = `(All ${element.getAttribute('data-placeholder') || 'Options'})`;
+          display.appendChild(placeholder);
         }
         
         // Update checkboxes in dropdown
@@ -863,9 +871,11 @@ function clearAllFilters() {
   // Clear universal search filters
   universalCalendarSearchFilters.clear();
   if (window.calendarUniversalSearch) {
-    window.calendarUniversalSearch.clearFilters();
+    window.calendarUniversalSearch.clearAllFilters();
   }
 
+  // Apply the cleared filters to ensure state synchronization
+  applyFilters();
   updateFilterSummary();
   renderCalendar();
 }
