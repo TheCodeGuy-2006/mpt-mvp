@@ -2972,7 +2972,7 @@ function createMultiselect(selectElement) {
           const tag = document.createElement('span');
           tag.className = 'multiselect-tag';
           tag.innerHTML = `
-            ${option.text}
+            <span class="multiselect-tag-text">${option.text}</span>
             <span class="multiselect-tag-remove" data-value="${value}">×</span>
           `;
           selectedContainer.appendChild(tag);
@@ -2990,7 +2990,7 @@ function createMultiselect(selectElement) {
         const tag = document.createElement('span');
         tag.className = 'multiselect-tag';
         tag.innerHTML = `
-          ${firstOption.text}
+          <span class="multiselect-tag-text">${firstOption.text}</span>
           <span class="multiselect-tag-remove" data-value="${firstOption.value}">×</span>
         `;
         selectedContainer.appendChild(tag);

@@ -79,7 +79,7 @@ function createCalendarMultiselect(selectElement) {
           const tag = document.createElement('span');
           tag.className = 'multiselect-tag';
           tag.innerHTML = `
-            ${option.text}
+            <span class="multiselect-tag-text">${option.text}</span>
             <span class="multiselect-tag-remove" data-value="${value}">×</span>
           `;
           selectedContainer.appendChild(tag);
@@ -97,7 +97,7 @@ function createCalendarMultiselect(selectElement) {
         const tag = document.createElement('span');
         tag.className = 'multiselect-tag';
         tag.innerHTML = `
-          ${firstOption.text}
+          <span class="multiselect-tag-text">${firstOption.text}</span>
           <span class="multiselect-tag-remove" data-value="${firstOption.value}">×</span>
         `;
         selectedContainer.appendChild(tag);
@@ -255,6 +255,35 @@ const universalCalendarSearchFilters = new Map();
 function normalizeQuarter(quarter) {
   if (!quarter || typeof quarter !== 'string') return quarter;
   return quarter.replace(/\s*-\s*/, ' ');
+}
+
+// Sort quarters in chronological order (fiscal year order: July to June)
+function sortQuartersChronologically(quarters) {
+  const monthOrder = {
+    'July': 1,
+    'August': 2,
+    'September': 3,
+    'October': 4,
+    'November': 5,
+    'December': 6,
+    'January': 7,
+    'February': 8,
+    'March': 9,
+    'April': 10,
+    'May': 11,
+    'June': 12
+  };
+
+  return quarters.sort((a, b) => {
+    // Extract month name from quarter strings like "Q1 July" or "Q2 November"
+    const monthA = a.split(' ').pop();
+    const monthB = b.split(' ').pop();
+    
+    const orderA = monthOrder[monthA] || 999;
+    const orderB = monthOrder[monthB] || 999;
+    
+    return orderA - orderB;
+  });
 }
 
 // Performance cache for calendar data
@@ -470,7 +499,7 @@ function getFilterOptions() {
     programTypes: Array.from(options.programTypes).sort(),
     strategicPillars: Array.from(options.strategicPillars).sort(),
     revenuePlays: Array.from(options.revenuePlays).sort(),
-    quarters: Array.from(options.quarters).sort(),
+    quarters: sortQuartersChronologically(Array.from(options.quarters)),
   };
 }
 

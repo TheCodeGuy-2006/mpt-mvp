@@ -55,7 +55,7 @@ function createRoiMultiselect(selectElement) {
           const tag = document.createElement('span');
           tag.className = 'multiselect-tag';
           tag.innerHTML = `
-            ${option.text}
+            <span class="multiselect-tag-text">${option.text}</span>
             <span class="multiselect-tag-remove" data-value="${value}">×</span>
           `;
           selectedContainer.appendChild(tag);
@@ -73,7 +73,7 @@ function createRoiMultiselect(selectElement) {
         const tag = document.createElement('span');
         tag.className = 'multiselect-tag';
         tag.innerHTML = `
-          ${firstOption.text}
+          <span class="multiselect-tag-text">${firstOption.text}</span>
           <span class="multiselect-tag-remove" data-value="${firstOption.value}">×</span>
         `;
         selectedContainer.appendChild(tag);
@@ -824,13 +824,17 @@ function populateRoiFilters() {
     if (clearButton && !clearButton.hasEventListener) {
       clearButton.hasEventListener = true;
       clearButton.addEventListener("click", () => {
-        // Clear all multiselects
+        // Clear all multiselects using the proper API
         selectElements.forEach(select => {
           // Clear select element
           Array.from(select.options).forEach(option => option.selected = false);
           
           // Update multiselect display if it exists
-          if (select._multiselectContainer) {
+          if (select._multiselectAPI) {
+            // Use the multiselect API to properly clear the values
+            select._multiselectAPI.setSelectedValues([]);
+          } else if (select._multiselectContainer) {
+            // Fallback for older multiselect implementation
             const display = select._multiselectContainer.querySelector('.multiselect-display');
             if (display) {
               const placeholder = document.createElement('span');
@@ -853,7 +857,7 @@ function populateRoiFilters() {
         // Clear universal search filters
         universalRoiSearchFilters.clear();
         if (window.roiUniversalSearch) {
-          window.roiUniversalSearch.clearFilters();
+          window.roiUniversalSearch.clearAllFilters();
         }
         
         // Reset filter state and force update

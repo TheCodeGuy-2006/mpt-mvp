@@ -1576,6 +1576,15 @@ table#planTable td input[type="text"]:focus {
   overflow: hidden;
 }
 
+/* Multiselect container improvements */
+.multiselect-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+
 .multiselect-tag {
   background: #0969da;
   color: white;
@@ -1586,7 +1595,15 @@ table#planTable td input[type="text"]:focus {
   display: flex;
   align-items: center;
   gap: 4px;
-  max-width: 120px;
+  max-width: 150px;
+  min-width: 0; /* Allow flex items to shrink */
+  flex-shrink: 0; /* Prevent individual tags from shrinking too much */
+}
+
+/* Text portion of the tag - can be truncated */
+.multiselect-tag-text {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -1594,10 +1611,12 @@ table#planTable td input[type="text"]:focus {
 .multiselect-tag-remove {
   cursor: pointer;
   font-weight: bold;
-  margin-left: 4px;
   padding: 0 2px;
   border-radius: 2px;
   transition: background 0.2s ease;
+  flex-shrink: 0; /* Never shrink the remove button */
+  margin-left: 2px;
+  line-height: 1;
 }
 
 .multiselect-tag-remove:hover {
