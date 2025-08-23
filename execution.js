@@ -1760,6 +1760,12 @@ function initializeExecutionUniversalSearch() {
   if (!window.UniversalSearchFilter) {
     console.error("❌ EXECUTION: UniversalSearchFilter class not found!");
     console.log("Available on window:", Object.keys(window).filter(k => k.includes('Search') || k.includes('Universal')));
+    // Retry after a short delay
+    setTimeout(() => {
+      if (window.UniversalSearchFilter) {
+        initializeExecutionUniversalSearch();
+      }
+    }, 100);
     return;
   }
   
@@ -1770,6 +1776,13 @@ function initializeExecutionUniversalSearch() {
   if (!container) {
     console.error("❌ EXECUTION: Container 'executionUniversalSearch' not found in DOM!");
     console.log("Available elements with 'execution' in id:", Array.from(document.querySelectorAll('[id*="execution"]')).map(el => el.id));
+    // Retry after a short delay
+    setTimeout(() => {
+      const retryContainer = document.getElementById('executionUniversalSearch');
+      if (retryContainer) {
+        initializeExecutionUniversalSearch();
+      }
+    }, 100);
     return;
   }
   
@@ -1857,8 +1870,37 @@ function updateExecutionSearchData() {
     return;
   }
   
-  if (!executionTableInstance) {
-    console.warn("⚠️ EXECUTION: Execution table instance not available yet");
+  // Get table instance with multiple fallback options
+  let tableInstance = executionTableInstance || window.executionModule?.tableInstance || window.executionTableInstance;
+  
+  if (!tableInstance) {
+    console.warn("⚠️ EXECUTION: No execution table instance available, retrying...");
+    
+    // Implement exponential backoff retry (try 3 times with increasing delays)
+    let retryCount = 0;
+    const maxRetries = 3;
+    const baseDelay = 200;
+    
+    const retryUpdate = () => {
+      retryCount++;
+      const delay = baseDelay * Math.pow(2, retryCount - 1); // 200ms, 400ms, 800ms
+      
+      setTimeout(() => {
+        tableInstance = executionTableInstance || window.executionModule?.tableInstance || window.executionTableInstance;
+        
+        if (tableInstance) {
+          console.log(`✅ EXECUTION: Table instance found on retry ${retryCount}, updating search data`);
+          updateExecutionSearchData();
+        } else if (retryCount < maxRetries) {
+          console.warn(`⚠️ EXECUTION: Table instance still not available (retry ${retryCount}/${maxRetries}), trying again...`);
+          retryUpdate();
+        } else {
+          console.warn(`⚠️ EXECUTION: Table instance still not available after ${maxRetries} retries, giving up search data update`);
+        }
+      }, delay);
+    };
+    
+    retryUpdate();
     return;
   }
   
@@ -1866,7 +1908,7 @@ function updateExecutionSearchData() {
   const processData = () => {
     try {
       const startTime = performance.now();
-      const executionData = executionTableInstance.getData();
+      const executionData = tableInstance.getData();
       console.log("📈 EXECUTION: Creating filter options from", executionData.length, "execution records");
       
       // Get filter options from planning module constants
@@ -2186,4 +2228,31 @@ if (window.tabManager) {
       console.error("❌ Failed to initialize execution tab:", error);
     }
   };
+}
+
+// Add a safety initialization when document is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    // Only initialize if execution tab is currently active and universal search isn't initialized
+    if (window.location.hash === '#execution' && 
+        (!window.executionUniversalSearch || 
+         window.executionUniversalSearch instanceof HTMLElement ||
+         typeof window.executionUniversalSearch.updateData !== 'function')) {
+      console.log("🔄 EXECUTION: Safety initialization on DOMContentLoaded");
+      setTimeout(() => {
+        initializeExecutionUniversalSearch();
+      }, 100);
+    }
+  });
+} else {
+  // Document already loaded, check if we need to initialize
+  if (window.location.hash === '#execution' && 
+      (!window.executionUniversalSearch || 
+       window.executionUniversalSearch instanceof HTMLElement ||
+       typeof window.executionUniversalSearch.updateData !== 'function')) {
+    console.log("🔄 EXECUTION: Safety initialization - document already ready");
+    setTimeout(() => {
+      initializeExecutionUniversalSearch();
+    }, 100);
+  }
 }

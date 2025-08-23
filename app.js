@@ -1126,6 +1126,23 @@ function route() {
         window.executionModule.prePopulateExecutionFilters();
       }
       
+      // Initialize universal search immediately when execution tab is shown
+      if (typeof window.executionModule?.initializeExecutionUniversalSearch === "function") {
+        if (!window.executionUniversalSearch || 
+            window.executionUniversalSearch instanceof HTMLElement ||
+            typeof window.executionUniversalSearch.updateData !== 'function') {
+          console.log("🔄 APP: Initializing execution universal search on tab switch");
+          window.executionModule.initializeExecutionUniversalSearch();
+          
+          // Update search data after a longer delay to ensure table is ready
+          setTimeout(() => {
+            if (typeof window.executionModule.updateExecutionSearchData === 'function') {
+              window.executionModule.updateExecutionSearchData();
+            }
+          }, 300);
+        }
+      }
+      
       setTimeout(() => {
         if (window.executionModule && window.executionModule.tableInstance) {
           window.executionModule.tableInstance.redraw(true);
@@ -1150,19 +1167,12 @@ function route() {
               ) {
                 window.executionModule.setupExecutionFilters();
               }
-              // Initialize universal search for execution if not already done
-              if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
-                if (!window.executionUniversalSearch || 
-                    window.executionUniversalSearch instanceof HTMLElement ||
-                    typeof window.executionUniversalSearch.updateData !== 'function') {
-                  window.executionModule.initializeExecutionUniversalSearch();
-                  // Update search data after initialization
-                  setTimeout(() => {
-                    if (typeof window.executionModule.updateExecutionSearchData === 'function') {
-                      window.executionModule.updateExecutionSearchData();
-                    }
-                  }, 100);
-                }
+              
+              // Update universal search data if it's already initialized
+              if (window.executionUniversalSearch && 
+                  typeof window.executionUniversalSearch.updateData === 'function' &&
+                  typeof window.executionModule.updateExecutionSearchData === 'function') {
+                window.executionModule.updateExecutionSearchData();
               }
             }, { timeout: 100 });
           } else {
@@ -1183,17 +1193,12 @@ function route() {
               ) {
                 window.executionModule.setupExecutionFilters();
               }
-              if (typeof window.executionModule.initializeExecutionUniversalSearch === "function") {
-                if (!window.executionUniversalSearch || 
-                    window.executionUniversalSearch instanceof HTMLElement ||
-                    typeof window.executionUniversalSearch.updateData !== 'function') {
-                  window.executionModule.initializeExecutionUniversalSearch();
-                  setTimeout(() => {
-                    if (typeof window.executionModule.updateExecutionSearchData === 'function') {
-                      window.executionModule.updateExecutionSearchData();
-                    }
-                  }, 100);
-                }
+              
+              // Update universal search data if it's already initialized
+              if (window.executionUniversalSearch && 
+                  typeof window.executionUniversalSearch.updateData === 'function' &&
+                  typeof window.executionModule.updateExecutionSearchData === 'function') {
+                window.executionModule.updateExecutionSearchData();
               }
             }, 100);
           }
