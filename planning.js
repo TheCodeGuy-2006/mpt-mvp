@@ -3654,6 +3654,7 @@ window.planningModule = {
   prePopulatePlanningFilters, // Add pre-population function
   applyPlanningFilters,
   initializePlanningFilters,
+  createMultiselect, // Export multiselect function for use by execution
   cleanupPlanningGrid,
   clearPlanningCache,
   ensurePlanningGridVisible, // Add grid visibility function

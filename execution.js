@@ -671,6 +671,20 @@ function initExecutionGrid(rows) {
 
       await yieldToMain();
       console.log("✅ Execution grid initialization completed");
+      
+      // Debug: Show actual execution data structure
+      const executionData = table.getData();
+      console.log("[Execution] Data count after init:", executionData.length);
+      if (executionData.length > 0) {
+        console.log("[Execution] Sample data keys:", Object.keys(executionData[0]));
+        console.log("[Execution] Sample data:", executionData[0]);
+      }
+      
+      // Populate filters with actual data after grid is built
+      setTimeout(() => {
+        populateExecutionFilters();
+      }, 500);
+      
       resolve(table);
     } catch (error) {
       console.error("❌ Error initializing execution grid:", error);
@@ -879,6 +893,20 @@ function prePopulateExecutionFilters() {
       "South Korea", "Sri Lanka", "Taiwan", "Thailand", "Vietnam"
     ];
 
+    // Get execution data for dynamic filter population
+    const executionData = executionTableInstance?.getData() || [];
+    
+    // Extract unique values from actual data
+    const uniqueOwners = executionData.length > 0 ? 
+      Array.from(new Set(executionData.map((c) => c.owner).filter(Boolean))).sort() : 
+      [];
+    const uniqueRevenuePlays = executionData.length > 0 ? 
+      Array.from(new Set(executionData.map((c) => c.revenuePlay).filter(Boolean))).sort() : 
+      [];
+    const uniqueCountries = executionData.length > 0 ? 
+      Array.from(new Set(executionData.map((c) => c.country).filter(Boolean))).sort() : 
+      [];
+
     // Pre-populate with static data immediately for better UX
     const populateSelectFast = (select, options, placeholder) => {
       if (select.children.length === 0) {
@@ -892,15 +920,15 @@ function prePopulateExecutionFilters() {
       }
     };
 
-    // Populate with static data for immediate display
+    // Populate with dynamic data when available, fallback to static data
     populateSelectFast(regionSelect, regionOptions, 'Regions');
     populateSelectFast(quarterSelect, quarterOptions, 'Quarters');
     populateSelectFast(statusSelect, statusOptions, 'Statuses');
     populateSelectFast(programTypeSelect, programTypes, 'Program Types');
     populateSelectFast(strategicPillarSelect, strategicPillars, 'Strategic Pillars');
-    populateSelectFast(ownerSelect, names, 'Owners');
-    populateSelectFast(revenuePlaySelect, revenuePlayOptions, 'Revenue Plays');
-    populateSelectFast(countrySelect, countryOptions, 'Countries');
+    populateSelectFast(ownerSelect, uniqueOwners.length > 0 ? uniqueOwners : names, 'Owners');
+    populateSelectFast(revenuePlaySelect, uniqueRevenuePlays.length > 0 ? uniqueRevenuePlays : revenuePlayOptions, 'Revenue Plays');
+    populateSelectFast(countrySelect, uniqueCountries.length > 0 ? uniqueCountries : countryOptions, 'Countries');
 
     // Initialize Digital Motions button
     if (!digitalMotionsButton.hasAttribute("data-active")) {
@@ -1069,6 +1097,8 @@ function setupExecutionFilterLogic() {
     programTypeSelect: document.getElementById("executionProgramTypeFilter"),
     strategicPillarSelect: document.getElementById("executionStrategicPillarFilter"),
     ownerSelect: document.getElementById("executionOwnerFilter"),
+    revenuePlaySelect: document.getElementById("executionRevenuePlayFilter"),
+    countrySelect: document.getElementById("executionCountryFilter"),
     digitalMotionsButton: document.getElementById("executionDigitalMotionsFilter"),
     clearButton: document.getElementById("executionClearFilters")
   };
@@ -1080,6 +1110,8 @@ function setupExecutionFilterLogic() {
     programTypeSelect,
     strategicPillarSelect,
     ownerSelect,
+    revenuePlaySelect,
+    countrySelect,
     digitalMotionsButton,
     clearButton
   } = filterElements;
@@ -1113,6 +1145,8 @@ function setupExecutionFilterLogic() {
     programTypeSelect,
     strategicPillarSelect,
     ownerSelect,
+    revenuePlaySelect,
+    countrySelect,
   ];
 
   // Batch event listener setup to reduce DOM manipulation
@@ -1292,6 +1326,13 @@ function applyExecutionFilters() {
   const filters = getExecutionFilterValues();
   console.log("[Execution] Applying filters:", filters);
 
+  // Debug: Check what fields exist in the execution data
+  const executionData = executionTableInstance.getData();
+  if (executionData.length > 0) {
+    console.log("[Execution] Sample data fields:", Object.keys(executionData[0]));
+    console.log("[Execution] Sample row:", executionData[0]);
+  }
+
   // Use requestAnimationFrame to batch DOM operations and reduce forced reflow
   requestAnimationFrame(() => {
     // Batch all filter operations to minimize reflow
@@ -1327,6 +1368,14 @@ function applyExecutionFilters() {
       }
       if (filters.owner.length > 0) {
         activeFilters.push({ field: "owner", type: "in", value: filters.owner });
+      }
+      if (filters.revenuePlay.length > 0) {
+        console.log("[Execution] Adding revenuePlay filter:", filters.revenuePlay);
+        activeFilters.push({ field: "revenuePlay", type: "in", value: filters.revenuePlay });
+      }
+      if (filters.country.length > 0) {
+        console.log("[Execution] Adding country filter:", filters.country);
+        activeFilters.push({ field: "country", type: "in", value: filters.country });
       }
 
       // Apply standard filters first (batched)
@@ -1551,12 +1600,130 @@ function testDigitalMotionsData() {
 // Make test function globally available
 window.testDigitalMotionsData = testDigitalMotionsData;
 
+// Main function to populate execution filters with actual data (called after data is loaded)
+function populateExecutionFilters() {
+  console.log("🔧 Populating execution filters with actual data...");
+  
+  const regionSelect = document.getElementById("executionRegionFilter");
+  const quarterSelect = document.getElementById("executionQuarterFilter");
+  const statusSelect = document.getElementById("executionStatusFilter");
+  const programTypeSelect = document.getElementById("executionProgramTypeFilter");
+  const strategicPillarSelect = document.getElementById("executionStrategicPillarFilter");
+  const ownerSelect = document.getElementById("executionOwnerFilter");
+  const revenuePlaySelect = document.getElementById("executionRevenuePlayFilter");
+  const countrySelect = document.getElementById("executionCountryFilter");
+  const digitalMotionsButton = document.getElementById("executionDigitalMotionsFilter");
+
+  if (!regionSelect || !quarterSelect || !statusSelect || 
+      !programTypeSelect || !strategicPillarSelect || !ownerSelect || 
+      !revenuePlaySelect || !countrySelect || !digitalMotionsButton) {
+    console.warn("⚠️ Some execution filter elements not found, retrying in 100ms");
+    setTimeout(populateExecutionFilters, 100);
+    return;
+  }
+
+  console.log("✅ All execution filter elements found, proceeding with population");
+
+  // Get execution data for dynamic filter population
+  const executionData = executionTableInstance?.getData() || [];
+  
+  // Debug: Log the actual data structure
+  console.log("[Execution] Execution data count:", executionData.length);
+  if (executionData.length > 0) {
+    console.log("[Execution] Sample execution data fields:", Object.keys(executionData[0]));
+    console.log("[Execution] Sample execution data:", executionData[0]);
+    
+    // Debug: Show the actual country and revenuePlay values in the data
+    executionData.forEach((row, index) => {
+      console.log(`[Execution] Row ${index + 1}: country="${row.country}", revenuePlay="${row.revenuePlay}"`);
+    });
+  }
+  
+  // Extract unique values from actual data
+  const uniqueOwners = executionData.length > 0 ? 
+    Array.from(new Set(executionData.map((c) => c.owner).filter(Boolean))).sort() : 
+    [];
+  const uniqueRevenuePlays = executionData.length > 0 ? 
+    Array.from(new Set(executionData.map((c) => c.revenuePlay).filter(Boolean))).sort() : 
+    [];
+  const uniqueCountries = executionData.length > 0 ? 
+    Array.from(new Set(executionData.map((c) => c.country).filter(Boolean))).sort() : 
+    [];
+
+  // Get static options for fallback
+  const regionOptions = window.planningModule?.constants?.regionOptions || ["JP & Korea", "South APAC", "SAARC"];
+  const quarterOptions = window.planningModule?.constants?.quarterOptions || [];
+  const statusOptions = window.planningModule?.constants?.statusOptions || [];
+  const programTypes = window.planningModule?.constants?.programTypes || [];
+  const strategicPillars = window.planningModule?.constants?.strategicPillars || [];
+  const names = window.planningModule?.constants?.names || [];
+  const revenuePlayOptions = window.planningModule?.constants?.revenuePlayOptions || [];
+  const countryOptions = window.planningModule?.constants?.countryOptions || [];
+
+  // Helper function to repopulate a select with new options
+  const repopulateSelect = (select, options, clearFirst = true) => {
+    if (clearFirst) {
+      select.innerHTML = '';
+    }
+    
+    options.forEach((optionValue) => {
+      const option = document.createElement("option");
+      option.value = optionValue;
+      option.textContent = optionValue;
+      select.appendChild(option);
+    });
+  };
+
+  // Use requestAnimationFrame to populate filters without blocking
+  requestAnimationFrame(() => {
+    // Repopulate filters with actual data
+    repopulateSelect(regionSelect, regionOptions, true);
+    repopulateSelect(quarterSelect, quarterOptions.map(q => q.replace(/\s*-\s*/g, ' ').trim()), true);
+    repopulateSelect(statusSelect, statusOptions, true);
+    repopulateSelect(programTypeSelect, programTypes, true);
+    repopulateSelect(strategicPillarSelect, strategicPillars, true);
+    repopulateSelect(ownerSelect, uniqueOwners.length > 0 ? uniqueOwners : names, true);
+    repopulateSelect(revenuePlaySelect, uniqueRevenuePlays.length > 0 ? uniqueRevenuePlays : revenuePlayOptions, true);
+    repopulateSelect(countrySelect, uniqueCountries.length > 0 ? uniqueCountries : countryOptions, true);
+
+    // Update multiselects if they exist
+    const selectElements = [
+      regionSelect, quarterSelect, statusSelect, 
+      programTypeSelect, strategicPillarSelect, ownerSelect,
+      revenuePlaySelect, countrySelect
+    ];
+
+    selectElements.forEach(select => {
+      if (select._multiselectContainer) {
+        // Refresh the multiselect
+        const container = select._multiselectContainer;
+        const parent = container.parentNode;
+        parent.removeChild(container);
+        select._multiselectContainer = null;
+        
+        // Use planning module's createMultiselect if available
+        if (window.planningModule && typeof window.planningModule.createMultiselect === 'function') {
+          window.planningModule.createMultiselect(select);
+        }
+      } else {
+        // Use planning module's createMultiselect if available
+        if (window.planningModule && typeof window.planningModule.createMultiselect === 'function') {
+          window.planningModule.createMultiselect(select);
+        }
+      }
+    });
+
+    console.log("✅ Execution filters populated successfully with actual data");
+  });
+}
+
 // EXPORT EXECUTION MODULE FUNCTIONS
 window.executionModule = {
   initExecutionGrid,
   setupExecutionSave,
   setupExecutionFilters,
   prePopulateExecutionFilters, // Add pre-population function
+  populateExecutionFilters, // Add main filter population function
   syncGridsOnEdit,
   applyExecutionFilters,
   getExecutionFilterValues,
@@ -1715,6 +1882,16 @@ function updateExecutionSearchData() {
         new Set(executionData.map((c) => c.owner).filter(Boolean)),
       ).sort();
       
+      // Get unique revenue plays from actual data
+      const uniqueRevenuePlays = Array.from(
+        new Set(executionData.map((c) => c.revenuePlay).filter(Boolean)),
+      ).sort();
+      
+      // Get unique countries from actual data
+      const uniqueCountries = Array.from(
+        new Set(executionData.map((c) => c.country).filter(Boolean)),
+      ).sort();
+      
       // Create searchable filter options
       const searchData = [];
       
@@ -1788,6 +1965,30 @@ function updateExecutionSearchData() {
           category: 'owner',
           value: owner,
           description: `Filter by ${owner}`,
+          type: 'filter'
+        });
+      });
+      
+      // Add revenue play filters (from actual data)
+      uniqueRevenuePlays.forEach(revenuePlay => {
+        searchData.push({
+          id: `revenuePlay_${revenuePlay}`,
+          title: revenuePlay,
+          category: 'revenuePlay',
+          value: revenuePlay,
+          description: `Filter by ${revenuePlay}`,
+          type: 'filter'
+        });
+      });
+      
+      // Add country filters (from actual data)
+      uniqueCountries.forEach(country => {
+        searchData.push({
+          id: `country_${country}`,
+          title: country,
+          category: 'country',
+          value: country,
+          description: `Filter by ${country}`,
           type: 'filter'
         });
       });
