@@ -570,7 +570,8 @@ function renderFilterControls() {
         </div>
       ` : ''}
       
-      <div class="filter-row filter-row-main">
+      <!-- Filter Grid - Row 1: 4 filters -->
+      <div class="filter-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; width: 100%;">
         <div class="filter-group">
           <label for="filterRegion">Region</label>
           <select id="filterRegion" class="filter-select" multiple data-placeholder="Regions">
@@ -578,18 +579,6 @@ function renderFilterControls() {
               .map(
                 (region) =>
                   `<option value="${region}" ${activeFilters.region.includes(region) ? "selected" : ""}>${region}</option>`,
-              )
-              .join("")}
-          </select>
-        </div>
-        
-        <div class="filter-group">
-          <label for="filterCountry">Country</label>
-          <select id="filterCountry" class="filter-select" multiple data-placeholder="Countries">
-            ${filterOptions.countries
-              .map(
-                (country) =>
-                  `<option value="${country}" ${activeFilters.country.includes(country) ? "selected" : ""}>${country}</option>`,
               )
               .join("")}
           </select>
@@ -608,6 +597,18 @@ function renderFilterControls() {
         </div>
         
         <div class="filter-group">
+          <label for="filterCountry">Country</label>
+          <select id="filterCountry" class="filter-select" multiple data-placeholder="Countries">
+            ${filterOptions.countries
+              .map(
+                (country) =>
+                  `<option value="${country}" ${activeFilters.country.includes(country) ? "selected" : ""}>${country}</option>`,
+              )
+              .join("")}
+          </select>
+        </div>
+        
+        <div class="filter-group">
           <label for="filterOwner">Owner</label>
           <select id="filterOwner" class="filter-select" multiple data-placeholder="Owners">
             ${filterOptions.owners
@@ -618,7 +619,10 @@ function renderFilterControls() {
               .join("")}
           </select>
         </div>
-        
+      </div>
+      
+      <!-- Filter Grid - Row 2: 4 filters -->
+      <div class="filter-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; width: 100%; margin-top: 16px;">
         <div class="filter-group">
           <label for="filterStatus">Status</label>
           <select id="filterStatus" class="filter-select" multiple data-placeholder="Statuses">
@@ -630,9 +634,7 @@ function renderFilterControls() {
               .join("")}
           </select>
         </div>
-      </div>
-      
-      <div class="filter-row filter-row-secondary">
+        
         <div class="filter-group">
           <label for="filterProgramType">Program Type</label>
           <select id="filterProgramType" class="filter-select" multiple data-placeholder="Program Types">
@@ -670,7 +672,8 @@ function renderFilterControls() {
         </div>
       </div>
       
-      <div class="filter-actions">
+      <!-- Action Buttons Row -->
+      <div style="margin-top: 16px;">
         <button id="clearFilters" class="filter-btn filter-btn-clear">
           Clear All Filters
         </button>

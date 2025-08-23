@@ -70,79 +70,72 @@
               <!-- Universal Search Filter -->
               <div id="planningUniversalSearch"></div>
               
-              <!-- Row 1: Search and Core Filters -->
-              <div class="filter-row filter-row-main">
+              <!-- Filter Grid - Row 1: 4 filters -->
+              <div class="filter-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; width: 100%;">
                 <div class="filter-group">
                   <label for="planningRegionFilter">Region:</label>
-                  <select id="planningRegionFilter" class="filter-select" multiple>
+                  <select id="planningRegionFilter" class="filter-select" multiple data-placeholder="Regions">
                     <!-- Options populated dynamically -->
                   </select>
                 </div>
                 <div class="filter-group">
                   <label for="planningQuarterFilter">Quarter:</label>
-                  <select id="planningQuarterFilter" class="filter-select" multiple>
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-                <div class="filter-group">
-                  <label for="planningStatusFilter">Status:</label>
-                  <select id="planningStatusFilter" class="filter-select" multiple>
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-              </div>
-              
-              <!-- Row 2: Secondary Filters -->
-              <div class="filter-row filter-row-secondary">
-                <div class="filter-group">
-                  <label for="planningProgramTypeFilter">Program Type:</label>
-                  <select id="planningProgramTypeFilter" class="filter-select" multiple>
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-                <div class="filter-group">
-                  <label for="planningStrategicPillarFilter">Strategic Pillar:</label>
-                  <select id="planningStrategicPillarFilter" class="filter-select" multiple>
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-                <div class="filter-group">
-                  <label for="planningOwnerFilter">Owner:</label>
-                  <select id="planningOwnerFilter" class="filter-select" multiple>
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-              </div>
-              
-              <!-- Row 3: Additional Filters -->
-              <div class="filter-row filter-row-additional">
-                <div class="filter-group">
-                  <label for="planningRevenuePlayFilter">Revenue Play:</label>
-                  <select id="planningRevenuePlayFilter" class="filter-select" multiple>
+                  <select id="planningQuarterFilter" class="filter-select" multiple data-placeholder="Quarters">
                     <!-- Options populated dynamically -->
                   </select>
                 </div>
                 <div class="filter-group">
                   <label for="planningCountryFilter">Country:</label>
-                  <select id="planningCountryFilter" class="filter-select" multiple>
+                  <select id="planningCountryFilter" class="filter-select" multiple data-placeholder="Countries">
                     <!-- Options populated dynamically -->
                   </select>
                 </div>
                 <div class="filter-group">
-                  <!-- Empty space for alignment -->
+                  <label for="planningOwnerFilter">Owner:</label>
+                  <select id="planningOwnerFilter" class="filter-select" multiple data-placeholder="Owners">
+                    <!-- Options populated dynamically -->
+                  </select>
                 </div>
-                
-                <!-- Action Buttons -->
-                <div class="filter-actions">
-                  <button id="planningDigitalMotionsFilter" class="filter-btn filter-btn-digital">
-                    <i class="octicon octicon-rocket" aria-hidden="true"></i>
-                    Digital Motions
-                  </button>
-                  <button id="planningClearFilters" class="filter-btn filter-btn-clear">
-                    <i class="octicon octicon-x" aria-hidden="true"></i>
-                    Clear Filters
-                  </button>
+              </div>
+              
+              <!-- Filter Grid - Row 2: 4 filters -->
+              <div class="filter-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; width: 100%; margin-top: 16px;">
+                <div class="filter-group">
+                  <label for="planningStatusFilter">Status:</label>
+                  <select id="planningStatusFilter" class="filter-select" multiple data-placeholder="Statuses">
+                    <!-- Options populated dynamically -->
+                  </select>
                 </div>
+                <div class="filter-group">
+                  <label for="planningProgramTypeFilter">Program Type:</label>
+                  <select id="planningProgramTypeFilter" class="filter-select" multiple data-placeholder="Program Types">
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="planningStrategicPillarFilter">Strategic Pillar:</label>
+                  <select id="planningStrategicPillarFilter" class="filter-select" multiple data-placeholder="Strategic Pillars">
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="planningRevenuePlayFilter">Revenue Play:</label>
+                  <select id="planningRevenuePlayFilter" class="filter-select" multiple data-placeholder="Revenue Plays">
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Action Buttons Row -->
+              <div style="margin-top: 16px;">
+                <button id="planningDigitalMotionsFilter" class="filter-btn filter-btn-digital">
+                  <i class="octicon octicon-rocket" aria-hidden="true"></i>
+                  Digital Motions
+                </button>
+                <button id="planningClearFilters" class="filter-btn filter-btn-clear">
+                  <i class="octicon octicon-x" aria-hidden="true"></i>
+                  Clear Filters
+                </button>
               </div>
             </div>
           </div>
@@ -210,79 +203,72 @@
               <!-- Universal Search Filter -->
               <div id="executionUniversalSearch"></div>
               
-              <!-- Row 1: Search and Core Filters -->
-              <div class="filter-row filter-row-main">
+              <!-- Filter Grid - Row 1: 4 filters -->
+              <div class="filter-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; width: 100%;">
                 <div class="filter-group">
                   <label for="executionRegionFilter">Region:</label>
-                  <select id="executionRegionFilter" class="filter-select" multiple>
+                  <select id="executionRegionFilter" class="filter-select" multiple data-placeholder="Regions">
                     <!-- Options populated dynamically -->
                   </select>
                 </div>
                 <div class="filter-group">
                   <label for="executionQuarterFilter">Quarter:</label>
-                  <select id="executionQuarterFilter" class="filter-select" multiple>
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-                <div class="filter-group">
-                  <label for="executionStatusFilter">Status:</label>
-                  <select id="executionStatusFilter" class="filter-select" multiple>
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-              </div>
-              
-              <!-- Row 2: Secondary Filters -->
-              <div class="filter-row filter-row-secondary">
-                <div class="filter-group">
-                  <label for="executionProgramTypeFilter">Program Type:</label>
-                  <select id="executionProgramTypeFilter" class="filter-select" multiple>
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-                <div class="filter-group">
-                  <label for="executionStrategicPillarFilter">Strategic Pillar:</label>
-                  <select id="executionStrategicPillarFilter" class="filter-select" multiple>
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-                <div class="filter-group">
-                  <label for="executionOwnerFilter">Owner:</label>
-                  <select id="executionOwnerFilter" class="filter-select" multiple>
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-              </div>
-              
-              <!-- Row 3: Additional Filters -->
-              <div class="filter-row filter-row-additional">
-                <div class="filter-group">
-                  <label for="executionRevenuePlayFilter">Revenue Play:</label>
-                  <select id="executionRevenuePlayFilter" class="filter-select" multiple>
+                  <select id="executionQuarterFilter" class="filter-select" multiple data-placeholder="Quarters">
                     <!-- Options populated dynamically -->
                   </select>
                 </div>
                 <div class="filter-group">
                   <label for="executionCountryFilter">Country:</label>
-                  <select id="executionCountryFilter" class="filter-select" multiple>
+                  <select id="executionCountryFilter" class="filter-select" multiple data-placeholder="Countries">
                     <!-- Options populated dynamically -->
                   </select>
                 </div>
                 <div class="filter-group">
-                  <!-- Empty space for alignment -->
+                  <label for="executionOwnerFilter">Owner:</label>
+                  <select id="executionOwnerFilter" class="filter-select" multiple data-placeholder="Owners">
+                    <!-- Options populated dynamically -->
+                  </select>
                 </div>
-                
-                <!-- Action Buttons -->
-                <div class="filter-actions">
-                  <button id="executionDigitalMotionsFilter" class="filter-btn filter-btn-digital">
-                    <i class="octicon octicon-rocket" aria-hidden="true"></i>
-                    Digital Motions
-                  </button>
-                  <button id="executionClearFilters" class="filter-btn filter-btn-clear">
-                    <i class="octicon octicon-x" aria-hidden="true"></i>
-                    Clear Filters
-                  </button>
+              </div>
+              
+              <!-- Filter Grid - Row 2: 4 filters -->
+              <div class="filter-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; width: 100%; margin-top: 16px;">
+                <div class="filter-group">
+                  <label for="executionStatusFilter">Status:</label>
+                  <select id="executionStatusFilter" class="filter-select" multiple data-placeholder="Statuses">
+                    <!-- Options populated dynamically -->
+                  </select>
                 </div>
+                <div class="filter-group">
+                  <label for="executionProgramTypeFilter">Program Type:</label>
+                  <select id="executionProgramTypeFilter" class="filter-select" multiple data-placeholder="Program Types">
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="executionStrategicPillarFilter">Strategic Pillar:</label>
+                  <select id="executionStrategicPillarFilter" class="filter-select" multiple data-placeholder="Strategic Pillars">
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="executionRevenuePlayFilter">Revenue Play:</label>
+                  <select id="executionRevenuePlayFilter" class="filter-select" multiple data-placeholder="Revenue Plays">
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Action Buttons Row -->
+              <div style="margin-top: 16px;">
+                <button id="executionDigitalMotionsFilter" class="filter-btn filter-btn-digital">
+                  <i class="octicon octicon-rocket" aria-hidden="true"></i>
+                  Digital Motions
+                </button>
+                <button id="executionClearFilters" class="filter-btn filter-btn-clear">
+                  <i class="octicon octicon-x" aria-hidden="true"></i>
+                  Clear Filters
+                </button>
               </div>
             </div>
           </div>
