@@ -812,17 +812,6 @@ function populateRoiFilters() {
   populateSelect(strategicPillarsSelect, cachedFilterOptions.strategicPillarsOptions, strategicPillarsSelect.children.length > 0);
   populateSelect(revenuePlaySelect, cachedFilterOptions.revenuePlayOptions, revenuePlaySelect.children.length > 0);
 
-  console.log('ROI Filter options populated:', {
-    regions: cachedFilterOptions.regionOptions.length,
-    quarters: cachedFilterOptions.quarterOptions.length,
-    countries: cachedFilterOptions.countryOptions.length,
-    owners: cachedFilterOptions.ownerOptions.length,
-    statuses: cachedFilterOptions.statusOptions.length,
-    programTypes: cachedFilterOptions.programTypeOptions.length,
-    strategicPillars: cachedFilterOptions.strategicPillarsOptions.length,
-    revenuePlays: cachedFilterOptions.revenuePlayOptions.length
-  });
-
   // Initialize custom multiselects if not already done
   const selectElements = [
     regionSelect, quarterSelect, countrySelect, ownerSelect, 
@@ -833,14 +822,10 @@ function populateRoiFilters() {
     if (!select._multiselectContainer) {
       // Use planning module's multiselect if available, otherwise fall back to ROI implementation
       if (window.planningModule && typeof window.planningModule.createMultiselect === 'function') {
-        console.log('Using planning multiselect for:', select.id);
         window.planningModule.createMultiselect(select);
       } else {
-        console.log('Using ROI multiselect for:', select.id);
         createRoiMultiselect(select);
       }
-    } else {
-      console.log('Multiselect already exists for:', select.id);
     }
   });
 
@@ -1144,8 +1129,6 @@ function initializeRoiFunctionality() {
         
         // Repopulate filters with new data
         populateRoiFilters();
-        
-        console.log('ROI filters repopulated with planning data');
         return; // Stop checking
       }
     }
