@@ -1,26 +1,5 @@
 [
   {
-    "id": "program-1756009154574",
-    "programType": "Webinars",
-    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
-    "owner": "Tomoko Tanaka",
-    "quarter": "Q1 September",
-    "fiscalYear": "FY27",
-    "region": "South APAC",
-    "country": "Malaysia",
-    "forecastedCost": 12000,
-    "expectedLeads": 120,
-    "revenuePlay": "New Business",
-    "status": "Planning",
-    "description": "wefjljskdhfli",
-    "__modified": false,
-    "__unsavedPriority": 0,
-    "mqlForecast": 12,
-    "pipelineForecast": 288000,
-    "issueLink": "",
-    "digitalMotions": true
-  },
-  {
     "id": "program-1755752283959",
     "programType": "3P Sponsored Events",
     "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
@@ -44,6 +23,46 @@
     "actualMQLs": 20
   },
   {
+    "programType": "User Groups",
+    "strategicPillars": "Account Growth and Product Adoption",
+    "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "SAARC",
+    "country": "X SAARC",
+    "owner": "Giorgia Parham",
+    "description": "India ITES Dev Community User Group (Virtual sessions)",
+    "forecastedCost": 0,
+    "expectedLeads": 300,
+    "status": "Planning",
+    "mqlForecast": 30,
+    "pipelineForecast": 720000,
+    "__unsavedPriority": 0,
+    "__modified": false,
+    "id": "row_11_1756009124526",
+    "digitalMotions": true
+  },
+  {
+    "programType": "Operational/Infrastructure/Swag",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "revenuePlay": "All",
+    "fiscalYear": "FY26",
+    "quarter": "Q1 - August",
+    "region": "X APAC Non English",
+    "country": "X APAC Non English",
+    "owner": "Giorgia Parham",
+    "description": "AI-Driven Asset Localization Support (Ongoing fund allocation for AI translation software - Azure Speech Studio)",
+    "forecastedCost": 3600,
+    "expectedLeads": 0,
+    "status": "Planning",
+    "mqlForecast": 0,
+    "pipelineForecast": 0,
+    "__unsavedPriority": 0,
+    "__modified": false,
+    "id": "row_12_1756009124526",
+    "digitalMotions": true
+  },
+  {
     "programType": "Operational/Infrastructure/Swag",
     "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
     "revenuePlay": "All",
@@ -60,11 +79,11 @@
     "pipelineForecast": 0,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_13_1756009051748",
+    "id": "row_13_1756009124526",
     "digitalMotions": true
   },
   {
-    "programType": "Localized Programs",
+    "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
     "strategicPillars": "Pipeline Acceleration & Executive Engagement",
     "revenuePlay": "All",
     "fiscalYear": "FY26",
@@ -73,14 +92,14 @@
     "country": "X APAC English",
     "owner": "Giorgia Parham",
     "description": "Executive Fireside Interview Series: Tech Talks (Quarterly digital interviews with APAC thought leaders/CxOs)",
-    "forecastedCost": 3500,
+    "forecastedCost": 6969,
     "expectedLeads": 400,
     "status": "Planning",
     "mqlForecast": 40,
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_16_1756009051748",
+    "id": "row_16_1756009124526",
     "digitalMotions": true
   },
   {
@@ -100,7 +119,7 @@
     "pipelineForecast": 1200000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_21_1756009051748",
+    "id": "row_21_1756009124526",
     "digitalMotions": true
   },
   {
@@ -120,7 +139,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_22_1756009051748",
+    "id": "row_22_1756009124526",
     "digitalMotions": true
   },
   {
@@ -133,14 +152,14 @@
     "country": "X APAC English",
     "owner": "Giorgia Parham",
     "description": "Quarterly APAC Newsletter (Consolidated GitHub news & regional updates)",
-    "forecastedCost": 0,
+    "forecastedCost": 67,
     "expectedLeads": 250,
     "status": "Planning",
     "mqlForecast": 25,
     "pipelineForecast": 600000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_23_1756009051748",
+    "id": "row_23_1756009124526",
     "digitalMotions": true
   },
   {
@@ -160,7 +179,7 @@
     "pipelineForecast": 535200,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_27_1756009051748",
+    "id": "row_27_1756009124526",
     "digitalMotions": true
   },
   {
@@ -180,7 +199,7 @@
     "pipelineForecast": 4800000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_28_1756009051748",
+    "id": "row_28_1756009124526",
     "digitalMotions": true
   },
   {
@@ -200,7 +219,7 @@
     "pipelineForecast": 240000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_29_1756009051748",
+    "id": "row_29_1756009124526",
     "digitalMotions": true
   },
   {
@@ -220,7 +239,7 @@
     "pipelineForecast": 192000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_33_1756009051748",
+    "id": "row_33_1756009124526",
     "digitalMotions": true
   },
   {
@@ -228,7 +247,7 @@
     "strategicPillars": "Account Growth and Product Adoption",
     "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
     "fiscalYear": "FY26",
-    "quarter": "",
+    "quarter": "Q1 - August",
     "region": "South APAC",
     "country": "ASEAN",
     "owner": "Giorgia Parham",
@@ -240,7 +259,7 @@
     "pipelineForecast": 192000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_34_1756009051748",
+    "id": "row_34_1756009124526",
     "digitalMotions": true
   },
   {
@@ -253,14 +272,14 @@
     "country": "ASEAN",
     "owner": "Giorgia Parham",
     "description": "FSI Digital Transformation with AI Security (Localized Webinar, Content, Email)",
-    "forecastedCost": 0,
+    "forecastedCost": 488597409,
     "expectedLeads": 350,
     "status": "Planning",
     "mqlForecast": 35,
     "pipelineForecast": 840000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_35_1756009051748",
+    "id": "row_35_1756009124526",
     "digitalMotions": true
   },
   {
@@ -303,7 +322,7 @@
     "pipelineForecast": 720000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_10_1756009051748",
+    "id": "row_10_1756009124526",
     "digitalMotions": true
   },
   {
@@ -323,7 +342,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_17_1756009051748",
+    "id": "row_17_1756009124526",
     "digitalMotions": true
   },
   {
@@ -343,7 +362,7 @@
     "pipelineForecast": 1200000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_18_1756009051748",
+    "id": "row_18_1756009124526",
     "digitalMotions": true
   },
   {
@@ -351,7 +370,7 @@
     "strategicPillars": "Account Growth and Product Adoption",
     "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
     "fiscalYear": "FY26",
-    "quarter": "",
+    "quarter": "Q2 - December",
     "region": "X APAC English",
     "country": "X APAC English",
     "owner": "Giorgia Parham",
@@ -363,7 +382,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_19_1756009051748",
+    "id": "row_19_1756009124526",
     "digitalMotions": true
   },
   {
@@ -383,7 +402,7 @@
     "pipelineForecast": 600000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_20_1756009051748",
+    "id": "row_20_1756009124526",
     "digitalMotions": true
   },
   {
@@ -403,7 +422,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_31_1756009051748",
+    "id": "row_31_1756009124526",
     "digitalMotions": true
   },
   {
@@ -423,7 +442,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_32_1756009051748",
+    "id": "row_32_1756009124526",
     "digitalMotions": true
   },
   {
@@ -443,7 +462,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_2_1756009051748",
+    "id": "row_2_1756009124526",
     "digitalMotions": true
   },
   {
@@ -463,7 +482,7 @@
     "pipelineForecast": 600000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_3_1756009051748",
+    "id": "row_3_1756009124526",
     "digitalMotions": true
   },
   {
@@ -483,7 +502,7 @@
     "pipelineForecast": 1200000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_4_1756009051748",
+    "id": "row_4_1756009124526",
     "digitalMotions": true
   },
   {
@@ -503,7 +522,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_9_1756009051748",
+    "id": "row_9_1756009124526",
     "digitalMotions": true
   },
   {
@@ -523,7 +542,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_14_1756009051748",
+    "id": "row_14_1756009124526",
     "digitalMotions": true
   },
   {
@@ -543,7 +562,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_15_1756009051748",
+    "id": "row_15_1756009124526",
     "digitalMotions": true
   },
   {
@@ -563,7 +582,7 @@
     "pipelineForecast": 535200,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_24_1756009051748",
+    "id": "row_24_1756009124526",
     "digitalMotions": true
   },
   {
@@ -583,7 +602,7 @@
     "pipelineForecast": 4800000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_25_1756009051748",
+    "id": "row_25_1756009124526",
     "digitalMotions": true
   },
   {
@@ -603,7 +622,7 @@
     "pipelineForecast": 240000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_26_1756009051748",
+    "id": "row_26_1756009124526",
     "digitalMotions": true
   },
   {
@@ -623,7 +642,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_30_1756009051748",
+    "id": "row_30_1756009124526",
     "digitalMotions": true
   },
   {
@@ -643,7 +662,7 @@
     "pipelineForecast": 600000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_5_1756009051748",
+    "id": "row_5_1756009124526",
     "digitalMotions": true
   },
   {
@@ -663,7 +682,7 @@
     "pipelineForecast": 960000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_6_1756009051748",
+    "id": "row_6_1756009124526",
     "digitalMotions": true
   },
   {
@@ -683,7 +702,7 @@
     "pipelineForecast": 1200000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_7_1756009051748",
+    "id": "row_7_1756009124526",
     "digitalMotions": true
   },
   {
@@ -703,7 +722,7 @@
     "pipelineForecast": 1200000,
     "__unsavedPriority": 0,
     "__modified": false,
-    "id": "row_8_1756009051748",
+    "id": "row_8_1756009124526",
     "digitalMotions": true
   }
 ]
