@@ -1671,20 +1671,34 @@ function initPlanningGrid(rows) {
             editor: "input",
             width: 180,
             formatter: function(cell) {
-              // Always wrap in a span for hover effect
+              // Wrap in span for hover effect
               const val = cell.getValue() || '';
               return `<span class="desc-hover-span">${val.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>`;
             },
             cellClick: function (e, cell) {
-              if (cell.getValue() && cell.getValue().length > 20) {
-                const tooltip = prompt("Description:", cell.getValue());
-                if (tooltip !== null && tooltip !== cell.getValue()) {
-                  cell.setValue(tooltip);
-                }
+              // Remove any existing tooltip when clicking to edit
+              const el = cell.getElement();
+              if (el._descTooltipDiv) {
+                el._descTooltipDiv.remove();
+                el._descTooltipDiv = null;
               }
+              if (el._descTooltipMove) {
+                el.removeEventListener('mousemove', el._descTooltipMove);
+                el._descTooltipMove = null;
+              }
+              el.classList.remove('description-hover');
+              
+              // Start editing the cell normally
+              cell.edit();
             },
             cellMouseOver: function(e, cell) {
               const el = cell.getElement();
+              
+              // Don't show tooltip if cell is being edited
+              if (el.querySelector('input') || el.querySelector('textarea')) {
+                return;
+              }
+              
               el.classList.add('description-hover');
               // Create floating tooltip
               let tooltip = document.createElement('div');
@@ -1742,6 +1756,12 @@ function initPlanningGrid(rows) {
                 el._descTooltipMove = null;
               }
             },
+            cellEdited: function(cell) {
+              // Trigger autosave when description is edited
+              setTimeout(() => {
+                debouncedAutosave();
+              }, 100);
+            }
           },
           {
             title: "Owner",
