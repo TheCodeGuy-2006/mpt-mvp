@@ -12,7 +12,7 @@ window.DEBUG_PERFORMANCE = false; // Set to true to enable detailed performance 
 // Initialize TabManager with better timing
 function initializeTabManager() {
   if (typeof TabManager !== 'undefined' && window.tabManager) {
-    console.log("🎯 TabManager already initialized");
+  // TabManager already initialized
     registerAllTabs();
     return;
   }
@@ -38,7 +38,7 @@ function registerAllTabs() {
     // Register all tabs with their initialization functions
     window.tabManager.registerTab('planning', 
       () => {
-        console.log('Loading planning tab');
+        // Loading planning tab
         route();
       }, 
       () => console.log('Planning tab cleanup')
@@ -46,7 +46,7 @@ function registerAllTabs() {
     
     window.tabManager.registerTab('execution', 
       () => {
-        console.log('Loading execution tab');
+        // Loading execution tab
         route();
       }, 
       () => console.log('Execution tab cleanup')
@@ -54,7 +54,7 @@ function registerAllTabs() {
     
     window.tabManager.registerTab('budgets', 
       () => {
-        console.log('Loading budgets tab');
+        // Loading budgets tab
         route();
       }, 
       () => console.log('Budgets tab cleanup')
@@ -62,7 +62,7 @@ function registerAllTabs() {
     
     window.tabManager.registerTab('roi', 
       () => {
-        console.log('Loading ROI tab');
+        // Loading ROI tab
         route();
       }, 
       () => console.log('ROI tab cleanup')
@@ -70,7 +70,7 @@ function registerAllTabs() {
     
     window.tabManager.registerTab('calendar', 
       () => {
-        console.log('Loading calendar tab');
+        // Loading calendar tab
         route();
       }, 
       () => console.log('Calendar tab cleanup')
@@ -78,13 +78,13 @@ function registerAllTabs() {
     
     window.tabManager.registerTab('github-sync', 
       () => {
-        console.log('Loading GitHub sync tab');
+        // Loading GitHub sync tab
         route();
       }, 
       () => console.log('GitHub Sync tab cleanup')
     );
     
-    console.log("✅ All tabs registered successfully");
+    // All tabs registered successfully
   } catch (error) {
     console.error("❌ Error registering tabs:", error);
   }

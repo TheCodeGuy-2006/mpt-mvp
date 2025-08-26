@@ -732,20 +732,13 @@ function processRowsInBatches(rows, batchSize = 15, callback) {
 
 // Ensure planning UI is functional even with empty data
 function ensurePlanningUIFunctional() {
-  console.log("🔧 ENTER: ensurePlanningUIFunctional");
-  console.log("🔧 Current DOM ready state:", document.readyState);
-  console.log("🔧 Planning table instance exists:", !!window.planningTableInstance);
-  
   // Wire up buttons even if table isn't ready
   const addBtn = document.getElementById("addPlanningRow");
-  console.log("🔍 Add button found:", !!addBtn, "has onclick:", !!addBtn?.onclick);
   if (addBtn && !addBtn.onclick) {
     addBtn.onclick = () => showAddRowModal();
-    console.log("✅ Add campaign button wired up");
   }
 
   const delBtn = document.getElementById("deletePlanningRow");
-  console.log("🔍 Delete button found:", !!delBtn, "has onclick:", !!delBtn?.onclick);
   if (delBtn && !delBtn.onclick) {
     delBtn.textContent = "Delete Highlighted Rows";
     delBtn.onclick = () => {
@@ -763,246 +756,78 @@ function ensurePlanningUIFunctional() {
       window.hasUnsavedPlanningChanges = true;
       console.log(`[Planning] Unsaved changes set to true (mass delete: ${selectedRows.length} rows)`);
     };
-    console.log("✅ Delete button wired up");
   }
 
   // Wire up Delete All Rows button
-  console.log("🔧 === DELETE ALL BUTTON DEBUGGING START ===");
   const deleteAllBtn = document.getElementById("deleteAllPlanningRows");
-  console.log("🔍 Delete All button element:", deleteAllBtn);
-  console.log("🔍 Delete All button found:", !!deleteAllBtn);
-  console.log("🔍 Delete All button ID:", deleteAllBtn?.id);
-  console.log("🔍 Delete All button classes:", deleteAllBtn?.className);
-  console.log("🔍 Delete All button parent:", deleteAllBtn?.parentElement?.className);
-  console.log("🔍 Delete All button has onclick:", !!deleteAllBtn?.onclick);
-  console.log("🔍 Delete All button has addEventListener:", typeof deleteAllBtn?.addEventListener);
-  
   if (deleteAllBtn) {
-    console.log("🔧 Attempting to wire up Delete All button...");
-    
     // Clear any existing handlers
     deleteAllBtn.onclick = null;
-    console.log("🔧 Cleared existing onclick handler");
-    
-    // Remove any existing event listeners by cloning (but keep it simpler)
     deleteAllBtn.removeEventListener('click', deleteAllBtn._deleteAllHandler);
     
     // Create the handler function
     const deleteAllHandler = function(event) {
-      console.log("🗑️ === DELETE ALL BUTTON CLICKED ===");
-      console.log("🗑️ Event object:", event);
-      console.log("🗑️ Event target:", event.target);
-      console.log("🗑️ Button element:", this);
-      
-      // Prevent any default behavior
       event.preventDefault();
       event.stopPropagation();
       
-      console.log("🔍 Checking planningTableInstance...");
-      console.log("🔍 window.planningTableInstance exists:", !!window.planningTableInstance);
-      console.log("🔍 planningTableInstance type:", typeof window.planningTableInstance);
-      
       if (!window.planningTableInstance) {
-        console.log("❌ No planningTableInstance found");
         alert("No table instance found. Please reload the page and try again.");
         return;
       }
       
-      console.log("✅ planningTableInstance found, getting rows...");
       let allRows;
       try {
         allRows = window.planningTableInstance.getRows();
-        console.log("📊 Found rows:", allRows.length);
-        console.log("📊 Rows data sample:", allRows.slice(0, 3));
       } catch (error) {
-        console.log("❌ Error getting rows:", error);
         alert("Error accessing table data: " + error.message);
         return;
       }
       
       if (allRows.length === 0) {
-        console.log("ℹ️ No rows to delete");
         alert("No rows to delete.");
         return;
       }
       
-      console.log("🤔 Showing confirmation dialog for", allRows.length, "rows...");
       const confirmed = confirm(`Are you sure you want to delete ALL ${allRows.length} rows? This action cannot be undone.`);
-      console.log("🤔 User confirmation result:", confirmed);
-      
-      if (!confirmed) {
-        console.log("❌ User cancelled deletion");
-        return;
-      }
-      
-      console.log("🗑️ Proceeding with deletion of", allRows.length, "rows");
+      if (!confirmed) return;
       
       try {
-        // Clear all data from the table
-        console.log("🗑️ Calling clearData()...");
         window.planningTableInstance.clearData();
-        console.log("✅ Table data cleared successfully");
         
-        // Update the data store if it exists
         if (window.planningDataStore && typeof window.planningDataStore.clearAllData === 'function') {
-          console.log("🗑️ Clearing data store...");
           window.planningDataStore.clearAllData();
-          console.log("✅ Data store cleared");
         } else if (window.planningDataCache) {
-          console.log("🗑️ Clearing data cache...");
           window.planningDataCache.length = 0;
-          console.log("✅ Data cache cleared");
-        } else {
-          console.log("⚠️ No data store or cache found to clear");
         }
         
         window.hasUnsavedPlanningChanges = true;
-        console.log("✅ Set hasUnsavedPlanningChanges to true");
-        
-        // Show success message
-        console.log("✅ All planning rows deleted successfully");
         alert("All rows have been deleted successfully!");
         
       } catch (error) {
-        console.log("❌ Error during deletion process:", error);
         alert("Error during deletion: " + error.message);
       }
     };
     
-    // Store reference to handler for potential cleanup
     deleteAllBtn._deleteAllHandler = deleteAllHandler;
-    
-    // Add the event listener
     deleteAllBtn.addEventListener('click', deleteAllHandler);
-    console.log("✅ Delete All button wired up with addEventListener");
-    console.log("🔧 === DELETE ALL BUTTON DEBUGGING END ===");
-  } else {
-    console.log("❌ Delete All button not found in DOM");
-    console.log("🔍 Available buttons in button-group:");
-    const buttonGroup = document.querySelector('.button-group');
-    if (buttonGroup) {
-      const buttons = buttonGroup.querySelectorAll('button');
-      buttons.forEach((btn, index) => {
-        console.log(`  Button ${index + 1}: ID="${btn.id}", Class="${btn.className}", Text="${btn.textContent?.trim()}"`);
-      });
-    } else {
-      console.log("❌ Button group not found");
-    }
-    
-    // Try again after a short delay
-    setTimeout(() => {
-      console.log("🔄 Retrying Delete All button search after delay...");
-      const retryBtn = document.getElementById("deleteAllPlanningRows");
-      if (retryBtn && !retryBtn.onclick) {
-        console.log("🔄 Retrying Delete All button wiring...");
-        wireUpDeleteAllButton();
-      } else {
-        console.log("🔄 Retry: button still not found or already has onclick");
-      }
-    }, 1000);
   }
-}
-
-// Dedicated function to wire up the Delete All button
-function wireUpDeleteAllButton() {
-  const deleteAllBtn = document.getElementById("deleteAllPlanningRows");
-  if (deleteAllBtn) {
-    deleteAllBtn.addEventListener('click', function() {
-      console.log("🗑️ Delete All button clicked (retry wiring)!");
-      
-      if (!window.planningTableInstance) {
-        console.log("❌ No planningTableInstance found");
-        alert("No table instance found. Please reload the page and try again.");
-        return;
-      }
-      
-      const allRows = window.planningTableInstance.getRows();
-      console.log("📊 Found rows:", allRows.length);
-      
-      if (allRows.length === 0) {
-        alert("No rows to delete.");
-        return;
-      }
-      
-      if (!confirm(`Are you sure you want to delete ALL ${allRows.length} rows? This action cannot be undone.`)) {
-        console.log("❌ User cancelled deletion");
-        return;
-      }
-      
-      console.log("🗑️ Proceeding with deletion of", allRows.length, "rows");
-      
-      // Clear all data from the table
-      window.planningTableInstance.clearData();
-      console.log("✅ Table data cleared");
-      
-      // Update the data store if it exists
-      if (window.planningDataStore && typeof window.planningDataStore.clearAllData === 'function') {
-        window.planningDataStore.clearAllData();
-        console.log("✅ Data store cleared");
-      } else if (window.planningDataCache) {
-        window.planningDataCache.length = 0;
-        console.log("✅ Data cache cleared");
-      }
-      
-      window.hasUnsavedPlanningChanges = true;
-      console.log("✅ All planning rows deleted successfully");
-    });
-    console.log("✅ Delete All button successfully wired up (retry)");
-  }
-
-  // Wire up CSV import
-  const importBtn = document.getElementById("importCSVBtn");
-  const csvInput = document.getElementById("csvFileInput");
-  console.log("🔍 Import button found:", !!importBtn, "CSV input found:", !!csvInput);
-  if (importBtn && csvInput && !importBtn.onclick) {
-    importBtn.onclick = () => csvInput.click();
-    console.log("✅ Import button wired up");
-  }
-
-  // Wire up save button
-  const saveBtn = document.getElementById("savePlanningRows");
-  console.log("🔍 Save button found:", !!saveBtn, "has onclick:", !!saveBtn?.onclick);
-  if (saveBtn && !saveBtn.onclick) {
-    saveBtn.onclick = async () => {
-      if (!planningTableInstance) {
-        alert("No data to save.");
-        return;
-      }
-      // Use existing save functionality
-      setupPlanningSave(planningTableInstance, planningTableInstance.getData());
-      saveBtn.click(); // Trigger the actual save
-    };
-    console.log("✅ Save button wired up");
-  }
-
-  // Ensure filters are populated
-  console.log("🔍 About to populate filters...");
-  populatePlanningFilters();
-  
-  console.log("✅ EXIT: Planning UI functionality ensured");
 }
 
 // Call during loading to handle empty data case
 async function loadPlanning(retryCount = 0, useCache = true) {
-  console.log("🔄 loadPlanning called with:", { retryCount, useCache });
-  
   // Return cached data if available
   if (useCache && planningDataCache && planningDataCache.length > 0) {
-    console.log("✅ Returning cached data:", planningDataCache.length, "rows");
     return planningDataCache;
   }
 
   // Prevent multiple simultaneous loads
   if (isDataLoading) {
-    console.log("⏳ Data already loading, waiting...");
     while (isDataLoading) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
-    console.log("⏳ Wait finished, returning cache:", planningDataCache?.length || 0, "rows");
     return planningDataCache || [];
   }
 
-  console.log("🚀 Starting data load process...");
   isDataLoading = true;
   planningPerformance.start('data loading');
   
@@ -1010,28 +835,23 @@ async function loadPlanning(retryCount = 0, useCache = true) {
     let rows;
 
     try {
-      console.log("🌐 Attempting to fetch from Worker API...");
       // Use Worker API endpoint
       const workerEndpoint =
         window.cloudflareSyncModule?.getWorkerEndpoint() ||
         "https://mpt-mvp-sync.jordanradford.workers.dev";
       const workerUrl = `${workerEndpoint}/data/planning`;
 
-      console.log("🌐 Worker URL:", workerUrl);
       const response = await fetch(workerUrl, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
 
-      console.log("🌐 Worker API response status:", response.status);
       if (response.ok) {
         const result = await response.json();
         rows = result.data;
-        console.log("✅ Worker API success, data:", rows?.length || 0, "rows");
 
         if (!rows || rows.length === 0) {
           if (retryCount < 2) {
-            console.log("🔄 Worker returned empty data, retrying...");
             await new Promise((resolve) =>
               setTimeout(resolve, (retryCount + 1) * 2000),
             );
@@ -1042,55 +862,39 @@ async function loadPlanning(retryCount = 0, useCache = true) {
         throw new Error(`Worker API failed: ${response.status} ${response.statusText}`);
       }
     } catch (workerError) {
-      console.log("⚠️ Worker API failed:", workerError.message);
       // Fallback: Try local file
       try {
-        console.log("📁 Falling back to local file...");
         const r = await fetch("data/planning.json");
-        console.log("📁 Local file response status:", r.status);
         if (!r.ok) throw new Error("Failed to fetch planning.json");
         rows = await r.json();
-        console.log("✅ Local file success, data:", rows?.length || 0, "rows");
       } catch (localError) {
-        console.error("❌ Local file also failed:", localError.message);
-        // Don't throw error, just use empty array
-        console.log("🔧 Using empty array as fallback");
+        console.error("Local file also failed:", localError.message);
         rows = [];
       }
     }
     
     // Handle empty data gracefully
     if (!rows || !Array.isArray(rows)) {
-      console.warn("⚠️ No planning data available or invalid data format, type:", typeof rows);
       rows = [];
     }
     
-    console.log("📊 Planning data loaded - rows count:", rows.length);
-    
     if (rows.length === 0) {
-      console.log("📭 Planning data is empty - this is normal for new installations");
-      console.log("🔧 Initializing empty state handling...");
       planningDataCache = [];
       isDataLoading = false;
       hideLoadingIndicator();
       
       // Ensure UI is functional even with no data
-      console.log("⏰ Scheduling UI functionality setup...");
       setTimeout(() => {
-        console.log("🎛️ Running ensurePlanningUIFunctional...");
         ensurePlanningUIFunctional();
       }, 100);
       
       // Initialize empty grid immediately
       if (!isGridInitialized) {
-        console.log("⏰ Scheduling empty grid initialization...");
         setTimeout(() => {
-          console.log("🏗️ Initializing empty grid...");
           initPlanningGrid([]);
         }, 200);
       }
       
-      console.log("✅ Empty data handling complete, returning empty array");
       return [];
     }
     
@@ -1150,7 +954,6 @@ async function loadPlanning(retryCount = 0, useCache = true) {
   } finally {
     // Ensure isDataLoading is always reset
     if (isDataLoading) {
-      console.log("🔧 Finally block: Ensuring isDataLoading is reset");
       isDataLoading = false;
     }
   }
@@ -1163,30 +966,149 @@ let planningDataCache = null;
 let isGridInitialized = false;
 let isDataLoading = false;
 
-// Lightweight data store for faster operations
+// Enhanced data store with master dataset management for faster operations
 class PlanningDataStore {
   constructor() {
-    this.data = [];
-    this.filteredData = [];
+    this.masterData = [];           // Complete dataset - source of truth
+    this.filteredData = [];         // Currently filtered view
+    this.deletedRows = new Set();   // Track deleted row IDs for soft delete
     this.pendingUpdates = new Map();
     this.updateQueue = [];
+    this.changeLog = [];            // Track all changes for debugging
   }
   
+  // Set the master dataset (called when loading from server/file)
   setData(data) {
-    // Clear __modified on all rows when loading new data
-    if (Array.isArray(data)) {
-      data.forEach(row => { if (row && typeof row === 'object') row.__modified = false; });
+    if (!Array.isArray(data)) {
+      console.warn('PlanningDataStore.setData: Invalid data provided, expected array');
+      data = [];
     }
-    this.data = data;
+    
+    // Clear __modified on all rows when loading new data
+    data.forEach(row => { 
+      if (row && typeof row === 'object') {
+        row.__modified = false;
+        // Ensure each row has an ID
+        if (!row.id) {
+          row.id = `row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        }
+      }
+    });
+    
+    this.masterData = [...data];  // Deep copy to prevent external mutation
     this.filteredData = [...data];
+    this.deletedRows.clear();
+    this.changeLog = [];
+    
+    console.log(`Master dataset updated: ${this.masterData.length} rows`);
   }
   
+  // Get master dataset (unfiltered, including soft-deleted rows)
+  getMasterData() {
+    return this.masterData;
+  }
+  
+  // Get active dataset (master minus deleted rows)
   getData() {
-    return this.data;
+    return this.masterData.filter(row => !this.deletedRows.has(row.id));
   }
   
+  // Get currently filtered data (for table display)
   getFilteredData() {
     return this.filteredData;
+  }
+  
+  // Add new row to master dataset
+  addRow(rowData) {
+    if (!rowData.id) {
+      rowData.id = `row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+    
+    rowData.__modified = true;
+    this.masterData.push(rowData);
+    
+    this.logChange('add', rowData.id, rowData);
+    console.log(`Row added to master dataset: ${rowData.id}`);
+    
+    return rowData;
+  }
+  
+  // Update row in master dataset
+  updateRow(rowId, updates) {
+    const rowIndex = this.masterData.findIndex(r => r.id === rowId);
+    if (rowIndex === -1) {
+      console.warn(`Row not found in master dataset: ${rowId}`);
+      return false;
+    }
+    
+    const oldData = { ...this.masterData[rowIndex] };
+    Object.assign(this.masterData[rowIndex], updates, { __modified: true });
+    
+    this.logChange('update', rowId, this.masterData[rowIndex], oldData);
+    return true;
+  }
+  
+  // Soft delete row (keeps in master but marks as deleted)
+  deleteRow(rowId) {
+    const row = this.masterData.find(r => r.id === rowId);
+    if (!row) {
+      console.warn(`Row not found in master dataset for deletion: ${rowId}`);
+      return false;
+    }
+    
+    this.deletedRows.add(rowId);
+    this.logChange('delete', rowId, row);
+    console.log(`Row soft-deleted: ${rowId}`);
+    
+    return true;
+  }
+  
+  // Hard delete row (permanently removes from master)
+  permanentlyDeleteRow(rowId) {
+    const rowIndex = this.masterData.findIndex(r => r.id === rowId);
+    if (rowIndex === -1) {
+      console.warn(`Row not found in master dataset for permanent deletion: ${rowId}`);
+      return false;
+    }
+    
+    const deletedRow = this.masterData.splice(rowIndex, 1)[0];
+    this.deletedRows.delete(rowId);
+    
+    this.logChange('permanent_delete', rowId, deletedRow);
+    console.log(`Row permanently deleted: ${rowId}`);
+    
+    return true;
+  }
+  
+  // Restore soft-deleted row
+  restoreRow(rowId) {
+    if (!this.deletedRows.has(rowId)) {
+      console.warn(`Row not in deleted set: ${rowId}`);
+      return false;
+    }
+    
+    this.deletedRows.delete(rowId);
+    const row = this.masterData.find(r => r.id === rowId);
+    
+    this.logChange('restore', rowId, row);
+    console.log(`Row restored: ${rowId}`);
+    
+    return true;
+  }
+  
+  // Get deleted rows (for recovery/undo functionality)
+  getDeletedRows() {
+    return this.masterData.filter(row => this.deletedRows.has(row.id));
+  }
+  
+  // Clear all deleted rows permanently
+  clearDeletedRows() {
+    const deletedCount = this.deletedRows.size;
+    this.masterData = this.masterData.filter(row => !this.deletedRows.has(row.id));
+    this.deletedRows.clear();
+    
+    console.log(`Permanently cleared ${deletedCount} deleted rows`);
+    return deletedCount;
   }
   
   // Queue updates to reduce immediate DOM operations
@@ -1201,33 +1123,31 @@ class PlanningDataStore {
   processUpdateQueue() {
     if (this.pendingUpdates.size === 0) return;
     
-    // Apply all pending updates at once
+    // Apply all pending updates to master dataset
     this.pendingUpdates.forEach((updates, rowId) => {
-      const row = this.data.find(r => r.id === rowId);
-      if (row) {
-        Object.assign(row, updates);
-      }
+      this.updateRow(rowId, updates);
     });
     
     this.pendingUpdates.clear();
     
-    // Update table if it exists
-    if (planningTableInstance && this.data.length > 0) {
-      // Clear __modified on all rows when replacing data
-      this.data.forEach(row => { if (row && typeof row === 'object') row.__modified = false; });
-      planningTableInstance.replaceData(this.data);
+    // Update table if it exists with current filtered view
+    if (planningTableInstance && this.getData().length > 0) {
+      planningTableInstance.replaceData(this.getFilteredData());
     }
   }
-  
+
   applyFilters(filters) {
     const startTime = performance.now();
+    
+    // Start with active data (master minus deleted)
+    const activeData = this.getData();
     
     // Pre-compute normalized quarter filter values for performance
     const normalizedQuarterFilters = filters.quarter && Array.isArray(filters.quarter) 
       ? filters.quarter.map(normalizeQuarter) 
       : null;
     
-    this.filteredData = this.data.filter(row => {
+    this.filteredData = activeData.filter(row => {
       // Digital Motions filter (robust: accept boolean true or string 'true')
       if (filters.digitalMotions && !(row.digitalMotions === true || row.digitalMotions === 'true')) {
         return false;
@@ -1284,22 +1204,129 @@ class PlanningDataStore {
     });
     
     const duration = performance.now() - startTime;
-    console.log(`🔍 Filter applied: ${this.filteredData.length}/${this.data.length} rows (${duration.toFixed(2)}ms)`);
+    console.log(`Filter applied: ${this.filteredData.length}/${activeData.length} rows (${duration.toFixed(2)}ms)`);
     
     return this.filteredData;
   }
   
+  // Clear all data (including deleted rows)
   clearAllData() {
-    console.log("🗑️ Clearing all planning data from data store");
-    this.data = [];
+    this.masterData = [];
     this.filteredData = [];
+    this.deletedRows.clear();
     this.pendingUpdates.clear();
     this.updateQueue = [];
+    this.changeLog = [];
+    console.log("All planning data cleared from data store");
+  }
+  
+  // Log changes for debugging and potential undo functionality
+  logChange(action, rowId, newData, oldData = null) {
+    this.changeLog.push({
+      timestamp: new Date().toISOString(),
+      action,
+      rowId,
+      newData: newData ? { ...newData } : null,
+      oldData: oldData ? { ...oldData } : null
+    });
+    
+    // Keep only last 100 changes to prevent memory bloat
+    if (this.changeLog.length > 100) {
+      this.changeLog.shift();
+    }
+  }
+  
+  // Get change history for debugging
+  getChangeLog() {
+    return this.changeLog;
+  }
+  
+  // Get statistics about the dataset
+  getStats() {
+    return {
+      masterDataCount: this.masterData.length,
+      activeDataCount: this.getData().length,
+      filteredDataCount: this.filteredData.length,
+      deletedCount: this.deletedRows.size,
+      pendingUpdates: this.pendingUpdates.size,
+      changeLogEntries: this.changeLog.length
+    };
   }
 }
 
 const planningDataStore = new PlanningDataStore();
 window.planningDataStore = planningDataStore;
+
+// Debug utilities for testing master dataset functionality
+window.planningDebug = {
+  // Test the master dataset functionality
+  testMasterDataset() {
+    console.log('=== Testing Master Dataset Functionality ===');
+    const stats = planningDataStore.getStats();
+    console.log('Current stats:', stats);
+    console.log('Master data sample:', planningDataStore.getMasterData().slice(0, 3));
+    console.log('Active data count:', planningDataStore.getData().length);
+    console.log('Filtered data count:', planningDataStore.getFilteredData().length);
+    console.log('Deleted rows:', planningDataStore.getDeletedRows().length);
+    return stats;
+  },
+  
+  // Test soft delete functionality
+  testSoftDelete(rowId) {
+    if (!rowId) {
+      const activeData = planningDataStore.getData();
+      if (activeData.length === 0) {
+        console.log('No rows available to delete');
+        return false;
+      }
+      rowId = activeData[0].id;
+    }
+    
+    console.log(`Testing soft delete for row: ${rowId}`);
+    const beforeStats = planningDataStore.getStats();
+    const success = planningDataStore.deleteRow(rowId);
+    const afterStats = planningDataStore.getStats();
+    
+    console.log('Before:', beforeStats);
+    console.log('After:', afterStats);
+    console.log('Delete successful:', success);
+    
+    return success;
+  },
+  
+  // Test restore functionality
+  testRestore(rowId) {
+    if (!rowId) {
+      const deletedRows = planningDataStore.getDeletedRows();
+      if (deletedRows.length === 0) {
+        console.log('No deleted rows available to restore');
+        return false;
+      }
+      rowId = deletedRows[0].id;
+    }
+    
+    console.log(`Testing restore for row: ${rowId}`);
+    const beforeStats = planningDataStore.getStats();
+    const success = planningDataStore.restoreRow(rowId);
+    const afterStats = planningDataStore.getStats();
+    
+    console.log('Before:', beforeStats);
+    console.log('After:', afterStats);
+    console.log('Restore successful:', success);
+    
+    return success;
+  },
+  
+  // View change log
+  viewChangeLog() {
+    const log = planningDataStore.getChangeLog();
+    console.log('=== Change Log ===');
+    log.forEach((entry, index) => {
+      console.log(`${index + 1}. ${entry.timestamp} - ${entry.action} - Row: ${entry.rowId}`);
+    });
+    return log;
+  }
+};
 
 // Loading indicator functions for large dataset processing
 function showLoadingIndicator(message = "Loading...") {
@@ -1390,23 +1417,17 @@ async function initPlanningGridLazy() {
 }
 
 function initPlanningGrid(rows) {
-  console.log("🏗️ ENTER: initPlanningGrid with", rows?.length || 0, "rows");
   planningPerformance.start('grid initialization');
   
   // Handle empty data gracefully
   if (!rows || !Array.isArray(rows)) {
-    console.warn("⚠️ Invalid data provided to initPlanningGrid, using empty array, type:", typeof rows);
     rows = [];
   }
   
-  console.log("📊 Grid will be initialized with", rows.length, "rows");
-  
   // Initialize data store
-  console.log("🗃️ Setting data in data store...");
   planningDataStore.setData(rows);
   
   return new Promise((resolve) => {
-    console.log("🚀 Starting chunked grid initialization...");
     // Break up the initialization into smaller chunks to prevent long tasks
     const initializeInChunks = async () => {
       
@@ -1501,10 +1522,7 @@ function initPlanningGrid(rows) {
           "</div>" : 
           "No Data Available",
         tableBuilt: function() {
-          console.log(`Planning table built with ${this.getData().length} rows`);
-          
           // Wire up button functionality now that table is built
-          console.log("🔧 Table built, wiring up UI functionality...");
           ensurePlanningUIFunctional();
           
           // Use requestIdleCallback for non-blocking redraw
@@ -1540,7 +1558,6 @@ function initPlanningGrid(rows) {
           scheduleRedraw();
         },
         dataLoaded: function(data) {
-          console.log(`Planning grid loaded with ${data.length} rows`);
           if (window.requestIdleCallback) {
             requestIdleCallback(() => {
               this.redraw(false);
@@ -2584,8 +2601,19 @@ function setupPlanningSave(table, rows) {
   const saveBtn = document.getElementById("savePlanningRows");
   if (!saveBtn) return;
   saveBtn.onclick = async () => {
-    // Recalculate KPIs for all rows before saving
-    const allRows = table.getData();
+    console.log("=== PHASE 2: Using Master Dataset for Save ===");
+    
+    // Get the complete dataset from master data store (not filtered table data)
+    const masterData = planningDataStore.getData(); // Gets active data (master minus deleted)
+    console.log(`Saving master dataset: ${masterData.length} rows (vs table: ${table.getData().length} visible)`);
+    
+    if (masterData.length === 0) {
+      alert("No data to save.");
+      return;
+    }
+    
+    // Recalculate KPIs for ALL rows in master dataset before saving
+    const allRows = [...masterData]; // Work with a copy to avoid mutation
     
     // Process KPI calculations in very small batches to prevent long tasks
     for (let i = 0; i < allRows.length; i += 8) {
@@ -2609,7 +2637,15 @@ function setupPlanningSave(table, rows) {
             changed = true;
           }
           
-          if (changed) row.__modified = true;
+          if (changed) {
+            row.__modified = true;
+            // Update the master dataset with calculated values
+            planningDataStore.updateRow(row.id, {
+              mqlForecast: row.mqlForecast,
+              pipelineForecast: row.pipelineForecast,
+              __modified: true
+            });
+          }
         }
       });
       
@@ -2619,11 +2655,23 @@ function setupPlanningSave(table, rows) {
       }
     }
 
-
-    // Save all planning data
-    const data = table.getData();
-    // Clear __modified and __unsavedPriority on all rows after save
-    data.forEach(row => { row.__modified = false; row.__unsavedPriority = 0; });
+    // Use the updated master dataset for saving
+    const data = planningDataStore.getData();
+    
+    // Clear __modified and __unsavedPriority on all rows in master dataset after save preparation
+    data.forEach(row => { 
+      row.__modified = false; 
+      row.__unsavedPriority = 0; 
+    });
+    
+    // Update the master dataset with cleared flags
+    data.forEach(row => {
+      planningDataStore.updateRow(row.id, {
+        __modified: false,
+        __unsavedPriority: 0
+      });
+    });
+    
     setTimeout(() => {
       highlightUnsavedRows();
       // Remove unsaved sort, optionally restore default sort here
@@ -3216,8 +3264,6 @@ function ensurePlanningGridVisible() {
 }
 
 function populatePlanningFilters() {
-  console.log("🔧 Populating planning filters...");
-  
   const regionSelect = document.getElementById("planningRegionFilter");
   const quarterSelect = document.getElementById("planningQuarterFilter");
   const statusSelect = document.getElementById("planningStatusFilter");
@@ -3231,12 +3277,9 @@ function populatePlanningFilters() {
   if (!regionSelect || !quarterSelect || !statusSelect || 
       !programTypeSelect || !strategicPillarSelect || !ownerSelect || 
       !revenuePlaySelect || !countrySelect || !digitalMotionsButton) {
-    console.warn("⚠️ Some filter elements not found, retrying in 100ms (reduced delay)");
-    setTimeout(populatePlanningFilters, 100); // Reduced from 500ms to 100ms
+    setTimeout(populatePlanningFilters, 100);
     return;
   }
-
-  console.log("✅ All filter elements found, proceeding with population");
 
   // Initialize Digital Motions button state
   if (!digitalMotionsButton.hasAttribute("data-active")) {
@@ -3334,8 +3377,6 @@ function populatePlanningFilters() {
         select.setAttribute("data-listener-attached", "true");
       }
     });
-
-    console.log("✅ Planning filters populated successfully");
   }); // Close requestAnimationFrame callback
 
   // Digital Motions filter button toggle (only attach once)
@@ -3345,19 +3386,9 @@ function populatePlanningFilters() {
       const isActive = currentState === "true";
       const newState = !isActive;
 
-      console.log("[Planning] Digital Motions button clicked:", {
-        currentState,
-        isActive,
-        newState,
-      });
-
       digitalMotionsButton.dataset.active = newState.toString();
       updateDigitalMotionsButtonVisual(digitalMotionsButton);
 
-      console.log(
-        "[Planning] About to apply filters with Digital Motions state:",
-        newState,
-      );
       applyPlanningFilters();
     });
     digitalMotionsButton.setAttribute("data-listener-attached", "true");
@@ -3613,7 +3644,6 @@ function updatePlanningFilterSummary(filters, resultCount) {
 
 // Pre-populate planning filters with static data for immediate display
 function prePopulatePlanningFilters() {
-  console.log("🚀 Pre-populating planning filters for faster initial load...");
   
   // Use requestAnimationFrame to avoid blocking initial page load
   requestAnimationFrame(() => {
@@ -3627,11 +3657,8 @@ function prePopulatePlanningFilters() {
 
     if (!regionSelect || !quarterSelect || !statusSelect || 
         !programTypeSelect || !strategicPillarSelect || !ownerSelect || !digitalMotionsButton) {
-      console.log("⏳ Filter elements not ready yet, will populate later");
       return;
     }
-
-    console.log("✅ Pre-populating filters with static data");
 
     // Pre-populate with static data immediately for better UX
     const populateSelectFast = (select, options, placeholder) => {
@@ -3675,8 +3702,6 @@ function prePopulatePlanningFilters() {
         }
       }
     });
-
-    console.log("✅ Planning filters pre-populated successfully");
   });
 }
 
@@ -3709,6 +3734,14 @@ window.planningModule = {
   cleanupPlanningWorker,
   initializePlanningUniversalSearch,
   updatePlanningSearchData,
+  // Master dataset management utilities
+  getDataStore: () => planningDataStore,
+  getMasterData: () => planningDataStore.getMasterData(),
+  getActiveData: () => planningDataStore.getData(),
+  getDeletedRows: () => planningDataStore.getDeletedRows(),
+  getDataStats: () => planningDataStore.getStats(),
+  restoreDeletedRow: (rowId) => planningDataStore.restoreRow(rowId),
+  permanentlyDeleteRow: (rowId) => planningDataStore.permanentlyDeleteRow(rowId),
   // State getters
   getIsInitialized: () => isGridInitialized,
   getIsLoading: () => isDataLoading,
@@ -3878,9 +3911,11 @@ function triggerPlanningAutosave(table) {
     return;
   }
 
-  // Get only modified data to reduce payload size
-  const allData = table.getData();
+  // Get data from master dataset instead of filtered table
+  const allData = planningDataStore.getData(); // Uses master dataset (excluding deleted)
   const modifiedData = allData.filter(row => row.__modified);
+  
+  console.log(`Autosave: Using master dataset - ${allData.length} total rows, ${modifiedData.length} modified`);
   
   // For large datasets, prioritize saving modified rows
   if (allData.length > 1000 && modifiedData.length < allData.length * 0.1) {
@@ -3897,27 +3932,16 @@ function triggerPlanningAutosave(table) {
 // Universal Search Filter Implementation
 
 function initializePlanningUniversalSearch() {
-  console.log("🔍 PLANNING: Starting universal search initialization...");
-  
   // Check if UniversalSearchFilter class is available
   if (!window.UniversalSearchFilter) {
-    console.error("❌ PLANNING: UniversalSearchFilter class not found!");
-    console.log("Available on window:", Object.keys(window).filter(k => k.includes('Search') || k.includes('Universal')));
     return;
   }
-  
-  console.log("✅ PLANNING: UniversalSearchFilter class found");
   
   // Check if container exists
   const container = document.getElementById('planningUniversalSearch');
   if (!container) {
-    console.error("❌ PLANNING: Container 'planningUniversalSearch' not found in DOM!");
-    console.log("Available elements with 'planning' in id:", Array.from(document.querySelectorAll('[id*="planning"]')).map(el => el.id));
     return;
   }
-  
-  console.log("✅ PLANNING: Container found:", container);
-  console.log("✅ PLANNING: Container visible:", container.offsetParent !== null);
   
   try {
     // Initialize universal search for planning
@@ -3925,39 +3949,30 @@ function initializePlanningUniversalSearch() {
       'planningUniversalSearch',
       {
         onFilterChange: (selectedFilters) => {
-          console.log("🔄 PLANNING: Search filters changed:", selectedFilters);
           applyPlanningSearchFilters(selectedFilters);
         }
       }
     );
     
-    console.log("✅ PLANNING: Universal search initialized successfully!");
-    
     // Update search data with current planning data
     updatePlanningSearchData();
     
   } catch (error) {
-    console.error("❌ PLANNING: Error initializing universal search:", error);
-    console.error("❌ PLANNING: Error stack:", error.stack);
+    console.error("Error initializing planning universal search:", error);
   }
 }
 
 function updatePlanningSearchData() {
-  console.log("📊 PLANNING: Updating search data...");
-  
   if (!window.planningUniversalSearch) {
-    console.warn("⚠️ PLANNING: Universal search not initialized yet");
     return;
   }
   
   if (!planningTableInstance) {
-    console.warn("⚠️ PLANNING: Planning table instance not available yet");
     return;
   }
   
   try {
     const planningData = planningTableInstance.getData();
-    console.log("📈 PLANNING: Creating filter options from", planningData.length, "planning records");
     
     // Get unique values from actual data
     const uniqueOwners = Array.from(
@@ -4064,20 +4079,15 @@ function updatePlanningSearchData() {
       });
     });
 
-    console.log('[DEBUG] planning.js: searchData sent to updateData:', searchData);
     window.planningUniversalSearch.updateData(searchData);
-    console.log("✅ PLANNING: Search data updated with", searchData.length, "filter options");
     
   } catch (error) {
-    console.error("❌ PLANNING: Error updating search data:", error);
+    console.error("Error updating planning search data:", error);
   }
 }
 
 function applyPlanningSearchFilters(selectedFilters) {
-  console.log("🎯 PLANNING: Applying search filters:", selectedFilters);
-  
   if (!planningTableInstance) {
-    console.warn("⚠️ PLANNING: Planning table instance not available");
     return;
   }
   

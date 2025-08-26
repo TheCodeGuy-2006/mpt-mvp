@@ -670,7 +670,7 @@ function initExecutionGrid(rows) {
       }, 300);
 
       await yieldToMain();
-      console.log("✅ Execution grid initialization completed");
+      // Grid initialization completed
       
       // Debug: Show actual execution data structure
       const executionData = table.getData();
@@ -1050,7 +1050,7 @@ function populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusO
       }
     });
 
-    console.log("✅ Execution filters populated successfully");
+    // Execution filters populated successfully
   }); // Close requestAnimationFrame
 }
 
@@ -1713,7 +1713,7 @@ function populateExecutionFilters() {
       }
     });
 
-    console.log("✅ Execution filters populated successfully with actual data");
+    // Execution filters populated successfully with actual data
   });
 }
 
@@ -2197,7 +2197,7 @@ if (window.tabManager) {
       }
     }
   );
-  console.log("✅ Execution tab registered with TabManager");
+  // Execution tab registered with TabManager
 } else {
   // Fallback: Initialize when explicitly needed
   console.log("🎯 TabManager not available, execution will initialize on demand");
