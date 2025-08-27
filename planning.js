@@ -742,6 +742,8 @@ function ensurePlanningUIFunctional() {
   if (delBtn && !delBtn.onclick) {
     delBtn.textContent = "Delete Highlighted Rows";
     delBtn.onclick = () => {
+      console.log("=== PHASE 3: Using Master Dataset for Delete ===");
+      
       if (!planningTableInstance) {
         alert("No campaigns to delete.");
         return;
@@ -752,7 +754,22 @@ function ensurePlanningUIFunctional() {
         return;
       }
       if (!confirm(`Are you sure you want to delete ${selectedRows.length} selected row(s)?`)) return;
-      selectedRows.forEach(row => row.delete());
+      
+      // Use master dataset delete instead of table row delete
+      const deletedIds = [];
+      selectedRows.forEach(row => {
+        const rowData = row.getData();
+        if (rowData && rowData.id) {
+          // Mark as deleted in master dataset (soft delete)
+          planningDataStore.deleteRow(rowData.id);
+          deletedIds.push(rowData.id);
+          console.log(`Soft deleted row ID: ${rowData.id}`);
+        }
+        // Also remove from table display
+        row.delete();
+      });
+      
+      console.log(`Phase 3: Deleted ${deletedIds.length} rows from master dataset`);
       window.hasUnsavedPlanningChanges = true;
       console.log(`[Planning] Unsaved changes set to true (mass delete: ${selectedRows.length} rows)`);
     };
@@ -770,40 +787,44 @@ function ensurePlanningUIFunctional() {
       event.preventDefault();
       event.stopPropagation();
       
+      console.log("=== PHASE 3: Using Master Dataset for Delete All ===");
+      
       if (!window.planningTableInstance) {
         alert("No table instance found. Please reload the page and try again.");
         return;
       }
       
-      let allRows;
-      try {
-        allRows = window.planningTableInstance.getRows();
-      } catch (error) {
-        alert("Error accessing table data: " + error.message);
-        return;
-      }
+      // Get count from master dataset instead of table
+      const masterData = planningDataStore.getData(); // Active data (not deleted)
+      const totalRows = masterData.length;
       
-      if (allRows.length === 0) {
+      if (totalRows === 0) {
         alert("No rows to delete.");
         return;
       }
       
-      const confirmed = confirm(`Are you sure you want to delete ALL ${allRows.length} rows? This action cannot be undone.`);
+      const confirmed = confirm(`Are you sure you want to delete ALL ${totalRows} rows? This action cannot be undone.`);
       if (!confirmed) return;
       
       try {
+        // Clear the table display
         window.planningTableInstance.clearData();
         
-        if (window.planningDataStore && typeof window.planningDataStore.clearAllData === 'function') {
-          window.planningDataStore.clearAllData();
-        } else if (window.planningDataCache) {
-          window.planningDataCache.length = 0;
-        }
+        // Use master dataset to mark all rows as deleted
+        const deletedIds = [];
+        masterData.forEach(row => {
+          if (row && row.id) {
+            planningDataStore.deleteRow(row.id);
+            deletedIds.push(row.id);
+          }
+        });
         
+        console.log(`Phase 3: Marked ${deletedIds.length} rows as deleted in master dataset`);
         window.hasUnsavedPlanningChanges = true;
         alert("All rows have been deleted successfully!");
         
       } catch (error) {
+        console.error("Error during deletion:", error);
         alert("Error during deletion: " + error.message);
       }
     };
@@ -1995,6 +2016,16 @@ function initPlanningGrid(rows) {
             width: 50,
             hozAlign: "center",
             cellClick: function (e, cell) {
+              console.log("=== PHASE 3: Individual Row Delete Using Master Dataset ===");
+              
+              const rowData = cell.getRow().getData();
+              if (rowData && rowData.id) {
+                // Soft delete from master dataset
+                planningDataStore.deleteRow(rowData.id);
+                console.log(`Phase 3: Soft deleted row ID: ${rowData.id} from master dataset`);
+              }
+              
+              // Also remove from table display
               cell.getRow().delete();
               window.hasUnsavedPlanningChanges = true;
               console.log("[Planning] Unsaved changes set to true (row delete)");
@@ -2043,13 +2074,30 @@ function initPlanningGrid(rows) {
       if (delBtn) {
         delBtn.textContent = "Delete Highlighted Rows";
         delBtn.onclick = () => {
+          console.log("=== PHASE 3: Using Master Dataset for Delete (Alternative Handler) ===");
+          
           const selectedRows = planningTableInstance.getSelectedRows();
           if (selectedRows.length === 0) {
             alert("No rows selected for deletion.");
             return;
           }
           if (!confirm(`Are you sure you want to delete ${selectedRows.length} selected row(s)?`)) return;
-          selectedRows.forEach(row => row.delete());
+          
+          // Use master dataset delete instead of just table row delete
+          const deletedIds = [];
+          selectedRows.forEach(row => {
+            const rowData = row.getData();
+            if (rowData && rowData.id) {
+              // Mark as deleted in master dataset (soft delete)
+              planningDataStore.deleteRow(rowData.id);
+              deletedIds.push(rowData.id);
+              console.log(`Soft deleted row ID: ${rowData.id}`);
+            }
+            // Also remove from table display
+            row.delete();
+          });
+          
+          console.log(`Phase 3: Deleted ${deletedIds.length} rows from master dataset (alternative handler)`);
           window.hasUnsavedPlanningChanges = true;
           console.log(`[Planning] Unsaved changes set to true (mass delete: ${selectedRows.length} rows)`);
         };
@@ -2511,12 +2559,24 @@ function setupAddRowModalEvents() {
     }
 
 
+    // Add row to master dataset first
+    planningDataStore.addRow(formData);
+    console.log(`Phase 3: Added new row to master dataset: ${formData.id}`);
+
     // Add row to table and force unsaved to top
     let newRow;
     if (planningTableInstance && typeof planningTableInstance.addRow === 'function') {
       // Remove any existing row with this id (shouldn't happen, but for safety)
       const existing = planningTableInstance.getRows().find(r => r.getData().id === formData.id);
-      if (existing) existing.delete();
+      if (existing) {
+        // Also remove from master dataset if it exists
+        const existingData = existing.getData();
+        if (existingData && existingData.id) {
+          planningDataStore.deleteRow(existingData.id);
+          console.log(`Phase 3: Removed duplicate from master dataset: ${existingData.id}`);
+        }
+        existing.delete();
+      }
 
       // Insert at the top by updating the data array directly
       let data = planningTableInstance.getData();
