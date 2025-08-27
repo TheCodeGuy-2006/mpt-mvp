@@ -303,25 +303,53 @@ const calendarCache = {
   getCampaigns() {
     const now = Date.now();
     if (!this.campaigns || (now - this.lastUpdate) > 10000) { // Reduced cache time to 10 seconds for faster updates
-      // Try multiple ways to access planning data
+      // Try multiple ways to access planning data - prioritize master dataset
       let rawCampaigns = [];
       
-      // First try: direct access to planningTableInstance
-      if (window.planningTableInstance && typeof window.planningTableInstance.getData === 'function') {
+      // First try: Master dataset (highest priority)
+      if (window.planningDataStore && typeof window.planningDataStore.getData === 'function') {
+        try {
+          rawCampaigns = window.planningDataStore.getData() || [];
+          if (rawCampaigns.length > 0) {
+            console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningDataStore (master dataset)`);
+          }
+        } catch (error) {
+          console.warn('Calendar: Error accessing planningDataStore:', error);
+        }
+      }
+      
+      // Second try: direct access to planningTableInstance
+      if ((!rawCampaigns || rawCampaigns.length === 0) && window.planningTableInstance && typeof window.planningTableInstance.getData === 'function') {
         rawCampaigns = window.planningTableInstance.getData() || [];
-        console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningTableInstance`);
+        if (rawCampaigns.length > 0) {
+          console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningTableInstance`);
+        }
       }
-      // Second try: access through planningModule
-      else if (window.planningModule?.tableInstance && typeof window.planningModule.tableInstance.getData === 'function') {
+      
+      // Third try: access through planningModule
+      if ((!rawCampaigns || rawCampaigns.length === 0) && window.planningModule?.tableInstance && typeof window.planningModule.tableInstance.getData === 'function') {
         rawCampaigns = window.planningModule.tableInstance.getData() || [];
-        console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningModule.tableInstance`);
+        if (rawCampaigns.length > 0) {
+          console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningModule.tableInstance`);
+        }
       }
-      // Fallback: try to load from cached data
-      else if (window.planningDataCache && Array.isArray(window.planningDataCache)) {
+      
+      // Fourth try: fallback to cached data
+      if ((!rawCampaigns || rawCampaigns.length === 0) && window.planningDataCache && Array.isArray(window.planningDataCache)) {
         rawCampaigns = window.planningDataCache;
+        if (rawCampaigns.length > 0) {
+          console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningDataCache`);
+        }
       }
-      else {
-        // Return empty array during initialization - this is normal behavior
+      
+      // If still no data, return existing cache or empty array
+      if (!rawCampaigns || rawCampaigns.length === 0) {
+        // Only log during first few attempts to reduce console noise
+        if (!window.calendarDataAttempts) window.calendarDataAttempts = 0;
+        window.calendarDataAttempts++;
+        if (window.calendarDataAttempts <= 3) {
+          console.log('Calendar: No campaign data available, may still be loading...');
+        }
         return this.campaigns || [];
       }
       
@@ -1770,6 +1798,33 @@ function initializeCalendar() {
       clearInterval(dataCheckInterval);
     }, 15000);
   }
+  
+  // Add event listeners for data ready events
+  window.addEventListener('planningDataReady', (event) => {
+    console.log('[CALENDAR] Planning data ready event received:', event.detail);
+    // Clear cache and refresh calendar if we're on the calendar tab
+    if (window.location.hash === '#calendar') {
+      calendarCache.invalidate();
+      // Reset attempt counter
+      window.calendarDataAttempts = 0;
+      
+      // Update available fiscal years with new data
+      const newCampaigns = getCampaignData();
+      if (newCampaigns.length > 0) {
+        const availableFYs = getAvailableFYs();
+        if (availableFYs.length > 0 && !availableFYs.includes(currentFY)) {
+          currentFY = availableFYs[0];
+          console.log(`Calendar: Updated current FY to ${currentFY} after data load`);
+        }
+        
+        // Re-render calendar with new data
+        requestAnimationFrame(() => {
+          renderCalendar();
+          console.log('[CALENDAR] Calendar refreshed with new planning data');
+        });
+      }
+    }
+  });
 }
 
 // Initialize calendar universal search
@@ -1923,9 +1978,20 @@ const calendarModule = {
   debugCalendarState() {
     console.log('🔍 Calendar Debug State:');
     console.log(`- Current FY: ${currentFY}`);
+    console.log(`- Planning data store:`, window.planningDataStore);
     console.log(`- Planning table instance:`, window.planningTableInstance);
     console.log(`- Planning module:`, window.planningModule);
     console.log(`- Planning data cache:`, window.planningDataCache);
+    
+    // Test master dataset access
+    if (window.planningDataStore && typeof window.planningDataStore.getData === 'function') {
+      try {
+        const masterData = window.planningDataStore.getData();
+        console.log(`- Master dataset count: ${masterData.length}`);
+      } catch (error) {
+        console.log(`- Master dataset error:`, error);
+      }
+    }
     
     const campaigns = getCampaignData();
     console.log(`- Campaign count: ${campaigns.length}`);

@@ -1971,7 +1971,8 @@ const roiModule = {
   // Master dataset helper functions
   getPlanningData,
   getExecutionData,
-  checkForPlanningData // Data watcher function for planning data availability
+  checkForPlanningData, // Data watcher function for planning data availability
+  clearBudgetsCache // Budget cache management
 };
 
 // Export to window for access from other modules
@@ -1983,18 +1984,39 @@ window.debugRoi = debugRoiState;
 // Remaining Budget Calculation Functions
 let budgetsData = null;
 
-// Load budgets data from budgets.json
+// Load budgets data with integration to budgets module
 async function loadBudgetsData() {
   if (budgetsData) return budgetsData;
 
   try {
+    // First try: Use budgets module if available (preferred for consistency)
+    if (window.budgetsModule && typeof window.budgetsModule.loadBudgets === 'function') {
+      try {
+        budgetsData = await window.budgetsModule.loadBudgets();
+        if (budgetsData && Object.keys(budgetsData).length > 0) {
+          console.log('[ROI] Loaded budgets data from budgets module');
+          return budgetsData;
+        }
+      } catch (error) {
+        console.warn('[ROI] Error loading from budgets module:', error);
+      }
+    }
+    
+    // Fallback: Load directly from file (existing behavior)
     const response = await fetch("data/budgets.json");
     budgetsData = await response.json();
+    console.log('[ROI] Loaded budgets data from local file');
     return budgetsData;
   } catch (error) {
     console.error("[ROI] Error loading budgets data:", error);
     return {};
   }
+}
+
+// Clear budgets cache (for consistency with budgets module)
+function clearBudgetsCache() {
+  budgetsData = null;
+  console.log('[ROI] Budgets cache cleared');
 }
 
 // Update remaining budget calculation

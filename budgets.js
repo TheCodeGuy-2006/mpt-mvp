@@ -565,6 +565,20 @@ const budgetsModule = {
   // Method to clear calculation cache when data changes
   clearCalculationCache() {
     this._calculationCache.clear();
+    
+    // Also clear ROI budgets cache if available to maintain consistency
+    if (window.roiModule) {
+      // Reset ROI budget data cache
+      console.log('[BUDGETS] Clearing ROI budget cache for consistency');
+      setTimeout(() => {
+        if (typeof window.roiModule.updateRemainingBudget === 'function') {
+          window.roiModule.updateRemainingBudget({});
+        }
+        if (typeof window.roiModule.updateForecastedBudgetUsage === 'function') {
+          window.roiModule.updateForecastedBudgetUsage({});
+        }
+      }, 100);
+    }
   },
   
   // Optimized utilization calculation with caching
