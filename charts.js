@@ -1094,16 +1094,42 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
     return quarter.replace(/\s*-\s*/g, ' ').trim();
   };
 
-  // Get forecasted from planning table
+  // Get forecasted from planning data using master dataset
   let planningRows = [];
-  if (window.planningTableInstance) {
-    planningRows = window.planningTableInstance.getData();
-    console.log('[ROI CHART] planningTableInstance found, rows:', planningRows);
-  } else if (window.planningRows) {
+  
+  // Try master dataset first
+  if (window.planningDataStore && typeof window.planningDataStore.getData === 'function') {
+    try {
+      planningRows = window.planningDataStore.getData();
+      console.log('[ROI CHART] Using planning master dataset, rows:', planningRows.length);
+    } catch (error) {
+      console.warn('[ROI CHART] Error accessing planning master dataset:', error);
+    }
+  }
+  
+  // Fallback to table instance
+  if ((!planningRows || planningRows.length === 0) && window.planningTableInstance) {
+    try {
+      planningRows = window.planningTableInstance.getData();
+      console.log('[ROI CHART] Fallback to planningTableInstance, rows:', planningRows.length);
+    } catch (error) {
+      console.warn('[ROI CHART] Error accessing planning table instance:', error);
+    }
+  }
+  
+  // Final fallback to window.planningRows
+  if ((!planningRows || planningRows.length === 0) && window.planningRows) {
     planningRows = window.planningRows;
-    console.log('[ROI CHART] window.planningRows fallback, rows:', planningRows);
-  } else {
-    console.warn('[ROI CHART] No planningTableInstance or planningRows found');
+    console.log('[ROI CHART] Fallback to window.planningRows, rows:', planningRows.length);
+  }
+  
+  if (!planningRows || planningRows.length === 0) {
+    // Only warn occasionally to reduce console noise
+    if (!window.chartsPlanningWarningCount) window.chartsPlanningWarningCount = 0;
+    window.chartsPlanningWarningCount++;
+    if (window.chartsPlanningWarningCount <= 2) {
+      console.warn('[ROI CHART] No planning data source available, may still be loading...');
+    }
   }
   console.log('[ROI CHART] Filters:', filters);
   if (Array.isArray(planningRows) && planningRows.length > 0) {
@@ -1134,39 +1160,60 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
     console.warn('[ROI CHART] planningRows is empty or not an array:', planningRows);
   }
 
-  // Get actuals from execution table if available
-  if (window.executionTableInstance) {
-    const execRows = window.executionTableInstance.getData();
-    console.log('[ROI CHART] executionTableInstance found, rows:', execRows);
-    if (Array.isArray(execRows) && execRows.length > 0) {
-      let execFilteredCount = 0;
-      execRows.forEach((row) => {
-        // Multi-select filter logic: only filter if array is non-empty
-        if (Array.isArray(filters.region) && filters.region.length > 0 && !filters.region.includes(row.region)) return;
-        if (Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) return;
-        if (Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) return;
-        if (Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) return;
-        if (Array.isArray(filters.status) && filters.status.length > 0 && !filters.status.includes(row.status)) return;
-        if (Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) return;
-        if (Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) return;
-        if (Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) return;
-
-        execFilteredCount++;
-        hasExecutionData = true;
-        let aMql = row.actualMQLs || 0;
-        if (typeof aMql === "string") aMql = Number(aMql.toString().replace(/[^\d.-]/g, ""));
-        if (!isNaN(aMql)) actualMql += Number(aMql);
-
-        let aLeads = row.actualLeads || 0;
-        if (typeof aLeads === "string") aLeads = Number(aLeads.toString().replace(/[^\d.-]/g, ""));
-        if (!isNaN(aLeads)) actualLeads += Number(aLeads);
-      });
-      console.log(`[ROI CHART] Execution rows: total=${execRows.length}, filtered=${execFilteredCount}, actualMql=${actualMql}, actualLeads=${actualLeads}`);
-    } else {
-      console.warn('[ROI CHART] executionTableInstance rows is empty or not an array:', execRows);
+  // Get actuals from execution data using master dataset
+  let execRows = [];
+  
+  // Try master dataset first
+  if (window.executionDataStore && typeof window.executionDataStore.getData === 'function') {
+    try {
+      execRows = window.executionDataStore.getData();
+      console.log('[ROI CHART] Using execution master dataset, rows:', execRows.length);
+    } catch (error) {
+      console.warn('[ROI CHART] Error accessing execution master dataset:', error);
     }
-  } else {
-    console.warn('[ROI CHART] No executionTableInstance found');
+  }
+  
+  // Fallback to table instance
+  if ((!execRows || execRows.length === 0) && window.executionTableInstance) {
+    try {
+      execRows = window.executionTableInstance.getData();
+      console.log('[ROI CHART] Fallback to executionTableInstance, rows:', execRows.length);
+    } catch (error) {
+      console.warn('[ROI CHART] Error accessing execution table instance:', error);
+    }
+  }
+  
+  if (!execRows || execRows.length === 0) {
+    // Only warn occasionally to reduce console noise
+    if (!window.chartsExecutionWarningCount) window.chartsExecutionWarningCount = 0;
+    window.chartsExecutionWarningCount++;
+    if (window.chartsExecutionWarningCount <= 2) {
+      console.warn('[ROI CHART] No execution data source available, may still be loading...');
+    }
+  } else if (Array.isArray(execRows) && execRows.length > 0) {
+    let execFilteredCount = 0;
+    execRows.forEach((row) => {
+      // Multi-select filter logic: only filter if array is non-empty
+      if (Array.isArray(filters.region) && filters.region.length > 0 && !filters.region.includes(row.region)) return;
+      if (Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) return;
+      if (Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) return;
+      if (Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) return;
+      if (Array.isArray(filters.status) && filters.status.length > 0 && !filters.status.includes(row.status)) return;
+      if (Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) return;
+      if (Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) return;
+      if (Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) return;
+
+      execFilteredCount++;
+      hasExecutionData = true;
+      let aMql = row.actualMQLs || 0;
+      if (typeof aMql === "string") aMql = Number(aMql.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(aMql)) actualMql += Number(aMql);
+
+      let aLeads = row.actualLeads || 0;
+      if (typeof aLeads === "string") aLeads = Number(aLeads.toString().replace(/[^\d.-]/g, ""));
+      if (!isNaN(aLeads)) actualLeads += Number(aLeads);
+    });
+    console.log(`[ROI CHART] Execution rows: total=${execRows.length}, filtered=${execFilteredCount}, actualMql=${actualMql}, actualLeads=${actualLeads}`);
   }
 
   // Cache processed data

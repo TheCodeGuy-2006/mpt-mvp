@@ -1448,6 +1448,15 @@ function initPlanningGrid(rows) {
   // Initialize data store
   planningDataStore.setData(rows);
   
+  // Notify other modules that planning data is ready
+  if (rows && rows.length > 0) {
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('planningDataReady', { 
+        detail: { rowCount: rows.length, source: 'planning' }
+      }));
+    }, 100);
+  }
+  
   return new Promise((resolve) => {
     // Break up the initialization into smaller chunks to prevent long tasks
     const initializeInChunks = async () => {

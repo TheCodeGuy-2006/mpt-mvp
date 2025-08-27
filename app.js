@@ -1221,6 +1221,7 @@ function route() {
     }
     if (
       hash === "#roi" &&
+      window.roiModule &&
       typeof window.roiModule.updateRoiTotalSpend === "function"
     ) {
       // Ensure ROI section is visible first

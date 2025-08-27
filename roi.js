@@ -7,6 +7,10 @@ import {
   updateRoiGauge,
   initRoiTabSwitching
 } from './charts.js';
+
+// Early module initialization to prevent timing issues
+window.roiModule = window.roiModule || {};
+
 // Performance optimization: Cache and debounce
 let filterUpdateTimeout = null;
 let lastFilterState = null;
@@ -15,6 +19,118 @@ let cachedFilterOptions = null;
 let lastChartUpdate = 0;
 let isRoiTabActive = false;
 let roiInitialized = false;
+
+// ============================================================================
+// MASTER DATASET ACCESS HELPERS
+// ============================================================================
+
+/**
+ * Get planning data from master dataset with fallback to table data
+ * @returns {Array} Planning data array
+ */
+function getPlanningData() {
+  // First priority: Master dataset
+  if (window.planningDataStore && typeof window.planningDataStore.getData === 'function') {
+    try {
+      const data = window.planningDataStore.getData();
+      // Only log if we actually have data to reduce console noise
+      if (data.length > 0) {
+        console.log(`[ROI] Using planning master dataset: ${data.length} rows`);
+      }
+      return data;
+    } catch (error) {
+      console.warn('[ROI] Error accessing planning master dataset:', error);
+    }
+  }
+  
+  // Second priority: Table instance
+  if (window.planningModule && window.planningModule.tableInstance && typeof window.planningModule.tableInstance.getData === 'function') {
+    try {
+      const data = window.planningModule.tableInstance.getData();
+      if (data.length > 0) {
+        console.log(`[ROI] Fallback to planning table data: ${data.length} rows`);
+      }
+      return data;
+    } catch (error) {
+      console.warn('[ROI] Error accessing planning table data:', error);
+    }
+  }
+  
+  // Third priority: Direct table instance
+  if (window.planningTableInstance && typeof window.planningTableInstance.getData === 'function') {
+    try {
+      const data = window.planningTableInstance.getData();
+      if (data.length > 0) {
+        console.log(`[ROI] Fallback to direct planning table: ${data.length} rows`);
+      }
+      return data;
+    } catch (error) {
+      console.warn('[ROI] Error accessing direct planning table:', error);
+    }
+  }
+  
+  // Only warn if this is the first few attempts to reduce noise
+  if (!window.roiDataLoadAttempts) window.roiDataLoadAttempts = 0;
+  window.roiDataLoadAttempts++;
+  if (window.roiDataLoadAttempts <= 3) {
+    console.warn('[ROI] No planning data source available, may still be loading...');
+  }
+  return [];
+}
+
+/**
+ * Get execution data from master dataset with fallback to table data  
+ * @returns {Array} Execution data array
+ */
+function getExecutionData() {
+  // First priority: Master dataset
+  if (window.executionDataStore && typeof window.executionDataStore.getData === 'function') {
+    try {
+      const data = window.executionDataStore.getData();
+      // Only log if we actually have data to reduce console noise
+      if (data.length > 0) {
+        console.log(`[ROI] Using execution master dataset: ${data.length} rows`);
+      }
+      return data;
+    } catch (error) {
+      console.warn('[ROI] Error accessing execution master dataset:', error);
+    }
+  }
+  
+  // Second priority: Module table instance
+  if (window.executionModule && window.executionModule.tableInstance && typeof window.executionModule.tableInstance.getData === 'function') {
+    try {
+      const data = window.executionModule.tableInstance.getData();
+      if (data.length > 0) {
+        console.log(`[ROI] Fallback to execution table data: ${data.length} rows`);
+      }
+      return data;
+    } catch (error) {
+      console.warn('[ROI] Error accessing execution table data:', error);
+    }
+  }
+  
+  // Third priority: Direct table instance
+  if (window.executionTableInstance && typeof window.executionTableInstance.getData === 'function') {
+    try {
+      const data = window.executionTableInstance.getData();
+      if (data.length > 0) {
+        console.log(`[ROI] Fallback to direct execution table: ${data.length} rows`);
+      }
+      return data;
+    } catch (error) {
+      console.warn('[ROI] Error accessing direct execution table:', error);
+    }
+  }
+  
+  // Only warn if this is the first few attempts to reduce noise
+  if (!window.roiExecutionLoadAttempts) window.roiExecutionLoadAttempts = 0;
+  window.roiExecutionLoadAttempts++;
+  if (window.roiExecutionLoadAttempts <= 3) {
+    console.warn('[ROI] No execution data source available, may still be loading...');
+  }
+  return [];
+}
 
 // Custom multiselect implementation for ROI
 function createRoiMultiselect(selectElement) {
@@ -274,11 +390,11 @@ function updateRoiTotalSpend() {
   // Get filter values once
   const filters = getFilterState();
 
-  // Use cached data if available
+  // Use master dataset for filtering
   let filteredData = [];
-  if (window.executionModule.tableInstance) {
-    const allData = window.executionModule.tableInstance.getData();
-    
+  const allData = getExecutionData();
+  
+  if (allData.length > 0) {
     // Helper function to normalize quarter formats for comparison
     const normalizeQuarter = (quarter) => {
       if (!quarter) return '';
@@ -379,9 +495,11 @@ function updateRoiTotalSpend() {
 
   // Update Total Forecasted Cost value from Planning tab with filters applied
   let totalForecastedCost = 0;
-  if (window.planningModule && window.planningModule.tableInstance) {
-    const planningData = window.planningModule.tableInstance.getData();
-    
+  
+  // MASTER DATASET: Use planning master dataset
+  const planningData = getPlanningData();
+  
+  if (planningData.length > 0) {
     // Helper function to normalize quarter formats for comparison
     const normalizeQuarter = (quarter) => {
       if (!quarter) return '';
@@ -519,16 +637,18 @@ updateRoiTotalSpend = function () {
   populateRoiFilters();
   const filters = getRoiFilterValues();
   let filteredData = [];
-  if (window.executionModule.tableInstance) {
+  
+  // MASTER DATASET: Use execution master dataset
+  const executionData = getExecutionData();
+  
+  if (executionData.length > 0) {
     // Helper function to normalize quarter formats for comparison
     const normalizeQuarter = (quarter) => {
       if (!quarter) return '';
       return quarter.replace(/\s*-\s*/g, ' ').trim();
     };
     
-    filteredData = window.executionModule.tableInstance
-      .getData()
-      .filter((row) => {
+    filteredData = executionData.filter((row) => {
         // Quarter filter with normalization to handle format differences
         let quarterMatch = filters.quarter.length === 0;
         if (!quarterMatch && row.quarter) {
@@ -620,8 +740,9 @@ updateRoiTotalSpend = function () {
 
   // Update Total Forecasted Cost value from Planning tab
   let totalForecastedCost = 0;
-  if (window.planningModule && window.planningModule.tableInstance) {
-    const planningData = window.planningModule.tableInstance.getData();
+  const planningData = getPlanningData();
+  
+  if (planningData.length > 0) {
     totalForecastedCost = planningData.reduce((sum, row) => {
       let val = row.forecastedCost;
       if (typeof val === "string")
@@ -749,7 +870,7 @@ function populateRoiFilters() {
 
   // Use cached planning data if available
   if (!cachedPlanningData) {
-    cachedPlanningData = window.planningModule?.tableInstance?.getData() || [];
+    cachedPlanningData = getPlanningData();
   }
 
   // Use cached filter options if available
@@ -888,8 +1009,8 @@ function populateRoiFilters() {
 // Pre-cache planning data when app loads to improve filter performance
 function preCachePlanningData() {
   // Cache planning data if not already cached
-  if (!cachedPlanningData && window.planningModule?.tableInstance) {
-    cachedPlanningData = window.planningModule.tableInstance.getData();
+  if (!cachedPlanningData) {
+    cachedPlanningData = getPlanningData();
   }
 }
 
@@ -951,8 +1072,8 @@ function updateReportTotalSpend() {
     });
 
   // Calculate actual spend, MQL, and SQL from execution data
-  if (window.executionModule && window.executionModule.tableInstance) {
-    const executionData = window.executionModule.tableInstance.getData();
+  const executionData = getExecutionData();
+  if (executionData.length > 0) {
     let totalActualSpend = 0;
     let totalActualMql = 0;
     let totalActualSql = 0;
@@ -1093,54 +1214,20 @@ function initializeRoiFunctionality() {
   // Initialize universal search
   initializeRoiUniversalSearch();
   
-  // Set up a data watcher to repopulate filters when planning data becomes available
-  let dataCheckAttempts = 0;
-  const maxDataCheckAttempts = 50; // Check for up to 5 seconds
-  
-  // Clear cached data to force repopulation with fresh data
-  const checkForPlanningData = () => {
-    dataCheckAttempts++;
-    
-    if (window.planningModule?.tableInstance) {
-      const planningData = window.planningModule.tableInstance.getData();
-      if (planningData && planningData.length > 0) {
-        // Clear cached data to force repopulation
-        cachedPlanningData = null;
-        cachedFilterOptions = null;
-        
-        // Force recreate multiselects with fresh data
-        const selectElements = [
-          document.getElementById("roiRegionFilter"),
-          document.getElementById("roiQuarterFilter"), 
-          document.getElementById("roiCountryFilter"),
-          document.getElementById("roiOwnerFilter"),
-          document.getElementById("roiStatusFilter"),
-          document.getElementById("roiProgramTypeFilter"),
-          document.getElementById("roiStrategicPillarsFilter"),
-          document.getElementById("roiRevenuePlayFilter")
-        ].filter(Boolean);
-        
-        // Destroy existing multiselects
-        selectElements.forEach(select => {
-          if (select._multiselectAPI) {
-            select._multiselectAPI.destroy();
-          }
-        });
-        
-        // Repopulate filters with new data
-        populateRoiFilters();
-        return; // Stop checking
+  // Start checking for planning data immediately
+  try {
+    checkForPlanningData();
+  } catch (error) {
+    console.warn('[ROI] Error calling checkForPlanningData:', error);
+    // Fallback: try again after a delay
+    setTimeout(() => {
+      try {
+        checkForPlanningData();
+      } catch (e) {
+        console.error('[ROI] Failed to initialize planning data check:', e);
       }
-    }
-    
-    // Continue checking if data not available and we haven't reached max attempts
-    if (dataCheckAttempts < maxDataCheckAttempts) {
-      setTimeout(checkForPlanningData, 100);
-    }
-  };
-  
-  // Start checking for planning data
-  setTimeout(checkForPlanningData, 100);
+    }, 500);
+  }
   
   // Use the new DOM element wait function for more reliable initialization
   setTimeout(() => {
@@ -1164,6 +1251,91 @@ function initializeRoiFunctionality() {
     }
   }, 200); // Reduced from 700ms for better responsiveness
 }
+
+// Data watcher for planning data availability - moved outside to be globally accessible
+let dataCheckAttempts = 0;
+const maxDataCheckAttempts = 50; // Check for up to 5 seconds
+
+// Add a data ready listener to react when data stores are populated
+window.addEventListener('planningDataReady', () => {
+  console.log('[ROI] Planning data ready event received');
+  if (window.location.hash === '#roi') {
+    setTimeout(() => {
+      checkForPlanningData();
+      // Also trigger component updates
+      if (typeof populateRoiFilters === 'function') populateRoiFilters();
+      if (typeof updateRoiTotalSpend === 'function') updateRoiTotalSpend();
+    }, 200);
+  }
+});
+
+window.addEventListener('executionDataReady', () => {
+  console.log('[ROI] Execution data ready event received');
+  if (window.location.hash === '#roi') {
+    setTimeout(() => {
+      checkForPlanningData();
+      // Also trigger component updates
+      if (typeof updateRoiTotalSpend === 'function') updateRoiTotalSpend();
+      if (typeof updateRemainingBudget === 'function') updateRemainingBudget({});
+    }, 200);
+  }
+});
+
+const checkForPlanningData = () => {
+  dataCheckAttempts++;
+  
+  const planningData = getPlanningData();
+  const executionData = getExecutionData();
+  
+  // Check if we have meaningful data in either dataset
+  const hasPlanning = planningData && planningData.length > 0;
+  const hasExecution = executionData && executionData.length > 0;
+  
+  if (hasPlanning || hasExecution) {
+    console.log(`[ROI] Data available - Planning: ${planningData.length}, Execution: ${executionData.length}`);
+    
+    // Clear cached data to force repopulation
+    cachedPlanningData = null;
+    cachedFilterOptions = null;
+    
+    // Force recreate multiselects with fresh data
+    const selectElements = [
+      document.getElementById("roiRegionFilter"),
+        document.getElementById("roiQuarterFilter"), 
+        document.getElementById("roiCountryFilter"),
+        document.getElementById("roiOwnerFilter"),
+        document.getElementById("roiStatusFilter"),
+        document.getElementById("roiProgramTypeFilter"),
+        document.getElementById("roiStrategicPillarsFilter"),
+        document.getElementById("roiRevenuePlayFilter")
+      ].filter(Boolean);
+      
+      // Destroy existing multiselects
+      selectElements.forEach(select => {
+        if (select._multiselectAPI) {
+          select._multiselectAPI.destroy();
+        }
+      });
+      
+      // Repopulate filters with new data
+      populateRoiFilters();
+      
+      // Reset attempt counters
+      window.roiDataLoadAttempts = 0;
+      window.roiExecutionLoadAttempts = 0;
+      
+      return; // Stop checking
+    }
+  
+  // Continue checking if data not available and we haven't reached max attempts
+  if (dataCheckAttempts < maxDataCheckAttempts) {
+    // Use exponential backoff for better performance
+    const delay = Math.min(100 * Math.pow(1.1, dataCheckAttempts), 1000);
+    setTimeout(checkForPlanningData, delay);
+  } else {
+    console.log('[ROI] Stopped checking for data after maximum attempts');
+  }
+};
 
 // Lazy initialization of ROI data table
 function ensureRoiDataTableInitialized() {
@@ -1464,7 +1636,7 @@ function getCampaignDataForRoi() {
     return [];
   }
 
-  let planningData = window.planningModule.tableInstance.getData();
+  let planningData = getPlanningData();
 
   // Apply universal search filters if they exist
   if (window.activeRoiSearchFilters && window.activeRoiSearchFilters.length > 0) {
@@ -1796,6 +1968,10 @@ const roiModule = {
   forceRefreshRoiComponents, // Force refresh function for troubleshooting
   waitForRoiElementsAndInitialize, // Wait for DOM elements before initialization
   debugRoiState, // Debug function to troubleshoot initialization issues
+  // Master dataset helper functions
+  getPlanningData,
+  getExecutionData,
+  checkForPlanningData // Data watcher function for planning data availability
 };
 
 // Export to window for access from other modules
@@ -1838,9 +2014,9 @@ async function updateRemainingBudget(filters) {
 
     // Calculate total actual cost from execution data (apply ALL filters)
     let totalActualCost = 0;
-    if (window.executionModule && window.executionModule.tableInstance) {
-      const executionData = window.executionModule.tableInstance.getData();
-      
+    const executionData = getExecutionData();
+    
+    if (executionData.length > 0) {
       // Helper function to normalize quarter formats for comparison
       const normalizeQuarter = (quarter) => {
         if (!quarter) return '';
@@ -1942,9 +2118,9 @@ async function updateForecastedBudgetUsage(filters) {
 
     // Calculate total forecasted cost from planning data (apply ALL filters)
     let totalForecastedCost = 0;
-    if (window.planningModule && window.planningModule.tableInstance) {
-      const planningData = window.planningModule.tableInstance.getData();
-      
+    const planningData = getPlanningData();
+    
+    if (planningData.length > 0) {
       // Helper function to normalize quarter formats for comparison
       const normalizeQuarter = (quarter) => {
         if (!quarter) return '';
