@@ -2885,72 +2885,73 @@ document
           rows = csvToObj(csv);
         }
         
-        // Show progress for large imports
-        if (rows.length > 100) {
-          showLoadingIndicator(`Processing ${rows.length} rows...`);
+        if (!rows || rows.length === 0) {
+          alert('No data found in CSV file. Please check the file format.');
+          return;
         }
         
-        // Map CSV headers to table fields and clean up data in batches
+        // Show progress for large imports
+        if (rows.length > 100) {
+          showLoadingIndicator(`Analyzing ${rows.length} rows...`);
+        }
+        
+        // Initialize smart mapper
+        const smartMapper = new SmartCSVMapper();
+        
+        // Get CSV headers (first row keys)
+        const csvHeaders = Object.keys(rows[0] || {});
+        
+        if (csvHeaders.length === 0) {
+          alert('No columns found in CSV file. Please ensure the file has headers.');
+          return;
+        }
+        
+        // Analyze headers and create intelligent mapping
+        const analysisResult = smartMapper.analyzeCSVHeaders(csvHeaders);
+        
+        // Show mapping preview to user
+        const previewHTML = smartMapper.showMappingPreview(csvHeaders, analysisResult);
+        
+        // Create modal for preview
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          background: rgba(0,0,0,0.5); z-index: 10000; display: flex;
+          align-items: center; justify-content: center;
+        `;
+        modal.innerHTML = `<div style="background: white; border-radius: 10px; max-height: 90vh; overflow-y: auto;">${previewHTML}</div>`;
+        
+        document.body.appendChild(modal);
+        
+        // Handle user decision
+        modal.querySelector('#confirmImport').onclick = async () => {
+          document.body.removeChild(modal);
+          await processImportWithMapping(rows, analysisResult.mapping, analysisResult.combinedColumnMappings, smartMapper);
+        };
+        
+        modal.querySelector('#cancelImport').onclick = () => {
+          document.body.removeChild(modal);
+          hideLoadingIndicator();
+        };
+        
+      } catch (error) {
+        console.error('CSV Import Error:', error);
+        alert('Error processing CSV file: ' + error.message);
+        hideLoadingIndicator();
+      }
+    };
+    
+    // Function to process the import with confirmed mapping
+    async function processImportWithMapping(rows, mapping, combinedColumnMappings, smartMapper) {
+      try {
+        showLoadingIndicator(`Processing ${rows.length} rows with smart mapping...`);
+        
+        // Map CSV rows to table format using smart mapper
         const mappedRows = [];
         
         await processRowsInBatches(rows, 15, (row) => {
-          const mappedRow = {};
-
-          // Map column names from CSV to expected field names
-          const columnMapping = {
-            campaignType: "programType", // CSV uses campaignType, grid uses programType
-            strategicPillars: "strategicPillars",
-            revenuePlay: "revenuePlay",
-            fiscalYear: "fiscalYear",
-            quarterMonth: "quarter", // CSV uses quarterMonth, grid uses quarter
-            region: "region",
-            country: "country",
-            owner: "owner",
-            description: "description",
-            forecastedCost: "forecastedCost",
-            expectedLeads: "expectedLeads",
-            status: "status",
-          };
-
-          // Apply mapping and clean up values
-          Object.keys(row).forEach((csvField) => {
-            const gridField = columnMapping[csvField] || csvField;
-            let value = row[csvField];
-
-            // Clean up specific fields
-            if (gridField === "forecastedCost") {
-              // Handle forecasted cost - remove commas, quotes, and convert to number
-              if (typeof value === "string") {
-                value = value.replace(/[",\s]/g, ""); // Remove commas, quotes, and spaces
-                value = value ? Number(value) : 0;
-              } else {
-                value = value ? Number(value) : 0;
-              }
-            } else if (gridField === "expectedLeads") {
-              // Ensure expected leads is a number
-              if (typeof value === "string") {
-                value = value.replace(/[",\s]/g, ""); // Remove any formatting
-                value = value ? Number(value) : 0;
-              } else {
-                value = value ? Number(value) : 0;
-              }
-            } else if (gridField === "status") {
-              // Ensure status is a string and handle any numeric values
-              if (value && typeof value !== "string") {
-                value = String(value);
-              }
-              // If it's empty or undefined, default to 'Planning'
-              if (!value || value === "" || value === "undefined") {
-                value = "Planning";
-              }
-            }
-
-            // Only add non-empty values to avoid overwriting with empty strings
-            if (value !== "" && value !== undefined && value !== null) {
-              mappedRow[gridField] = value;
-            }
-          });
-
+          // Use smart mapper to process each row with combined column support
+          const mappedRow = smartMapper.processRow(row, mapping, combinedColumnMappings);
           mappedRows.push(mappedRow);
         });
 
@@ -3001,6 +3002,8 @@ document
           }
         }
         
+        console.log(`Successfully imported ${mappedRows.length} campaigns with smart mapping!`);
+        
         hideLoadingIndicator();
         
         // Show success message
@@ -3017,7 +3020,7 @@ document
           font-weight: bold;
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         `;
-        successMsg.textContent = `✓ Successfully imported ${mappedRows.length} campaigns!`;
+        successMsg.textContent = `✓ Successfully imported ${mappedRows.length} campaigns with smart column mapping!`;
         document.body.appendChild(successMsg);
 
         setTimeout(() => {
@@ -3028,10 +3031,11 @@ document
         
       } catch (error) {
         hideLoadingIndicator();
-        console.error("CSV import error:", error);
-        alert("Failed to import CSV: " + error.message);
+        console.error("Smart CSV import error:", error);
+        alert("Failed to import CSV with smart mapping: " + error.message);
       }
-    };
+    }
+    
     reader.readAsText(file);
   });
 
