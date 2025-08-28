@@ -2981,6 +2981,15 @@ document
           const batchSize = 100;
           for (let i = 0; i < mappedRows.length; i += batchSize) {
             const batch = mappedRows.slice(i, i + batchSize);
+            
+            // Add each row to master dataset first, then to table
+            batch.forEach(row => {
+              if (planningDataStore && typeof planningDataStore.addRow === 'function') {
+                planningDataStore.addRow(row);
+                console.log(`CSV Import: Added row to master dataset: ${row.id}`);
+              }
+            });
+            
             planningTableInstance.addData(batch);
             // Update progress
             if (mappedRows.length > 100) {
