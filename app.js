@@ -6,6 +6,7 @@ import { initRoiTabSwitching, renderBudgetsRegionCharts } from "./charts.js";
 // console.log("app.js loaded"); // Redundant log removed
 
 // Debug flags for performance monitoring
+window.DEBUG_MODE = false; // Master debug flag - set to true to enable all debug logging
 window.DEBUG_FILTERS = false; // Set to true to enable filter debug logging
 window.DEBUG_PERFORMANCE = false; // Set to true to enable detailed performance logging
 
@@ -19,7 +20,9 @@ function initializeTabManager() {
   
   if (typeof TabManager !== 'undefined') {
     window.tabManager = new TabManager();
-    console.log("🎯 TabManager initialized and available globally");
+    if (window.DEBUG_MODE) {
+      console.log("🎯 TabManager initialized and available globally");
+    }
     registerAllTabs();
   } else {
     console.warn("🎯 TabManager class not found, retrying...");
@@ -759,12 +762,14 @@ const AppPerformance = {
       try {
         const observer = new PerformanceObserver((entries) => {
           entries.getEntries().forEach((entry) => {
-            // Increased threshold to 100ms to reduce noise from normal operations
-            if (entry.duration > 100) { 
-              console.warn(`Long task detected: ${entry.duration.toFixed(2)}ms`);
+            // Increased threshold to 150ms to reduce noise from normal operations
+            if (entry.duration > 150) { 
+              if (window.DEBUG_MODE) {
+                console.warn(`Long task detected: ${entry.duration.toFixed(2)}ms`);
+              }
               
               // Provide actionable advice for long tasks
-              if (entry.duration > 500) {
+              if (entry.duration > 500 && window.DEBUG_MODE) {
                 console.warn(`⚠️ Very long task detected! Consider breaking this operation into smaller chunks.`);
               }
             }
@@ -1154,70 +1159,102 @@ function route() {
         }
       }
       
-      setTimeout(() => {
-        if (window.executionModule && window.executionModule.tableInstance) {
-          window.executionModule.tableInstance.redraw(true);
-          // If the table library supports chunked setData, use it here for large data sets
-          // Example: window.executionModule.tableInstance.setDataInChunks(...)
-          window.executionModule.tableInstance.setData(
-            window.executionModule.tableInstance.getData(),
-          );
-          // Defer heavy sync and filter operations to idle time
-          if (typeof window !== 'undefined' && window.requestIdleCallback) {
-            window.requestIdleCallback(() => {
-              // Sync digital motions data from planning tab
-              if (
-                typeof window.executionModule.syncDigitalMotionsFromPlanning ===
-                "function"
-              ) {
-                window.executionModule.syncDigitalMotionsFromPlanning();
-              }
-              // Initialize filters when execution tab is shown (this will update with dynamic data)
-              if (
-                typeof window.executionModule.setupExecutionFilters === "function"
-              ) {
-                window.executionModule.setupExecutionFilters();
-              }
-              
-              // Update universal search data if it's already initialized
-              if (window.executionUniversalSearch && 
-                  typeof window.executionUniversalSearch.updateData === 'function' &&
-                  typeof window.executionModule.updateExecutionSearchData === 'function') {
-                window.executionModule.updateExecutionSearchData();
-              }
-            }, { timeout: 100 });
-          } else {
-            setTimeout(() => {
-              // Pre-populate filters immediately
-              if (typeof window.executionModule.prePopulateExecutionFilters === "function") {
-                window.executionModule.prePopulateExecutionFilters();
-              }
-              
-              if (
-                typeof window.executionModule.syncDigitalMotionsFromPlanning ===
-                "function"
-              ) {
-                window.executionModule.syncDigitalMotionsFromPlanning();
-              }
-              if (
-                typeof window.executionModule.setupExecutionFilters === "function"
-              ) {
-                window.executionModule.setupExecutionFilters();
-              }
-              
-              // Update universal search data if it's already initialized
-              if (window.executionUniversalSearch && 
-                  typeof window.executionUniversalSearch.updateData === 'function' &&
-                  typeof window.executionModule.updateExecutionSearchData === 'function') {
-                window.executionModule.updateExecutionSearchData();
-              }
-            }, 100);
+      // Use requestIdleCallback for non-critical operations to avoid blocking
+      if (typeof window !== 'undefined' && window.requestIdleCallback) {
+        // First idle callback - just table redraw (lightweight)
+        window.requestIdleCallback(() => {
+          const startTime = performance.now();
+          if (window.executionModule && window.executionModule.tableInstance) {
+            const tableInstance = window.executionModule.tableInstance;
+            // Use RAF for DOM updates to sync with browser paint
+            requestAnimationFrame(() => {
+              tableInstance.redraw(true);
+            });
           }
-        } else {
-          // Optionally, retry a few times if executionModule.tableInstance is not ready
-          // Could add a retry mechanism here if needed
-        }
-      }, 0);
+          if (window.DEBUG_PERFORMANCE) {
+            console.log(`Table redraw idle callback: ${(performance.now() - startTime).toFixed(2)}ms`);
+          }
+        }, { timeout: 100 });
+        
+        // Second idle callback - table data update
+        window.requestIdleCallback(() => {
+          const startTime = performance.now();
+          if (window.executionModule && window.executionModule.tableInstance) {
+            const tableInstance = window.executionModule.tableInstance;
+            requestAnimationFrame(() => {
+              tableInstance.setData(tableInstance.getData());
+            });
+          }
+          if (window.DEBUG_PERFORMANCE) {
+            console.log(`Table setData idle callback: ${(performance.now() - startTime).toFixed(2)}ms`);
+          }
+        }, { timeout: 200 });
+        
+        // Third idle callback - sync operations (potentially heavy)
+        window.requestIdleCallback(() => {
+          const startTime = performance.now();
+          if (window.executionModule && typeof window.executionModule.syncDigitalMotionsFromPlanning === "function") {
+            window.executionModule.syncDigitalMotionsFromPlanning();
+          }
+          if (window.DEBUG_PERFORMANCE) {
+            console.log(`Sync digital motions idle callback: ${(performance.now() - startTime).toFixed(2)}ms`);
+          }
+        }, { timeout: 300 });
+        
+        // Fourth idle callback - filter setup (potentially heavy)
+        window.requestIdleCallback(() => {
+          const startTime = performance.now();
+          if (window.executionModule && typeof window.executionModule.setupExecutionFilters === "function") {
+            window.executionModule.setupExecutionFilters();
+          }
+          if (window.DEBUG_PERFORMANCE) {
+            console.log(`Filter setup idle callback: ${(performance.now() - startTime).toFixed(2)}ms`);
+          }
+        }, { timeout: 400 });
+        
+        // Fifth idle callback - search data update (least critical)
+        window.requestIdleCallback(() => {
+          const startTime = performance.now();
+          if (window.executionUniversalSearch && 
+              typeof window.executionUniversalSearch.updateData === 'function' &&
+              typeof window.executionModule.updateExecutionSearchData === 'function') {
+            window.executionModule.updateExecutionSearchData();
+          }
+          if (window.DEBUG_PERFORMANCE) {
+            console.log(`Search data update idle callback: ${(performance.now() - startTime).toFixed(2)}ms`);
+          }
+        }, { timeout: 500 });
+      } else {
+        // Lightweight fallback for browsers without requestIdleCallback
+        setTimeout(() => {
+          if (window.executionModule && window.executionModule.tableInstance) {
+            window.executionModule.tableInstance.redraw(true);
+          }
+        }, 50);
+        
+        setTimeout(() => {
+          if (window.executionModule) {
+            // Pre-populate filters immediately
+            if (typeof window.executionModule.prePopulateExecutionFilters === "function") {
+              window.executionModule.prePopulateExecutionFilters();
+            }
+            
+            if (typeof window.executionModule.syncDigitalMotionsFromPlanning === "function") {
+              window.executionModule.syncDigitalMotionsFromPlanning();
+            }
+            if (typeof window.executionModule.setupExecutionFilters === "function") {
+              window.executionModule.setupExecutionFilters();
+            }
+            
+            // Update universal search data if it's already initialized
+            if (window.executionUniversalSearch && 
+                typeof window.executionUniversalSearch.updateData === 'function' &&
+                typeof window.executionModule.updateExecutionSearchData === 'function') {
+              window.executionModule.updateExecutionSearchData();
+            }
+          }
+        }, 100);
+      }
     }
     if (
       hash === "#roi" &&

@@ -289,7 +289,10 @@ function safeScrollToRow(table, rowIdentifier, position = "top", ifVisible = fal
     });
     
     if (!rowExists) {
-      console.warn("Target row no longer exists in table, scrolling to top");
+      // Only log in debug mode to reduce console noise
+      if (window.DEBUG_MODE) {
+        console.warn("Target row no longer exists in table, scrolling to top");
+      }
       if (typeof table.scrollToPosition === 'function') {
         table.scrollToPosition(0, 0, false);
         return true;
@@ -3834,7 +3837,9 @@ window.planningModule = {
 
 // Register with tab manager if available
 if (window.tabManager) {
-  console.log("🎯 TabManager found, registering planning tab...");
+  if (window.DEBUG_MODE) {
+    console.log("🎯 TabManager found, registering planning tab...");
+  }
   window.tabManager.registerTab(
     'planning',
     async () => {
@@ -3878,7 +3883,9 @@ if (window.tabManager) {
       cleanupPlanningGrid();
     }
   );
-  console.log("✅ Planning tab registered with TabManager");
+  if (window.DEBUG_MODE) {
+    console.log("✅ Planning tab registered with TabManager");
+  }
 } else {
   console.log("⚠️ TabManager not available, setting up fallback initialization");
   // Fallback: Initialize when explicitly needed
@@ -3969,9 +3976,11 @@ Object.defineProperty(window.planningModule, "tableInstance", {
   },
 });
 
-console.log(
-  "Planning module initialized and exported to window.planningModule",
-);
+if (window.DEBUG_MODE) {
+  console.log(
+    "Planning module initialized and exported to window.planningModule",
+  );
+}
 
 // Autosave functionality for planning - optimized for large datasets
 function triggerPlanningAutosave(table) {

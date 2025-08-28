@@ -33,8 +33,8 @@ function getPlanningData() {
   if (window.planningDataStore && typeof window.planningDataStore.getData === 'function') {
     try {
       const data = window.planningDataStore.getData();
-      // Only log if we actually have data to reduce console noise
-      if (data.length > 0) {
+      // Silent data access - only log if DEBUG_MODE enabled
+      if (data.length > 0 && window.DEBUG_MODE) {
         console.log(`[ROI] Using planning master dataset: ${data.length} rows`);
       }
       return data;
@@ -47,7 +47,7 @@ function getPlanningData() {
   if (window.planningModule && window.planningModule.tableInstance && typeof window.planningModule.tableInstance.getData === 'function') {
     try {
       const data = window.planningModule.tableInstance.getData();
-      if (data.length > 0) {
+      if (data.length > 0 && window.DEBUG_MODE) {
         console.log(`[ROI] Fallback to planning table data: ${data.length} rows`);
       }
       return data;
@@ -60,7 +60,7 @@ function getPlanningData() {
   if (window.planningTableInstance && typeof window.planningTableInstance.getData === 'function') {
     try {
       const data = window.planningTableInstance.getData();
-      if (data.length > 0) {
+      if (data.length > 0 && window.DEBUG_MODE) {
         console.log(`[ROI] Fallback to direct planning table: ${data.length} rows`);
       }
       return data;
@@ -87,8 +87,8 @@ function getExecutionData() {
   if (window.executionDataStore && typeof window.executionDataStore.getData === 'function') {
     try {
       const data = window.executionDataStore.getData();
-      // Only log if we actually have data to reduce console noise
-      if (data.length > 0) {
+      // Silent data access - only log if DEBUG_MODE enabled
+      if (data.length > 0 && window.DEBUG_MODE) {
         console.log(`[ROI] Using execution master dataset: ${data.length} rows`);
       }
       return data;
@@ -1258,7 +1258,9 @@ const maxDataCheckAttempts = 50; // Check for up to 5 seconds
 
 // Add a data ready listener to react when data stores are populated
 window.addEventListener('planningDataReady', () => {
-  console.log('[ROI] Planning data ready event received');
+  if (window.DEBUG_MODE) {
+    console.log('[ROI] Planning data ready event received');
+  }
   if (window.location.hash === '#roi') {
     setTimeout(() => {
       checkForPlanningData();
@@ -1270,7 +1272,9 @@ window.addEventListener('planningDataReady', () => {
 });
 
 window.addEventListener('executionDataReady', () => {
-  console.log('[ROI] Execution data ready event received');
+  if (window.DEBUG_MODE) {
+    console.log('[ROI] Execution data ready event received');
+  }
   if (window.location.hash === '#roi') {
     setTimeout(() => {
       checkForPlanningData();
@@ -1292,7 +1296,9 @@ const checkForPlanningData = () => {
   const hasExecution = executionData && executionData.length > 0;
   
   if (hasPlanning || hasExecution) {
-    console.log(`[ROI] Data available - Planning: ${planningData.length}, Execution: ${executionData.length}`);
+    if (window.DEBUG_MODE) {
+      console.log(`[ROI] Data available - Planning: ${planningData.length}, Execution: ${executionData.length}`);
+    }
     
     // Clear cached data to force repopulation
     cachedPlanningData = null;
@@ -1762,7 +1768,9 @@ function initializeRoiUniversalSearch() {
       }
     );
     
-    console.log("✅ ROI: Universal search initialized successfully!");
+    if (window.DEBUG_MODE) {
+      console.log("✅ ROI: Universal search initialized successfully!");
+    }
     
     // Update search data with current ROI data
     updateRoiSearchData();
@@ -1805,7 +1813,9 @@ function updateRoiSearchData() {
   
   try {
     const campaigns = getCampaignDataForRoi();
-    console.log(`🔍 ROI: Creating filter options from ${campaigns.length} campaigns`);
+    if (window.DEBUG_MODE) {
+      console.log(`🔍 ROI: Creating filter options from ${campaigns.length} campaigns`);
+    }
     
     // Get filter options from planning module constants
     const regionOptions = window.planningModule?.constants?.regionOptions || [];
@@ -1938,7 +1948,9 @@ function updateRoiSearchData() {
     });
     
     window.roiUniversalSearch.updateData(searchData);
-    console.log("✅ ROI: Search data updated with", searchData.length, "filter options");
+    if (window.DEBUG_MODE) {
+      console.log("✅ ROI: Search data updated with", searchData.length, "filter options");
+    }
     
   } catch (error) {
     console.error("❌ ROI: Error updating search data:", error);
@@ -2063,7 +2075,9 @@ async function updateRemainingBudget(filters) {
         return sum;
       }, 0);
     }
-    console.log("[ROI] Total actual cost calculated:", totalActualCost);
+    if (window.DEBUG_MODE) {
+      console.log("[ROI] Total actual cost calculated:", totalActualCost);
+    }
 
     // Calculate remaining budget
     const remainingBudget = totalBudget - totalActualCost;
@@ -2167,7 +2181,9 @@ async function updateForecastedBudgetUsage(filters) {
         return sum;
       }, 0);
     }
-    console.log("[ROI] Total forecasted cost calculated:", totalForecastedCost);
+    if (window.DEBUG_MODE) {
+      console.log("[ROI] Total forecasted cost calculated:", totalForecastedCost);
+    }
 
     // Calculate forecasted budget usage (remaining budget after forecasted costs)
     const forecastedBudgetUsage = totalBudget - totalForecastedCost;

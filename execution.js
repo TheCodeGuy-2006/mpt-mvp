@@ -151,8 +151,9 @@ if (document.readyState === 'loading') {
   tryInjectExecutionDescriptionKeywordSearchBar();
 }
 
-// Initialize execution filters early for better performance
-initializeExecutionFiltersEarly();
+// Early filter initialization disabled - now handled by main initialization sequence
+// initializeExecutionFiltersEarly();
+
 // --- Unsaved Changes Flag for Execution Tab ---
 window.hasUnsavedExecutionChanges = false;
 
@@ -303,7 +304,9 @@ class ExecutionDataStore {
     this.changeLog = []; // Track all operations for debugging
     this.initialized = false;
     
-    console.log("🔧 PHASE 1: ExecutionDataStore initialized");
+    if (window.DEBUG_MODE) {
+      console.log("🔧 PHASE 1: ExecutionDataStore initialized");
+    }
   }
 
   /**
@@ -324,7 +327,9 @@ class ExecutionDataStore {
       timestamp: new Date().toISOString()
     });
     
-    console.log(`✅ PHASE 1: ExecutionDataStore initialized with ${this.masterData.length} rows`);
+    if (window.DEBUG_MODE) {
+      console.log(`✅ PHASE 1: ExecutionDataStore initialized with ${this.masterData.length} rows`);
+    }
     return true;
   }
 
@@ -445,7 +450,9 @@ class ExecutionDataStore {
       timestamp: new Date().toISOString()
     });
     
-    console.log(`🔄 PHASE 1: Replaced execution data: ${oldCount} → ${this.masterData.length} rows`);
+    if (window.DEBUG_MODE) {
+      console.log(`🔄 PHASE 1: Replaced execution data: ${oldCount} → ${this.masterData.length} rows`);
+    }
     return true;
   }
 
@@ -460,7 +467,9 @@ class ExecutionDataStore {
     }
 
     const planningData = window.planningDataStore.getData();
-    console.log(`🔄 PHASE 1: Syncing execution data with planning (${planningData.length} planning rows)`);
+    if (window.DEBUG_MODE) {
+      console.log(`🔄 PHASE 1: Syncing execution data with planning (${planningData.length} planning rows)`);
+    }
     
     // Update execution master data to match planning
     // This ensures that execution data stays current with planning changes
@@ -920,7 +929,9 @@ function initExecutionGrid(rows) {
       // =============================================================================
       // PHASE 1: INITIALIZE EXECUTION DATA STORE
       // =============================================================================
-      console.log("🔧 PHASE 1: Initializing ExecutionDataStore...");
+      if (window.DEBUG_MODE) {
+        console.log("🔧 PHASE 1: Initializing ExecutionDataStore...");
+      }
       
       // Create and initialize the execution data store
       if (!executionDataStore) {
@@ -1191,6 +1202,7 @@ function initExecutionGrid(rows) {
       }
       
       // Populate filters with actual data after grid is built
+      // Note: Filter logic setup is now handled by the main initialization sequence
       setTimeout(() => {
         populateExecutionFilters();
       }, 500);
@@ -1297,11 +1309,48 @@ function initExecutionGrid(rows) {
   };
 }
 
-// EXECUTION FILTERS SETUP
+// EXECUTION FILTERS SETUP (Performance Optimized)
 function setupExecutionFilters() {
-  // Sync digital motions data from planning table first
-  syncDigitalMotionsFromPlanning();
+  // Skip if filters are already initialized to avoid duplicate work
+  if (window.executionModule && window.executionModule.filtersInitialized) {
+    if (window.DEBUG_MODE) {
+      console.log("🔧 Execution filters already initialized, skipping setup");
+    }
+    return;
+  }
 
+  // Use requestAnimationFrame to avoid blocking main thread
+  requestAnimationFrame(() => {
+    // Sync digital motions data from planning table first
+    syncDigitalMotionsFromPlanning();
+
+    // Use cached data if available to avoid recreation
+    const cachedData = window.executionModule?.cachedFilterData;
+    if (cachedData) {
+      // Use cached constants for better performance
+      const { regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names } = cachedData;
+      
+      // Populate filter dropdowns using the HTML elements already in index.html
+      populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names);
+      
+      // Skip filter logic setup here - it will be handled by the main initialization sequence
+      if (window.DEBUG_MODE) {
+        console.log("[Execution] Filter dropdowns populated, filter logic setup deferred to main sequence");
+      }
+      
+      // Mark as initialized
+      if (window.executionModule) {
+        window.executionModule.filtersInitialized = true;
+      }
+    } else {
+      // Fallback to original method if no cached data
+      setupExecutionFiltersOriginal();
+    }
+  });
+}
+
+// Original setup method as fallback
+function setupExecutionFiltersOriginal() {
   // Get constants from planning module for consistency
   const regionOptions = window.planningModule?.constants?.regionOptions || [
     "JP & Korea",
@@ -1332,13 +1381,13 @@ function setupExecutionFilters() {
   ];
   const strategicPillars = window.planningModule?.constants?.strategicPillars || [
     "Account Growth and Product Adoption",
-    "Pipeline Acceleration & Executive Engagement", 
+    "Pipeline Acceleration & Executive Engagement",
     "Brand Awareness & Top of Funnel Demand Generation",
     "New Logo Acquisition",
   ];
   const quarterOptions = window.planningModule?.constants?.quarterOptions || [
     "Q1 July",
-    "Q1 August", 
+    "Q1 August",
     "Q1 September",
     "Q2 October",
     "Q2 November",
@@ -1355,15 +1404,15 @@ function setupExecutionFilters() {
     "Beverly Leung",
     "Giorgia Parham",
     "Tomoko Tanaka",
-  ];
-
-  // Set up filters with constants from planning module
+  ];  // Set up filters with constants from planning module
 
   // Populate filter dropdowns using the HTML elements already in index.html
   populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names);
   
-  // Setup filter event listeners
-  setupExecutionFilterLogic();
+  // Skip filter logic setup here - it will be handled by the main initialization sequence
+  if (window.DEBUG_MODE) {
+    console.log("[Execution] Pre-population complete, filter logic setup deferred to main sequence");
+  }
 }
 
 // Pre-populate execution filters with static data for immediate display
@@ -1389,40 +1438,62 @@ function prePopulateExecutionFilters() {
       return;
     }
 
-    console.log("✅ Pre-populating execution filters with static data");
+    if (window.DEBUG_MODE) {
+      console.log("✅ Pre-populating execution filters with static data");
+    }
 
-    // Get constants from planning module for consistency
-    const regionOptions = window.planningModule?.constants?.regionOptions || [
-      "JP & Korea", "South APAC", "SAARC",
-    ];
-    const statusOptions = window.planningModule?.constants?.statusOptions || [
-      "Planning", "On Track", "Shipped", "Cancelled",
-    ];
-    const programTypes = window.planningModule?.constants?.programTypes || [
-      "User Groups", "Targeted paid ads & content sydication", "Flagship Events (Galaxy, Universe Recaps) 1:Many",
-      "3P Sponsored Events", "Webinars", "Microsoft", "Lunch & Learns and Workshops (1:few)",
-      "Localized Programs", "CxO events (1:few)", "Exec engagement programs", "In-Account Events (1:1)",
-      "Contractor/Infrastructure", "Paid ads", "Operational/Infrastructure/Swag",
-    ];
-    const strategicPillars = window.planningModule?.constants?.strategicPillars || [
-      "Account Growth and Product Adoption", "Pipeline Acceleration & Executive Engagement", 
-      "Brand Awareness & Top of Funnel Demand Generation", "New Logo Acquisition",
-    ];
-    const quarterOptions = window.planningModule?.constants?.quarterOptions || [
-      "Q1 July", "Q1 August", "Q1 September", "Q2 October", "Q2 November", "Q2 December",
-      "Q3 January", "Q3 February", "Q3 March", "Q4 April", "Q4 May", "Q4 June",
-    ];
-    const names = window.planningModule?.constants?.names || [
-      "Shruti Narang", "Beverly Leung", "Giorgia Parham", "Tomoko Tanaka",
-    ];
-    const revenuePlayOptions = window.planningModule?.constants?.revenuePlayOptions || [
-      "New Logo Acquisition", "Account Expansion", "Customer Retention", "Cross-sell/Upsell", "Market Development", "Partner Channel",
-    ];
-    const countryOptions = window.planningModule?.constants?.countryOptions || [
-      "Afghanistan", "Australia", "Bangladesh", "Bhutan", "Brunei Darussalam", "Cambodia", "China", "Hong Kong", "India", "Indonesia", "Japan", 
-      "Lao People's Democratic Republic", "Malaysia", "Maldives", "Myanmar", "Nepal", "New Zealand", "Pakistan", "Philippines", "Singapore", 
-      "South Korea", "Sri Lanka", "Taiwan", "Thailand", "Vietnam"
-    ];
+    // Cache static data arrays to avoid recreation
+    if (!window.executionModule.cachedFilterData) {
+      // Get constants from planning module for consistency
+      const regionOptions = window.planningModule?.constants?.regionOptions || [
+        "JP & Korea", "South APAC", "SAARC",
+      ];
+      const statusOptions = window.planningModule?.constants?.statusOptions || [
+        "Planning", "On Track", "Shipped", "Cancelled",
+      ];
+      const programTypes = window.planningModule?.constants?.programTypes || [
+        "User Groups", "Targeted paid ads & content sydication", "Flagship Events (Galaxy, Universe Recaps) 1:Many",
+        "3P Sponsored Events", "Webinars", "Microsoft", "Lunch & Learns and Workshops (1:few)",
+        "Localized Programs", "CxO events (1:few)", "Exec engagement programs", "In-Account Events (1:1)",
+        "Contractor/Infrastructure", "Paid ads", "Operational/Infrastructure/Swag",
+      ];
+      const strategicPillars = window.planningModule?.constants?.strategicPillars || [
+        "Account Growth and Product Adoption", "Pipeline Acceleration & Executive Engagement", 
+        "Brand Awareness & Top of Funnel Demand Generation", "New Logo Acquisition",
+      ];
+      const quarterOptions = window.planningModule?.constants?.quarterOptions || [
+        "Q1 July", "Q1 August", "Q1 September", "Q2 October", "Q2 November", "Q2 December",
+        "Q3 January", "Q3 February", "Q3 March", "Q4 April", "Q4 May", "Q4 June",
+      ];
+      const names = window.planningModule?.constants?.names || [
+        "Shruti Narang", "Beverly Leung", "Giorgia Parham", "Tomoko Tanaka",
+      ];
+      const revenuePlayOptions = window.planningModule?.constants?.revenuePlayOptions || [
+        "New Logo Acquisition", "Account Expansion", "Customer Retention", "Cross-sell/Upsell", "Market Development", "Partner Channel",
+      ];
+      const countryOptions = window.planningModule?.constants?.countryOptions || [
+        "Afghanistan", "Australia", "Bangladesh", "Bhutan", "Brunei Darussalam", "Cambodia", "China", "Hong Kong", "India", "Indonesia", "Japan", 
+        "Lao People's Democratic Republic", "Malaysia", "Maldives", "Myanmar", "Nepal", "New Zealand", "Pakistan", "Philippines", "Singapore", 
+        "South Korea", "Sri Lanka", "Taiwan", "Thailand", "Vietnam"
+      ];
+
+      // Cache the data to avoid recreation
+      window.executionModule.cachedFilterData = {
+        regionOptions,
+        statusOptions, 
+        programTypes,
+        strategicPillars,
+        quarterOptions,
+        names,
+        revenuePlayOptions,
+        countryOptions
+      };
+    }
+
+    const { 
+      regionOptions, statusOptions, programTypes, strategicPillars, 
+      quarterOptions, names, revenuePlayOptions, countryOptions 
+    } = window.executionModule.cachedFilterData;
 
     // Get execution data for dynamic filter population
     const executionData = executionTableInstance?.getData() || [];
@@ -1438,16 +1509,20 @@ function prePopulateExecutionFilters() {
       Array.from(new Set(executionData.map((c) => c.country).filter(Boolean))).sort() : 
       [];
 
-    // Pre-populate with static data immediately for better UX
+    // Pre-populate with static data immediately for better UX using document fragments
     const populateSelectFast = (select, options, placeholder) => {
       if (select.children.length === 0) {
         select.setAttribute('data-placeholder', placeholder);
+        
+        // Use document fragment for batch DOM operations
+        const fragment = document.createDocumentFragment();
         options.forEach((optionValue) => {
           const option = document.createElement("option");
           option.value = optionValue;
           option.textContent = optionValue;
-          select.appendChild(option);
+          fragment.appendChild(option);
         });
+        select.appendChild(fragment);
       }
     };
 
@@ -1484,7 +1559,9 @@ function prePopulateExecutionFilters() {
       }
     });
 
-    console.log("✅ Execution filters pre-populated successfully");
+    if (window.DEBUG_MODE) {
+      console.log("✅ Execution filters pre-populated successfully");
+    }
   });
 }
 
@@ -1603,21 +1680,124 @@ function updateExecutionDigitalMotionsButtonVisual(button) {
   }
 }
 
-// Setup filter logic for execution tracking
-function setupExecutionFilterLogic() {
-  // Ensure we have a valid table instance before setting up filters
-  if (!executionTableInstance) {
-    console.warn(
-      "[Execution] Table instance not available yet, retrying in next idle period...",
+// Setup filter logic for execution tracking (with robust table detection)
+function setupExecutionFilterLogic(retryCount = 0) {
+  const MAX_RETRIES = 15; // Increased patience for table initialization
+  const RETRY_DELAY = 200 + (retryCount * 100); // Exponential backoff
+  
+  // Enhanced table readiness check
+  function isTableReady() {
+    // Check for table instance
+    const tableInstance = executionTableInstance || 
+                         window.executionTableInstance || 
+                         window.executionModule?.tableInstance;
+    
+    if (!tableInstance) return false;
+    
+    // Check if DOM is ready
+    const gridElement = document.getElementById('executionGrid');
+    if (!gridElement) return false;
+    
+    // Check if data store exists and is properly initialized
+    if (!window.executionDataStore) return false;
+    
+    // Check if data store has been populated (either has data or has been synced)
+    // Allow empty data stores that are initialized, but require them to be synced with planning
+    const dataStoreReady = window.executionDataStore.initialized && (
+      window.executionDataStore.getData().length > 0 || 
+      window.planningDataStore?.getData().length >= 0  // Planning data exists (even if empty)
     );
     
-    // Use requestIdleCallback to retry more efficiently
+    if (!dataStoreReady) return false;
+    
+    return true;
+  }
+  
+  if (!isTableReady()) {
+    if (retryCount >= MAX_RETRIES) {
+      console.warn(
+        "[Execution] Failed to initialize table after",
+        MAX_RETRIES,
+        "retries. Filter logic setup aborted."
+      );
+      
+      // Enhanced diagnostic information
+      const diagnostics = {
+        timestamp: new Date().toISOString(),
+        retryCount: retryCount,
+        tableReferences: {
+          executionTableInstance: !!executionTableInstance,
+          windowExecutionTableInstance: !!window.executionTableInstance,
+          moduleTableInstance: !!window.executionModule?.tableInstance
+        },
+        domStatus: {
+          gridExists: !!document.getElementById('executionGrid'),
+          gridVisible: document.getElementById('executionGrid')?.offsetParent !== null,
+          gridChildCount: document.getElementById('executionGrid')?.children.length || 0
+        },
+        dataStoreStatus: {
+          exists: !!window.executionDataStore,
+          initialized: window.executionDataStore?.initialized,
+          dataLength: window.executionDataStore?.getData().length || 0
+        },
+        moduleStatus: {
+          exists: !!window.executionModule,
+          initInProgress: window.executionModule?.initializationInProgress,
+          filtersInitialized: window.executionModule?.filtersInitialized
+        }
+      };
+      
+      console.warn("[Execution] Enhanced diagnostics:", diagnostics);
+      
+      // Schedule a delayed background check
+      setTimeout(() => {
+        if (isTableReady()) {
+          console.warn("[Execution] Table became ready later - attempting deferred filter setup");
+          setupExecutionFilterLogic(0); // Reset retry count
+        }
+      }, 5000);
+      
+      return;
+    }
+    
+    if (window.DEBUG_MODE && retryCount % 3 === 0) {
+      console.warn(
+        `[Execution] Table not ready, retrying ${retryCount + 1}/${MAX_RETRIES} in ${RETRY_DELAY}ms...`,
+      );
+    }
+    
+    // Use requestIdleCallback to retry more efficiently with backoff
     if (window.requestIdleCallback) {
-      window.requestIdleCallback(() => setupExecutionFilterLogic(), { timeout: 200 });
+      window.requestIdleCallback(() => setupExecutionFilterLogic(retryCount + 1), { 
+        timeout: RETRY_DELAY 
+      });
     } else {
-      setTimeout(setupExecutionFilterLogic, 100);
+      setTimeout(() => setupExecutionFilterLogic(retryCount + 1), RETRY_DELAY);
     }
     return;
+  }
+  
+  // Success - table instance found and ready
+  const tableInstance = executionTableInstance || 
+                       window.executionTableInstance || 
+                       window.executionModule?.tableInstance;
+  
+  if (window.DEBUG_MODE && retryCount > 0) {
+    console.log(`[Execution] Table instance ready after ${retryCount} retries`);
+  }
+  
+  // Check if filter logic is already set up to prevent duplicate initialization
+  if (window.executionModule && window.executionModule.filterLogicInitialized) {
+    if (window.DEBUG_MODE) {
+      console.log("[Execution] Filter logic already initialized, skipping duplicate setup");
+    }
+    return;
+  }
+  
+  // Store the found table instance for consistent access
+  if (!executionTableInstance && tableInstance) {
+    executionTableInstance = tableInstance;
+    window.executionTableInstance = tableInstance;
   }
 
   // Batch DOM queries for better performance
@@ -1762,6 +1942,24 @@ function setupExecutionFilterLogic() {
     });
     clearButton.setAttribute("data-listener-attached", "true");
   }
+  
+  // Mark filter logic as initialized to prevent duplicate setups
+  if (window.executionModule) {
+    window.executionModule.filterLogicInitialized = true;
+  }
+  
+  if (window.DEBUG_MODE) {
+    console.log("[Execution] Filter logic setup completed successfully");
+  }
+}
+
+// Debug function to reset filter initialization flags
+function resetExecutionFilterInitialization() {
+  if (window.executionModule) {
+    window.executionModule.filtersInitialized = false;
+    window.executionModule.filterLogicInitialized = false;
+  }
+  console.log("[Execution] Filter initialization flags reset - next setup will reinitialize filters");
 }
 
 // Get current filter values for execution tracking
@@ -2161,16 +2359,21 @@ function populateExecutionFilters() {
   // Get execution data for dynamic filter population
   const executionData = executionTableInstance?.getData() || [];
   
-  // Debug: Log the actual data structure
-  console.log("[Execution] Execution data count:", executionData.length);
-  if (executionData.length > 0) {
-    console.log("[Execution] Sample execution data fields:", Object.keys(executionData[0]));
-    console.log("[Execution] Sample execution data:", executionData[0]);
-    
-    // Debug: Show the actual country and revenuePlay values in the data
-    executionData.forEach((row, index) => {
-      console.log(`[Execution] Row ${index + 1}: country="${row.country}", revenuePlay="${row.revenuePlay}"`);
-    });
+  // Debug: Log the actual data structure (only in debug mode)
+  if (window.DEBUG_MODE) {
+    console.log("[Execution] Execution data count:", executionData.length);
+    if (executionData.length > 0) {
+      console.log("[Execution] Sample execution data fields:", Object.keys(executionData[0]));
+      console.log("[Execution] Sample execution data:", executionData[0]);
+      
+      // Show only first 3 rows to avoid spam
+      executionData.slice(0, 3).forEach((row, index) => {
+        console.log(`[Execution] Sample row ${index + 1}: country="${row.country}", revenuePlay="${row.revenuePlay}"`);
+      });
+      if (executionData.length > 3) {
+        console.log(`[Execution] ... and ${executionData.length - 3} more rows (showing first 3 only)`);
+      }
+    }
   }
   
   // Extract unique values from actual data
@@ -2695,30 +2898,48 @@ if (window.tabManager) {
           });
         });
         
-        // Setup filters in next idle period
+        // Sync data from planning BEFORE setting up filters
+        if (window.planningModule?.tableInstance) {
+          console.log("🔄 EXECUTION: Syncing data from planning before filter setup...");
+          await new Promise(resolve => {
+            initializeWithIdleCallback(() => {
+              syncDigitalMotionsFromPlanning();
+              resolve();
+            });
+          });
+        }
+        
+        // Setup filters after sync is complete
         await new Promise(resolve => {
           initializeWithIdleCallback(() => {
             setupExecutionFilters();
+            // Now explicitly setup the filter logic after filters are populated
+            setupExecutionFilterLogic();
             resolve();
           });
         });
       } else {
-        console.log("✅ EXECUTION: Table already initialized, setting up filters only...");
+        console.log("✅ EXECUTION: Table already initialized, syncing and setting up filters...");
         
-        // Setup filters asynchronously
+        // Sync data from planning first
+        if (window.planningModule?.tableInstance) {
+          console.log("🔄 EXECUTION: Syncing data from planning...");
+          await new Promise(resolve => {
+            initializeWithIdleCallback(() => {
+              syncDigitalMotionsFromPlanning();
+              resolve();
+            });
+          });
+        }
+        
+        // Setup filters after sync
         await new Promise(resolve => {
           initializeWithIdleCallback(() => {
             setupExecutionFilters();
+            // Now explicitly setup the filter logic after filters are populated
+            setupExecutionFilterLogic();
             resolve();
           });
-        });
-      }
-      
-      // Sync data from planning if available (in next idle period)
-      if (window.planningModule?.tableInstance) {
-        console.log("🔄 EXECUTION: Syncing data from planning...");
-        initializeWithIdleCallback(() => {
-          syncDigitalMotionsFromPlanning();
         });
       }
       
@@ -2747,13 +2968,18 @@ if (window.tabManager) {
       
       if (!executionTableInstance) {
         const emptyData = [];
-        initExecutionGrid(emptyData);
-        setupExecutionFilters();
+        await initExecutionGrid(emptyData);
         
-        // Sync data from planning if available
+        // Wait for sync to complete before setting up filters
         if (window.planningModule?.tableInstance) {
-          syncDigitalMotionsFromPlanning();
+          console.log("🔄 EXECUTION: Syncing with planning data before filter setup...");
+          await syncDigitalMotionsFromPlanning();
         }
+        
+        // Now setup filters after sync is complete
+        setupExecutionFilters();
+        // Explicitly setup the filter logic after filters are populated
+        setupExecutionFilterLogic();
         
         // Add a small delay to ensure DOM is ready
         setTimeout(() => {

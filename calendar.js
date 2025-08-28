@@ -311,7 +311,9 @@ const calendarCache = {
         try {
           rawCampaigns = window.planningDataStore.getData() || [];
           if (rawCampaigns.length > 0) {
+          if (window.DEBUG_MODE) {
             console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningDataStore (master dataset)`);
+          }
           }
         } catch (error) {
           console.warn('Calendar: Error accessing planningDataStore:', error);
@@ -360,7 +362,9 @@ const calendarCache = {
       }));
       
       this.lastUpdate = now;
-      console.log(`Calendar: Cached ${this.campaigns.length} campaigns with index numbers`);
+      if (window.DEBUG_MODE) {
+        console.log(`Calendar: Cached ${this.campaigns.length} campaigns with index numbers`);
+      }
     }
     return this.campaigns;
   },
@@ -1829,7 +1833,9 @@ function initializeCalendar() {
 
 // Initialize calendar universal search
 function initializeCalendarUniversalSearch() {
-  console.log("🔍 CALENDAR: Starting universal search initialization...");
+  if (window.DEBUG_MODE) {
+    console.log("🔍 CALENDAR: Starting universal search initialization...");
+  }
   
   // Check if UniversalSearchFilter class is available
   if (!window.UniversalSearchFilter) {
@@ -1838,7 +1844,9 @@ function initializeCalendarUniversalSearch() {
     return;
   }
   
-  console.log("✅ CALENDAR: UniversalSearchFilter class found");
+  if (window.DEBUG_MODE) {
+    console.log("✅ CALENDAR: UniversalSearchFilter class found");
+  }
   
   // Check if container exists
   const container = document.getElementById('calendarUniversalSearch');
@@ -1848,8 +1856,10 @@ function initializeCalendarUniversalSearch() {
     return;
   }
   
-  console.log("✅ CALENDAR: Container found:", container);
-  console.log("✅ CALENDAR: Container visible:", container.offsetParent !== null);
+  if (window.DEBUG_MODE) {
+    console.log("✅ CALENDAR: Container found:", container);
+    console.log("✅ CALENDAR: Container visible:", container.offsetParent !== null);
+  }
   
   try {
     // Initialize universal search for calendar

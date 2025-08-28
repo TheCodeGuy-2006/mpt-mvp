@@ -93,7 +93,10 @@ class TabManager {
           } catch (error) {
             console.error(`❌ TabManager: Error initializing tab ${tabId}:`, error);
           } finally {
-            console.log(`⚡ TabManager: Hiding loading indicator for tab: ${tabId}`);
+            // Only log in development mode to reduce console overhead
+            if (window.DEBUG_MODE) {
+              console.log(`⚡ TabManager: Hiding loading indicator for tab: ${tabId}`);
+            }
             this.hideTabLoadingIndicator();
           }
         } else {

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Execution Timing</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .log { margin: 5px 0; padding: 5px; border-left: 3px solid #ccc; }
+        .error { border-color: red; background: #fee; }
+        .success { border-color: green; background: #efe; }
+        .info { border-color: blue; background: #eef; }
+    </style>
+</head>
+<body>
+    <h1>Execution Module Timing Debug</h1>
+    <div id="logs"></div>
+    
+    <script>
+        // Override console.log to capture logs
+        const logsDiv = document.getElementById('logs');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addLog(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            logsDiv.appendChild(div);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        // Check execution module status periodically
+        function checkStatus() {
+            addLog('=== STATUS CHECK ===', 'info');
+            addLog(`executionDataStore exists: ${!!window.executionDataStore}`, 'info');
+            addLog(`executionTableInstance exists: ${!!window.executionTableInstance}`, 'info');
+            addLog(`planningDataStore exists: ${!!window.planningDataStore}`, 'info');
+            addLog(`executionModule exists: ${!!window.executionModule}`, 'info');
+            
+            if (window.executionDataStore) {
+                addLog(`executionDataStore initialized: ${window.executionDataStore.initialized}`, 'info');
+                addLog(`executionDataStore data length: ${window.executionDataStore.getData().length}`, 'info');
+            }
+            
+            if (window.executionModule) {
+                addLog(`executionModule.filtersInitialized: ${window.executionModule.filtersInitialized}`, 'info');
+                addLog(`executionModule.filterLogicInitialized: ${window.executionModule.filterLogicInitialized}`, 'info');
+            }
+        }
+        
+        // Check every 2 seconds
+        setInterval(checkStatus, 2000);
+        
+        // Initial check after 1 second
+        setTimeout(checkStatus, 1000);
+    </script>
+    
+    <!-- Load the actual modules -->
+    <script src="universal-search.js"></script>
+    <script src="tab-manager.js"></script>
+    <script src="execution-table-debug.js"></script>
+    <script type="module" src="planning.js"></script>
+    <script type="module" src="execution.js"></script>
+</body>
+</html>
