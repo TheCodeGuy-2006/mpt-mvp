@@ -100,7 +100,7 @@
     "__unsavedPriority": 0
   },
   {
-    "programType": "In-Account Events (1:1)",
+    "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
     "strategicPillars": "Account Growth and Product Adoption",
     "revenuePlay": "All",
     "fiscalYear": "FY26",
@@ -109,7 +109,7 @@
     "country": "India",
     "owner": "Shruti Narang",
     "description": "In Account Days - AirIndia Kochi",
-    "forecastedCost": 4000,
+    "forecastedCost": 12000000,
     "expectedLeads": 0,
     "mqlForecast": 0,
     "status": "Planning",
@@ -157,7 +157,9 @@
     "digitalMotions": false,
     "id": "imp_1756368267984_490fn4td6",
     "__modified": true,
-    "__unsavedPriority": 0
+    "__unsavedPriority": 0,
+    "issueLink": "",
+    "poRaised": "Yes"
   },
   {
     "programType": "Localized Events",
@@ -182,7 +184,7 @@
   {
     "programType": "Localized Programs",
     "strategicPillars": "Pipeline Acceleration & Executive Engagement",
-    "revenuePlay": "Secure all developer workloads with the power of AI",
+    "revenuePlay": "",
     "fiscalYear": "FY26",
     "quarter": "Q1 August",
     "region": "South APAC",
@@ -194,10 +196,11 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368267984_xi5p4w4vz",
     "__modified": true,
-    "__unsavedPriority": 0
+    "__unsavedPriority": 0,
+    "issueLink": "https://docs.google.com/spreadsheets/d/19P5tabkAJx6cjVtxJhiYu-n9AXe-e5YlsdUm0FkNOw0/edit?gid=0#gid=0"
   },
   {
     "programType": "Localized Programs",
@@ -214,10 +217,11 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268000_m01d3szqg",
     "__modified": true,
-    "__unsavedPriority": 0
+    "__unsavedPriority": 0,
+    "issueLink": ""
   },
   {
     "programType": "Localized Programs",
@@ -225,7 +229,7 @@
     "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
     "fiscalYear": "FY26",
     "quarter": "Q1 August",
-    "region": "South APAC",
+    "region": "JP & Korea",
     "country": "Australia",
     "owner": "Giorgia Parham",
     "description": "Major Account ABM: Tailored content hub, personalised emails, webinars, relationship showcase etc",
@@ -234,10 +238,11 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268000_1rf7el8us",
     "__modified": true,
-    "__unsavedPriority": 0
+    "__unsavedPriority": 0,
+    "issueLink": ""
   },
   {
     "programType": "Localized Programs",
@@ -254,7 +259,7 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268000_ai8i1rjpo",
     "__modified": true,
     "__unsavedPriority": 0
@@ -294,7 +299,7 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268000_f62ryljkg",
     "__modified": true,
     "__unsavedPriority": 0
@@ -334,7 +339,7 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268017_cfke0y29l",
     "__modified": true,
     "__unsavedPriority": 0
@@ -354,7 +359,7 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268017_ay29u7uiu",
     "__modified": true,
     "__unsavedPriority": 0
@@ -374,7 +379,7 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268017_1u6prks0k",
     "__modified": true,
     "__unsavedPriority": 0
@@ -394,7 +399,7 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268017_6fwu2somx",
     "__modified": true,
     "__unsavedPriority": 0
@@ -474,7 +479,7 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268034_ht1v29qqk",
     "__modified": true,
     "__unsavedPriority": 0
@@ -594,7 +599,7 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268050_smfh939h6",
     "__modified": true,
     "__unsavedPriority": 0
@@ -774,7 +779,7 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756368268084_3fvbuiprw",
     "__modified": true,
     "__unsavedPriority": 0
