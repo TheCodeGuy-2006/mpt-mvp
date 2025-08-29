@@ -1,4 +1,33 @@
 // --- Highlight Unsaved Rows in Planning Grid ---
+// --- Global Description Tooltip Cleanup ---
+function cleanupAllDescriptionTooltips() {
+  // Remove any existing tooltips from DOM
+  const tooltips = document.querySelectorAll('.desc-hover-tooltip');
+  tooltips.forEach(tooltip => tooltip.remove());
+  
+  // Clean up any attached event listeners and references
+  const cells = document.querySelectorAll('.description-hover');
+  cells.forEach(cell => {
+    cell.classList.remove('description-hover');
+    if (cell._descTooltipDiv) {
+      cell._descTooltipDiv = null;
+    }
+    if (cell._descTooltipMove) {
+      cell.removeEventListener('mousemove', cell._descTooltipMove);
+      cell._descTooltipMove = null;
+    }
+  });
+}
+
+// Add global cleanup on page interactions
+document.addEventListener('click', cleanupAllDescriptionTooltips);
+document.addEventListener('scroll', cleanupAllDescriptionTooltips);
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    cleanupAllDescriptionTooltips();
+  }
+});
+
 // --- Inject Description Keyword Search Bar for Planning Tab ---
 function injectDescriptionKeywordSearchBar() {
   // Only inject once
@@ -1727,16 +1756,7 @@ function initPlanningGrid(rows) {
             },
             cellClick: function (e, cell) {
               // Remove any existing tooltip when clicking to edit
-              const el = cell.getElement();
-              if (el._descTooltipDiv) {
-                el._descTooltipDiv.remove();
-                el._descTooltipDiv = null;
-              }
-              if (el._descTooltipMove) {
-                el.removeEventListener('mousemove', el._descTooltipMove);
-                el._descTooltipMove = null;
-              }
-              el.classList.remove('description-hover');
+              cleanupAllDescriptionTooltips();
               
               // Start editing the cell normally
               cell.edit();
@@ -1748,6 +1768,9 @@ function initPlanningGrid(rows) {
               if (el.querySelector('input') || el.querySelector('textarea')) {
                 return;
               }
+              
+              // Clean up any existing tooltips first
+              cleanupAllDescriptionTooltips();
               
               el.classList.add('description-hover');
               // Create floating tooltip
@@ -1793,6 +1816,21 @@ function initPlanningGrid(rows) {
               el._descTooltipMove = moveTooltip;
               el._descTooltipDiv = tooltip;
               el.addEventListener('mousemove', moveTooltip);
+              
+              // Auto-cleanup after 10 seconds as a failsafe
+              setTimeout(() => {
+                if (tooltip && tooltip.parentNode) {
+                  tooltip.remove();
+                }
+                if (el._descTooltipMove) {
+                  el.removeEventListener('mousemove', el._descTooltipMove);
+                  el._descTooltipMove = null;
+                }
+                if (el._descTooltipDiv) {
+                  el._descTooltipDiv = null;
+                }
+                el.classList.remove('description-hover');
+              }, 10000);
             },
             cellMouseOut: function(e, cell) {
               const el = cell.getElement();
@@ -3042,6 +3080,9 @@ document
         hideLoadingIndicator();
         console.error("Smart CSV import error:", error);
         alert("Failed to import CSV with smart mapping: " + error.message);
+      } finally {
+        // Reset the file input so the same file can be imported again
+        e.target.value = '';
       }
     }
     
