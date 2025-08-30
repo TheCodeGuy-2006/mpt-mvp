@@ -1,3 +1,15 @@
+// ============================================================================
+// 🔧 DEBUG EXPORTS - Early initialization for debug environments
+// ============================================================================
+
+// Declare debug functions early so they can be accessed by debug environments
+window.executionDebugEarly = {
+  moduleLoaded: true,
+  timestamp: new Date().toISOString()
+};
+
+console.log('🚀 EXECUTION MODULE: Early debug marker set');
+
 // --- Inject Description Keyword Search Bar for Execution Tab ---
 function injectExecutionDescriptionKeywordSearchBar() {
   // (Filtering logic removed to restore previous state)
@@ -224,6 +236,22 @@ function setupExecutionSave(table, rows) {
               }
             });
             console.log("✅ PHASE 2: Planning data store updated with execution changes");
+          }
+          
+          // Refresh the table display with updated data from data store
+          console.log("🔄 PHASE 2: Refreshing table display after save...");
+          const currentData = executionDataStore.getData();
+          if (table && typeof table.replaceData === 'function') {
+            table.replaceData(currentData);
+            console.log("✅ PHASE 2: Table display refreshed with", currentData.length, "rows");
+            
+            // Reapply current filters after data refresh
+            setTimeout(() => {
+              if (typeof applyExecutionFilters === 'function') {
+                applyExecutionFilters();
+                console.log("✅ PHASE 2: Filters reapplied after save");
+              }
+            }, 100);
           }
           
           alert(
@@ -561,6 +589,35 @@ class ExecutionDataStore {
   }
 
   /**
+   * Sync table display with current data store data
+   * This ensures the table shows the most up-to-date data
+   */
+  syncTableWithDataStore() {
+    if (!this.tableInstance) {
+      console.warn("ExecutionDataStore: No table instance linked for sync");
+      return false;
+    }
+
+    try {
+      const currentData = this.getData();
+      console.log(`🔄 PHASE 1: Syncing table with data store (${currentData.length} rows)`);
+      
+      this.tableInstance.replaceData(currentData);
+      
+      this.logOperation('syncTableWithDataStore', {
+        rowCount: currentData.length,
+        timestamp: new Date().toISOString()
+      });
+      
+      console.log("✅ PHASE 1: Table synced with data store");
+      return true;
+    } catch (error) {
+      console.error("❌ PHASE 1: Error syncing table with data store:", error);
+      return false;
+    }
+  }
+
+  /**
    * Show planning-execution sync status
    */
   showSyncStatus() {
@@ -591,6 +648,52 @@ class ExecutionDataStore {
 
 // Global execution data store instance
 let executionDataStore = null;
+
+// Global sync function for debugging and manual fixes
+window.syncExecutionTableWithDataStore = function() {
+  if (executionDataStore && typeof executionDataStore.syncTableWithDataStore === 'function') {
+    const success = executionDataStore.syncTableWithDataStore();
+    if (success) {
+      console.log("✅ Manual sync completed - table updated with data store data");
+      // Reapply filters after sync
+      if (typeof applyExecutionFilters === 'function') {
+        setTimeout(applyExecutionFilters, 100);
+      }
+    }
+    return success;
+  } else {
+    console.warn("❌ ExecutionDataStore not available for manual sync");
+    return false;
+  }
+};
+
+// Debug function to test filter functionality
+window.debugExecutionFilters = function() {
+  console.log("🔍 EXECUTION FILTER DEBUG INFO:");
+  
+  if (executionDataStore) {
+    const storeData = executionDataStore.getData();
+    console.log("Data Store rows:", storeData.length);
+    if (storeData.length > 0) {
+      console.log("Sample store data:", storeData[0]);
+    }
+  }
+  
+  if (executionTableInstance) {
+    const tableData = executionTableInstance.getData();
+    console.log("Table rows:", tableData.length);
+    if (tableData.length > 0) {
+      console.log("Sample table data:", tableData[0]);
+    }
+  }
+  
+  if (typeof getExecutionFilterValues === 'function') {
+    const filters = getExecutionFilterValues();
+    console.log("Current filters:", filters);
+  }
+  
+  console.log("Manual filter test completed. Run 'applyExecutionFilters()' to test filtering.");
+};
 
 // =============================================================================
 // PHASE 1: EXECUTION DEBUG UTILITIES
@@ -1081,7 +1184,17 @@ function initExecutionGrid(rows) {
           editor: "list",
           editorParams: { values: statusOptions },
           cellEdited: debounce((cell) => {
-            cell.getRow().getData().__modified = true;
+            const rowData = cell.getRow().getData();
+            rowData.__modified = true;
+            
+            // Update the data store with the changes
+            if (executionDataStore && rowData.id) {
+              executionDataStore.updateRow(rowData.id, {
+                status: rowData.status,
+                __modified: true
+              });
+            }
+            
             window.hasUnsavedExecutionChanges = true;
             console.log("[Execution] Unsaved changes set to true (cellEdited: Status)");
           }, 500),
@@ -1092,7 +1205,17 @@ function initExecutionGrid(rows) {
           editor: "list",
           editorParams: { values: yesNo },
           cellEdited: debounce((cell) => {
-            cell.getRow().getData().__modified = true;
+            const rowData = cell.getRow().getData();
+            rowData.__modified = true;
+            
+            // Update the data store with the changes
+            if (executionDataStore && rowData.id) {
+              executionDataStore.updateRow(rowData.id, {
+                poRaised: rowData.poRaised,
+                __modified: true
+              });
+            }
+            
             window.hasUnsavedExecutionChanges = true;
             console.log("[Execution] Unsaved changes set to true (cellEdited: PO Raised)");
           }, 500),
@@ -1117,7 +1240,17 @@ function initExecutionGrid(rows) {
             return "$" + Number(v).toLocaleString();
           },
           cellEdited: debounce((cell) => {
-            cell.getRow().getData().__modified = true;
+            const rowData = cell.getRow().getData();
+            rowData.__modified = true;
+            
+            // Update the data store with the changes
+            if (executionDataStore && rowData.id) {
+              executionDataStore.updateRow(rowData.id, {
+                actualCost: rowData.actualCost,
+                __modified: true
+              });
+            }
+            
             window.hasUnsavedExecutionChanges = true;
             console.log("[Execution] Unsaved changes set to true (cellEdited: Actual Cost)");
           }, 500),
@@ -1128,7 +1261,17 @@ function initExecutionGrid(rows) {
           field: "actualLeads",
           editor: "number",
           cellEdited: debounce((cell) => {
-            cell.getRow().getData().__modified = true;
+            const rowData = cell.getRow().getData();
+            rowData.__modified = true;
+            
+            // Update the data store with the changes
+            if (executionDataStore && rowData.id) {
+              executionDataStore.updateRow(rowData.id, {
+                actualLeads: rowData.actualLeads,
+                __modified: true
+              });
+            }
+            
             window.hasUnsavedExecutionChanges = true;
             console.log("[Execution] Unsaved changes set to true (cellEdited: Actual Leads)");
           }, 500),
@@ -1139,7 +1282,17 @@ function initExecutionGrid(rows) {
           field: "actualMQLs",
           editor: "number",
           cellEdited: debounce((cell) => {
-            cell.getRow().getData().__modified = true;
+            const rowData = cell.getRow().getData();
+            rowData.__modified = true;
+            
+            // Update the data store with the changes
+            if (executionDataStore && rowData.id) {
+              executionDataStore.updateRow(rowData.id, {
+                actualMQLs: rowData.actualMQLs,
+                __modified: true
+              });
+            }
+            
             window.hasUnsavedExecutionChanges = true;
             console.log("[Execution] Unsaved changes set to true (cellEdited: Actual MQLs)");
           }, 500),
@@ -1205,6 +1358,12 @@ function initExecutionGrid(rows) {
       // Note: Filter logic setup is now handled by the main initialization sequence
       setTimeout(() => {
         populateExecutionFilters();
+        
+        // Initialize filter event listeners after population
+        setTimeout(() => {
+          console.log("🔧 EXECUTION: Initializing filter event listeners...");
+          initializeExecutionFilters();
+        }, 100);
       }, 500);
       
       resolve(table);
@@ -1333,10 +1492,9 @@ function setupExecutionFilters() {
       // Populate filter dropdowns using the HTML elements already in index.html
       populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names);
       
-      // Skip filter logic setup here - it will be handled by the main initialization sequence
-      if (window.DEBUG_MODE) {
-        console.log("[Execution] Filter dropdowns populated, filter logic setup deferred to main sequence");
-      }
+      // Setup filter event listeners after population
+      console.log("🔧 [EXECUTION] Calling setupExecutionFilterLogic() from cached path...");
+      setupExecutionFilterLogic();
       
       // Mark as initialized
       if (window.executionModule) {
@@ -1345,6 +1503,10 @@ function setupExecutionFilters() {
     } else {
       // Fallback to original method if no cached data
       setupExecutionFiltersOriginal();
+      
+      // Also setup filter event listeners for fallback path
+      console.log("🔧 [EXECUTION] Calling setupExecutionFilterLogic() from fallback path...");
+      setupExecutionFilterLogic();
     }
   });
 }
@@ -1834,9 +1996,20 @@ function setupExecutionFilterLogic(retryCount = 0) {
     !programTypeSelect ||
     !strategicPillarSelect ||
     !ownerSelect ||
+    !revenuePlaySelect ||
+    !countrySelect ||
     !digitalMotionsButton
   ) {
-    console.warn("[Execution] Required filter elements not found");
+    console.warn("[Execution] Required filter elements not found:");
+    console.log("  regionSelect:", !!regionSelect);
+    console.log("  quarterSelect:", !!quarterSelect);
+    console.log("  statusSelect:", !!statusSelect);
+    console.log("  programTypeSelect:", !!programTypeSelect);
+    console.log("  strategicPillarSelect:", !!strategicPillarSelect);
+    console.log("  ownerSelect:", !!ownerSelect);
+    console.log("  revenuePlaySelect:", !!revenuePlaySelect);
+    console.log("  countrySelect:", !!countrySelect);
+    console.log("  digitalMotionsButton:", !!digitalMotionsButton);
     return;
   }
 
@@ -1860,11 +2033,28 @@ function setupExecutionFilterLogic(retryCount = 0) {
     countrySelect,
   ];
 
+  console.log("🔍 [EXECUTION] Debugging select elements:");
+  selectElements.forEach((select, index) => {
+    console.log(`  ${index}: ${select ? select.id : 'NULL'} - ${select ? 'Found' : 'Missing'}`);
+  });
+
   // Batch event listener setup to reduce DOM manipulation
-  selectElements.forEach((select) => {
+  selectElements.forEach((select, index) => {
+    if (!select) {
+      console.warn(`⚠️ [EXECUTION] Null element at index ${index}, skipping`);
+      return;
+    }
+    
     if (!select.hasAttribute("data-listener-attached")) {
-      select.addEventListener("change", debounce(applyExecutionFilters, 150));
+      console.log(`🔧 [EXECUTION] Attaching listener to: ${select.id}`);
+      select.addEventListener("change", (e) => {
+        console.log(`🔄 [EXECUTION] Filter changed: ${select.id} = ${select.value}`);
+        debounce(applyExecutionFilters, 150)();
+      });
       select.setAttribute("data-listener-attached", "true");
+      console.log(`✅ [EXECUTION] Event listener attached to: ${select.id}`);
+    } else {
+      console.log(`⏭️ [EXECUTION] Listener already attached to: ${select.id}`);
     }
   });
 
@@ -2045,6 +2235,8 @@ function getExecutionFilterValues() {
 
 // Apply filters to execution tracking table
 function applyExecutionFilters() {
+  console.log("🚀 [EXECUTION] applyExecutionFilters() called!");
+  
   if (!executionTableInstance) {
     console.warn(
       "[Execution] Table instance not available, cannot apply filters",
@@ -2055,8 +2247,26 @@ function applyExecutionFilters() {
   const filters = getExecutionFilterValues();
   console.log("[Execution] Applying filters:", filters);
 
-  // Debug: Check what fields exist in the execution data
-  const executionData = executionTableInstance.getData();
+  // Get current data from data store instead of table
+  let executionData;
+  if (executionDataStore) {
+    executionData = executionDataStore.getData();
+    console.log("[Execution] Using data from ExecutionDataStore:", executionData.length, "rows");
+    
+    // COMPATIBILITY FIX: If data store is synced with planning but we're filtering execution,
+    // fall back to table data for filtering to maintain field compatibility
+    if (executionData.length > 0 && executionTableInstance) {
+      const tableData = executionTableInstance.getData();
+      if (tableData.length > 0) {
+        console.log("[Execution] Using table data for filtering to maintain field compatibility:", tableData.length, "rows");
+        executionData = tableData;
+      }
+    }
+  } else {
+    executionData = executionTableInstance.getData();
+    console.log("[Execution] Fallback: Using data from table:", executionData.length, "rows");
+  }
+  
   if (executionData.length > 0) {
     console.log("[Execution] Sample data fields:", Object.keys(executionData[0]));
     console.log("[Execution] Sample row:", executionData[0]);
@@ -2068,101 +2278,123 @@ function applyExecutionFilters() {
     const startTime = performance.now();
     
     try {
-      // Clear existing filters first
-      executionTableInstance.clearFilter();
+      // Check if any filters are active
+      const hasActiveFilters = 
+        filters.region.length > 0 ||
+        filters.status.length > 0 ||
+        filters.programType.length > 0 ||
+        filters.strategicPillar.length > 0 ||
+        filters.owner.length > 0 ||
+        filters.revenuePlay.length > 0 ||
+        filters.country.length > 0 ||
+        filters.quarter.length > 0 ||
+        filters.digitalMotions;
 
-      // Apply filters using Tabulator's built-in filter system
-      const activeFilters = [];
-
-      // Multi-value filters (arrays)
-      if (filters.region.length > 0) {
-        activeFilters.push({ field: "region", type: "in", value: filters.region });
-      }
-      if (filters.status.length > 0) {
-        activeFilters.push({ field: "status", type: "in", value: filters.status });
-      }
-      if (filters.programType.length > 0) {
-        activeFilters.push({
-          field: "programType",
-          type: "in",
-          value: filters.programType,
-        });
-      }
-      if (filters.strategicPillar.length > 0) {
-        activeFilters.push({
-          field: "strategicPillars",
-          type: "in",
-          value: filters.strategicPillar,
-        });
-      }
-      if (filters.owner.length > 0) {
-        activeFilters.push({ field: "owner", type: "in", value: filters.owner });
-      }
-      if (filters.revenuePlay.length > 0) {
-        console.log("[Execution] Adding revenuePlay filter:", filters.revenuePlay);
-        activeFilters.push({ field: "revenuePlay", type: "in", value: filters.revenuePlay });
-      }
-      if (filters.country.length > 0) {
-        console.log("[Execution] Adding country filter:", filters.country);
-        activeFilters.push({ field: "country", type: "in", value: filters.country });
-      }
-
-      // Apply standard filters first (batched)
-      if (activeFilters.length > 0) {
-        executionTableInstance.setFilter(activeFilters);
-      }
-
-      // Add custom filters after standard filters
-      if (filters.quarter.length > 0) {
-        // Custom quarter filter to handle format mismatch between filter options and data
-        // Filter options: "Q1 July", Data format: "Q1 - July"
-        executionTableInstance.addFilter(function(data) {
-          if (!data.quarter) return false;
-          
-          return filters.quarter.some(filterQuarter => {
-            // Normalize both formats for comparison
-            const normalizeQuarter = (q) => q.replace(/\s*-\s*/g, ' ').trim();
-            return normalizeQuarter(data.quarter) === normalizeQuarter(filterQuarter);
-          });
-        });
-      }
-
-      // Apply Digital Motions filter separately as a custom function filter
-      if (filters.digitalMotions) {
-        console.log("[Execution] Applying Digital Motions filter - checking data...");
-        
-        // Count total rows and DM rows for debugging
-        const allData = executionTableInstance.getData();
-        const dmCount = allData.filter(row => row.digitalMotions === true || row.digitalMotions === 'true').length;
-        console.log(`[Execution] Total rows: ${allData.length}, Digital Motions rows: ${dmCount}`);
-        
-        // Sample a few DM campaigns for debugging
-        const dmSamples = allData.filter(row => row.digitalMotions === true || row.digitalMotions === 'true').slice(0, 3);
-        if (dmSamples.length > 0) {
-          console.log("[Execution] Sample DM campaigns:", dmSamples.map(r => ({
-            id: r.id,
-            description: r.description,
-            digitalMotions: r.digitalMotions
-          })));
+      if (!hasActiveFilters) {
+        console.log("[Execution] No active filters, showing all data");
+        // Ensure table has the latest data from data store and clear filters
+        if (executionDataStore && executionData) {
+          executionTableInstance.replaceData(executionData);
         }
-        
-        executionTableInstance.addFilter(function (data) {
-          // Handle both boolean true and string 'true' values for digitalMotions
-          const isDM = data.digitalMotions === true || data.digitalMotions === 'true';
-          if (isDM) {
-            console.log(`[Execution] Including DM campaign: ${data.description || data.id}`, data.digitalMotions);
-          }
-          return isDM;
-        });
+        executionTableInstance.clearFilter();
+        console.log("[Execution] All filters cleared, showing", executionData.length, "rows");
+        return;
       }
 
-      // Get visible rows count efficiently
-      const visibleRows = executionTableInstance.getDataCount(true);
-      
+      console.log("[Execution] Active filters detected, applying manual filtering...");
+      console.log("[Execution] Filter details:", JSON.stringify(filters, null, 2));
+
+      // Apply manual filtering to the data before setting it to the table
+      const filteredData = executionData.filter((row, index) => {
+        // Log first few rows for debugging
+        if (index < 3) {
+          console.log(`[Execution] Row ${index} data:`, {
+            region: row.region,
+            status: row.status,
+            programType: row.programType,
+            strategicPillars: row.strategicPillars,
+            owner: row.owner,
+            revenuePlay: row.revenuePlay,
+            country: row.country,
+            quarter: row.quarter,
+            digitalMotions: row.digitalMotions
+          });
+        }
+        // Region filter
+        if (filters.region.length > 0 && !filters.region.includes(row.region)) {
+          return false;
+        }
+
+        // Status filter
+        if (filters.status.length > 0 && !filters.status.includes(row.status)) {
+          return false;
+        }
+
+        // Program Type filter
+        if (filters.programType.length > 0 && !filters.programType.includes(row.programType)) {
+          return false;
+        }
+
+        // Strategic Pillar filter
+        if (filters.strategicPillar.length > 0 && !filters.strategicPillar.includes(row.strategicPillars)) {
+          return false;
+        }
+
+        // Owner filter
+        if (filters.owner.length > 0 && !filters.owner.includes(row.owner)) {
+          return false;
+        }
+
+        // Revenue Play filter
+        if (filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) {
+          return false;
+        }
+
+        // Country filter
+        if (filters.country.length > 0 && !filters.country.includes(row.country)) {
+          return false;
+        }
+
+        // Quarter filter (with normalization)
+        if (filters.quarter.length > 0) {
+          const normalizeQuarter = (q) => q ? q.replace(/\s*-\s*/g, ' ').trim() : '';
+          const rowQuarter = normalizeQuarter(row.quarter);
+          const quarterMatch = filters.quarter.some(filterQuarter => 
+            normalizeQuarter(filterQuarter) === rowQuarter
+          );
+          if (!quarterMatch) {
+            return false;
+          }
+        }
+
+        // Digital Motions filter
+        if (filters.digitalMotions) {
+          const isDM = row.digitalMotions === true || row.digitalMotions === 'true';
+          if (!isDM) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      console.log(`[Execution] Manual filtering complete: ${executionData.length} → ${filteredData.length} rows`);
+
+      // Clear any existing Tabulator filters and replace data with filtered results
+      executionTableInstance.clearFilter();
+      executionTableInstance.replaceData(filteredData);
+
+      // Force table redraw to ensure changes are visible
+      setTimeout(() => {
+        executionTableInstance.redraw(true);
+        const finalCount = executionTableInstance.getData().length;
+        console.log(`[Execution] After redraw: ${finalCount} rows visible`);
+      }, 50);
+
       const endTime = performance.now();
       const duration = endTime - startTime;
       
-      console.log("[Execution] Filters applied in", duration.toFixed(2), "ms, showing", visibleRows, "rows");
+      console.log("[Execution] Filters applied in", duration.toFixed(2), "ms, showing", filteredData.length, "rows");
 
       // Show helpful message when Digital Motions filter is active
       if (filters.digitalMotions) {
@@ -2836,6 +3068,8 @@ function applyExecutionSearchFilters(selectedFilters) {
       programType: [],
       strategicPillar: [],
       owner: [],
+      revenuePlay: [],
+      country: [],
       fiscalYear: [],
       digitalMotions: false
     };
@@ -3259,3 +3493,105 @@ window.testExecutionPhase3 = {
 
 // Helper function to run tests from console
 window.runExecutionTests = () => window.testExecutionPhase3.runAllTests();
+
+// ============================================================================
+// 🔧 DEBUG EXPORTS - Make functions available for debug environments
+// ============================================================================
+
+// Export key functions for debug environments
+window.executionDebugFunctions = {
+  initExecutionGrid,
+  initializeExecutionFilters,
+  initializeExecutionUniversalSearch,
+  applyExecutionFilters,
+  getExecutionFilterValues
+};
+
+// Manual initialization function for debug environments
+window.initializeExecutionDebug = async function() {
+  console.log('🔧 DEBUG: Starting manual execution initialization...');
+  
+  try {
+    // Initialize with empty data first
+    await initExecutionGrid([]);
+    
+    // Initialize filters
+    setTimeout(() => {
+      initializeExecutionFilters();
+    }, 500);
+    
+    // Initialize universal search
+    setTimeout(() => {
+      initializeExecutionUniversalSearch();
+    }, 1000);
+    
+    console.log('✅ DEBUG: Execution initialization complete');
+    return true;
+  } catch (error) {
+    console.error('❌ DEBUG: Execution initialization failed:', error);
+    return false;
+  }
+};
+
+// Immediate debug notification
+console.log('🚀 EXECUTION MODULE: Debug functions exported to window');
+console.log('Available debug functions:', Object.keys(window.executionDebugFunctions || {}));
+console.log('initializeExecutionDebug available:', typeof window.initializeExecutionDebug);
+
+// ============================================================================
+// 🔧 AUTO-INITIALIZATION FOR DEBUG ENVIRONMENTS
+// ============================================================================
+
+// Check if we're in a debug environment and auto-initialize
+setTimeout(() => {
+  const isDebugEnvironment = document.title.includes('Debug') || 
+                           window.location.href.includes('debug') ||
+                           document.querySelector('#logs'); // Debug log container exists
+  
+  if (isDebugEnvironment && !window.executionTableInstance) {
+    console.log('🔍 DEBUG: Auto-initialization detected for debug environment');
+    
+    // Direct initialization without waiting for exports
+    const autoInit = async () => {
+      try {
+        console.log('🔧 DEBUG: Starting direct auto-initialization...');
+        
+        // Call initExecutionGrid directly
+        await initExecutionGrid([]);
+        console.log('✅ DEBUG: Grid initialized');
+        
+        // Initialize filters
+        setTimeout(() => {
+          try {
+            initializeExecutionFilters();
+            console.log('✅ DEBUG: Filters initialized');
+          } catch (e) {
+            console.error('❌ DEBUG: Filter initialization failed:', e);
+          }
+        }, 500);
+        
+        // Initialize universal search
+        setTimeout(() => {
+          try {
+            initializeExecutionUniversalSearch();
+            console.log('✅ DEBUG: Universal search initialized');
+          } catch (e) {
+            console.error('❌ DEBUG: Universal search initialization failed:', e);
+          }
+        }, 1000);
+        
+        console.log('🎉 DEBUG: Auto-initialization complete');
+        
+        // Trigger status update if available
+        if (window.debugExecution && window.debugExecution.checkStatus) {
+          setTimeout(() => window.debugExecution.checkStatus(), 1500);
+        }
+        
+      } catch (error) {
+        console.error('❌ DEBUG: Auto-initialization failed:', error);
+      }
+    };
+    
+    autoInit();
+  }
+}, 500);
