@@ -128,7 +128,7 @@ class UniversalSearchFilter {
     // Sort categories and limit results
     const sortedResults = new Map();
     // Add digitalMotions to the category order so it always appears in the dropdown
-    const categoryOrder = ['region', 'quarter', 'status', 'programType', 'strategicPillars', 'owner', 'country', 'revenuePlay', 'digitalMotions'];
+    const categoryOrder = ['region', 'quarter', 'status', 'programType', 'strategicPillars', 'owner', 'country', 'revenuePlay', 'fiscalYear', 'digitalMotions'];
 
     categoryOrder.forEach(cat => {
       if (results.has(cat)) {
@@ -308,6 +308,7 @@ class UniversalSearchFilter {
       owner: 'Owner',
       country: 'Country',
       revenuePlay: 'Revenue Play',
+      fiscalYear: 'Fiscal Year',
       digitalMotions: 'Digital Motions'
     };
     return displayNames[category] || category;

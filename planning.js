@@ -1192,25 +1192,55 @@ class PlanningDataStore {
   applyFilters(filters) {
     const startTime = performance.now();
     
+    // Early return optimization: if no filters are active, return all active data
+    const hasActiveFilters = filters.digitalMotions || 
+      (Array.isArray(filters.descriptionKeyword) && filters.descriptionKeyword.length > 0) ||
+      ['region', 'quarter', 'status', 'programType', 'strategicPillars', 'owner', 'revenuePlay', 'country']
+        .some(field => Array.isArray(filters[field]) && filters[field].length > 0);
+    
     // Start with active data (master minus deleted)
     const activeData = this.getData();
     
-    // Pre-compute normalized quarter filter values for performance
+    if (!hasActiveFilters) {
+      this.filteredData = activeData;
+      const duration = performance.now() - startTime;
+      if (window.DEBUG_FILTERS) {
+        console.log(`Filter applied (no filters): ${this.filteredData.length}/${activeData.length} rows (${duration.toFixed(2)}ms)`);
+      }
+      return this.filteredData;
+    }
+    
+    // Pre-compute filter optimizations
     const normalizedQuarterFilters = filters.quarter && Array.isArray(filters.quarter) 
       ? filters.quarter.map(normalizeQuarter) 
       : null;
     
+    // Pre-compute case-insensitive filter sets for performance
+    const programTypeFilters = filters.programType && Array.isArray(filters.programType)
+      ? new Set(filters.programType.map(val => (val || '').toLowerCase().trim()))
+      : null;
+    
+    const strategicPillarsFilters = filters.strategicPillars && Array.isArray(filters.strategicPillars)
+      ? new Set(filters.strategicPillars.map(val => (val || '').toLowerCase().trim()))
+      : null;
+    
+    // Pre-compute description keywords for case-insensitive matching
+    const descriptionKeywords = Array.isArray(filters.descriptionKeyword) && filters.descriptionKeyword.length > 0
+      ? filters.descriptionKeyword.map(kw => kw.toLowerCase())
+      : null;
+    
     this.filteredData = activeData.filter(row => {
-      // Digital Motions filter (robust: accept boolean true or string 'true')
+      // Digital Motions filter (optimized boolean check)
       if (filters.digitalMotions && !(row.digitalMotions === true || row.digitalMotions === 'true')) {
         return false;
       }
 
-      // Description keyword filter (case-insensitive, matches ALL keywords)
-      if (Array.isArray(filters.descriptionKeyword) && filters.descriptionKeyword.length > 0) {
+      // Description keyword filter (optimized with pre-computed keywords)
+      if (descriptionKeywords) {
         const desc = (row.description || '').toLowerCase();
-        const allMatch = filters.descriptionKeyword.every(kw => desc.includes(kw.toLowerCase()));
-        if (!allMatch) return false;
+        if (!descriptionKeywords.every(kw => desc.includes(kw))) {
+          return false;
+        }
       }
 
       // Multiselect filters - check if row value is in the selected array
@@ -1221,31 +1251,26 @@ class PlanningDataStore {
           // Get the correct row value for this field
           let rowValue = row[field];
 
-          // Apply quarter normalization for quarter field comparison (optimized)
+          // Apply field-specific optimizations
           if (field === 'quarter') {
             rowValue = normalizeQuarter(rowValue);
             if (!normalizedQuarterFilters.includes(rowValue)) {
               return false;
             }
           } else if (field === 'programType') {
-            // Case-insensitive comparison for programType to handle data inconsistencies
+            // Use pre-computed Set for faster lookup
             const rowValueLower = (rowValue || '').toLowerCase().trim();
-            const filterMatched = filterValues.some(filterVal => 
-              (filterVal || '').toLowerCase().trim() === rowValueLower
-            );
-            if (!filterMatched) {
+            if (!programTypeFilters.has(rowValueLower)) {
               return false;
             }
           } else if (field === 'strategicPillars') {
-            // Case-insensitive comparison for strategicPillars to handle data inconsistencies
+            // Use pre-computed Set for faster lookup
             const rowValueLower = (rowValue || '').toLowerCase().trim();
-            const filterMatched = filterValues.some(filterVal => 
-              (filterVal || '').toLowerCase().trim() === rowValueLower
-            );
-            if (!filterMatched) {
+            if (!strategicPillarsFilters.has(rowValueLower)) {
               return false;
             }
           } else {
+            // Direct array includes for exact matches (fastest for other fields)
             if (!filterValues.includes(rowValue)) {
               return false;
             }
@@ -1257,7 +1282,9 @@ class PlanningDataStore {
     });
     
     const duration = performance.now() - startTime;
-    console.log(`Filter applied: ${this.filteredData.length}/${activeData.length} rows (${duration.toFixed(2)}ms)`);
+    if (window.DEBUG_FILTERS) {
+      console.log(`Filter applied: ${this.filteredData.length}/${activeData.length} rows (${duration.toFixed(2)}ms)`);
+    }
     
     return this.filteredData;
   }
@@ -3524,76 +3551,94 @@ function populatePlanningFilters() {
   const clearButton = document.getElementById("planningClearFilters");
   if (clearButton && !clearButton.hasAttribute("data-listener-attached")) {
     clearButton.addEventListener("click", () => {
-      // Get all select elements
-      const regionSelect = document.getElementById("planningRegionFilter");
-      const quarterSelect = document.getElementById("planningQuarterFilter");
-      const statusSelect = document.getElementById("planningStatusFilter");
-      const programTypeSelect = document.getElementById("planningProgramTypeFilter");
-      const strategicPillarSelect = document.getElementById("planningStrategicPillarFilter");
-      const ownerSelect = document.getElementById("planningOwnerFilter");
-      const revenuePlaySelect = document.getElementById("planningRevenuePlayFilter");
-      const countrySelect = document.getElementById("planningCountryFilter");
+      // Add visual feedback immediately
+      clearButton.disabled = true;
+      clearButton.style.opacity = '0.7';
+      clearButton.textContent = 'Clearing...';
       
-      const selectElements = [
-        regionSelect, quarterSelect, statusSelect, 
-        programTypeSelect, strategicPillarSelect, ownerSelect,
-        revenuePlaySelect, countrySelect
-      ];
-      
-      // Clear all multiselect values
-      selectElements.forEach(select => {
-        if (select && select.multiple) {
-          // Clear all selected options in multiselect
-          Array.from(select.options).forEach(option => {
-            option.selected = false;
+      // Use requestAnimationFrame to ensure UI updates before heavy operations
+      requestAnimationFrame(() => {
+        try {
+          // Batch DOM operations for better performance
+          const selectElementIds = [
+            "planningRegionFilter", "planningQuarterFilter", "planningStatusFilter", 
+            "planningProgramTypeFilter", "planningStrategicPillarFilter", "planningOwnerFilter",
+            "planningRevenuePlayFilter", "planningCountryFilter"
+          ];
+          
+          // Use a single query selector to get all elements at once
+          const selectElements = selectElementIds.map(id => document.getElementById(id)).filter(Boolean);
+          
+          // Batch clear all multiselect values efficiently
+          selectElements.forEach(select => {
+            if (select && select.multiple) {
+              // More efficient: set selectedIndex to -1 instead of looping through options
+              select.selectedIndex = -1;
+              
+              // Clear custom multiselect displays efficiently
+              if (select._multiselectContainer) {
+                const multiselectAPI = select._multiselectAPI;
+                if (multiselectAPI && typeof multiselectAPI.setSelectedValues === 'function') {
+                  multiselectAPI.setSelectedValues([]);
+                }
+              }
+            } else if (select) {
+              select.value = "";
+            }
           });
           
-          // Update custom multiselect display if it exists
-          if (select._multiselectContainer) {
-            const multiselectAPI = select._multiselectAPI;
-            if (multiselectAPI) {
-              multiselectAPI.setSelectedValues([]);
-            }
+          // Reset Digital Motions button
+          if (digitalMotionsButton) {
+            digitalMotionsButton.dataset.active = "false";
+            updateDigitalMotionsButtonVisual(digitalMotionsButton);
           }
-        } else if (select) {
-          select.value = "";
+          
+          // Clear universal search filters (batch operation)
+          universalSearchFilters = {
+            region: [],
+            quarter: [],
+            status: [],
+            programType: [],
+            strategicPillars: [],
+            owner: [],
+            revenuePlay: [],
+            country: [],
+            fiscalYear: [],
+            digitalMotions: false
+          };
+          
+          // Clear universal search display if it exists
+          if (window.planningUniversalSearch && typeof window.planningUniversalSearch.clearAllFilters === 'function') {
+            window.planningUniversalSearch.clearAllFilters();
+          }
+          
+          // Clear description keyword search input efficiently
+          const descriptionSearchInput = document.getElementById('planning-description-search');
+          if (descriptionSearchInput && descriptionSearchInput.value) {
+            descriptionSearchInput.value = '';
+            // Use a more efficient event dispatch
+            descriptionSearchInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          
+          // Apply filters (which will show all data since no filters are selected)
+          // Use a timeout to allow DOM updates to complete first
+          setTimeout(() => {
+            applyPlanningFilters();
+            
+            // Restore button state
+            clearButton.disabled = false;
+            clearButton.style.opacity = '1';
+            clearButton.textContent = 'Clear All Filters';
+          }, 10);
+          
+        } catch (error) {
+          console.error('Error clearing filters:', error);
+          // Restore button state on error
+          clearButton.disabled = false;
+          clearButton.style.opacity = '1';
+          clearButton.textContent = 'Clear All Filters';
         }
       });
-      
-      // Reset Digital Motions button
-      digitalMotionsButton.dataset.active = "false";
-      updateDigitalMotionsButtonVisual(digitalMotionsButton);
-      
-      // Clear universal search filters
-      universalSearchFilters = {
-        region: [],
-        quarter: [],
-        status: [],
-        programType: [],
-        strategicPillars: [],
-        owner: [],
-        revenuePlay: [],
-        country: [],
-        fiscalYear: [],
-        digitalMotions: false
-      };
-      
-      // Clear universal search display if it exists
-      if (window.planningUniversalSearch && typeof window.planningUniversalSearch.clearAllFilters === 'function') {
-        window.planningUniversalSearch.clearAllFilters();
-      }
-      
-      // Clear description keyword search input
-      const descriptionSearchInput = document.getElementById('planning-description-search');
-      if (descriptionSearchInput) {
-        descriptionSearchInput.value = '';
-        // Trigger the search to clear the description filters
-        const event = new Event('input', { bubbles: true });
-        descriptionSearchInput.dispatchEvent(event);
-      }
-      
-      // Apply filters (which will show all data since no filters are selected)
-      applyPlanningFilters();
     });
     clearButton.setAttribute("data-listener-attached", "true");
   }
@@ -3699,21 +3744,36 @@ function applyPlanningFilters() {
   }
 
   const filters = getPlanningFilterValues();
-  console.log("[Planning] Applying filters:", filters);
+  
+  // Only log in debug mode to reduce console noise
+  if (window.DEBUG_FILTERS) {
+    console.log("[Planning] Applying filters:", filters);
+  }
 
   // Use data store for faster filtering
   const filteredData = planningDataStore.applyFilters(filters);
   
-  // Update table with filtered data
-  planningTableInstance.setData(filteredData);
+  // Update table with filtered data more efficiently
+  // Use replaceData instead of setData for better performance with large datasets
+  if (filteredData.length > 0) {
+    planningTableInstance.replaceData(filteredData);
+  } else {
+    planningTableInstance.clearData();
+  }
 
-  console.log("[Planning] Filters applied, showing", filteredData.length, "rows");
+  // Only log in debug mode to reduce console noise
+  if (window.DEBUG_FILTERS) {
+    console.log("[Planning] Filters applied, showing", filteredData.length, "rows");
+  }
 
-  // Update filter summary display
-  updatePlanningFilterSummary(filters, filteredData.length);
+  // Update filter summary display (debounced for performance)
+  clearTimeout(window._filterSummaryTimeout);
+  window._filterSummaryTimeout = setTimeout(() => {
+    updatePlanningFilterSummary(filters, filteredData.length);
+  }, 50);
 
-  // Show helpful message when Digital Motions filter is active
-  if (filters.digitalMotions) {
+  // Show helpful message when Digital Motions filter is active (debug only)
+  if (filters.digitalMotions && window.DEBUG_FILTERS) {
     console.log(
       "[Planning] Digital Motions filter active - showing only campaigns with digitalMotions: true",
     );
@@ -4184,6 +4244,38 @@ function updatePlanningSearchData() {
         category: 'owner',
         value: owner,
         description: `Filter by ${owner}`,
+        type: 'filter'
+      });
+    });
+
+    // Add revenue play filters
+    const uniqueRevenuePlays = Array.from(
+      new Set(planningData.map((c) => c.revenuePlay).filter(Boolean)),
+    ).sort();
+    
+    uniqueRevenuePlays.forEach(revenuePlay => {
+      searchData.push({
+        id: `revenuePlay_${revenuePlay}`,
+        title: revenuePlay,
+        category: 'revenuePlay',
+        value: revenuePlay,
+        description: `Filter by ${revenuePlay} revenue play`,
+        type: 'filter'
+      });
+    });
+
+    // Add country filters
+    const uniqueCountries = Array.from(
+      new Set(planningData.map((c) => c.country).filter(Boolean)),
+    ).sort();
+    
+    uniqueCountries.forEach(country => {
+      searchData.push({
+        id: `country_${country}`,
+        title: country,
+        category: 'country',
+        value: country,
+        description: `Filter by ${country}`,
         type: 'filter'
       });
     });
