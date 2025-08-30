@@ -2253,15 +2253,8 @@ function applyExecutionFilters() {
     executionData = executionDataStore.getData();
     console.log("[Execution] Using data from ExecutionDataStore:", executionData.length, "rows");
     
-    // COMPATIBILITY FIX: If data store is synced with planning but we're filtering execution,
-    // fall back to table data for filtering to maintain field compatibility
-    if (executionData.length > 0 && executionTableInstance) {
-      const tableData = executionTableInstance.getData();
-      if (tableData.length > 0) {
-        console.log("[Execution] Using table data for filtering to maintain field compatibility:", tableData.length, "rows");
-        executionData = tableData;
-      }
-    }
+    // Always use the full unfiltered data from data store for proper filtering
+    // The table data might already be filtered, which would break filter removal
   } else {
     executionData = executionTableInstance.getData();
     console.log("[Execution] Fallback: Using data from table:", executionData.length, "rows");
@@ -3087,7 +3080,48 @@ function applyExecutionSearchFilters(selectedFilters) {
       });
     }
     
+    // Synchronize dropdown filters with universal search filters
+    // Clear dropdowns that are not in the universal search selection
+    const dropdownMappings = {
+      region: 'executionRegionFilter',
+      quarter: 'executionQuarterFilter', 
+      status: 'executionStatusFilter',
+      programType: 'executionProgramTypeFilter',
+      strategicPillar: 'executionStrategicPillarFilter',
+      owner: 'executionOwnerFilter',
+      revenuePlay: 'executionRevenuePlayFilter',
+      country: 'executionCountryFilter'
+    };
+    
+    Object.entries(dropdownMappings).forEach(([category, elementId]) => {
+      const element = document.getElementById(elementId);
+      if (element) {
+        const universalValues = universalExecutionSearchFilters[category] || [];
+        
+        if (element.multiple) {
+          // For multiselect, clear all options then select only universal search values
+          Array.from(element.options).forEach(option => {
+            option.selected = universalValues.includes(option.value);
+          });
+        } else {
+          // For single select, set value to first universal search value or empty
+          element.value = universalValues.length > 0 ? universalValues[0] : '';
+        }
+      }
+    });
+    
+    // Handle Digital Motions button
+    const digitalMotionsButton = document.getElementById("executionDigitalMotionsFilter");
+    if (digitalMotionsButton) {
+      digitalMotionsButton.dataset.active = universalExecutionSearchFilters.digitalMotions.toString();
+      // Update button visual state
+      if (typeof updateExecutionDigitalMotionsButtonVisual === 'function') {
+        updateExecutionDigitalMotionsButtonVisual(digitalMotionsButton);
+      }
+    }
+    
     console.log("🔍 EXECUTION: Universal search filters updated:", universalExecutionSearchFilters);
+    console.log("🔄 EXECUTION: Dropdown filters synchronized with universal search");
     
     // Apply filters using the main execution filter system
     applyExecutionFilters();
