@@ -16,7 +16,7 @@
     "pipelineForecast": 0,
     "digitalMotions": false,
     "id": "imp_1756368267966_vrhgfax0h",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -36,7 +36,7 @@
     "pipelineForecast": 0,
     "digitalMotions": false,
     "id": "imp_1756368267966_99dmyhctk",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -56,7 +56,7 @@
     "pipelineForecast": 240000,
     "digitalMotions": false,
     "id": "imp_1756368267966_rdi10ezuk",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -76,7 +76,7 @@
     "pipelineForecast": 600000,
     "digitalMotions": false,
     "id": "imp_1756368267971_k5ivq925h",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -96,7 +96,7 @@
     "pipelineForecast": 1440000,
     "digitalMotions": false,
     "id": "imp_1756368267971_7hi9fvaah",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -116,7 +116,7 @@
     "pipelineForecast": 600000,
     "digitalMotions": false,
     "id": "imp_1756368267984_qimzg0xyr",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -136,7 +136,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368267984_xi5p4w4vz",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -156,7 +156,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268000_m01d3szqg",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -176,7 +176,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268000_1rf7el8us",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -196,7 +196,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268000_ai8i1rjpo",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -216,7 +216,7 @@
     "pipelineForecast": 480000,
     "digitalMotions": false,
     "id": "imp_1756368268000_lfu2l53u3",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -236,7 +236,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268000_f62ryljkg",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -256,7 +256,7 @@
     "pipelineForecast": 240000,
     "digitalMotions": false,
     "id": "imp_1756368268017_7fk6gftlu",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -276,7 +276,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268017_cfke0y29l",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -296,7 +296,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268017_ay29u7uiu",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -316,7 +316,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268017_1u6prks0k",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -336,7 +336,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268017_6fwu2somx",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -356,7 +356,7 @@
     "pipelineForecast": 36000,
     "digitalMotions": false,
     "id": "imp_1756368268034_exh7pejhu",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -376,7 +376,7 @@
     "pipelineForecast": 720000,
     "digitalMotions": false,
     "id": "imp_1756368268034_d97ts5v4u",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -396,7 +396,7 @@
     "pipelineForecast": 480000,
     "digitalMotions": false,
     "id": "imp_1756368268034_852jsti0e",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -416,7 +416,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268034_ht1v29qqk",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -436,7 +436,7 @@
     "pipelineForecast": 120000,
     "digitalMotions": false,
     "id": "imp_1756368268034_ierdbvm6e",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -456,7 +456,7 @@
     "pipelineForecast": 0,
     "digitalMotions": false,
     "id": "imp_1756368268050_01sn0rvzi",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -476,7 +476,7 @@
     "pipelineForecast": 192000,
     "digitalMotions": false,
     "id": "imp_1756368268050_wfnwhhjb7",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -496,7 +496,7 @@
     "pipelineForecast": 600000,
     "digitalMotions": false,
     "id": "imp_1756368268050_ywv9mh9me",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -516,7 +516,7 @@
     "pipelineForecast": 480000,
     "digitalMotions": false,
     "id": "imp_1756368268050_1nqoxxa6i",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -536,7 +536,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268050_smfh939h6",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -556,7 +556,7 @@
     "pipelineForecast": 36000,
     "digitalMotions": false,
     "id": "imp_1756368268067_g0b4y2nss",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -576,7 +576,7 @@
     "pipelineForecast": 36000,
     "digitalMotions": false,
     "id": "imp_1756368268067_tg1ns75bm",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -596,7 +596,7 @@
     "pipelineForecast": 240000,
     "digitalMotions": false,
     "id": "imp_1756368268067_9e1owr4ay",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -616,7 +616,7 @@
     "pipelineForecast": 480000,
     "digitalMotions": false,
     "id": "imp_1756368268068_tt18qgxp8",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -636,7 +636,7 @@
     "pipelineForecast": 600000,
     "digitalMotions": false,
     "id": "imp_1756368268068_sw30lbcc0",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -656,7 +656,7 @@
     "pipelineForecast": 720000,
     "digitalMotions": false,
     "id": "imp_1756368268084_icu9hoy55",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -676,7 +676,7 @@
     "pipelineForecast": 240000,
     "digitalMotions": false,
     "id": "imp_1756368268084_hx00uqfle",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -696,7 +696,7 @@
     "pipelineForecast": 480000,
     "digitalMotions": false,
     "id": "imp_1756368268084_jwbn5p4jt",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -716,7 +716,7 @@
     "pipelineForecast": 0,
     "digitalMotions": true,
     "id": "imp_1756368268084_3fvbuiprw",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -733,9 +733,10 @@
     "revenuePlay": "New Business",
     "status": "On Track",
     "description": "TESTER",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0,
     "mqlForecast": 12,
-    "pipelineForecast": 288000
+    "pipelineForecast": 288000,
+    "digitalMotions": true
   }
 ]
