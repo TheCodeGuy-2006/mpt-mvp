@@ -18,7 +18,10 @@
     "id": "imp_1756368267966_vrhgfax0h",
     "__modified": false,
     "__unsavedPriority": 0,
-    "actualCost": 1200
+    "actualCost": 1200,
+    "poRaised": "Yes",
+    "actualLeads": 10,
+    "actualMQLs": 10
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -38,7 +41,8 @@
     "digitalMotions": false,
     "id": "imp_1756368267966_99dmyhctk",
     "__modified": false,
-    "__unsavedPriority": 0
+    "__unsavedPriority": 0,
+    "actualLeads": ""
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
