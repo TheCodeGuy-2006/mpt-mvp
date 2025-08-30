@@ -100,68 +100,6 @@
     "__unsavedPriority": 0
   },
   {
-    "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
-    "strategicPillars": "Account Growth and Product Adoption",
-    "revenuePlay": "All",
-    "fiscalYear": "FY26",
-    "quarter": "Q1 August",
-    "region": "SAARC",
-    "country": "India",
-    "owner": "Shruti Narang",
-    "description": "In Account Days - AirIndia Kochi",
-    "forecastedCost": 12000000,
-    "expectedLeads": 0,
-    "mqlForecast": 0,
-    "status": "Planning",
-    "pipelineForecast": 0,
-    "digitalMotions": false,
-    "id": "imp_1756368267984_9yw0lggye",
-    "__modified": true,
-    "__unsavedPriority": 0
-  },
-  {
-    "programType": "In-Account Events (1:1)",
-    "strategicPillars": "Account Growth and Product Adoption",
-    "revenuePlay": "All",
-    "fiscalYear": "FY26",
-    "quarter": "Q1 August",
-    "region": "SAARC",
-    "country": "India",
-    "owner": "Shruti Narang",
-    "description": "In Account Days - Accounts TBD",
-    "forecastedCost": 4000,
-    "expectedLeads": 0,
-    "mqlForecast": 0,
-    "status": "Planning",
-    "pipelineForecast": 0,
-    "digitalMotions": false,
-    "id": "imp_1756368267984_qz3q1rc2t",
-    "__modified": true,
-    "__unsavedPriority": 0
-  },
-  {
-    "programType": "In-Account Events (1:1)",
-    "strategicPillars": "Account Growth and Product Adoption",
-    "revenuePlay": "All",
-    "fiscalYear": "FY26",
-    "quarter": "Q1 August",
-    "region": "South APAC",
-    "country": "X South APAC",
-    "owner": "Beverly Leung",
-    "description": "In Account Days - Accounts TBD",
-    "forecastedCost": 16000,
-    "expectedLeads": 0,
-    "mqlForecast": 0,
-    "status": "Planning",
-    "pipelineForecast": 0,
-    "digitalMotions": false,
-    "id": "imp_1756368267984_490fn4td6",
-    "__modified": true,
-    "__unsavedPriority": 0,
-    "issueLink": "",
-    "poRaised": "Yes"
-  },
-  {
     "programType": "Localized Events",
     "strategicPillars": "New Logo Acquisition",
     "revenuePlay": "All",
@@ -184,7 +122,7 @@
   {
     "programType": "Localized Programs",
     "strategicPillars": "Pipeline Acceleration & Executive Engagement",
-    "revenuePlay": "",
+    "revenuePlay": "Secure all developer workloads with the power of AI",
     "fiscalYear": "FY26",
     "quarter": "Q1 August",
     "region": "South APAC",
@@ -199,8 +137,7 @@
     "digitalMotions": true,
     "id": "imp_1756368267984_xi5p4w4vz",
     "__modified": true,
-    "__unsavedPriority": 0,
-    "issueLink": "https://docs.google.com/spreadsheets/d/19P5tabkAJx6cjVtxJhiYu-n9AXe-e5YlsdUm0FkNOw0/edit?gid=0#gid=0"
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -220,8 +157,7 @@
     "digitalMotions": true,
     "id": "imp_1756368268000_m01d3szqg",
     "__modified": true,
-    "__unsavedPriority": 0,
-    "issueLink": ""
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -229,7 +165,7 @@
     "revenuePlay": "Accelerate developer productivity with Copilot in VS Code and GitHub",
     "fiscalYear": "FY26",
     "quarter": "Q1 August",
-    "region": "JP & Korea",
+    "region": "South APAC",
     "country": "Australia",
     "owner": "Giorgia Parham",
     "description": "Major Account ABM: Tailored content hub, personalised emails, webinars, relationship showcase etc",
@@ -241,8 +177,7 @@
     "digitalMotions": true,
     "id": "imp_1756368268000_1rf7el8us",
     "__modified": true,
-    "__unsavedPriority": 0,
-    "issueLink": ""
+    "__unsavedPriority": 0
   },
   {
     "programType": "Localized Programs",
@@ -783,5 +718,24 @@
     "id": "imp_1756368268084_3fvbuiprw",
     "__modified": true,
     "__unsavedPriority": 0
+  },
+  {
+    "id": "program-1756535970015",
+    "programType": "Flagship Events (Galaxy, Universe Recaps) 1:Many",
+    "strategicPillars": "Brand Awareness & Top of Funnel Demand Generation",
+    "owner": "Giorgia Parham",
+    "quarter": "Q2 October",
+    "fiscalYear": "FY25",
+    "region": "SAARC",
+    "country": "Cambodia",
+    "forecastedCost": 12000,
+    "expectedLeads": 120,
+    "revenuePlay": "New Business",
+    "status": "On Track",
+    "description": "TESTER",
+    "__modified": true,
+    "__unsavedPriority": 0,
+    "mqlForecast": 12,
+    "pipelineForecast": 288000
   }
 ]
