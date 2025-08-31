@@ -2835,10 +2835,26 @@ function setupPlanningSave(table, rows) {
           window.hasUnsavedPlanningChanges = false;
           console.log("[Planning] Unsaved changes set to false (after successful save to Worker). Now:", window.hasUnsavedPlanningChanges);
 
-          // Refresh data after successful save
-          if (window.cloudflareSyncModule.refreshDataAfterSave) {
-            window.cloudflareSyncModule.refreshDataAfterSave("planning");
+          // Refresh the table display with updated data from data store
+          console.log("🔄 PLANNING: Refreshing table display after save...");
+          const currentData = planningDataStore.getFilteredData();
+          if (table && typeof table.replaceData === 'function') {
+            table.replaceData(currentData);
+            console.log("✅ PLANNING: Table display refreshed with", currentData.length, "rows");
+            
+            // Reapply current filters after data refresh
+            setTimeout(() => {
+              if (typeof applyPlanningFilters === 'function') {
+                applyPlanningFilters();
+                console.log("✅ PLANNING: Filters reapplied after save");
+              }
+            }, 100);
           }
+
+          // Don't call refreshDataAfterSave for manual saves - it can override local changes with stale GitHub cache
+          // if (window.cloudflareSyncModule.refreshDataAfterSave) {
+          //   window.cloudflareSyncModule.refreshDataAfterSave("planning");
+          // }
 
           // Update ROI metrics
           if (typeof window.roiModule?.updateRoiTotalSpend === "function") {
@@ -2864,6 +2880,22 @@ function setupPlanningSave(table, rows) {
                 console.log("[Planning] (Backend fallback) About to set unsaved flag to false. Current:", window.hasUnsavedPlanningChanges);
                 window.hasUnsavedPlanningChanges = false;
                 console.log("[Planning] Unsaved changes set to false (after successful save to backend fallback). Now:", window.hasUnsavedPlanningChanges);
+                
+                // Refresh the table display with updated data from data store
+                console.log("🔄 PLANNING: Refreshing table display after fallback save...");
+                const currentData = planningDataStore.getFilteredData();
+                if (table && typeof table.replaceData === 'function') {
+                  table.replaceData(currentData);
+                  console.log("✅ PLANNING: Table display refreshed with", currentData.length, "rows");
+                  
+                  // Reapply current filters after data refresh
+                  setTimeout(() => {
+                    if (typeof applyPlanningFilters === 'function') {
+                      applyPlanningFilters();
+                      console.log("✅ PLANNING: Filters reapplied after fallback save");
+                    }
+                  }, 100);
+                }
               } else {
                 alert(
                   "❌ Failed to save: " + (result.error || "Unknown error")
@@ -2889,6 +2921,22 @@ function setupPlanningSave(table, rows) {
             console.log("[Planning] (Backend) About to set unsaved flag to false. Current:", window.hasUnsavedPlanningChanges);
             window.hasUnsavedPlanningChanges = false;
             console.log("[Planning] Unsaved changes set to false (after successful save to backend). Now:", window.hasUnsavedPlanningChanges);
+
+            // Refresh the table display with updated data from data store
+            console.log("🔄 PLANNING: Refreshing table display after backend save...");
+            const currentData = planningDataStore.getFilteredData();
+            if (table && typeof table.replaceData === 'function') {
+              table.replaceData(currentData);
+              console.log("✅ PLANNING: Table display refreshed with", currentData.length, "rows");
+              
+              // Reapply current filters after data refresh
+              setTimeout(() => {
+                if (typeof applyPlanningFilters === 'function') {
+                  applyPlanningFilters();
+                  console.log("✅ PLANNING: Filters reapplied after backend save");
+                }
+              }, 100);
+            }
 
             // Update ROI metrics
             if (typeof window.roiModule?.updateRoiTotalSpend === "function") {

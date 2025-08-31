@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning Save Test</title>
+</head>
+<body>
+    <h1>Planning Save Test</h1>
+    <p>This file can be opened to test the planning save functionality in the browser console.</p>
+    
+    <div>
+        <h2>Test Instructions:</h2>
+        <ol>
+            <li>Open the main application (index.html)</li>
+            <li>Go to the Planning tab</li>
+            <li>Import some campaigns or add new campaigns</li>
+            <li>Make changes to the campaigns</li>
+            <li>Click "Save Changes"</li>
+            <li>Verify that the changes persist in the table WITHOUT needing to reload the page</li>
+            <li>Check the console logs for messages like "✅ PLANNING: Table display refreshed with X rows"</li>
+        </ol>
+        
+        <h2>Expected Behavior (FIXED):</h2>
+        <ul>
+            <li>✅ Changes should persist immediately after save</li>
+            <li>✅ Table should show updated data without reverting</li>
+            <li>✅ No need to reload page to see changes</li>
+            <li>✅ Filters should continue to work properly after save</li>
+        </ul>
+        
+        <h2>Previous Issue (RESOLVED):</h2>
+        <ul>
+            <li>❌ Changes would revert to old data after save</li>
+            <li>❌ Required page reload to see saved changes</li>
+            <li>❌ refreshDataAfterSave was overriding local changes with stale GitHub cache</li>
+        </ul>
+    </div>
+    
+    <script>
+        console.log("Planning Save Test page loaded");
+        console.log("Key fix: Removed refreshDataAfterSave call from manual saves to prevent reversion");
+        console.log("The table now refreshes from local data store instead of fetching from GitHub");
+    </script>
+</body>
+</html>
