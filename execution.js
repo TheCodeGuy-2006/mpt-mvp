@@ -2318,9 +2318,15 @@ function applyExecutionFilters() {
           return false;
         }
 
-        // Status filter
-        if (filters.status.length > 0 && !filters.status.includes(row.status)) {
-          return false;
+        // Status filter (case-insensitive comparison)
+        if (filters.status.length > 0) {
+          const rowStatusLower = (row.status || '').toLowerCase();
+          const statusMatches = filters.status.some(filterStatus => 
+            (filterStatus || '').toLowerCase() === rowStatusLower
+          );
+          if (!statusMatches) {
+            return false;
+          }
         }
 
         // Program Type filter

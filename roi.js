@@ -577,9 +577,16 @@ function updateRoiTotalSpend() {
 function updateRoiCharts() {
   if (!isRoiTabActive) return;
   
+  console.log('[ROI] Updating charts with current filters...');
+  
   requestAnimationFrame(() => {
+    // Get current filter state for charts
+    const filters = getFilterState();
+    console.log('[ROI] Chart filters:', filters);
+    
+    // Update all ROI charts - they will automatically use the current filter state
     renderRoiByRegionChart();
-    renderRoiByProgramTypeChart();
+    renderRoiByProgramTypeChart(); 
     renderRoiByQuarterChart();
   });
 }
@@ -1687,14 +1694,11 @@ function updateRoiDataTable() {
   // Ensure data table is initialized before trying to update it
   const table = ensureRoiDataTableInitialized();
   if (!table) {
-
     return;
   }
 
-  // Get filter values from ROI filters
-  const regionFilter = document.getElementById("roiRegionFilter")?.value || "";
-  const quarterFilter =
-    document.getElementById("roiQuarterFilter")?.value || "";
+  // Get filter values using the comprehensive filter system
+  const filters = getFilterState();
 
   // Helper function to normalize quarter formats for comparison
   const normalizeQuarter = (quarter) => {
@@ -1705,17 +1709,67 @@ function updateRoiDataTable() {
   // Get fresh data
   const campaigns = getCampaignDataForRoi();
 
-  // Apply filters
+  // Apply all available filters
   const filteredCampaigns = campaigns.filter((campaign) => {
-    const matchesRegion = !regionFilter || campaign.region === regionFilter;
-    const matchesQuarter = !quarterFilter || normalizeQuarter(campaign.quarter) === normalizeQuarter(quarterFilter);
-    return matchesRegion && matchesQuarter;
+    // Region filter
+    if (filters.region.length > 0 && !filters.region.includes(campaign.region)) {
+      return false;
+    }
+    
+    // Quarter filter
+    if (filters.quarter.length > 0) {
+      const campaignQuarter = normalizeQuarter(campaign.quarter);
+      const quarterMatches = filters.quarter.some(filterQuarter => 
+        normalizeQuarter(filterQuarter) === campaignQuarter
+      );
+      if (!quarterMatches) {
+        return false;
+      }
+    }
+    
+    // Country filter
+    if (filters.country.length > 0 && !filters.country.includes(campaign.country)) {
+      return false;
+    }
+    
+    // Owner filter
+    if (filters.owner.length > 0 && !filters.owner.includes(campaign.owner)) {
+      return false;
+    }
+    
+    // Status filter (case-insensitive)
+    if (filters.status.length > 0) {
+      const campaignStatusLower = (campaign.status || '').toLowerCase();
+      const statusMatches = filters.status.some(filterStatus => 
+        (filterStatus || '').toLowerCase() === campaignStatusLower
+      );
+      if (!statusMatches) {
+        return false;
+      }
+    }
+    
+    // Program Type filter
+    if (filters.programType.length > 0 && !filters.programType.includes(campaign.programType)) {
+      return false;
+    }
+    
+    // Strategic Pillars filter
+    if (filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(campaign.strategicPillars)) {
+      return false;
+    }
+    
+    // Revenue Play filter
+    if (filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(campaign.revenuePlay)) {
+      return false;
+    }
+    
+    return true;
   });
+
+  console.log(`[ROI] Data table filtered: ${campaigns.length} → ${filteredCampaigns.length} campaigns`);
 
   // Update table data
   table.replaceData(filteredCampaigns);
-
-
 }
 
 // Handle ROI tab routing logic

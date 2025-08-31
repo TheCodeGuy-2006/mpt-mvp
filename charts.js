@@ -825,6 +825,8 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
 
   // Get current ROI filter state
   const filters = window.roiModule ? window.roiModule.getFilterState ? window.roiModule.getFilterState() : {} : {};
+  
+  console.log('[ROI CHART] ROI by Region - Current filters:', filters);
 
   // Create cache key based on filters
   const cacheKey = `roi-region-chart-${JSON.stringify(filters)}`;
@@ -846,20 +848,25 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
     regionMap[region] = { spend: 0, pipeline: 0 };
   });
 
-  // Debug: Check executionTableInstance and data
-  if (!window.executionTableInstance) {
-
+  // Get ROI campaign data instead of execution table data
+  let data = [];
+  if (window.roiModule && typeof window.roiModule.getCampaignDataForRoi === 'function') {
+    data = window.roiModule.getCampaignDataForRoi();
+    console.log('[ROI CHART] Using ROI campaign data:', data.length, 'campaigns');
+  } else {
+    console.warn('[ROI CHART] ROI module or getCampaignDataForRoi not available');
     return;
   }
-  const data = window.executionTableInstance.getData ? window.executionTableInstance.getData() : null;
+  
   if (!data || !Array.isArray(data) || data.length === 0) {
-
+    console.warn('[ROI CHART] No ROI campaign data available');
     return;
   }
 
   // Log all unique region values in the data
   const uniqueRegions = Array.from(new Set(data.map(row => row.region))).filter(Boolean);
-
+  console.log('[ROI CHART] Available regions in data:', uniqueRegions);
+  console.log('[ROI CHART] Target regions for chart:', targetRegions);
 
   // Helper function to normalize quarter formats for comparison
   const normalizeQuarter = (quarter) => {
@@ -867,71 +874,99 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
     return quarter.replace(/\s*-\s*/g, ' ').trim();
   };
 
-  // Debug: Log current filters
+  let filteredCount = 0;
+  let totalCount = data.length;
+  console.log('[ROI CHART] Processing', totalCount, 'total campaigns with filters:', filters);
 
   // Process data with filtering
   data.forEach((row, idx) => {
-    // Debug: Log row before filters
-    // Only log for first 10 rows to avoid spam
+    // Debug: Log first few rows to see data structure
+    if (idx < 3) {
+      console.log(`[ROI CHART] Sample row ${idx}:`, {
+        region: row.region,
+        programType: row.programType,
+        status: row.status,
+        actualCost: row.actualCost,
+        pipelineForecast: row.pipelineForecast
+      });
+    }
 
+    // Apply filters with detailed logging for first few rows
+    let passedAllFilters = true;
+    
     // Only apply region filter if it's a non-empty array
     if (Array.isArray(filters.region) && filters.region.length > 0 && !filters.region.includes(row.region)) {
-
-      return;
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by region:`, row.region, 'not in', filters.region);
+      passedAllFilters = false;
     }
     // Only apply quarter filter if it's a non-empty array
-    if (Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) {
-
-      return;
+    if (passedAllFilters && Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by quarter:`, row.quarter, 'not in', filters.quarter);
+      passedAllFilters = false;
     }
     // Only apply country filter if it's a non-empty array or a string
-    if (Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) {
-
-      return;
-    } else if (typeof filters.country === 'string' && filters.country && row.country !== filters.country) {
-
-      return;
+    if (passedAllFilters && Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by country:`, row.country, 'not in', filters.country);
+      passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.country === 'string' && filters.country && row.country !== filters.country) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by country string:`, row.country, '!==', filters.country);
+      passedAllFilters = false;
     }
     // Only apply owner filter if it's a non-empty array or a string
-    if (Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) {
-
-      return;
-    } else if (typeof filters.owner === 'string' && filters.owner && row.owner !== filters.owner) {
-
-      return;
+    if (passedAllFilters && Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by owner:`, row.owner, 'not in', filters.owner);
+      passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.owner === 'string' && filters.owner && row.owner !== filters.owner) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by owner string:`, row.owner, '!==', filters.owner);
+      passedAllFilters = false;
     }
-    // Only apply status filter if it's a non-empty array or a string
-    if (Array.isArray(filters.status) && filters.status.length > 0 && !filters.status.includes(row.status)) {
-
-      return;
-    } else if (typeof filters.status === 'string' && filters.status && row.status !== filters.status) {
-
-      return;
+    // Only apply status filter if it's a non-empty array or a string (case-insensitive)
+    if (passedAllFilters && Array.isArray(filters.status) && filters.status.length > 0) {
+      const rowStatusLower = (row.status || '').toLowerCase();
+      const statusMatches = filters.status.some(filterStatus => 
+        (filterStatus || '').toLowerCase() === rowStatusLower
+      );
+      if (!statusMatches) {
+        if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by status:`, row.status, 'not in', filters.status);
+        passedAllFilters = false;
+      }
+    } else if (passedAllFilters && typeof filters.status === 'string' && filters.status && (row.status || '').toLowerCase() !== (filters.status || '').toLowerCase()) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by status string:`, row.status, '!==', filters.status);
+      passedAllFilters = false;
     }
     // Only apply programType filter if it's a non-empty array or a string
-    if (Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) {
-
-      return;
-    } else if (typeof filters.programType === 'string' && filters.programType && row.programType !== filters.programType) {
-
-      return;
+    if (passedAllFilters && Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by programType:`, row.programType, 'not in', filters.programType);
+      passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.programType === 'string' && filters.programType && row.programType !== filters.programType) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by programType string:`, row.programType, '!==', filters.programType);
+      passedAllFilters = false;
     }
     // Only apply strategicPillars filter if it's a non-empty array or a string
-    if (Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) {
-
-      return;
-    } else if (typeof filters.strategicPillars === 'string' && filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) {
-
-      return;
+    if (passedAllFilters && Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by strategicPillars:`, row.strategicPillars, 'not in', filters.strategicPillars);
+      passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.strategicPillars === 'string' && filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by strategicPillars string:`, row.strategicPillars, '!==', filters.strategicPillars);
+      passedAllFilters = false;
     }
     // Only apply revenuePlay filter if it's a non-empty array or a string
-    if (Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) {
+    if (passedAllFilters && Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by revenuePlay:`, row.revenuePlay, 'not in', filters.revenuePlay);
+      passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.revenuePlay === 'string' && filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) {
+      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by revenuePlay string:`, row.revenuePlay, '!==', filters.revenuePlay);
+      passedAllFilters = false;
+    }
 
-      return;
-    } else if (typeof filters.revenuePlay === 'string' && filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) {
-
+    // Skip this row if it didn't pass all filters
+    if (!passedAllFilters) {
       return;
     }
+
+    // Row passed all filters, increment counter and log for first few
+    filteredCount++;
+    if (idx < 5) console.log(`[ROI CHART] Row ${idx} PASSED all filters - will be included in chart`);  
 
     const region = row.region;
     // Only process data for our target regions and exclude X APAC English/Non English
@@ -950,7 +985,10 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
 
     }
   });
-  // Log the final regionMap after processing
+  
+  // Log the final filtering results  
+  console.log(`[ROI CHART] Filtering complete: ${filteredCount}/${totalCount} campaigns passed filters`);
+  console.log('[ROI CHART] Final regionMap after processing:', JSON.stringify(regionMap, null, 2));
 
 
   const roiPercents = targetRegions.map((region) => {
@@ -1141,7 +1179,14 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
       if (Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) return;
       if (Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) return;
       if (Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) return;
-      if (Array.isArray(filters.status) && filters.status.length > 0 && !filters.status.includes(row.status)) return;
+      // Status filter with case-insensitive comparison
+      if (Array.isArray(filters.status) && filters.status.length > 0) {
+        const rowStatusLower = (row.status || '').toLowerCase();
+        const statusMatches = filters.status.some(filterStatus => 
+          (filterStatus || '').toLowerCase() === rowStatusLower
+        );
+        if (!statusMatches) return;
+      }
       if (Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) return;
       if (Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) return;
       if (Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) return;
@@ -1198,7 +1243,14 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
       if (Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) return;
       if (Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) return;
       if (Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) return;
-      if (Array.isArray(filters.status) && filters.status.length > 0 && !filters.status.includes(row.status)) return;
+      // Status filter with case-insensitive comparison
+      if (Array.isArray(filters.status) && filters.status.length > 0) {
+        const rowStatusLower = (row.status || '').toLowerCase();
+        const statusMatches = filters.status.some(filterStatus => 
+          (filterStatus || '').toLowerCase() === rowStatusLower
+        );
+        if (!statusMatches) return;
+      }
       if (Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) return;
       if (Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) return;
       if (Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) return;
