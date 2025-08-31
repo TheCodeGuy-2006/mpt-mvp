@@ -267,6 +267,9 @@ function injectDescriptionHoverCSS() {
 injectDescriptionHoverCSS();
 import { kpis, calculatePipeline } from "./src/calc.js";
 
+// Make calculatePipeline available globally for debugging
+window.calculatePipeline = calculatePipeline;
+
 // Utility function for safe table scrolling
 function safeScrollToRow(table, rowIdentifier, position = "top", ifVisible = false) {
   if (!table || typeof table.scrollToRow !== 'function') {
@@ -2760,24 +2763,46 @@ function setupPlanningSave(table, rows) {
         if (typeof row.expectedLeads === "number") {
           let changed = false;
           
-          // Calculate MQL
-          const newMql = Math.round(row.expectedLeads * 0.1);
-          if (row.mqlForecast !== newMql) {
-            row.mqlForecast = newMql;
-            changed = true;
-          }
-          
-          // Calculate Pipeline directly
-          const newPipeline = calculatePipeline(row.expectedLeads);
-          if (row.pipelineForecast !== newPipeline) {
-            row.pipelineForecast = newPipeline;
-            changed = true;
+          // Check for special program types that use different calculation methods
+          if (row.programType === "In-Account Events (1:1)") {
+            // For In-Account Events (1:1): no leads, pipeline = 20x forecasted cost
+            const newLeads = 0;
+            const newMql = 0;
+            const newPipeline = row.forecastedCost ? Number(row.forecastedCost) * 20 : 0;
+            
+            if (row.expectedLeads !== newLeads) {
+              row.expectedLeads = newLeads;
+              changed = true;
+            }
+            if (row.mqlForecast !== newMql) {
+              row.mqlForecast = newMql;
+              changed = true;
+            }
+            if (row.pipelineForecast !== newPipeline) {
+              row.pipelineForecast = newPipeline;
+              changed = true;
+            }
+          } else {
+            // For regular programs: use leads-based calculation
+            const newMql = Math.round(row.expectedLeads * 0.1);
+            if (row.mqlForecast !== newMql) {
+              row.mqlForecast = newMql;
+              changed = true;
+            }
+            
+            // Calculate Pipeline directly
+            const newPipeline = calculatePipeline(row.expectedLeads);
+            if (row.pipelineForecast !== newPipeline) {
+              row.pipelineForecast = newPipeline;
+              changed = true;
+            }
           }
           
           if (changed) {
             row.__modified = true;
             // Update the master dataset with calculated values
             planningDataStore.updateRow(row.id, {
+              expectedLeads: row.expectedLeads,
               mqlForecast: row.mqlForecast,
               pipelineForecast: row.pipelineForecast,
               __modified: true
@@ -3070,22 +3095,58 @@ document
 
         // Process calculated fields in batches
         await processRowsInBatches(mappedRows, 15, (row) => {
-          // Special logic for In-Account Events (1:1): no leads, pipeline = 20x forecasted cost
-          if (row.programType === "In-Account Events (1:1)") {
-            row.expectedLeads = 0;
-            row.mqlForecast = 0;
-            row.pipelineForecast = row.forecastedCost
-              ? Number(row.forecastedCost) * 20
-              : 0;
-          } else if (
-            typeof row.expectedLeads === "number" ||
-            (!isNaN(row.expectedLeads) &&
-              row.expectedLeads !== undefined &&
-              row.expectedLeads !== "")
-          ) {
-            const leadCount = Number(row.expectedLeads);
-            row.mqlForecast = Math.round(leadCount * 0.1);
-            row.pipelineForecast = calculatePipeline(leadCount);
+          // Debug: Log the first few rows to understand data structure
+          if (mappedRows.indexOf(row) < 3) {
+            console.log(`[CSV Import Debug] Row ${mappedRows.indexOf(row) + 1}:`, {
+              programType: row.programType,
+              expectedLeads: row.expectedLeads,
+              forecastedCost: row.forecastedCost,
+              leadType: typeof row.expectedLeads,
+              costType: typeof row.forecastedCost
+            });
+          }
+          
+          // IMPORTANT: Preserve imported values, don't override them with calculations
+          // Check if expectedLeads and mqlForecast were imported from CSV
+          const hasImportedLeads = row.expectedLeads !== undefined && row.expectedLeads !== null && row.expectedLeads !== '';
+          const hasImportedMql = row.mqlForecast !== undefined && row.mqlForecast !== null && row.mqlForecast !== '';
+          
+          if (hasImportedLeads || hasImportedMql) {
+            // Preserve imported values - this overrides any automatic logic
+            console.log(`[CSV Import] Preserving imported values for row ${mappedRows.indexOf(row) + 1}: leads=${row.expectedLeads}, mql=${row.mqlForecast}`);
+            
+            // Ensure they're numbers
+            if (hasImportedLeads) row.expectedLeads = Number(row.expectedLeads) || 0;
+            if (hasImportedMql) row.mqlForecast = Number(row.mqlForecast) || 0;
+            
+            // Calculate pipeline based on program type
+            if (row.programType === "In-Account Events (1:1)") {
+              row.pipelineForecast = row.forecastedCost ? Number(row.forecastedCost) * 20 : 0;
+            } else {
+              row.pipelineForecast = calculatePipeline(Number(row.expectedLeads) || 0);
+            }
+          } else {
+            // No imported leads/MQL values, use automatic calculation
+            if (row.programType === "In-Account Events (1:1)") {
+              row.expectedLeads = 0;
+              row.mqlForecast = 0;
+              row.pipelineForecast = row.forecastedCost ? Number(row.forecastedCost) * 20 : 0;
+            } else if (row.forecastedCost && Number(row.forecastedCost) > 0) {
+              // Auto-calculate from cost for regular programs
+              const leadCount = Math.round(Number(row.forecastedCost) / 24);
+              row.expectedLeads = leadCount;
+              row.mqlForecast = Math.round(leadCount * 0.1);
+              row.pipelineForecast = calculatePipeline(leadCount);
+            }
+          }
+          
+          if (mappedRows.indexOf(row) < 3) {
+            console.log(`[CSV Import Debug] Final values for row ${mappedRows.indexOf(row) + 1}:`, {
+              leads: row.expectedLeads,
+              mql: row.mqlForecast,
+              pipeline: row.pipelineForecast,
+              preserved: hasImportedLeads || hasImportedMql
+            });
           }
         });
         
@@ -4492,3 +4553,487 @@ window.forceWireDeleteAllButton = function() {
     console.log("❌ Button not found!");
   }
 };
+
+// === CAMPAIGN CALCULATION DEBUGGING TOOLS ===
+// Debugging utility for campaign calculation issues
+function debugCampaignCalculations() {
+  console.log("🔍 DEBUGGING CAMPAIGN CALCULATIONS");
+  console.log("=====================================");
+  
+  // Check if planning data is available
+  if (!window.planningDataStore) {
+    console.error("❌ Planning data store not available");
+    return;
+  }
+  
+  const data = window.planningDataStore.getData();
+  console.log(`📊 Analyzing ${data.length} campaigns...`);
+  
+  let regularPrograms = 0;
+  let inAccountEvents = 0;
+  let calculationMismatches = 0;
+  let issues = [];
+  
+  data.forEach((row, index) => {
+    if (!row) return;
+    
+    const isInAccount = row.programType === "In-Account Events (1:1)";
+    const expectedLeads = Number(row.expectedLeads) || 0;
+    const forecastedCost = Number(row.forecastedCost) || 0;
+    const currentMql = Number(row.mqlForecast) || 0;
+    const currentPipeline = Number(row.pipelineForecast) || 0;
+    
+    if (isInAccount) {
+      inAccountEvents++;
+      
+      // For In-Account Events: should be 0 leads, 0 MQL, cost * 20 pipeline
+      const expectedMql = 0;
+      const expectedPipeline = forecastedCost * 20;
+      
+      if (expectedLeads !== 0 || currentMql !== expectedMql || currentPipeline !== expectedPipeline) {
+        calculationMismatches++;
+        issues.push({
+          index: index + 1,
+          id: row.id,
+          programType: row.programType,
+          issue: "In-Account Events calculation mismatch",
+          current: { leads: expectedLeads, mql: currentMql, pipeline: currentPipeline },
+          expected: { leads: 0, mql: expectedMql, pipeline: expectedPipeline },
+          cost: forecastedCost
+        });
+      }
+    } else {
+      regularPrograms++;
+      
+      // For regular programs: MQL = leads * 0.1, Pipeline = leads * 2400
+      const expectedMql = Math.round(expectedLeads * 0.1);
+      const expectedPipeline = Math.round(expectedLeads * 2400); // calculatePipeline formula
+      
+      if (currentMql !== expectedMql || currentPipeline !== expectedPipeline) {
+        calculationMismatches++;
+        issues.push({
+          index: index + 1,
+          id: row.id,
+          programType: row.programType || "Unknown",
+          issue: "Regular program calculation mismatch",
+          current: { leads: expectedLeads, mql: currentMql, pipeline: currentPipeline },
+          expected: { leads: expectedLeads, mql: expectedMql, pipeline: expectedPipeline }
+        });
+      }
+    }
+  });
+  
+  console.log(`📈 Summary:`);
+  console.log(`   Regular Programs: ${regularPrograms}`);
+  console.log(`   In-Account Events: ${inAccountEvents}`);
+  console.log(`   Calculation Mismatches: ${calculationMismatches}`);
+  
+  if (issues.length > 0) {
+    console.log(`\n❌ Found ${issues.length} calculation issues:`);
+    issues.forEach(issue => {
+      console.log(`\n   Row ${issue.index} (ID: ${issue.id})`);
+      console.log(`   Program Type: ${issue.programType}`);
+      console.log(`   Issue: ${issue.issue}`);
+      console.log(`   Current: Leads=${issue.current.leads}, MQL=${issue.current.mql}, Pipeline=$${issue.current.pipeline.toLocaleString()}`);
+      console.log(`   Expected: Leads=${issue.expected.leads}, MQL=${issue.expected.mql}, Pipeline=$${issue.expected.pipeline.toLocaleString()}`);
+      if (issue.cost !== undefined) {
+        console.log(`   Forecasted Cost: $${issue.cost.toLocaleString()}`);
+      }
+    });
+    
+    console.log(`\n🔧 To fix these issues, you can run: fixCalculationIssues()`);
+  } else {
+    console.log(`\n✅ All calculations appear correct!`);
+  }
+  
+  // Check for data type issues
+  console.log(`\n🔍 Checking data types...`);
+  const typeIssues = [];
+  data.slice(0, 5).forEach((row, index) => {
+    if (!row) return;
+    
+    const leadsType = typeof row.expectedLeads;
+    const costType = typeof row.forecastedCost;
+    const mqlType = typeof row.mqlForecast;
+    const pipelineType = typeof row.pipelineForecast;
+    
+    if (leadsType !== 'number' || costType !== 'number' || mqlType !== 'number' || pipelineType !== 'number') {
+      typeIssues.push({
+        index: index + 1,
+        id: row.id,
+        types: { leads: leadsType, cost: costType, mql: mqlType, pipeline: pipelineType }
+      });
+    }
+  });
+  
+  if (typeIssues.length > 0) {
+    console.log(`❌ Found data type issues in first 5 rows:`);
+    typeIssues.forEach(issue => {
+      console.log(`   Row ${issue.index}: leads(${issue.types.leads}), cost(${issue.types.cost}), mql(${issue.types.mql}), pipeline(${issue.types.pipeline})`);
+    });
+  } else {
+    console.log(`✅ Data types look correct (checked first 5 rows)`);
+  }
+  
+  return { regularPrograms, inAccountEvents, calculationMismatches, issues, typeIssues };
+}
+
+function fixCalculationIssues() {
+  console.log("🔧 CHECKING CALCULATION ISSUES (Preserving Imported Values)");
+  console.log("===============================================================");
+  
+  if (!window.planningDataStore) {
+    console.error("❌ Planning data store not available");
+    return;
+  }
+  
+  // Define calculatePipeline locally if not available globally
+  const calcPipeline = window.calculatePipeline || function(leads) {
+    return Math.round((leads || 0) * 2400);
+  };
+  
+  const data = window.planningDataStore.getData();
+  let fixedCount = 0;
+  
+  data.forEach(row => {
+    if (!row) return;
+    
+    const isInAccount = row.programType === "In-Account Events (1:1)";
+    const expectedLeads = Number(row.expectedLeads) || 0;
+    const forecastedCost = Number(row.forecastedCost) || 0;
+    
+    let needsUpdate = false;
+    const updates = {};
+    
+    // NEW LOGIC: Only fix calculations if values appear to be auto-generated errors
+    // Do NOT override imported/manually set values
+    
+    if (isInAccount) {
+      // For In-Account Events: Only fix if values are clearly wrong calculations
+      // Allow imported values (like 300 leads for special In-Account Events) to remain
+      
+      // Only force to 0 if the current values seem like calculation errors
+      // (e.g., if leads exactly match cost/24 formula, it's likely auto-calculated)
+      const autoCalculatedLeads = Math.round(forecastedCost / 24);
+      const isLikelyAutoCalculated = (expectedLeads === autoCalculatedLeads && expectedLeads > 0);
+      
+      if (isLikelyAutoCalculated) {
+        // This looks like auto-calculated, revert to proper In-Account Events logic
+        console.log(`🔧 Reverting auto-calculated In-Account Event ${row.id}: ${expectedLeads} leads → 0 (imported values preserved elsewhere)`);
+        updates.expectedLeads = 0;
+        updates.mqlForecast = 0;
+        needsUpdate = true;
+      }
+      
+      // Always fix pipeline for In-Account Events
+      const correctPipeline = forecastedCost * 20;
+      if (Math.abs(row.pipelineForecast - correctPipeline) > 1) {
+        updates.pipelineForecast = correctPipeline;
+        needsUpdate = true;
+        console.log(`🔧 Fixing In-Account Event Pipeline ${row.id}: ${row.pipelineForecast} → ${correctPipeline} (cost: ${forecastedCost})`);
+      }
+    } else {
+      // For regular programs: Only fix pipeline calculations, preserve imported leads/MQL
+      
+      // Fix MQL only if it's clearly wrong (not 10% of leads)
+      const correctMql = Math.round(expectedLeads * 0.1);
+      if (expectedLeads > 0 && Math.abs(row.mqlForecast - correctMql) > 0.1) {
+        updates.mqlForecast = correctMql;
+        needsUpdate = true;
+        console.log(`🔧 Fixing MQL calculation for ${row.id}: ${row.mqlForecast} → ${correctMql} (leads: ${expectedLeads})`);
+      }
+      
+      // Fix pipeline only if it's clearly wrong (not 2400 * leads)
+      const correctPipeline = calcPipeline(expectedLeads);
+      if (expectedLeads > 0 && Math.abs(row.pipelineForecast - correctPipeline) > 100) {
+        updates.pipelineForecast = correctPipeline;
+        needsUpdate = true;
+        console.log(`🔧 Fixing Pipeline calculation for ${row.id}: ${row.pipelineForecast} → ${correctPipeline} (leads: ${expectedLeads})`);
+      }
+    }
+    
+    if (needsUpdate) {
+      updates.__modified = true;
+      window.planningDataStore.updateRow(row.id, updates);
+      fixedCount++;
+    }
+  });
+  
+  console.log(`✅ Fixed ${fixedCount} calculation issues (imported values preserved)`);
+  
+  // Refresh the table display
+  if (window.planningTableInstance && fixedCount > 0) {
+    const refreshedData = window.planningDataStore.getFilteredData();
+    window.planningTableInstance.replaceData(refreshedData);
+    console.log(`🔄 Table refreshed with corrected data`);
+    
+    // Also trigger ROI updates if available
+    if (window.roiModule && typeof window.roiModule.updateRoiTotalSpend === 'function') {
+      setTimeout(() => {
+        window.roiModule.updateRoiTotalSpend();
+        console.log(`🔄 ROI metrics updated`);
+      }, 100);
+    }
+  }
+  
+  return fixedCount;
+}
+
+// Make the proper calculatePipeline function globally available
+window.calculatePipeline = function(cost, programType, row) {
+  // Convert cost to number
+  const forecastedCost = Number(cost) || 0;
+  
+  if (forecastedCost <= 0) {
+    return {
+      expectedLeads: 0,
+      mqlForecast: 0,
+      pipelineForecast: 0
+    };
+  }
+  
+  // PRIORITY 1: Always preserve imported/manually set values
+  // If the row already has expectedLeads or mqlForecast values, preserve them
+  // This ensures imported CSV data overrides any automatic calculation logic
+  if (row && (row.expectedLeads !== undefined || row.mqlForecast !== undefined)) {
+    const preservedLeads = Number(row.expectedLeads) || 0;
+    const preservedMql = Number(row.mqlForecast) || 0;
+    
+    // Only use preserved values if they seem intentionally set (not just default 0s)
+    // Exception: For In-Account Events, 0 can be intentional, so always preserve for them
+    const isInAccount = programType === "In-Account Events (1:1)";
+    const hasIntentionalValues = preservedLeads > 0 || preservedMql > 0 || isInAccount;
+    
+    if (hasIntentionalValues) {
+      // Calculate pipeline based on program type but preserve leads/MQL
+      let pipelineForecast;
+      if (isInAccount) {
+        pipelineForecast = forecastedCost * 20; // In-Account Events: cost * 20
+      } else {
+        pipelineForecast = Math.round(preservedLeads * 2400); // Regular programs: leads * 2400
+      }
+      
+      return {
+        expectedLeads: preservedLeads,
+        mqlForecast: preservedMql,
+        pipelineForecast: pipelineForecast
+      };
+    }
+  }
+  
+  // PRIORITY 2: Automatic calculation only if no imported values exist
+  // Check if this is an In-Account Events program
+  const isInAccount = programType === "In-Account Events (1:1)";
+  
+  if (isInAccount) {
+    // Standard In-Account Events: 0 leads, 0 MQL, cost * 20 pipeline
+    return {
+      expectedLeads: 0,
+      mqlForecast: 0,
+      pipelineForecast: forecastedCost * 20
+    };
+  } else {
+    // For regular programs: reverse calculate leads from cost, then apply standard formulas
+    // This is only used as a fallback when no imported values exist
+    const expectedLeads = Math.round(forecastedCost / 24); // Rough estimate: $24 per lead
+    const mqlForecast = Math.round(expectedLeads * 0.1);
+    const pipelineForecast = Math.round(expectedLeads * 2400);
+    
+    return {
+      expectedLeads: expectedLeads,
+      mqlForecast: mqlForecast,
+      pipelineForecast: pipelineForecast
+    };
+  }
+};
+
+// Make debugging functions available globally
+window.debugCampaignCalculations = debugCampaignCalculations;
+window.fixCalculationIssues = fixCalculationIssues;
+
+// Add chart refresh function for debugging
+window.refreshRoiChart = function() {
+  console.log('Refreshing ROI chart...');
+  if (window.roiModule && window.roiModule.updateRoiCharts) {
+    window.roiModule.updateRoiCharts();
+  } else if (typeof updateRoiCharts === 'function') {
+    updateRoiCharts();
+  } else {
+    console.log('Chart update function not found');
+  }
+};
+
+// Add function to check total expected leads
+window.checkExpectedLeads = function() {
+  let totalExpectedLeads = 0;
+  let totalMqlForecast = 0;
+  let planningData = window.planningDataStore ? window.planningDataStore.getData() : (window.planningTableInstance ? window.planningTableInstance.getData() : window.planningRows);
+  
+  if (planningData && Array.isArray(planningData)) {
+    console.log(`Total planning rows: ${planningData.length}`);
+    
+    planningData.forEach((row, index) => {
+      let leads = row.expectedLeads || 0;
+      let mql = row.mqlForecast || 0;
+      
+      if (typeof leads === "string") leads = Number(leads.toString().replace(/[^\d.-]/g, ""));
+      if (typeof mql === "string") mql = Number(mql.toString().replace(/[^\d.-]/g, ""));
+      
+      if (!isNaN(leads)) totalExpectedLeads += Number(leads);
+      if (!isNaN(mql)) totalMqlForecast += Number(mql);
+      
+      // Show first few rows for debugging
+      if (index < 5) {
+        console.log(`Row ${index}: ${row.campaignName} - expectedLeads: ${row.expectedLeads}, mqlForecast: ${row.mqlForecast}`);
+      }
+    });
+    
+    console.log(`Total Expected Leads: ${totalExpectedLeads}`);
+    console.log(`Total MQL Forecast: ${totalMqlForecast}`);
+    console.log('Expected chart values - Leads: 4075, MQL: 407.5');
+    console.log(`Chart showing correct values: Leads ${totalExpectedLeads === 4075 ? '✓' : '✗'}, MQL ${totalMqlForecast === 407.5 ? '✓' : '✗'}`);
+  } else {
+    console.log('No planning data found');
+  }
+  
+  return { totalExpectedLeads, totalMqlForecast };
+};
+
+// Add detailed chart aggregation debugging
+window.debugChartAggregation = function() {
+  console.log('🔍 Debugging chart aggregation...');
+  
+  let planningData = window.planningDataStore ? window.planningDataStore.getData() : (window.planningTableInstance ? window.planningTableInstance.getData() : window.planningRows);
+  
+  if (!planningData || !Array.isArray(planningData)) {
+    console.log('❌ No planning data found');
+    return;
+  }
+  
+  console.log(`📊 Total planning rows: ${planningData.length}`);
+  
+  // Manual calculation like the chart does
+  let manualLeads = 0;
+  let manualMql = 0;
+  let processedRows = 0;
+  let skippedRows = 0;
+  
+  planningData.forEach((row, index) => {
+    let leads = row.expectedLeads || 0;
+    let mql = row.mqlForecast || 0;
+    
+    // Parse strings like the chart does
+    if (typeof leads === "string") leads = Number(leads.toString().replace(/[^\d.-]/g, ""));
+    if (typeof mql === "string") mql = Number(mql.toString().replace(/[^\d.-]/g, ""));
+    
+    // Check if values are valid numbers
+    if (!isNaN(leads) && !isNaN(mql)) {
+      manualLeads += Number(leads);
+      manualMql += Number(mql);
+      processedRows++;
+      
+      // Show details for rows with values
+      if (leads > 0 || mql > 0) {
+        console.log(`Row ${index}: ${row.campaignName || 'Unnamed'} - leads: ${leads}, MQL: ${mql}`);
+      }
+    } else {
+      skippedRows++;
+      console.log(`Row ${index}: SKIPPED - invalid values - leads: ${row.expectedLeads}, MQL: ${row.mqlForecast}`);
+    }
+  });
+  
+  console.log(`\n📈 Manual aggregation results:`);
+  console.log(`   Processed rows: ${processedRows}`);
+  console.log(`   Skipped rows: ${skippedRows}`);
+  console.log(`   Manual total leads: ${manualLeads}`);
+  console.log(`   Manual total MQL: ${manualMql}`);
+  console.log(`   Expected leads: 4075`);
+  console.log(`   Expected MQL: 407.5`);
+  console.log(`   Leads match: ${manualLeads === 4075 ? '✅' : '❌'} (difference: ${4075 - manualLeads})`);
+  console.log(`   MQL match: ${manualMql === 407.5 ? '✅' : '❌'} (difference: ${407.5 - manualMql})`);
+  
+  // Compare with chart logic
+  console.log(`\n🔄 Running chart aggregation simulation...`);
+  
+  // Get current ROI filter state (like the chart does)
+  const filters = window.roiModule ? window.roiModule.getFilterState ? window.roiModule.getFilterState() : {} : {};
+  console.log('Chart filters:', filters);
+  
+  let chartLeads = 0;
+  let chartMql = 0;
+  let chartProcessed = 0;
+  let chartFiltered = 0;
+  
+  // Helper to normalize quarter (copied from chart)
+  const normalizeQuarter = (quarter) => {
+    if (!quarter) return '';
+    return quarter.replace(/\s*-\s*/g, ' ').trim();
+  };
+  
+  planningData.forEach((row, index) => {
+    // Apply same filters as chart
+    if (Array.isArray(filters.region) && filters.region.length > 0 && !filters.region.includes(row.region)) {
+      chartFiltered++;
+      return;
+    }
+    if (Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) {
+      chartFiltered++;
+      return;
+    }
+    if (Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) {
+      chartFiltered++;
+      return;
+    }
+    if (Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) {
+      chartFiltered++;
+      return;
+    }
+    if (Array.isArray(filters.status) && filters.status.length > 0) {
+      const rowStatusLower = (row.status || '').toLowerCase();
+      const statusMatches = filters.status.some(filterStatus => 
+        (filterStatus || '').toLowerCase() === rowStatusLower
+      );
+      if (!statusMatches) {
+        chartFiltered++;
+        return;
+      }
+    }
+    if (Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) {
+      chartFiltered++;
+      return;
+    }
+    if (Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) {
+      chartFiltered++;
+      return;
+    }
+    if (Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) {
+      chartFiltered++;
+      return;
+    }
+
+    chartProcessed++;
+    let fMql = row.mqlForecast || 0;
+    if (typeof fMql === "string") fMql = Number(fMql.toString().replace(/[^\d.-]/g, ""));
+    if (!isNaN(fMql)) chartMql += Number(fMql);
+
+    let fLeads = row.expectedLeads || 0;
+    if (typeof fLeads === "string") fLeads = Number(fLeads.toString().replace(/[^\d.-]/g, ""));
+    if (!isNaN(fLeads)) chartLeads += Number(fLeads);
+  });
+  
+  console.log(`\n� Chart simulation results:`);
+  console.log(`   Chart processed rows: ${chartProcessed}`);
+  console.log(`   Chart filtered out: ${chartFiltered}`);
+  console.log(`   Chart total leads: ${chartLeads}`);
+  console.log(`   Chart total MQL: ${chartMql}`);
+  console.log(`   Chart matches manual: ${chartLeads === manualLeads ? '✅' : '❌'}`);
+  
+  return { manualLeads, manualMql, chartLeads, chartMql, processedRows, chartProcessed };
+};
+
+console.log("�🛠️ Campaign calculation debugging tools loaded!");
+console.log("Run debugCampaignCalculations() to analyze issues");
+console.log("Run fixCalculationIssues() to fix calculation problems");
+console.log("Run refreshRoiChart() to refresh the chart");
+console.log("Run checkExpectedLeads() to verify total expected leads/MQL");
+console.log("Run debugChartAggregation() to debug chart aggregation logic");

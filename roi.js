@@ -444,15 +444,15 @@ function updateRoiTotalSpend() {
     }
     if (!isNaN(pipelineVal)) totalPipeline += Number(pipelineVal);
 
-    // Total leads calculation
-    let leadsVal = row.actualLeads;
+    // Total leads calculation - use expected leads from planning data
+    let leadsVal = row.expectedLeads || row.actualLeads || 0; // Prefer forecast, fallback to actual
     if (typeof leadsVal === "string") {
       leadsVal = Number(leadsVal.toString().replace(/[^\d.-]/g, ""));
     }
     if (!isNaN(leadsVal)) totalLeads += Number(leadsVal);
 
-    // Total MQL calculation - use only actual MQLs from execution data
-    let mqlVal = row.actualMQLs || 0; // Only use actual MQLs, not forecast
+    // Total MQL calculation - use forecasted MQLs from planning data  
+    let mqlVal = row.mqlForecast || row.actualMQLs || 0; // Prefer forecast, fallback to actual
     if (typeof mqlVal === "string") {
       mqlVal = Number(mqlVal.toString().replace(/[^\d.-]/g, ""));
     }
