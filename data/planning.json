@@ -15,7 +15,7 @@
     "status": "SHIPPED",
     "pipelineForecast": 80000,
     "digitalMotions": false,
-    "id": "imp_1756614877442_k7tqqnuiq",
+    "id": "imp_1756630923496_bannrt2q8",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -35,7 +35,7 @@
     "status": "Planning",
     "pipelineForecast": 0,
     "digitalMotions": false,
-    "id": "imp_1756614877442_8yoz162cg",
+    "id": "imp_1756630923496_018w5oga9",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -55,7 +55,7 @@
     "status": "Planning",
     "pipelineForecast": 240000,
     "digitalMotions": false,
-    "id": "imp_1756614877442_taxvwuvzf",
+    "id": "imp_1756630923496_dp1t56gv6",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -75,7 +75,7 @@
     "status": "Planning",
     "pipelineForecast": 600000,
     "digitalMotions": false,
-    "id": "imp_1756614877451_ww7u7jli9",
+    "id": "imp_1756630923504_62umcw9b5",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -95,7 +95,7 @@
     "status": "Planning",
     "pipelineForecast": 1440000,
     "digitalMotions": false,
-    "id": "imp_1756614877451_ak8eor93f",
+    "id": "imp_1756630923504_0s6dg6liq",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -115,7 +115,7 @@
     "status": "Planning",
     "pipelineForecast": 80000,
     "digitalMotions": false,
-    "id": "imp_1756614877457_ik0evkrsj",
+    "id": "imp_1756630923515_w83rx0q4s",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -135,7 +135,7 @@
     "status": "Planning",
     "pipelineForecast": 80000,
     "digitalMotions": false,
-    "id": "imp_1756614877458_9rdjq6lf1",
+    "id": "imp_1756630923515_8iodnfewl",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -155,7 +155,7 @@
     "status": "Planning",
     "pipelineForecast": 320000,
     "digitalMotions": false,
-    "id": "imp_1756614877458_plt6bog6z",
+    "id": "imp_1756630923515_8ctlwbqb4",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -175,7 +175,7 @@
     "status": "Planning",
     "pipelineForecast": 600000,
     "digitalMotions": false,
-    "id": "imp_1756614877458_4brbgnurt",
+    "id": "imp_1756630923515_xtf44p6qq",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -194,8 +194,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877458_f80hef84h",
+    "digitalMotions": false,
+    "id": "imp_1756630923515_qmihdmrfg",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -214,8 +214,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877475_wqd9dhxtm",
+    "digitalMotions": false,
+    "id": "imp_1756630923531_f4zyvckoh",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -234,8 +234,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877475_gi7fk25nh",
+    "digitalMotions": false,
+    "id": "imp_1756630923531_fklcdmkd6",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -254,8 +254,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877475_r7zejhufn",
+    "digitalMotions": false,
+    "id": "imp_1756630923531_36unp3nop",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -275,7 +275,7 @@
     "status": "Planning",
     "pipelineForecast": 480000,
     "digitalMotions": false,
-    "id": "imp_1756614877475_27m046v2e",
+    "id": "imp_1756630923531_uzlwg0g88",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -294,8 +294,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877475_kwkhblg7m",
+    "digitalMotions": false,
+    "id": "imp_1756630923531_pw017zqo3",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -315,7 +315,7 @@
     "status": "Planning",
     "pipelineForecast": 240000,
     "digitalMotions": false,
-    "id": "imp_1756614877490_ter7o6dq2",
+    "id": "imp_1756630923548_oyi7xsbdb",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -334,8 +334,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877490_imp9xowf4",
+    "digitalMotions": false,
+    "id": "imp_1756630923548_t8yfw3w0h",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -354,8 +354,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877490_x4s6vgmdd",
+    "digitalMotions": false,
+    "id": "imp_1756630923548_ylg10c26h",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -374,8 +374,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877490_czy821wp4",
+    "digitalMotions": false,
+    "id": "imp_1756630923548_3ft6sxy7n",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -394,8 +394,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877490_3mjjydec8",
+    "digitalMotions": false,
+    "id": "imp_1756630923548_muc9aq1ak",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -415,7 +415,7 @@
     "status": "Planning",
     "pipelineForecast": 36000,
     "digitalMotions": false,
-    "id": "imp_1756614877508_qdh92uslo",
+    "id": "imp_1756630923564_iwrq5c9nv",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -435,7 +435,7 @@
     "status": "Planning",
     "pipelineForecast": 720000,
     "digitalMotions": false,
-    "id": "imp_1756614877508_jy6v1bp0a",
+    "id": "imp_1756630923564_mxf8um63g",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -455,7 +455,7 @@
     "status": "Planning",
     "pipelineForecast": 480000,
     "digitalMotions": false,
-    "id": "imp_1756614877508_tanu7jd05",
+    "id": "imp_1756630923564_xlb88t0hr",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -474,8 +474,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877508_1jie7kk46",
+    "digitalMotions": false,
+    "id": "imp_1756630923564_j7o66u563",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -495,7 +495,7 @@
     "status": "Planning",
     "pipelineForecast": 120000,
     "digitalMotions": false,
-    "id": "imp_1756614877508_iadmftvu2",
+    "id": "imp_1756630923564_7txlrvbrk",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -515,7 +515,7 @@
     "status": "Planning",
     "pipelineForecast": 80000,
     "digitalMotions": false,
-    "id": "imp_1756614877524_cdsuej15f",
+    "id": "imp_1756630923581_sq2d7ois0",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -535,7 +535,7 @@
     "status": "Planning",
     "pipelineForecast": 192000,
     "digitalMotions": false,
-    "id": "imp_1756614877524_8j4k468jf",
+    "id": "imp_1756630923581_mjc7ffyrb",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -555,7 +555,7 @@
     "status": "Planning",
     "pipelineForecast": 600000,
     "digitalMotions": false,
-    "id": "imp_1756614877524_ql8bdqtqf",
+    "id": "imp_1756630923581_npbxaiiqo",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -575,7 +575,7 @@
     "status": "Planning",
     "pipelineForecast": 480000,
     "digitalMotions": false,
-    "id": "imp_1756614877524_nyp82gjcp",
+    "id": "imp_1756630923581_6nvwa1ujc",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -594,8 +594,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877524_xs6h3si3u",
+    "digitalMotions": false,
+    "id": "imp_1756630923581_2ze33aq12",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -615,7 +615,7 @@
     "status": "Planning",
     "pipelineForecast": 36000,
     "digitalMotions": false,
-    "id": "imp_1756614877541_mr8zbeg4q",
+    "id": "imp_1756630923598_fjcevj81h",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -635,7 +635,7 @@
     "status": "Planning",
     "pipelineForecast": 36000,
     "digitalMotions": false,
-    "id": "imp_1756614877541_ds9nuluhv",
+    "id": "imp_1756630923598_qe94rhkfn",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -655,7 +655,7 @@
     "status": "Planning",
     "pipelineForecast": 240000,
     "digitalMotions": false,
-    "id": "imp_1756614877541_afec8kobl",
+    "id": "imp_1756630923598_pmstd0ack",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -675,7 +675,7 @@
     "status": "Planning",
     "pipelineForecast": 480000,
     "digitalMotions": false,
-    "id": "imp_1756614877541_1awidvsih",
+    "id": "imp_1756630923598_ew0qlen0q",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -695,7 +695,7 @@
     "status": "Planning",
     "pipelineForecast": 600000,
     "digitalMotions": false,
-    "id": "imp_1756614877541_ktk6tm4n9",
+    "id": "imp_1756630923598_u4wsuppc2",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -715,7 +715,7 @@
     "status": "Planning",
     "pipelineForecast": 720000,
     "digitalMotions": false,
-    "id": "imp_1756614877557_jrraesgwj",
+    "id": "imp_1756630923614_i3xgskhkx",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -735,7 +735,7 @@
     "status": "Planning",
     "pipelineForecast": 240000,
     "digitalMotions": false,
-    "id": "imp_1756614877557_lh1eh14iq",
+    "id": "imp_1756630923614_ww081mdeo",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -755,7 +755,7 @@
     "status": "Planning",
     "pipelineForecast": 480000,
     "digitalMotions": false,
-    "id": "imp_1756614877557_252iocrci",
+    "id": "imp_1756630923614_d8kinptqo",
     "__modified": true,
     "__unsavedPriority": 0
   },
@@ -774,8 +774,8 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": true,
-    "id": "imp_1756614877557_9xwapmlz3",
+    "digitalMotions": false,
+    "id": "imp_1756630923614_jtfwpd25r",
     "__modified": true,
     "__unsavedPriority": 0
   }
