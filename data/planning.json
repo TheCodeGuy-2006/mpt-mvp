@@ -83,7 +83,10 @@
     "digitalMotions": false,
     "id": "imp_1756630923504_62umcw9b5",
     "__modified": false,
-    "__unsavedPriority": 0
+    "__unsavedPriority": 0,
+    "poRaised": "Yes",
+    "actualCost": 11000,
+    "actualLeads": 300
   },
   {
     "programType": "3P Sponsored Events",
