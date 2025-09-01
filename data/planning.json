@@ -106,7 +106,11 @@
     "digitalMotions": false,
     "id": "imp_1756630923504_0s6dg6liq",
     "__modified": false,
-    "__unsavedPriority": 0
+    "__unsavedPriority": 0,
+    "actualLeads": 600,
+    "actualMQLs": 50,
+    "actualCost": 8000,
+    "poRaised": "Yes"
   },
   {
     "programType": "In-Account Events (1:1)",
