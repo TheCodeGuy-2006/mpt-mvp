@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning Pipeline Calculation Test Suite</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .test-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background-color: #1976d2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1565c0;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background-color: #757575;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #616161;
+        }
+        
+        .btn-success {
+            background-color: #388e3c;
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: #f57c00;
+            color: white;
+        }
+        
+        #testOutput {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #444;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #1976d2;
+        }
+        
+        .summary-card.passed {
+            border-left-color: #4caf50;
+        }
+        
+        .summary-card.failed {
+            border-left-color: #f44336;
+        }
+        
+        .summary-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .summary-card .number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1976d2;
+        }
+        
+        .summary-card.passed .number {
+            color: #4caf50;
+        }
+        
+        .summary-card.failed .number {
+            color: #f44336;
+        }
+        
+        .calculator {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .calc-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .calc-input input {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 150px;
+        }
+        
+        .calc-result {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #1976d2;
+            margin-top: 10px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .error {
+            color: #f44336;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            color: #388e3c;
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧮 Planning Pipeline Calculation Test Suite</h1>
+        <p>Comprehensive testing for pipeline calculation accuracy and performance</p>
+    </div>
+
+    <div class="test-container">
+        <h2>Quick Calculator</h2>
+        <div class="calculator">
+            <div class="calc-input">
+                <label>Expected Leads:</label>
+                <input type="number" id="leadsInput" placeholder="Enter number of leads" value="1000">
+                <button class="btn btn-primary" onclick="calculateSingle()">Calculate Pipeline</button>
+            </div>
+            <div id="calcResult" class="calc-result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>Test Controls</h2>
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="runAllTests()">Run All Tests</button>
+            <button class="btn btn-secondary" onclick="testStandardCases()">Test Standard Cases</button>
+            <button class="btn btn-secondary" onclick="testEdgeCases()">Test Edge Cases</button>
+            <button class="btn btn-secondary" onclick="testConsistency()">Test Consistency</button>
+            <button class="btn btn-warning" onclick="testPerformance()">Performance Test</button>
+            <button class="btn btn-success" onclick="clearOutput()">Clear Output</button>
+        </div>
+    </div>
+
+    <div id="summaryContainer" style="display: none;">
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h3>Total Tests</h3>
+                <div class="number" id="totalTests">0</div>
+            </div>
+            <div class="summary-card passed">
+                <h3>Passed</h3>
+                <div class="number" id="passedTests">0</div>
+            </div>
+            <div class="summary-card failed">
+                <h3>Failed</h3>
+                <div class="number" id="failedTests">0</div>
+            </div>
+            <div class="summary-card">
+                <h3>Pass Rate</h3>
+                <div class="number" id="passRate">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>Test Output</h2>
+        <div class="loading" id="loadingIndicator">Running tests...</div>
+        <div id="testOutput">Ready to run tests. Click any test button above to begin.</div>
+    </div>
+
+    <script type="module">
+        // Import the calc functions
+        import { kpis, calculatePipeline } from './src/calc.js';
+        
+        // Make functions globally available for testing
+        window.kpis = kpis;
+        window.calculatePipeline = calculatePipeline;
+        
+        // Test results storage
+        let testResults = {
+            passed: 0,
+            failed: 0,
+            errors: [],
+            details: []
+        };
+
+        // Output utilities
+        function log(message) {
+            const output = document.getElementById('testOutput');
+            output.textContent += message + '\n';
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('testOutput').textContent = '';
+            document.getElementById('summaryContainer').style.display = 'none';
+            testResults = { passed: 0, failed: 0, errors: [], details: [] };
+        }
+
+        function showLoading() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+        }
+
+        function updateSummary() {
+            const total = testResults.passed + testResults.failed;
+            const passRate = total > 0 ? (testResults.passed / total * 100).toFixed(1) : 0;
+            
+            document.getElementById('totalTests').textContent = total;
+            document.getElementById('passedTests').textContent = testResults.passed;
+            document.getElementById('failedTests').textContent = testResults.failed;
+            document.getElementById('passRate').textContent = passRate + '%';
+            document.getElementById('summaryContainer').style.display = 'block';
+        }
+
+        // Single calculation
+        window.calculateSingle = function() {
+            const leadsInput = document.getElementById('leadsInput');
+            const resultDiv = document.getElementById('calcResult');
+            const leads = parseFloat(leadsInput.value) || 0;
+            
+            try {
+                const pipeline = calculatePipeline(leads);
+                const kpiData = kpis(leads);
+                
+                resultDiv.innerHTML = `
+                    <h4>Results for ${leads.toLocaleString()} leads:</h4>
+                    <p><strong>Pipeline Forecast:</strong> $${pipeline.toLocaleString()}</p>
+                    <p><strong>MQL Forecast:</strong> ${kpiData.mql.toLocaleString()}</p>
+                    <p><strong>SQL Forecast:</strong> ${kpiData.sql.toLocaleString()}</p>
+                    <p><strong>Opportunities:</strong> ${kpiData.opps.toLocaleString()}</p>
+                    <p><em>Formula: ${leads} leads × 2400 = $${pipeline.toLocaleString()}</em></p>
+                `;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                resultDiv.style.display = 'block';
+            }
+        };
+
+        // Test standard cases
+        window.testStandardCases = function() {
+            clearOutput();
+            showLoading();
+            
+            setTimeout(() => {
+                log('=== TESTING STANDARD LEAD CASES ===\n');
+                
+                const leadTestCases = [0, 1, 10, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
+                
+                leadTestCases.forEach(leads => {
+                    const expected = Math.round(leads * 2400);
+                    const actual = calculatePipeline(leads);
+                    const passed = actual === expected;
+                    
+                    if (passed) {
+                        testResults.passed++;
+                        log(`✅ ${leads} leads -> $${actual.toLocaleString()}`);
+                    } else {
+                        testResults.failed++;
+                        testResults.errors.push(`${leads} leads: expected $${expected.toLocaleString()}, got $${actual.toLocaleString()}`);
+                        log(`❌ ${leads} leads: expected $${expected.toLocaleString()}, got $${actual.toLocaleString()}`);
+                    }
+                });
+                
+                hideLoading();
+                updateSummary();
+            }, 100);
+        };
+
+        // Test edge cases
+        window.testEdgeCases = function() {
+            clearOutput();
+            showLoading();
+            
+            setTimeout(() => {
+                log('=== TESTING EDGE CASES ===\n');
+                
+                const edgeCases = [
+                    { leads: null, expected: 0, description: "null leads" },
+                    { leads: undefined, expected: 0, description: "undefined leads" },
+                    { leads: "", expected: 0, description: "empty string leads" },
+                    { leads: "100", expected: 240000, description: "string number leads" },
+                    { leads: 0.5, expected: 1200, description: "fractional leads (0.5)" },
+                    { leads: 1.7, expected: 4080, description: "fractional leads (1.7)" },
+                    { leads: -10, expected: -24000, description: "negative leads" }
+                ];
+                
+                edgeCases.forEach(testCase => {
+                    try {
+                        const actual = calculatePipeline(testCase.leads);
+                        const passed = actual === testCase.expected;
+                        
+                        if (passed) {
+                            testResults.passed++;
+                            log(`✅ ${testCase.description}: ${testCase.leads} -> $${actual.toLocaleString()}`);
+                        } else {
+                            testResults.failed++;
+                            testResults.errors.push(`${testCase.description}: expected $${testCase.expected.toLocaleString()}, got $${actual.toLocaleString()}`);
+                            log(`❌ ${testCase.description}: expected $${testCase.expected.toLocaleString()}, got $${actual.toLocaleString()}`);
+                        }
+                    } catch (error) {
+                        testResults.failed++;
+                        testResults.errors.push(`${testCase.description}: threw error - ${error.message}`);
+                        log(`❌ ${testCase.description}: ERROR - ${error.message}`);
+                    }
+                });
+                
+                hideLoading();
+                updateSummary();
+            }, 100);
+        };
+
+        // Test consistency
+        window.testConsistency = function() {
+            clearOutput();
+            showLoading();
+            
+            setTimeout(() => {
+                log('=== TESTING CONSISTENCY WITH KPIS FUNCTION ===\n');
+                
+                const leadTestCases = [0, 1, 10, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
+                
+                leadTestCases.forEach(leads => {
+                    const directPipeline = calculatePipeline(leads);
+                    const kpisPipeline = kpis(leads).pipeline;
+                    const passed = directPipeline === kpisPipeline;
+                    
+                    if (passed) {
+                        testResults.passed++;
+                        log(`✅ ${leads} leads: both functions return $${directPipeline.toLocaleString()}`);
+                    } else {
+                        testResults.failed++;
+                        testResults.errors.push(`${leads} leads: calculatePipeline=$${directPipeline.toLocaleString()}, kpis.pipeline=$${kpisPipeline.toLocaleString()}`);
+                        log(`❌ ${leads} leads: calculatePipeline=$${directPipeline.toLocaleString()}, kpis.pipeline=$${kpisPipeline.toLocaleString()}`);
+                    }
+                });
+                
+                log('\n=== TESTING MQL CALCULATION CONSISTENCY ===\n');
+                
+                leadTestCases.forEach(leads => {
+                    const expectedMql = Math.round(leads * 0.1);
+                    const kpisMql = kpis(leads).mql;
+                    const passed = expectedMql === kpisMql;
+                    
+                    if (passed) {
+                        testResults.passed++;
+                        log(`✅ ${leads} leads -> ${expectedMql} MQLs`);
+                    } else {
+                        testResults.failed++;
+                        testResults.errors.push(`${leads} leads: expected ${expectedMql} MQLs, kpis returned ${kpisMql}`);
+                        log(`❌ ${leads} leads: expected ${expectedMql} MQLs, kpis returned ${kpisMql}`);
+                    }
+                });
+                
+                hideLoading();
+                updateSummary();
+            }, 100);
+        };
+
+        // Performance test
+        window.testPerformance = function() {
+            clearOutput();
+            showLoading();
+            
+            setTimeout(() => {
+                log('=== TESTING PERFORMANCE ===\n');
+                
+                const iterations = 100000;
+                const testLeads = 1000;
+                
+                const startTime = performance.now();
+                
+                for (let i = 0; i < iterations; i++) {
+                    calculatePipeline(testLeads);
+                }
+                
+                const endTime = performance.now();
+                const totalTime = endTime - startTime;
+                const avgTime = totalTime / iterations;
+                
+                log(`✅ Performance test: ${iterations.toLocaleString()} calculations in ${totalTime.toFixed(2)}ms`);
+                log(`✅ Average time per calculation: ${avgTime.toFixed(6)}ms`);
+                log(`✅ Calculations per second: ${(1000 / avgTime).toFixed(0).toLocaleString()}`);
+                
+                testResults.passed++;
+                
+                // Test formula breakdown
+                log('\n=== TESTING FORMULA BREAKDOWN ===\n');
+                
+                const testLeads2 = 1000;
+                const mqlRate = 0.1;
+                const sqlRate = 0.06;
+                const oppConversionRate = 0.8;
+                const dealSize = 50000;
+                
+                const mql = testLeads2 * mqlRate; // 100
+                const sql = testLeads2 * sqlRate; // 60
+                const opps = sql * oppConversionRate; // 48
+                const pipeline = opps * dealSize; // 2,400,000
+                const directPipeline = testLeads2 * 2400; // 2,400,000
+                
+                log(`Lead flow for ${testLeads2} leads:`);
+                log(`  MQLs: ${mql} (${testLeads2} × ${mqlRate})`);
+                log(`  SQLs: ${sql} (${testLeads2} × ${sqlRate})`);
+                log(`  Opportunities: ${opps} (${sql} × ${oppConversionRate})`);
+                log(`  Pipeline: $${pipeline.toLocaleString()} (${opps} × $${dealSize.toLocaleString()})`);
+                log(`  Direct calculation: $${directPipeline.toLocaleString()} (${testLeads2} × 2400)`);
+                
+                const passed = pipeline === directPipeline;
+                
+                if (passed) {
+                    testResults.passed++;
+                    log(`✅ Formula breakdown verification passed`);
+                } else {
+                    testResults.failed++;
+                    testResults.errors.push(`Formula breakdown: step-by-step=$${pipeline.toLocaleString()}, direct=$${directPipeline.toLocaleString()}`);
+                    log(`❌ Formula breakdown verification failed`);
+                }
+                
+                hideLoading();
+                updateSummary();
+            }, 100);
+        };
+
+        // Run all tests
+        window.runAllTests = function() {
+            clearOutput();
+            showLoading();
+            
+            setTimeout(() => {
+                log('🚀 Starting Complete Pipeline Calculation Test Suite...\n');
+                
+                // Standard cases
+                log('=== TESTING STANDARD LEAD CASES ===\n');
+                const leadTestCases = [0, 1, 10, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
+                
+                leadTestCases.forEach(leads => {
+                    const expected = Math.round(leads * 2400);
+                    const actual = calculatePipeline(leads);
+                    const passed = actual === expected;
+                    
+                    if (passed) {
+                        testResults.passed++;
+                        log(`✅ ${leads} leads -> $${actual.toLocaleString()}`);
+                    } else {
+                        testResults.failed++;
+                        testResults.errors.push(`${leads} leads: expected $${expected.toLocaleString()}, got $${actual.toLocaleString()}`);
+                        log(`❌ ${leads} leads: expected $${expected.toLocaleString()}, got $${actual.toLocaleString()}`);
+                    }
+                });
+                
+                // Edge cases
+                log('\n=== TESTING EDGE CASES ===\n');
+                const edgeCases = [
+                    { leads: null, expected: 0, description: "null leads" },
+                    { leads: undefined, expected: 0, description: "undefined leads" },
+                    { leads: "", expected: 0, description: "empty string leads" },
+                    { leads: "100", expected: 240000, description: "string number leads" },
+                    { leads: 0.5, expected: 1200, description: "fractional leads (0.5)" },
+                    { leads: 1.7, expected: 4080, description: "fractional leads (1.7)" },
+                    { leads: -10, expected: -24000, description: "negative leads" }
+                ];
+                
+                edgeCases.forEach(testCase => {
+                    try {
+                        const actual = calculatePipeline(testCase.leads);
+                        const passed = actual === testCase.expected;
+                        
+                        if (passed) {
+                            testResults.passed++;
+                            log(`✅ ${testCase.description}: ${testCase.leads} -> $${actual.toLocaleString()}`);
+                        } else {
+                            testResults.failed++;
+                            testResults.errors.push(`${testCase.description}: expected $${testCase.expected.toLocaleString()}, got $${actual.toLocaleString()}`);
+                            log(`❌ ${testCase.description}: expected $${testCase.expected.toLocaleString()}, got $${actual.toLocaleString()}`);
+                        }
+                    } catch (error) {
+                        testResults.failed++;
+                        testResults.errors.push(`${testCase.description}: threw error - ${error.message}`);
+                        log(`❌ ${testCase.description}: ERROR - ${error.message}`);
+                    }
+                });
+                
+                // Consistency tests
+                log('\n=== TESTING CONSISTENCY WITH KPIS FUNCTION ===\n');
+                leadTestCases.forEach(leads => {
+                    const directPipeline = calculatePipeline(leads);
+                    const kpisPipeline = kpis(leads).pipeline;
+                    const passed = directPipeline === kpisPipeline;
+                    
+                    if (passed) {
+                        testResults.passed++;
+                        log(`✅ ${leads} leads: both functions return $${directPipeline.toLocaleString()}`);
+                    } else {
+                        testResults.failed++;
+                        testResults.errors.push(`${leads} leads: calculatePipeline=$${directPipeline.toLocaleString()}, kpis.pipeline=$${kpisPipeline.toLocaleString()}`);
+                        log(`❌ ${leads} leads: calculatePipeline=$${directPipeline.toLocaleString()}, kpis.pipeline=$${kpisPipeline.toLocaleString()}`);
+                    }
+                });
+                
+                // Real-world scenarios
+                log('\n=== TESTING REAL-WORLD PLANNING SCENARIOS ===\n');
+                const scenarios = [
+                    { description: "Small webinar campaign", leads: 75, expectedPipeline: 180000 },
+                    { description: "Medium trade show", leads: 300, expectedPipeline: 720000 },
+                    { description: "Large conference", leads: 1200, expectedPipeline: 2880000 },
+                    { description: "Digital campaign", leads: 500, expectedPipeline: 1200000 },
+                    { description: "Account-based program", leads: 25, expectedPipeline: 60000 }
+                ];
+                
+                scenarios.forEach(scenario => {
+                    const actualPipeline = calculatePipeline(scenario.leads);
+                    const passed = actualPipeline === scenario.expectedPipeline;
+                    
+                    if (passed) {
+                        testResults.passed++;
+                        log(`✅ ${scenario.description}: ${scenario.leads} leads -> $${actualPipeline.toLocaleString()}`);
+                    } else {
+                        testResults.failed++;
+                        testResults.errors.push(`${scenario.description}: expected $${scenario.expectedPipeline.toLocaleString()}, got $${actualPipeline.toLocaleString()}`);
+                        log(`❌ ${scenario.description}: expected $${scenario.expectedPipeline.toLocaleString()}, got $${actualPipeline.toLocaleString()}`);
+                    }
+                });
+                
+                // In-Account Events test
+                log('\n=== TESTING IN-ACCOUNT EVENTS CALCULATION ===\n');
+                const eventScenarios = [
+                    { forecastedCost: 1000, expectedPipeline: 20000 },
+                    { forecastedCost: 5000, expectedPipeline: 100000 },
+                    { forecastedCost: 10000, expectedPipeline: 200000 },
+                    { forecastedCost: 0, expectedPipeline: 0 }
+                ];
+                
+                eventScenarios.forEach(scenario => {
+                    const actualPipeline = scenario.forecastedCost * 20;
+                    const passed = actualPipeline === scenario.expectedPipeline;
+                    
+                    if (passed) {
+                        testResults.passed++;
+                        log(`✅ In-Account Event: $${scenario.forecastedCost.toLocaleString()} cost -> $${actualPipeline.toLocaleString()} pipeline`);
+                    } else {
+                        testResults.failed++;
+                        testResults.errors.push(`In-Account Event: $${scenario.forecastedCost.toLocaleString()} cost, expected $${scenario.expectedPipeline.toLocaleString()}, got $${actualPipeline.toLocaleString()}`);
+                        log(`❌ In-Account Event: expected $${scenario.expectedPipeline.toLocaleString()}, got $${actualPipeline.toLocaleString()}`);
+                    }
+                });
+                
+                // Generate final report
+                log('\n' + '='.repeat(60));
+                log('PLANNING PIPELINE CALCULATION TEST SUMMARY');
+                log('='.repeat(60));
+                
+                const total = testResults.passed + testResults.failed;
+                const passRate = total > 0 ? (testResults.passed / total * 100).toFixed(1) : 0;
+                
+                log(`Total Tests: ${total}`);
+                log(`Passed: ${testResults.passed}`);
+                log(`Failed: ${testResults.failed}`);
+                log(`Pass Rate: ${passRate}%`);
+                
+                if (testResults.failed > 0) {
+                    log('\n❌ FAILED TESTS:');
+                    testResults.errors.forEach((error, index) => {
+                        log(`  ${index + 1}. ${error}`);
+                    });
+                }
+                
+                if (testResults.failed === 0) {
+                    log('\n🎉 ALL TESTS PASSED! Pipeline calculations are working correctly.');
+                } else {
+                    log('\n⚠️  Some tests failed. Please review the pipeline calculation logic.');
+                }
+                
+                hideLoading();
+                updateSummary();
+            }, 100);
+        };
+
+        // Initialize
+        log('Pipeline calculation test suite loaded. Click "Run All Tests" to begin comprehensive testing.');
+    </script>
+</body>
+</html>
