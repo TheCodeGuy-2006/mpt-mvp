@@ -16,8 +16,10 @@
     "pipelineForecast": 80000,
     "digitalMotions": false,
     "id": "imp_1756630923496_bannrt2q8",
-    "__modified": true,
-    "__unsavedPriority": 0
+    "__modified": false,
+    "__unsavedPriority": 0,
+    "poRaised": "(Clear)",
+    "actualCost": ""
   },
   {
     "programType": "Targeted Paid Ads & Content Syndication",
@@ -36,7 +38,7 @@
     "pipelineForecast": 0,
     "digitalMotions": false,
     "id": "imp_1756630923496_018w5oga9",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -56,8 +58,11 @@
     "pipelineForecast": 240000,
     "digitalMotions": false,
     "id": "imp_1756630923496_dp1t56gv6",
-    "__modified": true,
-    "__unsavedPriority": 0
+    "__modified": false,
+    "__unsavedPriority": 0,
+    "poRaised": "Yes",
+    "actualCost": 2000,
+    "actualLeads": 120
   },
   {
     "programType": "3P Sponsored Events",
@@ -76,7 +81,7 @@
     "pipelineForecast": 600000,
     "digitalMotions": false,
     "id": "imp_1756630923504_62umcw9b5",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -96,7 +101,7 @@
     "pipelineForecast": 1440000,
     "digitalMotions": false,
     "id": "imp_1756630923504_0s6dg6liq",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -116,7 +121,7 @@
     "pipelineForecast": 80000,
     "digitalMotions": false,
     "id": "imp_1756630923515_w83rx0q4s",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -136,7 +141,7 @@
     "pipelineForecast": 80000,
     "digitalMotions": false,
     "id": "imp_1756630923515_8iodnfewl",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -150,13 +155,13 @@
     "owner": "Beverly Leung",
     "description": "In Account Days - Accounts TBD",
     "forecastedCost": 16000,
-    "expectedLeads": 0,
-    "mqlForecast": 0,
+    "expectedLeads": 300,
+    "mqlForecast": 30,
     "status": "Planning",
     "pipelineForecast": 320000,
     "digitalMotions": false,
     "id": "imp_1756630923515_8ctlwbqb4",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -176,7 +181,7 @@
     "pipelineForecast": 600000,
     "digitalMotions": false,
     "id": "imp_1756630923515_xtf44p6qq",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -194,9 +199,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923515_qmihdmrfg",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -214,9 +219,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923531_f4zyvckoh",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -234,9 +239,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923531_fklcdmkd6",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -254,9 +259,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923531_36unp3nop",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -276,7 +281,7 @@
     "pipelineForecast": 480000,
     "digitalMotions": false,
     "id": "imp_1756630923531_uzlwg0g88",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -294,9 +299,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923531_pw017zqo3",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -316,7 +321,7 @@
     "pipelineForecast": 240000,
     "digitalMotions": false,
     "id": "imp_1756630923548_oyi7xsbdb",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -334,9 +339,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923548_t8yfw3w0h",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -354,9 +359,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923548_ylg10c26h",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -374,9 +379,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923548_3ft6sxy7n",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -394,9 +399,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923548_muc9aq1ak",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -411,12 +416,12 @@
     "description": "14 Aug, 2025 : GitHub AU State Government Showcase Series | Virtua- Australia State Government Showcase Series",
     "forecastedCost": 0,
     "expectedLeads": 15,
-    "mqlForecast": 2,
+    "mqlForecast": 1.5,
     "status": "Planning",
     "pipelineForecast": 36000,
     "digitalMotions": false,
     "id": "imp_1756630923564_iwrq5c9nv",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -436,7 +441,7 @@
     "pipelineForecast": 720000,
     "digitalMotions": false,
     "id": "imp_1756630923564_mxf8um63g",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -456,7 +461,7 @@
     "pipelineForecast": 480000,
     "digitalMotions": false,
     "id": "imp_1756630923564_xlb88t0hr",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -474,9 +479,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923564_j7o66u563",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -496,7 +501,7 @@
     "pipelineForecast": 120000,
     "digitalMotions": false,
     "id": "imp_1756630923564_7txlrvbrk",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -516,7 +521,7 @@
     "pipelineForecast": 80000,
     "digitalMotions": false,
     "id": "imp_1756630923581_sq2d7ois0",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -536,7 +541,7 @@
     "pipelineForecast": 192000,
     "digitalMotions": false,
     "id": "imp_1756630923581_mjc7ffyrb",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -556,7 +561,7 @@
     "pipelineForecast": 600000,
     "digitalMotions": false,
     "id": "imp_1756630923581_npbxaiiqo",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -576,7 +581,7 @@
     "pipelineForecast": 480000,
     "digitalMotions": false,
     "id": "imp_1756630923581_6nvwa1ujc",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -594,9 +599,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923581_2ze33aq12",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -611,12 +616,12 @@
     "description": "Perth Government Showcase Series",
     "forecastedCost": 1500,
     "expectedLeads": 15,
-    "mqlForecast": 2,
+    "mqlForecast": 1.5,
     "status": "Planning",
     "pipelineForecast": 36000,
     "digitalMotions": false,
     "id": "imp_1756630923598_fjcevj81h",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -631,12 +636,12 @@
     "description": "QLD Government Showcase Series",
     "forecastedCost": 1500,
     "expectedLeads": 15,
-    "mqlForecast": 2,
+    "mqlForecast": 1.5,
     "status": "Planning",
     "pipelineForecast": 36000,
     "digitalMotions": false,
     "id": "imp_1756630923598_qe94rhkfn",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -656,7 +661,7 @@
     "pipelineForecast": 240000,
     "digitalMotions": false,
     "id": "imp_1756630923598_pmstd0ack",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -676,7 +681,7 @@
     "pipelineForecast": 480000,
     "digitalMotions": false,
     "id": "imp_1756630923598_ew0qlen0q",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -696,7 +701,7 @@
     "pipelineForecast": 600000,
     "digitalMotions": false,
     "id": "imp_1756630923598_u4wsuppc2",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -716,7 +721,7 @@
     "pipelineForecast": 720000,
     "digitalMotions": false,
     "id": "imp_1756630923614_i3xgskhkx",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -736,7 +741,7 @@
     "pipelineForecast": 240000,
     "digitalMotions": false,
     "id": "imp_1756630923614_ww081mdeo",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -756,7 +761,7 @@
     "pipelineForecast": 480000,
     "digitalMotions": false,
     "id": "imp_1756630923614_d8kinptqo",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   },
   {
@@ -774,9 +779,9 @@
     "mqlForecast": 0,
     "status": "Planning",
     "pipelineForecast": 0,
-    "digitalMotions": false,
+    "digitalMotions": true,
     "id": "imp_1756630923614_jtfwpd25r",
-    "__modified": true,
+    "__modified": false,
     "__unsavedPriority": 0
   }
 ]
