@@ -232,10 +232,34 @@ function setupExecutionSave(table, rows) {
             console.log("🔄 PHASE 2: Syncing execution changes back to planning...");
             masterData.forEach(row => {
               if (row.id) {
-                window.planningDataStore.updateRow(row.id, row);
+                // Only sync planning-relevant fields back to planning data store
+                const planningFields = {
+                  // Core planning fields
+                  id: row.id,
+                  campaignName: row.campaignName,
+                  region: row.region,
+                  quarter: row.quarter,
+                  country: row.country,
+                  owner: row.owner,
+                  status: row.status,
+                  programType: row.programType,
+                  strategicPillars: row.strategicPillars,
+                  revenuePlay: row.revenuePlay,
+                  description: row.description,
+                  startDate: row.startDate,
+                  endDate: row.endDate,
+                  forecastedCost: row.forecastedCost,
+                  expectedLeads: row.expectedLeads,
+                  mqlForecast: row.mqlForecast,
+                  pipelineForecast: row.pipelineForecast,
+                  digitalMotions: row.digitalMotions,
+                  // Don't sync execution-specific fields like actualMQLs, actualLeads, etc.
+                  __modified: row.__modified
+                };
+                window.planningDataStore.updateRow(row.id, planningFields);
               }
             });
-            console.log("✅ PHASE 2: Planning data store updated with execution changes");
+            console.log("✅ PHASE 2: Planning data store updated with execution changes (planning fields only)");
           }
           
           // Refresh the table display with updated data from data store
@@ -486,7 +510,7 @@ class ExecutionDataStore {
 
   /**
    * Sync with planning data store
-   * This ensures execution data reflects current planning state
+   * This ensures execution data reflects current planning state while preserving execution-specific fields
    */
   syncWithPlanning() {
     if (!window.planningDataStore) {
@@ -499,14 +523,53 @@ class ExecutionDataStore {
       console.log(`🔄 PHASE 1: Syncing execution data with planning (${planningData.length} planning rows)`);
     }
     
-    // Update execution master data to match planning
-    // This ensures that execution data stays current with planning changes
-    this.replaceAllData(planningData);
+    // Instead of replacing all data, merge planning changes while preserving execution fields
+    const mergedData = planningData.map(planningRow => {
+      // Find existing execution row
+      const existingExecutionRow = this.masterData.find(execRow => execRow.id === planningRow.id);
+      
+      if (existingExecutionRow) {
+        // Preserve execution-specific fields while updating from planning
+        return {
+          ...planningRow, // Start with planning data
+          // Preserve execution-specific actual values
+          actualLeads: existingExecutionRow.actualLeads,
+          actualMQLs: existingExecutionRow.actualMQLs,
+          actualSQL: existingExecutionRow.actualSQL,
+          actualOpportunities: existingExecutionRow.actualOpportunities,
+          actualPipeline: existingExecutionRow.actualPipeline,
+          actualCost: existingExecutionRow.actualCost,
+          // Preserve any other execution fields that might exist
+          __modified: existingExecutionRow.__modified || false
+        };
+      } else {
+        // New row from planning - no execution data to preserve
+        return {
+          ...planningRow,
+          // Initialize execution fields
+          actualLeads: null,
+          actualMQLs: null,
+          actualSQL: null,
+          actualOpportunities: null,
+          actualPipeline: null,
+          actualCost: null,
+          __modified: false
+        };
+      }
+    });
+    
+    // Update execution master data with merged data
+    this.replaceAllData(mergedData);
     
     this.logOperation('syncWithPlanning', { 
       planningRowCount: planningData.length,
+      preservedExecutionFields: true,
       timestamp: new Date().toISOString()
     });
+    
+    if (window.DEBUG_MODE) {
+      console.log(`✅ PHASE 1: Synced with planning while preserving execution fields`);
+    }
     
     return true;
   }
@@ -1406,10 +1469,34 @@ function initExecutionGrid(rows) {
             console.log("🔄 PHASE 2: Syncing execution changes back to planning...");
             masterData.forEach(row => {
               if (row.id) {
-                window.planningDataStore.updateRow(row.id, row);
+                // Only sync planning-relevant fields back to planning data store
+                const planningFields = {
+                  // Core planning fields
+                  id: row.id,
+                  campaignName: row.campaignName,
+                  region: row.region,
+                  quarter: row.quarter,
+                  country: row.country,
+                  owner: row.owner,
+                  status: row.status,
+                  programType: row.programType,
+                  strategicPillars: row.strategicPillars,
+                  revenuePlay: row.revenuePlay,
+                  description: row.description,
+                  startDate: row.startDate,
+                  endDate: row.endDate,
+                  forecastedCost: row.forecastedCost,
+                  expectedLeads: row.expectedLeads,
+                  mqlForecast: row.mqlForecast,
+                  pipelineForecast: row.pipelineForecast,
+                  digitalMotions: row.digitalMotions,
+                  // Don't sync execution-specific fields like actualMQLs, actualLeads, etc.
+                  __modified: row.__modified
+                };
+                window.planningDataStore.updateRow(row.id, planningFields);
               }
             });
-            console.log("✅ PHASE 2: Planning data store updated with execution changes");
+            console.log("✅ PHASE 2: Planning data store updated with execution changes (planning fields only)");
           }
           
           alert(

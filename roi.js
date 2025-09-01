@@ -349,7 +349,7 @@ function hasFilterStateChanged() {
   return hasChanged;
 }
 
-// Get current filter state
+// Get current filter state including universal search filters
 function getFilterState() {
   // Helper function to get selected values from multiselect
   const getSelectedValues = (elementId) => {
@@ -360,7 +360,8 @@ function getFilterState() {
     return [];
   };
 
-  return {
+  // Get dropdown filter values
+  const dropdownFilters = {
     region: getSelectedValues("roiRegionFilter"),
     quarter: getSelectedValues("roiQuarterFilter"),
     country: getSelectedValues("roiCountryFilter"),
@@ -370,6 +371,26 @@ function getFilterState() {
     strategicPillars: getSelectedValues("roiStrategicPillarsFilter"),
     revenuePlay: getSelectedValues("roiRevenuePlayFilter"),
   };
+
+  // Combine dropdown filters with universal search filters
+  const combinedFilters = {
+    region: [...new Set([...dropdownFilters.region, ...(Array.from(universalRoiSearchFilters.get('region') || []))])],
+    quarter: [...new Set([...dropdownFilters.quarter, ...(Array.from(universalRoiSearchFilters.get('quarter') || []))])],
+    country: [...new Set([...dropdownFilters.country, ...(Array.from(universalRoiSearchFilters.get('country') || []))])],
+    owner: [...new Set([...dropdownFilters.owner, ...(Array.from(universalRoiSearchFilters.get('owner') || []))])],
+    status: [...new Set([...dropdownFilters.status, ...(Array.from(universalRoiSearchFilters.get('status') || []))])],
+    programType: [...new Set([...dropdownFilters.programType, ...(Array.from(universalRoiSearchFilters.get('programType') || []))])],
+    strategicPillars: [...new Set([...dropdownFilters.strategicPillars, ...(Array.from(universalRoiSearchFilters.get('strategicPillars') || []))])],
+    revenuePlay: [...new Set([...dropdownFilters.revenuePlay, ...(Array.from(universalRoiSearchFilters.get('revenuePlay') || []))])],
+  };
+
+  if (window.DEBUG_FILTERS) {
+    console.log('[ROI] getFilterState - dropdown filters:', dropdownFilters);
+    console.log('[ROI] getFilterState - universal search filters:', Object.fromEntries(universalRoiSearchFilters));
+    console.log('[ROI] getFilterState - combined filters:', combinedFilters);
+  }
+
+  return combinedFilters;
 }
 
 // Optimized ROI Total Spend and Pipeline Calculation
@@ -2031,6 +2052,7 @@ const roiModule = {
   preCachePlanningData, // New function for pre-caching data
   ensureRoiDataTableInitialized, // New function for lazy data table initialization
   getFilterState, // Export filter state function for charts
+  applyRoiSearchFilters, // Export universal search filter function
   forceRefreshRoiComponents, // Force refresh function for troubleshooting
   waitForRoiElementsAndInitialize, // Wait for DOM elements before initialization
   debugRoiState, // Debug function to troubleshoot initialization issues

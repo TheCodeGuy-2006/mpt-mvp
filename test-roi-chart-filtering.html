@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROI Chart Filtering Test</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      background: #f5f5f5;
+    }
+    .container { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      background: white; 
+      padding: 20px; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .test-section { 
+      margin: 20px 0; 
+      padding: 15px; 
+      border: 1px solid #ddd; 
+      border-radius: 5px; 
+    }
+    .test-title { 
+      font-weight: bold; 
+      color: #333; 
+      margin-bottom: 10px; 
+    }
+    .filter-controls {
+      display: flex;
+      gap: 15px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .filter-group label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #555;
+    }
+    select {
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      min-width: 120px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #005a99;
+    }
+    .results {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .success { color: #007700; }
+    .error { color: #cc0000; }
+    .warning { color: #cc6600; }
+    #universalSearchInput {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 ROI Chart Filtering Test</h1>
+    <p>This test validates that ROI charts respond correctly to both dropdown filters and universal search filters.</p>
+
+    <div class="test-section">
+      <div class="test-title">Test Controls</div>
+      
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label>Region Filter:</label>
+          <select id="testRegionFilter" multiple>
+            <option value="NA">NA</option>
+            <option value="EMEA">EMEA</option>
+            <option value="APAC">APAC</option>
+            <option value="SAARC">SAARC</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Status Filter:</label>
+          <select id="testStatusFilter" multiple>
+            <option value="Planning">Planning</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Universal Search:</label>
+          <input type="text" id="universalSearchInput" placeholder="Search campaigns...">
+        </div>
+      </div>
+      
+      <button onclick="testDropdownFiltering()">Test Dropdown Filtering</button>
+      <button onclick="testUniversalSearchFiltering()">Test Universal Search</button>
+      <button onclick="testCombinedFiltering()">Test Combined Filtering</button>
+      <button onclick="testChartUpdates()">Test Chart Updates</button>
+      <button onclick="clearAllTests()">Clear Results</button>
+      
+      <div id="testResults" class="results"></div>
+    </div>
+  </div>
+
+  <script>
+    let testLog = [];
+    
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = `[${timestamp}] ${message}`;
+      testLog.push(logEntry);
+      
+      const resultsDiv = document.getElementById('testResults');
+      const logDiv = document.createElement('div');
+      logDiv.className = type;
+      logDiv.textContent = logEntry;
+      resultsDiv.appendChild(logDiv);
+      resultsDiv.scrollTop = resultsDiv.scrollHeight;
+    }
+    
+    function clearAllTests() {
+      testLog = [];
+      document.getElementById('testResults').innerHTML = '';
+      log('Test results cleared', 'success');
+    }
+    
+    function testDropdownFiltering() {
+      log('=== Testing Dropdown Filtering ===', 'success');
+      
+      // Check if ROI module exists
+      if (!window.roiModule) {
+        log('❌ window.roiModule not found', 'error');
+        return;
+      }
+      
+      if (!window.roiModule.getFilterState) {
+        log('❌ getFilterState function not found', 'error');
+        return;
+      }
+      
+      log('✅ ROI module and getFilterState found', 'success');
+      
+      // Test getting current filter state
+      try {
+        const currentFilters = window.roiModule.getFilterState();
+        log(`✅ Current filter state: ${JSON.stringify(currentFilters)}`, 'success');
+        
+        // Validate filter structure
+        const expectedKeys = ['region', 'quarter', 'country', 'owner', 'status', 'programType', 'strategicPillars', 'revenuePlay'];
+        const missingKeys = expectedKeys.filter(key => !currentFilters.hasOwnProperty(key));
+        
+        if (missingKeys.length === 0) {
+          log('✅ Filter state has all expected properties', 'success');
+        } else {
+          log(`⚠️ Missing filter properties: ${missingKeys.join(', ')}`, 'warning');
+        }
+        
+        // Test if filters are arrays
+        Object.entries(currentFilters).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            log(`✅ ${key} filter is array with ${value.length} items`, 'success');
+          } else {
+            log(`❌ ${key} filter is not an array: ${typeof value}`, 'error');
+          }
+        });
+        
+      } catch (error) {
+        log(`❌ Error getting filter state: ${error.message}`, 'error');
+      }
+    }
+    
+    function testUniversalSearchFiltering() {
+      log('=== Testing Universal Search Filtering ===', 'success');
+      
+      // Check if universal search is initialized
+      if (!window.roiUniversalSearch) {
+        log('❌ window.roiUniversalSearch not found', 'error');
+        return;
+      }
+      
+      log('✅ ROI universal search found', 'success');
+      
+      // Test applying mock universal search filters
+      const mockSearchFilters = {
+        region: ['SAARC'],
+        status: ['Planning']
+      };
+      
+      try {
+        window.roiModule.applyRoiSearchFilters(mockSearchFilters);
+        log(`✅ Applied mock universal search filters: ${JSON.stringify(mockSearchFilters)}`, 'success');
+        
+        // Check if filters were applied
+        setTimeout(() => {
+          const updatedFilters = window.roiModule.getFilterState();
+          log(`✅ Updated filter state: ${JSON.stringify(updatedFilters)}`, 'success');
+          
+          // Verify universal search filters are included
+          if (updatedFilters.region.includes('SAARC')) {
+            log('✅ Universal search region filter applied correctly', 'success');
+          } else {
+            log('❌ Universal search region filter not found in filter state', 'error');
+          }
+          
+          if (updatedFilters.status.includes('Planning')) {
+            log('✅ Universal search status filter applied correctly', 'success');
+          } else {
+            log('❌ Universal search status filter not found in filter state', 'error');
+          }
+        }, 200);
+        
+      } catch (error) {
+        log(`❌ Error applying universal search filters: ${error.message}`, 'error');
+      }
+    }
+    
+    function testCombinedFiltering() {
+      log('=== Testing Combined Filtering (Dropdown + Universal Search) ===', 'success');
+      
+      // This would test if both dropdown and universal search filters work together
+      // Implementation would depend on having actual dropdown controls
+      log('ℹ️ Combined filtering test requires actual dropdown implementation', 'warning');
+    }
+    
+    function testChartUpdates() {
+      log('=== Testing Chart Update Triggers ===', 'success');
+      
+      // Check if chart functions exist
+      const chartFunctions = [
+        'renderRoiByRegionChart',
+        'renderRoiByProgramTypeChart', 
+        'renderRoiByQuarterChart'
+      ];
+      
+      chartFunctions.forEach(funcName => {
+        if (window[funcName]) {
+          log(`✅ ${funcName} function found`, 'success');
+        } else {
+          log(`❌ ${funcName} function not found`, 'error');
+        }
+      });
+      
+      // Test updateRoiCharts function
+      if (window.roiModule && window.roiModule.updateRoiCharts) {
+        log('✅ updateRoiCharts function found', 'success');
+        
+        try {
+          // Trigger chart update
+          window.roiModule.updateRoiCharts();
+          log('✅ Chart update triggered successfully', 'success');
+        } catch (error) {
+          log(`❌ Error triggering chart update: ${error.message}`, 'error');
+        }
+      } else {
+        log('❌ updateRoiCharts function not found', 'error');
+      }
+    }
+    
+    // Auto-run basic tests when page loads
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        log('🚀 Starting ROI Chart Filtering Tests...', 'success');
+        testDropdownFiltering();
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
