@@ -680,7 +680,17 @@ function initPlanningWorker() {
             break;
           case 'APPLY_FILTERS_COMPLETE':
             if (planningTableInstance) {
-              planningTableInstance.setData(data);
+              // Clean data to ensure no conflicting row number fields
+              const cleanedData = data.map(row => {
+                const cleanRow = { ...row };
+                // Remove any existing row number fields that might conflict
+                delete cleanRow.rowNumber;
+                delete cleanRow.sequentialNumber;
+                delete cleanRow.rowNum;
+                delete cleanRow['#'];
+                return cleanRow;
+              });
+              planningTableInstance.setData(cleanedData);
             }
             hideLoadingIndicator();
             break;
@@ -1458,8 +1468,19 @@ function initPlanningGrid(rows) {
     rows = [];
   }
   
+  // Clean data to ensure no conflicting row number fields
+  const cleanedRows = rows.map(row => {
+    const cleanRow = { ...row };
+    // Remove any existing row number fields that might conflict
+    delete cleanRow.rowNumber;
+    delete cleanRow.sequentialNumber;
+    delete cleanRow.rowNum;
+    delete cleanRow['#'];
+    return cleanRow;
+  });
+  
   // Initialize data store
-  planningDataStore.setData(rows);
+  planningDataStore.setData(cleanedRows);
   
   // Notify other modules that planning data is ready
   if (rows && rows.length > 0) {
@@ -1544,7 +1565,7 @@ function initPlanningGrid(rows) {
       
       // Chunk 2: Create table with basic config (medium task)
       planningTableInstance = new Tabulator("#planningGrid", {
-        data: rows,
+        data: cleanedRows,
         reactiveData: true,
         selectableRows: true, // Allow multi-row selection
         layout: "fitData", // Back to basic fitData for natural column sizing
@@ -1641,18 +1662,28 @@ function initPlanningGrid(rows) {
           // Sequential number column
           {
             title: "#",
-            field: "rowNumber",
+            field: "sequentialNumber", // Use a different field name to avoid conflicts
             formatter: function (cell) {
               const row = cell.getRow();
               const table = row.getTable();
-              const allRows = table.getRows();
-              const index = allRows.indexOf(row);
+              const allRows = table.getRows("visible"); // Only count visible rows
+              let index = -1;
+              // Find the actual index of this row
+              for (let i = 0; i < allRows.length; i++) {
+                if (allRows[i] === row) {
+                  index = i;
+                  break;
+                }
+              }
               return index + 1;
             },
             width: 50,
             hozAlign: "center",
             headerSort: false,
             frozen: true,
+            download: false, // Don't include in CSV exports
+            cellClick: false, // Disable cell editing
+            editor: false, // Disable editing
           },
           // Select row button (circle)
           {
