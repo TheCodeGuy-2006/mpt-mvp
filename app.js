@@ -865,7 +865,14 @@ function handleHashChange() {
     if (window.tabManager && typeof window.tabManager.switchToTab === 'function') {
       const hash = location.hash || "#planning";
       const tabId = hash.replace('#', '');
-      window.tabManager.switchToTab(tabId);
+      
+      // Only switch via TabManager if the current tab is different
+      // This prevents duplicate route() calls when TabManager already switched the tab
+      if (window.tabManager.currentTab !== tabId) {
+        window.tabManager.switchToTab(tabId);
+      } else if (window.DEBUG_MODE) {
+        console.log('🔄 [HASHCHANGE] Skipping TabManager switch - already on tab:', tabId);
+      }
     } else {
       debouncedRoute();
     }
@@ -950,12 +957,24 @@ function showSection(hash) {
         roiChartTabsContainer.style.visibility = 'visible';
       }
     }
+    
+    // Special handling for budgets tab - show both budgets sections
+    if (sectionId === "view-budgets") {
+      const budgetSetupSection = document.getElementById("view-budget-setup");
+      if (budgetSetupSection) {
+        budgetSetupSection.style.display = 'block';
+      }
+    }
   }
 }
 
 // Optimized route function with intelligent caching and reduced operations
 function route() {
   const currentHash = location.hash;
+  
+  if (window.DEBUG_MODE) {
+    console.log('🚀 [ROUTE] Called with hash:', currentHash);
+  }
   
   // Hide ROI chart tabs container by default for ALL tabs except ROI
   const roiChartTabsContainer = document.getElementById('roiChartTabsContainer');
@@ -1004,7 +1023,7 @@ function route() {
   if (cachedTime && (now - cachedTime) < 2000) {
     // Only update visual state, skip heavy operations
     updateActiveTab(hash);
-    showSection(hash);
+    // Note: Don't call showSection(hash) here as it interferes with budget-specific section handling below
     currentTab = hash;
     return;
   }
@@ -1022,14 +1041,18 @@ function route() {
   
   // Update visual state immediately for responsive feel
   updateActiveTab(hash);
-  showSection(hash);
   
   // Hide all sections first
   document.querySelectorAll("section").forEach((sec) => {
     sec.style.display = "none";
   });
+  
   // Show correct section(s) for the active tab
-  if (hash === "#budgets") {const budgetsSection = document.getElementById("view-budgets");
+  if (hash === "#budgets") {
+    if (window.DEBUG_MODE) {
+      console.log('🏦 [ROUTE] Handling budgets tab - showing both sections');
+    }
+    const budgetsSection = document.getElementById("view-budgets");
     const budgetSetupSection = document.getElementById("view-budget-setup");if (budgetsSection) budgetsSection.style.display = "block";
     if (budgetSetupSection) budgetSetupSection.style.display = "block";
     if (window.budgetsTableInstance) {
@@ -1063,24 +1086,92 @@ function route() {
       }, 0);
     }
     // --- Ensure Annual Budget Plan unlock logic is initialized every time tab is shown ---
-    if (
-      window.budgetsModule &&
-      typeof window.budgetsModule.initializeAnnualBudgetPlan === "function"
-    ) {// Use the latest budgets data if available, otherwise pass an empty array
-      let budgetsData = [];
-      try {
-        budgetsData = window.budgetsTableInstance
-          ? window.budgetsTableInstance.getData()
-          : [];} catch (e) {}
-      window.budgetsModule.initializeAnnualBudgetPlan(budgetsData);
-    } else {}
+    // Add delay to ensure DOM is ready and budgets data is available
+    setTimeout(() => {
+      if (
+        window.budgetsModule &&
+        typeof window.budgetsModule.initializeAnnualBudgetPlan === "function"
+      ) {
+        // Use the latest budgets data if available, otherwise load from source
+        let budgetsData = [];
+        try {
+          // First try to get data from the budgets table instance
+          if (window.budgetsTableInstance && window.budgetsTableInstance.getData) {
+            budgetsData = window.budgetsTableInstance.getData();
+          }
+          
+          // If no data from table, try the global budgets object
+          if (!budgetsData || budgetsData.length === 0) {
+            if (window.budgetsObj && Array.isArray(window.budgetsObj)) {
+              budgetsData = window.budgetsObj;
+            } else if (window.budgetsObj && typeof window.budgetsObj === 'object') {
+              // Convert object to array format if needed
+              budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({
+                region,
+                assignedBudget: data.assignedBudget || 0
+              }));
+            }
+          }
+          
+          // If still no data, try to load from the loadBudgets function
+          if (!budgetsData || budgetsData.length === 0) {
+            if (window.loadBudgets && typeof window.loadBudgets === 'function') {
+              window.loadBudgets().then(loadedBudgets => {
+                if (loadedBudgets && Array.isArray(loadedBudgets)) {
+                  window.budgetsModule.initializeAnnualBudgetPlan(loadedBudgets);
+                } else if (loadedBudgets && typeof loadedBudgets === 'object') {
+                  const budgetsArray = Object.entries(loadedBudgets).map(([region, data]) => ({
+                    region,
+                    assignedBudget: data.assignedBudget || 0
+                  }));
+                  window.budgetsModule.initializeAnnualBudgetPlan(budgetsArray);
+                }
+              }).catch(e => {
+                console.warn('Could not load budgets for annual plan:', e);
+                // Initialize with empty data so the table structure is still created
+                window.budgetsModule.initializeAnnualBudgetPlan([]);
+              });
+              return; // Exit early since we're handling async
+            }
+          }
+          
+          if (window.DEBUG_MODE) {
+            console.log('🏦 [TAB SWITCH] Initializing Annual Budget Plan with data:', budgetsData);
+          }
+          
+          window.budgetsModule.initializeAnnualBudgetPlan(budgetsData);
+          
+          // Also ensure the table is visible after initialization
+          setTimeout(() => {
+            if (window.budgetsModule.ensureAnnualBudgetPlanVisible) {
+              window.budgetsModule.ensureAnnualBudgetPlanVisible();
+            }
+            
+            // Double-check both budget sections are visible
+            const budgetsSection = document.getElementById("view-budgets");
+            const budgetSetupSection = document.getElementById("view-budget-setup");
+            if (budgetsSection && budgetsSection.style.display !== "block") {
+              budgetsSection.style.display = "block";
+            }
+            if (budgetSetupSection && budgetSetupSection.style.display !== "block") {
+              budgetSetupSection.style.display = "block";
+              if (window.DEBUG_MODE) {
+                console.log('🏦 [TAB SWITCH] Re-ensured budget setup section visibility');
+              }
+            }
+          }, 50);
+        } catch (e) {
+          console.warn('Error initializing Annual Budget Plan:', e);
+          // Initialize with empty data so the table structure is still created
+          window.budgetsModule.initializeAnnualBudgetPlan([]);
+        }
+      } else {
+        console.warn('budgetsModule.initializeAnnualBudgetPlan not available');
+      }
+    }, 100); // Small delay to ensure DOM is ready
   } else {
-    // Show only the section matching the tab
-    const section = document.querySelector(
-      `section#view-${hash.replace("#", "")}`,
-    );
-    // ...existing code...
-    if (section) section.style.display = "block";
+    // For all other tabs, use the optimized showSection function
+    showSection(hash);
     if (
       hash === "#planning" &&
       window.planningModule &&

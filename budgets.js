@@ -385,6 +385,20 @@ function initializeAnnualBudgetPlan(budgets) {
     console.log('🏦 [ANNUAL BUDGET PLAN] planTable tbody exists:', !!document.querySelector("#planTable tbody"));
   }
   
+  // Ensure budgets is an array
+  if (!budgets || !Array.isArray(budgets)) {
+    console.warn('🏦 [ANNUAL BUDGET PLAN] budgets is not an array, converting or using empty array');
+    if (budgets && typeof budgets === 'object') {
+      // Convert object to array
+      budgets = Object.entries(budgets).map(([region, data]) => ({
+        region,
+        assignedBudget: data.assignedBudget || 0
+      }));
+    } else {
+      budgets = [];
+    }
+  }
+  
   // Check if budgets sections are visible
   const budgetsSection = document.getElementById("view-budgets");
   const budgetSetupSection = document.getElementById("view-budget-setup");
@@ -394,42 +408,85 @@ function initializeAnnualBudgetPlan(budgets) {
     console.log('🏦 [ANNUAL BUDGET PLAN] planTable visibility:', document.getElementById("planTable")?.offsetParent !== null);
   }
   
+  // Ensure the budgets sections are visible (may not be if called too early)
+  if (budgetsSection && budgetsSection.style.display === 'none') {
+    budgetsSection.style.display = 'block';
+  }
+  if (budgetSetupSection && budgetSetupSection.style.display === 'none') {
+    budgetSetupSection.style.display = 'block';
+  }
+  
+  // Force show the budget setup section since planTable is inside it
+  if (budgetSetupSection) {
+    budgetSetupSection.style.display = 'block';
+    if (window.DEBUG_MODE) {
+      console.log('🏦 [ANNUAL BUDGET PLAN] Forced budget setup section to be visible');
+    }
+  }
+  
   // Populate Annual Budget Plan table from budgets.json
   try {
     const planTableBody = document.querySelector("#planTable tbody");
-    if (planTableBody && budgets.length > 0) {
+    if (planTableBody) {
       if (window.DEBUG_MODE) {
         console.log('🏦 [ANNUAL BUDGET PLAN] Populating table with', budgets.length, 'rows');
       }
+      
+      // Clear existing content
       planTableBody.innerHTML = "";
-      budgets.forEach((row, index) => {
-        if (window.DEBUG_MODE) {
-          console.log('🏦 [ANNUAL BUDGET PLAN] Processing row', index, ':', row);
-        }
+      
+      if (budgets.length > 0) {
+        budgets.forEach((row, index) => {
+          if (window.DEBUG_MODE) {
+            console.log('🏦 [ANNUAL BUDGET PLAN] Processing row', index, ':', row);
+          }
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><input type="text" value="${row.region || ''}" disabled /></td>
+            <td><input type="text" class="plan-usd-input" value="$${Number(row.assignedBudget ?? 0).toLocaleString()}" disabled /></td>
+            <td><button class="plan-delete-btn delete-row-btn" title="Delete" disabled><i class="octicon octicon-trash" aria-hidden="true"></i></button></td>
+          `;
+          planTableBody.appendChild(tr);
+        });
+      } else {
+        // Add an empty row if no data
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td><input type="text" value="${row.region}" disabled /></td>
-          <td><input type="text" class="plan-usd-input" value="$${Number(row.assignedBudget ?? 0).toLocaleString()}" disabled /></td>
+          <td><input type="text" value="" placeholder="Enter region" disabled /></td>
+          <td><input type="text" class="plan-usd-input" value="$0" disabled /></td>
           <td><button class="plan-delete-btn delete-row-btn" title="Delete" disabled><i class="octicon octicon-trash" aria-hidden="true"></i></button></td>
         `;
         planTableBody.appendChild(tr);
-      });
+      }
+      
       if (window.DEBUG_MODE) {
         console.log('🏦 [ANNUAL BUDGET PLAN] Table populated successfully');
       }
       
-      // Force a redraw to ensure the table is rendered
+      // Force a redraw to ensure the table is rendered and visible
       const planTable = document.getElementById("planTable");
       if (planTable) {
-        planTable.style.display = 'none';
+        // Ensure table is visible
+        planTable.style.visibility = 'hidden';
+        planTable.style.display = 'table';
         planTable.offsetHeight; // Trigger reflow
-        planTable.style.display = '';
+        planTable.style.visibility = 'visible';
+        
         if (window.DEBUG_MODE) {
-          console.log('🏦 [ANNUAL BUDGET PLAN] Forced table redraw');
+          console.log('🏦 [ANNUAL BUDGET PLAN] Forced table redraw and visibility');
         }
       }
     } else {
-      console.log('🏦 [ANNUAL BUDGET PLAN] Cannot populate table - planTableBody:', !!planTableBody, 'budgets.length:', budgets?.length);
+      console.warn('🏦 [ANNUAL BUDGET PLAN] Cannot find planTable tbody - DOM may not be ready');
+      
+      // Try again after a short delay if DOM isn't ready
+      setTimeout(() => {
+        const retryTableBody = document.querySelector("#planTable tbody");
+        if (retryTableBody) {
+          console.log('🏦 [ANNUAL BUDGET PLAN] Retrying table population after DOM ready');
+          initializeAnnualBudgetPlan(budgets);
+        }
+      }, 200);
     }
   } catch (e) {
     console.error('🏦 [ANNUAL BUDGET PLAN] Error populating table:', e);
@@ -566,6 +623,109 @@ const budgetsModule = {
   initBudgetsTable,
   setupAnnualBudgetSave,
   initializeAnnualBudgetPlan,
+  
+  // Function to ensure annual budget plan table is visible
+  ensureAnnualBudgetPlanVisible() {
+    const planTable = document.getElementById("planTable");
+    const budgetSetupSection = document.getElementById("view-budget-setup");
+    
+    // First ensure the parent section is visible
+    if (budgetSetupSection) {
+      if (budgetSetupSection.style.display === 'none' || !budgetSetupSection.offsetParent) {
+        budgetSetupSection.style.display = 'block';
+        console.log('🏦 [ANNUAL BUDGET PLAN] Made budget setup section visible');
+      }
+    }
+    
+    if (planTable) {
+      // Check if table has content
+      const tbody = planTable.querySelector("tbody");
+      const hasRows = tbody && tbody.children.length > 0;
+      
+      if (!hasRows) {
+        // If no rows, try to reinitialize with available data
+        console.log('🏦 [ANNUAL BUDGET PLAN] Table has no rows, attempting to reinitialize');
+        
+        let budgetsData = [];
+        try {
+          if (window.budgetsTableInstance && window.budgetsTableInstance.getData) {
+            budgetsData = window.budgetsTableInstance.getData();
+          } else if (window.budgetsObj) {
+            if (Array.isArray(window.budgetsObj)) {
+              budgetsData = window.budgetsObj;
+            } else if (typeof window.budgetsObj === 'object') {
+              budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({
+                region,
+                assignedBudget: data.assignedBudget || 0
+              }));
+            }
+          }
+          
+          this.initializeAnnualBudgetPlan(budgetsData);
+        } catch (e) {
+          console.warn('Error reinitializing annual budget plan:', e);
+        }
+      } else {
+        // Just ensure visibility
+        planTable.style.visibility = 'visible';
+        planTable.style.display = 'table';
+        console.log('🏦 [ANNUAL BUDGET PLAN] Ensured table visibility');
+      }
+    }
+  },
+  
+  // Debug function to check annual budget plan status
+  debugAnnualBudgetPlan() {
+    const planTable = document.getElementById("planTable");
+    const tbody = planTable?.querySelector("tbody");
+    const budgetsSection = document.getElementById("view-budgets");
+    const budgetSetupSection = document.getElementById("view-budget-setup");
+    
+    console.log('🔍 [DEBUG] Annual Budget Plan Status:');
+    console.log('  - planTable exists:', !!planTable);
+    console.log('  - planTable visible:', planTable?.offsetParent !== null);
+    console.log('  - planTable display:', planTable?.style.display);
+    console.log('  - tbody exists:', !!tbody);
+    console.log('  - tbody rows:', tbody?.children.length || 0);
+    console.log('  - budgets section display:', budgetsSection?.style.display);
+    console.log('  - budget setup section display:', budgetSetupSection?.style.display);
+    console.log('  - budgetsTableInstance exists:', !!window.budgetsTableInstance);
+    console.log('  - budgetsObj exists:', !!window.budgetsObj);
+    
+    if (tbody && tbody.children.length > 0) {
+      console.log('  - First row content:', tbody.children[0].innerHTML);
+    }
+    
+    return {
+      tableExists: !!planTable,
+      tableVisible: planTable?.offsetParent !== null,
+      rowCount: tbody?.children.length || 0,
+      sectionsVisible: {
+        budgets: budgetsSection?.style.display,
+        setup: budgetSetupSection?.style.display
+      }
+    };
+  },
+  
+  // Quick test function to check and fix visibility
+  testAnnualBudgetVisibility() {
+    console.log('🧪 [TEST] Testing Annual Budget Plan visibility...');
+    
+    const result = this.debugAnnualBudgetPlan();
+    
+    if (!result.tableVisible) {
+      console.log('🔧 [TEST] Table not visible, attempting to fix...');
+      this.ensureAnnualBudgetPlanVisible();
+      
+      // Re-check after fix
+      setTimeout(() => {
+        const newResult = this.debugAnnualBudgetPlan();
+        console.log('🎯 [TEST] Fix result - Table visible:', newResult.tableVisible);
+      }, 100);
+    } else {
+      console.log('✅ [TEST] Table is already visible!');
+    }
+  },
   
   // Performance utilities
   debounce,

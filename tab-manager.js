@@ -184,6 +184,14 @@ class TabManager {
       if (tabId === 'roi' && roiChartTabsContainer) {
         roiChartTabsContainer.style.display = 'block';
       }
+      
+      // Special handling for budgets tab - show both budgets and budget-setup sections
+      if (tabId === 'budgets') {
+        const budgetSetupSection = document.getElementById('view-budget-setup');
+        if (budgetSetupSection) {
+          budgetSetupSection.style.display = 'block';
+        }
+      }
     }
     
     // Update tab button states (look for navigation links)
@@ -212,6 +220,14 @@ class TabManager {
     const section = document.getElementById(sectionId);
     if (section) {
       section.style.display = 'none';
+      
+      // Special handling for budgets tab - also hide budget-setup section
+      if (tabId === 'budgets') {
+        const budgetSetupSection = document.getElementById('view-budget-setup');
+        if (budgetSetupSection) {
+          budgetSetupSection.style.display = 'none';
+        }
+      }
     }
   }
   
