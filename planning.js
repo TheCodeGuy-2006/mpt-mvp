@@ -1,3 +1,21 @@
+// --- MODULAR ARCHITECTURE INTEGRATION ---
+// Import new modular planning system (Phase 1)
+import('./src/PlanningModule.js').then(module => {
+  window.PlanningModuleLoader = module.default;
+  console.log('Planning module loader ready');
+}).catch(error => {
+  console.warn('Planning module not available, using legacy mode:', error);
+});
+
+// --- PHASE 2 INTEGRATION - ADVANCED ARCHITECTURE & PERFORMANCE ---
+// Import Phase 2 enhancement system (fixed version with fallbacks)
+import('./src/Phase2Integration-Fixed.js').then(module => {
+  window.Phase2Integration = module.default;
+  console.log('Phase 2 integration module loaded (fixed version)');
+}).catch(error => {
+  console.warn('Phase 2 integration not available:', error);
+});
+
 // --- Highlight Unsaved Rows in Planning Grid ---
 // --- Global Description Tooltip Cleanup ---
 function cleanupAllDescriptionTooltips() {
@@ -880,6 +898,26 @@ async function loadPlanning(retryCount = 0, useCache = true) {
   try {
     let rows;
 
+    // Try using new modular architecture first
+    try {
+      const planningSystem = await planningSystemPromise;
+      if (planningSystem.service) {
+        console.log('Loading data via modular planning service...');
+        rows = await planningSystem.service.loadData({
+          url: window.cloudflareSyncModule?.getWorkerEndpoint() + '/data/planning' || 
+               'https://mpt-mvp-sync.jordanradford.workers.dev/data/planning'
+        });
+        
+        if (rows && rows.length > 0) {
+          await planningSystem.controller.loadData(rows);
+          planningDataCache = rows;
+          return rows;
+        }
+      }
+    } catch (moduleError) {
+      console.warn('Modular service failed, falling back to legacy:', moduleError);
+    }
+
     try {
       // Use Worker API endpoint
       const workerEndpoint =
@@ -1303,6 +1341,83 @@ class PlanningDataStore {
   }
 }
 
+// --- MODULAR ARCHITECTURE INITIALIZATION ---
+// Initialize with new modular architecture when available, fallback to legacy
+async function initializePlanningSystem() {
+  try {
+    let planningModule = null;
+    
+    // Phase 1: Initialize modular architecture
+    if (window.PlanningModuleLoader) {
+      console.log('Initializing with modular architecture...');
+      planningModule = await window.PlanningModuleLoader.initializePlanningModule();
+      
+      // Maintain backward compatibility
+      window.planningDataStore = planningModule.controller.model;
+      window.planningController = planningModule.controller;
+    } else {
+      // Fallback to legacy architecture
+      console.log('Using legacy planning data store...');
+      const planningDataStore = new PlanningDataStore();
+      window.planningDataStore = planningDataStore;
+      planningModule = { controller: { model: planningDataStore } };
+    }
+    
+    // Phase 2: Initialize advanced architecture and performance enhancements
+    if (window.Phase2Integration) {
+      try {
+        console.log('🚀 Initializing Phase 2: Advanced Architecture & Performance...');
+        
+        const phase2System = await window.Phase2Integration.initializePhase2({
+          enablePerformanceMonitoring: true,
+          enableDataOptimization: true,
+          enableVirtualScrolling: true,
+          enableComponentSystem: true,
+          performanceThresholds: {
+            renderTime: 16,
+            dataOperation: 50,
+            networkRequest: 1000,
+            memoryUsage: 50,
+            domNodes: 1000
+          }
+        });
+        
+        // Enhance the planning controller with Phase 2 optimizations
+        if (window.planningController) {
+          window.planningController = window.Phase2Integration.enhancePlanningController(window.planningController);
+        }
+        
+        // Store Phase 2 system globally
+        window.phase2System = phase2System;
+        
+        console.log('✅ Phase 2 system successfully integrated');
+        
+        // Add Phase 2 to planning module
+        if (planningModule) {
+          planningModule.phase2 = phase2System;
+        }
+        
+      } catch (error) {
+        console.warn('⚠️ Phase 2 initialization failed, continuing with Phase 1:', error);
+      }
+    } else {
+      console.log('Phase 2 not available, using Phase 1 only');
+    }
+    
+    return planningModule;
+    
+  } catch (error) {
+    console.warn('Failed to initialize modular architecture, using legacy:', error);
+    const planningDataStore = new PlanningDataStore();
+    window.planningDataStore = planningDataStore;
+    return { controller: { model: planningDataStore } };
+  }
+}
+
+// Initialize the system
+let planningSystemPromise = initializePlanningSystem();
+
+// Legacy instantiation for immediate compatibility
 const planningDataStore = new PlanningDataStore();
 window.planningDataStore = planningDataStore;
 
@@ -1318,6 +1433,129 @@ window.planningDebug = {
     console.log('Filtered data count:', planningDataStore.getFilteredData().length);
     console.log('Deleted rows:', planningDataStore.getDeletedRows().length);
     return stats;
+  },
+  
+  // Phase 2 Testing
+  async testPhase2System() {
+    console.log('🧪 Testing Phase 2 System...');
+    
+    if (!window.phase2System) {
+      console.warn('⚠️ Phase 2 system not available');
+      return false;
+    }
+    
+    try {
+      // Test performance monitoring
+      const health = window.phase2System.getSystemHealth();
+      console.log('📊 System Health:', health);
+      
+      // Test data optimization
+      const data = window.planningController?.getData() || [];
+      if (data.length > 0) {
+        const optimizedData = await window.phase2System.optimizeDataset(data, {
+          indexFields: ['region', 'quarter', 'status'],
+          precomputeAggregations: true
+        });
+        console.log('🚀 Data optimization test:', optimizedData ? 'PASSED' : 'FAILED');
+      }
+      
+      // Test performance stats
+      const stats = window.phase2System.getPerformanceStats();
+      console.log('📈 Performance Stats:', stats);
+      
+      // Run built-in tests if available
+      if (window.Phase2Integration && window.Phase2Integration.createPhase2Tests) {
+        const testSuite = window.Phase2Integration.createPhase2Tests();
+        const testResults = await testSuite.runAllTests();
+        console.log('🧪 Phase 2 Test Results:', testResults);
+        return testResults.passed;
+      }
+      
+      return true;
+      
+    } catch (error) {
+      console.error('❌ Phase 2 test failed:', error);
+      return false;
+    }
+  },
+  
+  // Test filter optimization
+  async testOptimizedFiltering() {
+    console.log('🔍 Testing Optimized Filtering...');
+    
+    if (!window.phase2System) {
+      console.warn('⚠️ Phase 2 system not available');
+      return false;
+    }
+    
+    const data = window.planningController?.getData() || [];
+    if (data.length === 0) {
+      console.warn('No data available for filtering test');
+      return false;
+    }
+    
+    // Test regular vs optimized filtering performance
+    const filters = { 
+      region: ['North America', 'Europe'],
+      status: ['Active', 'Planning']
+    };
+    
+    // Regular filtering
+    const startTime = performance.now();
+    const regularResult = data.filter(row => {
+      return (!filters.region || filters.region.includes(row.region)) &&
+             (!filters.status || filters.status.includes(row.status));
+    });
+    const regularTime = performance.now() - startTime;
+    
+    // Optimized filtering
+    const optimizedStartTime = performance.now();
+    const optimizedResult = window.phase2System.createOptimizedFilter(data, filters);
+    const optimizedTime = performance.now() - optimizedStartTime;
+    
+    console.log(`📊 Regular filtering: ${regularResult.length} results in ${regularTime.toFixed(2)}ms`);
+    console.log(`🚀 Optimized filtering: ${optimizedResult.length} results in ${optimizedTime.toFixed(2)}ms`);
+    console.log(`⚡ Performance gain: ${((regularTime - optimizedTime) / regularTime * 100).toFixed(1)}%`);
+    
+    return optimizedResult.length === regularResult.length;
+  },
+  
+  // Test virtual scrolling
+  testVirtualScrolling() {
+    console.log('📜 Testing Virtual Scrolling...');
+    
+    if (!window.phase2System) {
+      console.warn('⚠️ Phase 2 system not available');
+      return false;
+    }
+    
+    const table = document.querySelector('#planningTable');
+    if (!table) {
+      console.warn('Planning table not found');
+      return false;
+    }
+    
+    const data = window.planningController?.getData() || [];
+    console.log(`📊 Data count: ${data.length}`);
+    
+    if (data.length > 1000) {
+      console.log('🔧 Large dataset detected, virtual scrolling should be active');
+      
+      // Check if virtual scrolling is active
+      const tbody = table.querySelector('tbody');
+      const virtualizationMarkers = tbody?.querySelectorAll('[data-virtual-index]');
+      
+      if (virtualizationMarkers && virtualizationMarkers.length > 0) {
+        console.log('✅ Virtual scrolling is active');
+        return true;
+      } else {
+        console.log('⚠️ Virtual scrolling not detected');
+        return false;
+      }
+    } else {
+      console.log('📊 Dataset too small for virtual scrolling');
+      return true;
+    }
   },
   
   // Test soft delete functionality
