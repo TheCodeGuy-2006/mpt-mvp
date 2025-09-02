@@ -8,8 +8,6 @@ window.executionDebugEarly = {
   timestamp: new Date().toISOString()
 };
 
-console.log('🚀 EXECUTION MODULE: Early debug marker set');
-
 // --- Inject Description Keyword Search Bar for Execution Tab ---
 function injectExecutionDescriptionKeywordSearchBar() {
   // (Filtering logic removed to restore previous state)
@@ -188,8 +186,6 @@ function setupExecutionSave(table, rows) {
     return;
   }
   btn.onclick = () => {
-    console.log("=== PHASE 2: Using Master Dataset for Execution Save ===");
-    
     // Get the complete dataset from execution master data store (not filtered table data)
     if (!executionDataStore) {
       console.error("❌ PHASE 2: ExecutionDataStore not available for save");
@@ -198,7 +194,6 @@ function setupExecutionSave(table, rows) {
     }
     
     const masterData = executionDataStore.getData(); // Gets active data (master minus planning deletes)
-    console.log(`Saving execution master dataset: ${masterData.length} rows (vs table: ${table.getData().length} visible)`);
     
     if (masterData.length === 0) {
       alert("No execution data to save.");
@@ -219,18 +214,13 @@ function setupExecutionSave(table, rows) {
       }
     });
     
-    console.log("Saving execution data:", masterData.length, "rows");
     // Try Worker first, then backend fallback
     if (window.cloudflareSyncModule) {
       window.cloudflareSyncModule
         .saveToWorker("planning", masterData, { source: "manual-save-execution" })
         .then((result) => {
-          console.log("Worker save successful:", result);
-          
           // Cross-tab sync: Update planning data store with execution changes
-          if (window.planningDataStore) {
-            console.log("🔄 PHASE 2: Syncing execution changes back to planning...");
-            masterData.forEach(row => {
+          if (window.planningDataStore) {masterData.forEach(row => {
               if (row.id) {
                 // Only sync planning-relevant fields back to planning data store
                 const planningFields = {
@@ -258,32 +248,21 @@ function setupExecutionSave(table, rows) {
                 };
                 window.planningDataStore.updateRow(row.id, planningFields);
               }
-            });
-            console.log("✅ PHASE 2: Planning data store updated with execution changes (planning fields only)");
-          }
+            });}
           
-          // Refresh the table display with updated data from data store
-          console.log("🔄 PHASE 2: Refreshing table display after save...");
-          const currentData = executionDataStore.getData();
+          // Refresh the table display with updated data from data storeconst currentData = executionDataStore.getData();
           if (table && typeof table.replaceData === 'function') {
-            table.replaceData(currentData);
-            console.log("✅ PHASE 2: Table display refreshed with", currentData.length, "rows");
-            
-            // Reapply current filters after data refresh
+            table.replaceData(currentData);// Reapply current filters after data refresh
             setTimeout(() => {
               if (typeof applyExecutionFilters === 'function') {
-                applyExecutionFilters();
-                console.log("✅ PHASE 2: Filters reapplied after save");
-              }
+                applyExecutionFilters();}
             }, 100);
           }
           
           alert(
             "✅ Execution data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed."
           );
-          // --- Reset unsaved changes flag after successful save ---
-          console.log("[Execution] Unsaved changes set to false (save successful)");
-          window.hasUnsavedExecutionChanges = false;
+          // --- Reset unsaved changes flag after successful save ---window.hasUnsavedExecutionChanges = false;
           if (window.cloudflareSyncModule.refreshDataAfterSave) {
             window.cloudflareSyncModule.refreshDataAfterSave("planning");
           }
@@ -301,9 +280,7 @@ function setupExecutionSave(table, rows) {
                 alert(
                   "✅ Execution data saved to backend (Worker unavailable)!"
                 );
-                // --- Reset unsaved changes flag after successful save ---
-                console.log("[Execution] Unsaved changes set to false (save successful, backend fallback)");
-                window.hasUnsavedExecutionChanges = false;
+                // --- Reset unsaved changes flag after successful save ---window.hasUnsavedExecutionChanges = false;
               } else {
                 alert(
                   "❌ Failed to save: " + (result.error || "Unknown error")
@@ -324,9 +301,7 @@ function setupExecutionSave(table, rows) {
         .then((result) => {
           if (result.success) {
             alert("✅ Execution data saved to backend!");
-            // --- Reset unsaved changes flag after successful save ---
-            console.log("[Execution] Unsaved changes set to false (save successful, backend only)");
-            window.hasUnsavedExecutionChanges = false;
+            // --- Reset unsaved changes flag after successful save ---window.hasUnsavedExecutionChanges = false;
           } else {
             alert("❌ Failed to save: " + (result.error || "Unknown error"));
           }
@@ -356,9 +331,7 @@ class ExecutionDataStore {
     this.changeLog = []; // Track all operations for debugging
     this.initialized = false;
     
-    if (window.DEBUG_MODE) {
-      console.log("🔧 PHASE 1: ExecutionDataStore initialized");
-    }
+    if (window.DEBUG_MODE) {}
   }
 
   /**
@@ -379,9 +352,7 @@ class ExecutionDataStore {
       timestamp: new Date().toISOString()
     });
     
-    if (window.DEBUG_MODE) {
-      console.log(`✅ PHASE 1: ExecutionDataStore initialized with ${this.masterData.length} rows`);
-    }
+    if (window.DEBUG_MODE) {}
     return true;
   }
 
@@ -437,10 +408,7 @@ class ExecutionDataStore {
     this.logOperation('addRow', { 
       rowId: rowData.id, 
       timestamp: new Date().toISOString()
-    });
-    
-    console.log(`✅ PHASE 1: Added row to execution master dataset: ${rowData.id}`);
-    return true;
+    });return true;
   }
 
   /**
@@ -502,9 +470,7 @@ class ExecutionDataStore {
       timestamp: new Date().toISOString()
     });
     
-    if (window.DEBUG_MODE) {
-      console.log(`🔄 PHASE 1: Replaced execution data: ${oldCount} → ${this.masterData.length} rows`);
-    }
+    if (window.DEBUG_MODE) {}
     return true;
   }
 
@@ -513,15 +479,11 @@ class ExecutionDataStore {
    * This ensures execution data reflects current planning state while preserving execution-specific fields
    */
   syncWithPlanning() {
-    if (!window.planningDataStore) {
-      console.log("⏳ PHASE 1: Planning data store not available for sync");
-      return false;
+    if (!window.planningDataStore) {return false;
     }
 
     const planningData = window.planningDataStore.getData();
-    if (window.DEBUG_MODE) {
-      console.log(`🔄 PHASE 1: Syncing execution data with planning (${planningData.length} planning rows)`);
-    }
+    if (window.DEBUG_MODE) {}
     
     // Instead of replacing all data, merge planning changes while preserving execution fields
     const mergedData = planningData.map(planningRow => {
@@ -567,9 +529,7 @@ class ExecutionDataStore {
       timestamp: new Date().toISOString()
     });
     
-    if (window.DEBUG_MODE) {
-      console.log(`✅ PHASE 1: Synced with planning while preserving execution fields`);
-    }
+    if (window.DEBUG_MODE) {}
     
     return true;
   }
@@ -629,19 +589,14 @@ class ExecutionDataStore {
     this.logOperation('clearAllData', { 
       oldCount,
       timestamp: new Date().toISOString()
-    });
-    
-    console.log(`🗑️ PHASE 1: Cleared all execution data (${oldCount} rows removed)`);
-  }
+    });}
 
   /**
    * Set the table instance reference for better integration
    * @param {Object} tableInstance - Tabulator table instance
    */
   setTableInstance(tableInstance) {
-    this.tableInstance = tableInstance;
-    console.log("🔗 PHASE 1: ExecutionDataStore linked to table instance");
-  }
+    this.tableInstance = tableInstance;}
 
   /**
    * Get the linked table instance
@@ -662,18 +617,12 @@ class ExecutionDataStore {
     }
 
     try {
-      const currentData = this.getData();
-      console.log(`🔄 PHASE 1: Syncing table with data store (${currentData.length} rows)`);
-      
-      this.tableInstance.replaceData(currentData);
+      const currentData = this.getData();this.tableInstance.replaceData(currentData);
       
       this.logOperation('syncTableWithDataStore', {
         rowCount: currentData.length,
         timestamp: new Date().toISOString()
-      });
-      
-      console.log("✅ PHASE 1: Table synced with data store");
-      return true;
+      });return true;
     } catch (error) {
       console.error("❌ PHASE 1: Error syncing table with data store:", error);
       return false;
@@ -683,29 +632,15 @@ class ExecutionDataStore {
   /**
    * Show planning-execution sync status
    */
-  showSyncStatus() {
-    console.log("🔄 EXECUTION-PLANNING Sync Status:");
-    
-    if (window.planningDataStore) {
+  showSyncStatus() {if (window.planningDataStore) {
       const planningActive = window.planningDataStore.getData().length;
-      const planningDeleted = window.planningDataStore.getDeletedRows().length;
-      console.log(`  Planning active: ${planningActive} rows`);
-      console.log(`  Planning deleted: ${planningDeleted} rows`);
-    } else {
-      console.log("  ❌ Planning data store not available");
-    }
+      const planningDeleted = window.planningDataStore.getDeletedRows().length;} else {}
     
     const executionActive = this.getActiveCount();
-    const executionTotal = this.getTotalCount();
-    console.log(`  Execution active: ${executionActive} rows`);
-    console.log(`  Execution total: ${executionTotal} rows`);
-    
-    // Show sync alignment
+    const executionTotal = this.getTotalCount();// Show sync alignment
     if (window.planningDataStore) {
       const planningActiveCount = window.planningDataStore.getData().length;
-      const syncAligned = planningActiveCount === executionActive;
-      console.log(`  Sync alignment: ${syncAligned ? '✅ Aligned' : '⚠️ Misaligned'}`);
-    }
+      const syncAligned = planningActiveCount === executionActive;}
   }
 }
 
@@ -716,9 +651,7 @@ let executionDataStore = null;
 window.syncExecutionTableWithDataStore = function() {
   if (executionDataStore && typeof executionDataStore.syncTableWithDataStore === 'function') {
     const success = executionDataStore.syncTableWithDataStore();
-    if (success) {
-      console.log("✅ Manual sync completed - table updated with data store data");
-      // Reapply filters after sync
+    if (success) {// Reapply filters after sync
       if (typeof applyExecutionFilters === 'function') {
         setTimeout(applyExecutionFilters, 100);
       }
@@ -1451,23 +1384,15 @@ function initExecutionGrid(rows) {
       return;
     }
     
-    const masterData = executionDataStore.getData(); // Gets active data (master minus planning deletes)
-    console.log(`Saving execution master dataset: ${masterData.length} rows (vs table: ${table.getData().length} visible)`);
-    
-    console.log("Saving execution data:", masterData.length, "rows");
+    const masterData = executionDataStore.getData(); // Gets active data (master minus planning deletes)console.log("Saving execution data:", masterData.length, "rows");
 
     // Try Worker first, then backend fallback
     if (window.cloudflareSyncModule) {
       // Primary: Save to Worker (using planning endpoint since execution is part of planning data)
       window.cloudflareSyncModule
         .saveToWorker("planning", masterData, { source: "manual-save-execution" })
-        .then((result) => {
-          console.log("Worker save successful:", result);
-          
-          // Cross-tab sync: Update planning data store with execution changes
-          if (window.planningDataStore) {
-            console.log("🔄 PHASE 2: Syncing execution changes back to planning...");
-            masterData.forEach(row => {
+        .then((result) => {// Cross-tab sync: Update planning data store with execution changes
+          if (window.planningDataStore) {masterData.forEach(row => {
               if (row.id) {
                 // Only sync planning-relevant fields back to planning data store
                 const planningFields = {
@@ -1495,9 +1420,7 @@ function initExecutionGrid(rows) {
                 };
                 window.planningDataStore.updateRow(row.id, planningFields);
               }
-            });
-            console.log("✅ PHASE 2: Planning data store updated with execution changes (planning fields only)");
-          }
+            });}
           
           alert(
             "✅ Execution data saved to GitHub!\n\n💡 Note: It may take 1-2 minutes for changes from other users to appear due to GitHub's caching. Use the 'Refresh Data' button in GitHub Sync if needed.",

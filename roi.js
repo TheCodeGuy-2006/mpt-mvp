@@ -34,9 +34,7 @@ function getPlanningData() {
     try {
       const data = window.planningDataStore.getData();
       // Silent data access - only log if DEBUG_MODE enabled
-      if (data.length > 0 && window.DEBUG_MODE) {
-        console.log(`[ROI] Using planning master dataset: ${data.length} rows`);
-      }
+      if (data.length > 0 && window.DEBUG_MODE) {}
       return data;
     } catch (error) {
       console.warn('[ROI] Error accessing planning master dataset:', error);
@@ -47,9 +45,7 @@ function getPlanningData() {
   if (window.planningModule && window.planningModule.tableInstance && typeof window.planningModule.tableInstance.getData === 'function') {
     try {
       const data = window.planningModule.tableInstance.getData();
-      if (data.length > 0 && window.DEBUG_MODE) {
-        console.log(`[ROI] Fallback to planning table data: ${data.length} rows`);
-      }
+      if (data.length > 0 && window.DEBUG_MODE) {}
       return data;
     } catch (error) {
       console.warn('[ROI] Error accessing planning table data:', error);
@@ -60,9 +56,7 @@ function getPlanningData() {
   if (window.planningTableInstance && typeof window.planningTableInstance.getData === 'function') {
     try {
       const data = window.planningTableInstance.getData();
-      if (data.length > 0 && window.DEBUG_MODE) {
-        console.log(`[ROI] Fallback to direct planning table: ${data.length} rows`);
-      }
+      if (data.length > 0 && window.DEBUG_MODE) {}
       return data;
     } catch (error) {
       console.warn('[ROI] Error accessing direct planning table:', error);
@@ -88,9 +82,7 @@ function getExecutionData() {
     try {
       const data = window.executionDataStore.getData();
       // Silent data access - only log if DEBUG_MODE enabled
-      if (data.length > 0 && window.DEBUG_MODE) {
-        console.log(`[ROI] Using execution master dataset: ${data.length} rows`);
-      }
+      if (data.length > 0 && window.DEBUG_MODE) {}
       return data;
     } catch (error) {
       console.warn('[ROI] Error accessing execution master dataset:', error);
@@ -101,9 +93,7 @@ function getExecutionData() {
   if (window.executionModule && window.executionModule.tableInstance && typeof window.executionModule.tableInstance.getData === 'function') {
     try {
       const data = window.executionModule.tableInstance.getData();
-      if (data.length > 0) {
-        console.log(`[ROI] Fallback to execution table data: ${data.length} rows`);
-      }
+      if (data.length > 0) {}
       return data;
     } catch (error) {
       console.warn('[ROI] Error accessing execution table data:', error);
@@ -114,9 +104,7 @@ function getExecutionData() {
   if (window.executionTableInstance && typeof window.executionTableInstance.getData === 'function') {
     try {
       const data = window.executionTableInstance.getData();
-      if (data.length > 0) {
-        console.log(`[ROI] Fallback to direct execution table: ${data.length} rows`);
-      }
+      if (data.length > 0) {}
       return data;
     } catch (error) {
       console.warn('[ROI] Error accessing direct execution table:', error);
@@ -384,11 +372,7 @@ function getFilterState() {
     revenuePlay: [...new Set([...dropdownFilters.revenuePlay, ...(Array.from(universalRoiSearchFilters.get('revenuePlay') || []))])],
   };
 
-  if (window.DEBUG_FILTERS) {
-    console.log('[ROI] getFilterState - dropdown filters:', dropdownFilters);
-    console.log('[ROI] getFilterState - universal search filters:', Object.fromEntries(universalRoiSearchFilters));
-    console.log('[ROI] getFilterState - combined filters:', combinedFilters);
-  }
+  if (window.DEBUG_FILTERS) {}
 
   return combinedFilters;
 }
@@ -596,16 +580,9 @@ function updateRoiTotalSpend() {
 
 // Throttled chart updates for better performance
 function updateRoiCharts() {
-  if (!isRoiTabActive) return;
-  
-  console.log('[ROI] Updating charts with current filters...');
-  
-  requestAnimationFrame(() => {
+  if (!isRoiTabActive) return;requestAnimationFrame(() => {
     // Get current filter state for charts
-    const filters = getFilterState();
-    console.log('[ROI] Chart filters:', filters);
-    
-    // Update all ROI charts - they will automatically use the current filter state
+    const filters = getFilterState();// Update all ROI charts - they will automatically use the current filter state
     renderRoiByRegionChart();
     renderRoiByProgramTypeChart(); 
     renderRoiByQuarterChart();
@@ -1286,9 +1263,7 @@ const maxDataCheckAttempts = 50; // Check for up to 5 seconds
 
 // Add a data ready listener to react when data stores are populated
 window.addEventListener('planningDataReady', () => {
-  if (window.DEBUG_MODE) {
-    console.log('[ROI] Planning data ready event received');
-  }
+  if (window.DEBUG_MODE) {}
   if (window.location.hash === '#roi') {
     setTimeout(() => {
       checkForPlanningData();
@@ -1300,9 +1275,7 @@ window.addEventListener('planningDataReady', () => {
 });
 
 window.addEventListener('executionDataReady', () => {
-  if (window.DEBUG_MODE) {
-    console.log('[ROI] Execution data ready event received');
-  }
+  if (window.DEBUG_MODE) {}
   if (window.location.hash === '#roi') {
     setTimeout(() => {
       checkForPlanningData();
@@ -1324,9 +1297,7 @@ const checkForPlanningData = () => {
   const hasExecution = executionData && executionData.length > 0;
   
   if (hasPlanning || hasExecution) {
-    if (window.DEBUG_MODE) {
-      console.log(`[ROI] Data available - Planning: ${planningData.length}, Execution: ${executionData.length}`);
-    }
+    if (window.DEBUG_MODE) {}
     
     // Clear cached data to force repopulation
     cachedPlanningData = null;
@@ -1366,9 +1337,7 @@ const checkForPlanningData = () => {
     // Use exponential backoff for better performance
     const delay = Math.min(100 * Math.pow(1.1, dataCheckAttempts), 1000);
     setTimeout(checkForPlanningData, delay);
-  } else {
-    console.log('[ROI] Stopped checking for data after maximum attempts');
-  }
+  } else {}
 };
 
 // Lazy initialization of ROI data table
@@ -1785,11 +1754,7 @@ function updateRoiDataTable() {
     }
     
     return true;
-  });
-
-  console.log(`[ROI] Data table filtered: ${campaigns.length} → ${filteredCampaigns.length} campaigns`);
-
-  // Update table data
+  });// Update table data
   table.replaceData(filteredCampaigns);
 }
 
@@ -1814,7 +1779,6 @@ function initializeRoiUniversalSearch() {
   // Check if UniversalSearchFilter class is available
   if (!window.UniversalSearchFilter) {
 
-
     return;
   }
   
@@ -1824,11 +1788,9 @@ function initializeRoiUniversalSearch() {
   const container = document.getElementById('roiUniversalSearch');
   if (!container) {
 
-
     return;
   }
   
-
 
   
   try {
@@ -1843,9 +1805,7 @@ function initializeRoiUniversalSearch() {
       }
     );
     
-    if (window.DEBUG_MODE) {
-      console.log("✅ ROI: Universal search initialized successfully!");
-    }
+    if (window.DEBUG_MODE) {}
     
     // Update search data with current ROI data
     updateRoiSearchData();
@@ -1857,10 +1817,7 @@ function initializeRoiUniversalSearch() {
 }
 
 // Apply search filters to ROI view
-function applyRoiSearchFilters(selectedFilters) {
-  console.log("🔍 ROI: Applying search filters:", selectedFilters);
-  
-  // Clear existing universal search filters
+function applyRoiSearchFilters(selectedFilters) {// Clear existing universal search filters
   universalRoiSearchFilters.clear();
   
   // selectedFilters is an object with categories as keys and arrays as values
@@ -1871,26 +1828,18 @@ function applyRoiSearchFilters(selectedFilters) {
         universalRoiSearchFilters.set(category, new Set(values));
       }
     });
-  }
-  
-  console.log("🔍 ROI: Universal search filters applied:", universalRoiSearchFilters);
-  
-  // Trigger ROI filter update using existing system
+  }// Trigger ROI filter update using existing system
   debouncedFilterUpdate();
 }
 
 // Update ROI search data
 function updateRoiSearchData() {
-  if (!window.roiUniversalSearch) {
-    console.log("🔍 ROI: Universal search not initialized yet");
-    return;
+  if (!window.roiUniversalSearch) {return;
   }
   
   try {
     const campaigns = getCampaignDataForRoi();
-    if (window.DEBUG_MODE) {
-      console.log(`🔍 ROI: Creating filter options from ${campaigns.length} campaigns`);
-    }
+    if (window.DEBUG_MODE) {}
     
     // Get filter options from planning module constants
     const regionOptions = window.planningModule?.constants?.regionOptions || [];

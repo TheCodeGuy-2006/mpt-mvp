@@ -223,9 +223,7 @@ window.highlightUnsavedRows = highlightUnsavedRows;
 window.hasUnsavedPlanningChanges = false;
 // Call this function after importing campaigns to trigger the unsaved changes warning on refresh/close
 window.setPlanningImportedUnsaved = function() {
-  window.hasUnsavedPlanningChanges = true;
-  console.log('[Planning] Unsaved changes set to true (imported campaigns)');
-};
+  window.hasUnsavedPlanningChanges = true;};
 // --- Unsaved Changes Warning Banner for Planning Tab ---
 // --- Warn on Tab Close/Reload if Unsaved Changes in Planning Tab ---
 window.addEventListener('beforeunload', function (e) {
@@ -343,7 +341,6 @@ function safeScrollToRow(table, rowIdentifier, position = "top", ifVisible = fal
     try {
       if (typeof table.scrollToPosition === 'function') {
 
-
 // --- DM Badge for Digital Motions Campaigns in Execution Details ---
 function injectDMBadgeCSS() {
   if (document.getElementById('dm-badge-style')) return;
@@ -399,7 +396,6 @@ function addDMBadgeToDetailsBox(detailsBoxElem, campaignData) {
 // Example usage (to be called wherever the details box is rendered/refreshed):
 //   addDMBadgeToDetailsBox(detailsBoxElem, campaignData);
 // Where detailsBoxElem is the DOM node for the details box, and campaignData is the campaign's data object.
-
 
 // --- Auto-inject DM badge for all digital motions campaigns in Execution tab ---
 function autoInjectDMBadgesOnExecutionTab() {
@@ -776,10 +772,7 @@ function ensurePlanningUIFunctional() {
   const delBtn = document.getElementById("deletePlanningRow");
   if (delBtn && !delBtn.onclick) {
     delBtn.textContent = "Delete Highlighted Rows";
-    delBtn.onclick = () => {
-      console.log("=== PHASE 3: Using Master Dataset for Delete ===");
-      
-      if (!planningTableInstance) {
+    delBtn.onclick = () => {if (!planningTableInstance) {
         alert("No campaigns to delete.");
         return;
       }
@@ -797,17 +790,10 @@ function ensurePlanningUIFunctional() {
         if (rowData && rowData.id) {
           // Mark as deleted in master dataset (soft delete)
           planningDataStore.deleteRow(rowData.id);
-          deletedIds.push(rowData.id);
-          console.log(`Soft deleted row ID: ${rowData.id}`);
-        }
+          deletedIds.push(rowData.id);}
         // Also remove from table display
         row.delete();
-      });
-      
-      console.log(`Phase 3: Deleted ${deletedIds.length} rows from master dataset`);
-      window.hasUnsavedPlanningChanges = true;
-      console.log(`[Planning] Unsaved changes set to true (mass delete: ${selectedRows.length} rows)`);
-    };
+      });window.hasUnsavedPlanningChanges = true;};
   }
 
   // Wire up Delete All Rows button
@@ -820,11 +806,7 @@ function ensurePlanningUIFunctional() {
     // Create the handler function
     const deleteAllHandler = function(event) {
       event.preventDefault();
-      event.stopPropagation();
-      
-      console.log("=== PHASE 3: Using Master Dataset for Delete All ===");
-      
-      if (!window.planningTableInstance) {
+      event.stopPropagation();if (!window.planningTableInstance) {
         alert("No table instance found. Please reload the page and try again.");
         return;
       }
@@ -852,10 +834,7 @@ function ensurePlanningUIFunctional() {
             planningDataStore.deleteRow(row.id);
             deletedIds.push(row.id);
           }
-        });
-        
-        console.log(`Phase 3: Marked ${deletedIds.length} rows as deleted in master dataset`);
-        window.hasUnsavedPlanningChanges = true;
+        });window.hasUnsavedPlanningChanges = true;
         alert("All rows have been deleted successfully!");
         
       } catch (error) {
@@ -1000,9 +979,7 @@ async function loadPlanning(retryCount = 0, useCache = true) {
     
     return rows;
   } catch (e) {
-    console.error("❌ Error in loadPlanning:", e);
-    console.log("🔧 Resetting loading state and returning empty array");
-    isDataLoading = false;
+    console.error("❌ Error in loadPlanning:", e);isDataLoading = false;
     hideLoadingIndicator();
     // Return empty array instead of cached data when there's an error
     planningDataCache = [];
@@ -1054,10 +1031,7 @@ class PlanningDataStore {
     this.masterData = [...data];  // Deep copy to prevent external mutation
     this.filteredData = [...data];
     this.deletedRows.clear();
-    this.changeLog = [];
-    
-    console.log(`Master dataset updated: ${this.masterData.length} rows`);
-  }
+    this.changeLog = [];}
   
   // Get master dataset (unfiltered, including soft-deleted rows)
   getMasterData() {
@@ -1083,10 +1057,7 @@ class PlanningDataStore {
     rowData.__modified = true;
     this.masterData.push(rowData);
     
-    this.logChange('add', rowData.id, rowData);
-    console.log(`Row added to master dataset: ${rowData.id}`);
-    
-    return rowData;
+    this.logChange('add', rowData.id, rowData);return rowData;
   }
   
   // Update row in master dataset
@@ -1113,10 +1084,7 @@ class PlanningDataStore {
     }
     
     this.deletedRows.add(rowId);
-    this.logChange('delete', rowId, row);
-    console.log(`Row soft-deleted: ${rowId}`);
-    
-    return true;
+    this.logChange('delete', rowId, row);return true;
   }
   
   // Hard delete row (permanently removes from master)
@@ -1130,10 +1098,7 @@ class PlanningDataStore {
     const deletedRow = this.masterData.splice(rowIndex, 1)[0];
     this.deletedRows.delete(rowId);
     
-    this.logChange('permanent_delete', rowId, deletedRow);
-    console.log(`Row permanently deleted: ${rowId}`);
-    
-    return true;
+    this.logChange('permanent_delete', rowId, deletedRow);return true;
   }
   
   // Restore soft-deleted row
@@ -1146,10 +1111,7 @@ class PlanningDataStore {
     this.deletedRows.delete(rowId);
     const row = this.masterData.find(r => r.id === rowId);
     
-    this.logChange('restore', rowId, row);
-    console.log(`Row restored: ${rowId}`);
-    
-    return true;
+    this.logChange('restore', rowId, row);return true;
   }
   
   // Get deleted rows (for recovery/undo functionality)
@@ -1161,10 +1123,7 @@ class PlanningDataStore {
   clearDeletedRows() {
     const deletedCount = this.deletedRows.size;
     this.masterData = this.masterData.filter(row => !this.deletedRows.has(row.id));
-    this.deletedRows.clear();
-    
-    console.log(`Permanently cleared ${deletedCount} deleted rows`);
-    return deletedCount;
+    this.deletedRows.clear();return deletedCount;
   }
   
   // Queue updates to reduce immediate DOM operations
@@ -1207,9 +1166,7 @@ class PlanningDataStore {
     if (!hasActiveFilters) {
       this.filteredData = activeData;
       const duration = performance.now() - startTime;
-      if (window.DEBUG_FILTERS) {
-        console.log(`Filter applied (no filters): ${this.filteredData.length}/${activeData.length} rows (${duration.toFixed(2)}ms)`);
-      }
+      if (window.DEBUG_FILTERS) {}
       return this.filteredData;
     }
     
@@ -1285,9 +1242,7 @@ class PlanningDataStore {
     });
     
     const duration = performance.now() - startTime;
-    if (window.DEBUG_FILTERS) {
-      console.log(`Filter applied: ${this.filteredData.length}/${activeData.length} rows (${duration.toFixed(2)}ms)`);
-    }
+    if (window.DEBUG_FILTERS) {}
     
     return this.filteredData;
   }
@@ -1463,15 +1418,11 @@ function showLoadingIndicator(message = "Loading...") {
   document.body.appendChild(indicator);
 }
 
-function hideLoadingIndicator() {
-  console.log("⚡ Attempting to hide loading indicator...");
-  const indicator = document.getElementById("planningLoadingIndicator");
+function hideLoadingIndicator() {const indicator = document.getElementById("planningLoadingIndicator");
   if (indicator) {
     indicator.remove();
     console.log("✅ Loading indicator removed");
-  } else {
-    console.log("ℹ️ No loading indicator found to remove");
-  }
+  } else {}
 }
 
 // Lazy initialization function for planning grid
@@ -2170,17 +2121,13 @@ function initPlanningGrid(rows) {
             if (rowData && rowData.id) {
               // Mark as deleted in master dataset (soft delete)
               planningDataStore.deleteRow(rowData.id);
-              deletedIds.push(rowData.id);
-              console.log(`Soft deleted row ID: ${rowData.id}`);
-            }
+              deletedIds.push(rowData.id);}
             // Also remove from table display
             row.delete();
           });
           
           console.log(`Phase 3: Deleted ${deletedIds.length} rows from master dataset (alternative handler)`);
-          window.hasUnsavedPlanningChanges = true;
-          console.log(`[Planning] Unsaved changes set to true (mass delete: ${selectedRows.length} rows)`);
-        };
+          window.hasUnsavedPlanningChanges = true;};
       }
 
       setupPlanningSave(planningTableInstance, rows);
@@ -2188,9 +2135,7 @@ function initPlanningGrid(rows) {
       // Update global reference
       window.planningTableInstance = planningTableInstance;
       
-      // Wire up button functionality now that table is created
-      console.log("🔧 Table instance created, wiring up UI functionality...");
-      ensurePlanningUIFunctional();
+      // Wire up button functionality now that table is createdensurePlanningUIFunctional();
 
       // Add event handlers
       const resizeHandler = debounce(() => {
@@ -2637,7 +2582,6 @@ function setupAddRowModalEvents() {
       formData.mqlForecast = Math.round(formData.expectedLeads * 0.1);
       formData.pipelineForecast = calculatePipeline(formData.expectedLeads);
     }
-
 
     // Add row to master dataset first
     planningDataStore.addRow(formData);
@@ -5032,8 +4976,3 @@ window.debugChartAggregation = function() {
 };
 
 console.log("�🛠️ Campaign calculation debugging tools loaded!");
-console.log("Run debugCampaignCalculations() to analyze issues");
-console.log("Run fixCalculationIssues() to fix calculation problems");
-console.log("Run refreshRoiChart() to refresh the chart");
-console.log("Run checkExpectedLeads() to verify total expected leads/MQL");
-console.log("Run debugChartAggregation() to debug chart aggregation logic");

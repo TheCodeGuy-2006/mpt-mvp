@@ -311,9 +311,7 @@ const calendarCache = {
         try {
           rawCampaigns = window.planningDataStore.getData() || [];
           if (rawCampaigns.length > 0) {
-          if (window.DEBUG_MODE) {
-            console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningDataStore (master dataset)`);
-          }
+          if (window.DEBUG_MODE) {}
           }
         } catch (error) {
           console.warn('Calendar: Error accessing planningDataStore:', error);
@@ -323,25 +321,19 @@ const calendarCache = {
       // Second try: direct access to planningTableInstance
       if ((!rawCampaigns || rawCampaigns.length === 0) && window.planningTableInstance && typeof window.planningTableInstance.getData === 'function') {
         rawCampaigns = window.planningTableInstance.getData() || [];
-        if (rawCampaigns.length > 0) {
-          console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningTableInstance`);
-        }
+        if (rawCampaigns.length > 0) {}
       }
       
       // Third try: access through planningModule
       if ((!rawCampaigns || rawCampaigns.length === 0) && window.planningModule?.tableInstance && typeof window.planningModule.tableInstance.getData === 'function') {
         rawCampaigns = window.planningModule.tableInstance.getData() || [];
-        if (rawCampaigns.length > 0) {
-          console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningModule.tableInstance`);
-        }
+        if (rawCampaigns.length > 0) {}
       }
       
       // Fourth try: fallback to cached data
       if ((!rawCampaigns || rawCampaigns.length === 0) && window.planningDataCache && Array.isArray(window.planningDataCache)) {
         rawCampaigns = window.planningDataCache;
-        if (rawCampaigns.length > 0) {
-          console.log(`Calendar: Got ${rawCampaigns.length} campaigns from planningDataCache`);
-        }
+        if (rawCampaigns.length > 0) {}
       }
       
       // If still no data, return existing cache or empty array
@@ -362,9 +354,7 @@ const calendarCache = {
       }));
       
       this.lastUpdate = now;
-      if (window.DEBUG_MODE) {
-        console.log(`Calendar: Cached ${this.campaigns.length} campaigns with index numbers`);
-      }
+      if (window.DEBUG_MODE) {}
     }
     return this.campaigns;
   },
@@ -1609,10 +1599,7 @@ const renderCalendar = debounce(() => {
   
   // Performance monitoring
   const endTime = performance.now();
-  const renderTime = endTime - startTime;
-  console.log(`📊 Calendar rendered in ${renderTime.toFixed(2)}ms`);
-  
-  if (renderTime > 100) {
+  const renderTime = endTime - startTime;if (renderTime > 100) {
     console.warn(`⚠️ Calendar render time exceeded 100ms: ${renderTime.toFixed(2)}ms`);
   }
   
@@ -1752,16 +1739,9 @@ function initializeCalendar() {
   initializeCalendarUniversalSearch();
   
   // Initialize calendar with available fiscal years
-  const campaigns = getCampaignData();
-  console.log(`Calendar: Found ${campaigns.length} campaigns during initialization`);
-  
-  if (campaigns.length > 0) {
-    const availableFYs = getAvailableFYs();
-    console.log(`Calendar: Available fiscal years: ${availableFYs.join(', ')}`);
-    if (availableFYs.length > 0 && !availableFYs.includes(currentFY)) {
-      currentFY = availableFYs[0];
-      console.log(`Calendar: Set current FY to ${currentFY}`);
-    }
+  const campaigns = getCampaignData();if (campaigns.length > 0) {
+    const availableFYs = getAvailableFYs();if (availableFYs.length > 0 && !availableFYs.includes(currentFY)) {
+      currentFY = availableFYs[0];}
   } else {
     console.warn('Calendar: No campaigns found during initialization - will retry when planning data loads');
   }
@@ -1804,9 +1784,7 @@ function initializeCalendar() {
   }
   
   // Add event listeners for data ready events
-  window.addEventListener('planningDataReady', (event) => {
-    console.log('[CALENDAR] Planning data ready event received:', event.detail);
-    // Clear cache and refresh calendar if we're on the calendar tab
+  window.addEventListener('planningDataReady', (event) => {// Clear cache and refresh calendar if we're on the calendar tab
     if (window.location.hash === '#calendar') {
       calendarCache.invalidate();
       // Reset attempt counter

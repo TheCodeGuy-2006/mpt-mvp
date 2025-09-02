@@ -184,15 +184,11 @@ const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
   // Get budgets data from the table or from the budgets object
   let budgetsData = [];
   if (window.budgetsTableInstance) {
-    budgetsData = window.budgetsTableInstance.getData();
-    console.info("[BudgetsBarChart] Loaded budgets data from budgetsTableInstance", budgetsData);
-  } else if (window.budgetsObj) {
+    budgetsData = window.budgetsTableInstance.getData();} else if (window.budgetsObj) {
     budgetsData = Object.entries(window.budgetsObj).map(([region, data]) => ({
       region,
       ...data,
-    }));
-    console.info("[BudgetsBarChart] Loaded budgets data from budgetsObj", budgetsData);
-  } else {
+    }));} else {
     console.warn("[BudgetsBarChart] No budgetsTableInstance or budgetsObj found on window.");
   }
 
@@ -208,9 +204,7 @@ const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
   })));
 
   // Use cached data if unchanged
-  if (cachedData && cachedData.signature === dataSignature) {
-    console.info("[BudgetsBarChart] Using cached data, no changes detected.");
-    return;
+  if (cachedData && cachedData.signature === dataSignature) {return;
   }
 
   // Prepare data for chart
@@ -224,9 +218,7 @@ const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
 
   // Destroy previous chart if exists
   if (window.budgetsBarChartInstance) {
-    window.budgetsBarChartInstance = chartsPerformanceUtils.cleanupChart(window.budgetsBarChartInstance);
-    console.info("[BudgetsBarChart] Destroyed previous chart instance.");
-  }
+    window.budgetsBarChartInstance = chartsPerformanceUtils.cleanupChart(window.budgetsBarChartInstance);}
 
   chartsPerformanceUtils.optimizedChartUpdate(() => {
     try {
@@ -289,9 +281,7 @@ const renderBudgetsBarChart = chartsPerformanceUtils.debounce(() => {
             },
           },
         },
-      });
-      console.info("[BudgetsBarChart] Chart rendered successfully.");
-    } catch (err) {
+      });} catch (err) {
       console.error("[BudgetsBarChart] Error rendering chart:", err);
     }
   });
@@ -344,9 +334,7 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
 
   const cachedRegionData = chartCache.get(cacheKey);
   if (cachedRegionData && cachedRegionData.signature === dataSignature) {
-    shouldRebuild = false;
-    console.info("[BudgetsRegionCharts] Using cached region data.");
-  }
+    shouldRebuild = false;}
 
   if (!shouldRebuild) {
     return;
@@ -414,11 +402,7 @@ const renderBudgetsRegionCharts = chartsPerformanceUtils.debounce(() => {
 
 // Helper function to process individual region chart
 function processRegionChart(region, rowContainer, budgetsData, planningRows) {
-  // Debug: Confirm function is called
-  // console.log(`[Region Chart] processRegionChart called for region: ${region}`);
-  // Debug: About to create chart for region
-  // console.log(`[Region Chart] Creating chart for region: ${region}`);
-  // Assigned budget
+  // Debug: Confirm function is called// Debug: About to create chart for region// Assigned budget
   const budgetObj = budgetsData.find((b) => b.region === region);
   const assignedBudget = budgetObj && budgetObj.assignedBudget
     ? Number(budgetObj.assignedBudget) : 0;
@@ -529,13 +513,6 @@ function processRegionChart(region, rowContainer, budgetsData, planningRows) {
     const safeAssignedBudget = Number(assignedBudget) || 0;
     const safeForecastedCost = Number(forecastedCost) || 0;
     const safeActualCost = Number(actualCost) || 0;
-    
-    // Debug log to see what values we're working with
-    console.log(`[Chart Debug] ${region}:`, {
-      assigned: safeAssignedBudget,
-      forecasted: safeForecastedCost,
-      actual: safeActualCost
-    });
     
     ctx.chartInstance = new Chart(ctx, {
       type: "bar",
@@ -824,11 +801,7 @@ function createFullscreenOverlay(region, assignedBudget, forecastedCost, actualC
 const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
 
   // Get current ROI filter state
-  const filters = window.roiModule ? window.roiModule.getFilterState ? window.roiModule.getFilterState() : {} : {};
-  
-  console.log('[ROI CHART] ROI by Region - Current filters:', filters);
-
-  // Create cache key based on filters
+  const filters = window.roiModule ? window.roiModule.getFilterState ? window.roiModule.getFilterState() : {} : {};// Create cache key based on filters
   const cacheKey = `roi-region-chart-${JSON.stringify(filters)}`;
   const cachedData = chartCache.get(cacheKey);
 
@@ -851,9 +824,7 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
   // Get ROI campaign data instead of execution table data
   let data = [];
   if (window.roiModule && typeof window.roiModule.getCampaignDataForRoi === 'function') {
-    data = window.roiModule.getCampaignDataForRoi();
-    console.log('[ROI CHART] Using ROI campaign data:', data.length, 'campaigns');
-  } else {
+    data = window.roiModule.getCampaignDataForRoi();} else {
     console.warn('[ROI CHART] ROI module or getCampaignDataForRoi not available');
     return;
   }
@@ -864,61 +835,34 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
   }
 
   // Log all unique region values in the data
-  const uniqueRegions = Array.from(new Set(data.map(row => row.region))).filter(Boolean);
-  console.log('[ROI CHART] Available regions in data:', uniqueRegions);
-  console.log('[ROI CHART] Target regions for chart:', targetRegions);
-
-  // Helper function to normalize quarter formats for comparison
+  const uniqueRegions = Array.from(new Set(data.map(row => row.region))).filter(Boolean);// Helper function to normalize quarter formats for comparison
   const normalizeQuarter = (quarter) => {
     if (!quarter || typeof quarter !== 'string') return '';
     return quarter.replace(/\s*-\s*/g, ' ').trim();
   };
 
   let filteredCount = 0;
-  let totalCount = data.length;
-  console.log('[ROI CHART] Processing', totalCount, 'total campaigns with filters:', filters);
-
-  // Process data with filtering
+  let totalCount = data.length;// Process data with filtering
   data.forEach((row, idx) => {
     // Debug: Log first few rows to see data structure
-    if (idx < 3) {
-      console.log(`[ROI CHART] Sample row ${idx}:`, {
-        region: row.region,
-        programType: row.programType,
-        status: row.status,
-        actualCost: row.actualCost,
-        pipelineForecast: row.pipelineForecast
-      });
-    }
+    if (idx < 3) {}
 
     // Apply filters with detailed logging for first few rows
     let passedAllFilters = true;
     
     // Only apply region filter if it's a non-empty array
-    if (Array.isArray(filters.region) && filters.region.length > 0 && !filters.region.includes(row.region)) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by region:`, row.region, 'not in', filters.region);
-      passedAllFilters = false;
+    if (Array.isArray(filters.region) && filters.region.length > 0 && !filters.region.includes(row.region)) {passedAllFilters = false;
     }
     // Only apply quarter filter if it's a non-empty array
-    if (passedAllFilters && Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by quarter:`, row.quarter, 'not in', filters.quarter);
-      passedAllFilters = false;
+    if (passedAllFilters && Array.isArray(filters.quarter) && filters.quarter.length > 0 && !filters.quarter.includes(normalizeQuarter(row.quarter))) {passedAllFilters = false;
     }
     // Only apply country filter if it's a non-empty array or a string
-    if (passedAllFilters && Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by country:`, row.country, 'not in', filters.country);
-      passedAllFilters = false;
-    } else if (passedAllFilters && typeof filters.country === 'string' && filters.country && row.country !== filters.country) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by country string:`, row.country, '!==', filters.country);
-      passedAllFilters = false;
+    if (passedAllFilters && Array.isArray(filters.country) && filters.country.length > 0 && !filters.country.includes(row.country)) {passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.country === 'string' && filters.country && row.country !== filters.country) {passedAllFilters = false;
     }
     // Only apply owner filter if it's a non-empty array or a string
-    if (passedAllFilters && Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by owner:`, row.owner, 'not in', filters.owner);
-      passedAllFilters = false;
-    } else if (passedAllFilters && typeof filters.owner === 'string' && filters.owner && row.owner !== filters.owner) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by owner string:`, row.owner, '!==', filters.owner);
-      passedAllFilters = false;
+    if (passedAllFilters && Array.isArray(filters.owner) && filters.owner.length > 0 && !filters.owner.includes(row.owner)) {passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.owner === 'string' && filters.owner && row.owner !== filters.owner) {passedAllFilters = false;
     }
     // Only apply status filter if it's a non-empty array or a string (case-insensitive)
     if (passedAllFilters && Array.isArray(filters.status) && filters.status.length > 0) {
@@ -926,37 +870,21 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
       const statusMatches = filters.status.some(filterStatus => 
         (filterStatus || '').toLowerCase() === rowStatusLower
       );
-      if (!statusMatches) {
-        if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by status:`, row.status, 'not in', filters.status);
-        passedAllFilters = false;
+      if (!statusMatches) {passedAllFilters = false;
       }
-    } else if (passedAllFilters && typeof filters.status === 'string' && filters.status && (row.status || '').toLowerCase() !== (filters.status || '').toLowerCase()) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by status string:`, row.status, '!==', filters.status);
-      passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.status === 'string' && filters.status && (row.status || '').toLowerCase() !== (filters.status || '').toLowerCase()) {passedAllFilters = false;
     }
     // Only apply programType filter if it's a non-empty array or a string
-    if (passedAllFilters && Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by programType:`, row.programType, 'not in', filters.programType);
-      passedAllFilters = false;
-    } else if (passedAllFilters && typeof filters.programType === 'string' && filters.programType && row.programType !== filters.programType) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by programType string:`, row.programType, '!==', filters.programType);
-      passedAllFilters = false;
+    if (passedAllFilters && Array.isArray(filters.programType) && filters.programType.length > 0 && !filters.programType.includes(row.programType)) {passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.programType === 'string' && filters.programType && row.programType !== filters.programType) {passedAllFilters = false;
     }
     // Only apply strategicPillars filter if it's a non-empty array or a string
-    if (passedAllFilters && Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by strategicPillars:`, row.strategicPillars, 'not in', filters.strategicPillars);
-      passedAllFilters = false;
-    } else if (passedAllFilters && typeof filters.strategicPillars === 'string' && filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by strategicPillars string:`, row.strategicPillars, '!==', filters.strategicPillars);
-      passedAllFilters = false;
+    if (passedAllFilters && Array.isArray(filters.strategicPillars) && filters.strategicPillars.length > 0 && !filters.strategicPillars.includes(row.strategicPillars)) {passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.strategicPillars === 'string' && filters.strategicPillars && row.strategicPillars !== filters.strategicPillars) {passedAllFilters = false;
     }
     // Only apply revenuePlay filter if it's a non-empty array or a string
-    if (passedAllFilters && Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by revenuePlay:`, row.revenuePlay, 'not in', filters.revenuePlay);
-      passedAllFilters = false;
-    } else if (passedAllFilters && typeof filters.revenuePlay === 'string' && filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) {
-      if (idx < 5) console.log(`[ROI CHART] Row ${idx} filtered out by revenuePlay string:`, row.revenuePlay, '!==', filters.revenuePlay);
-      passedAllFilters = false;
+    if (passedAllFilters && Array.isArray(filters.revenuePlay) && filters.revenuePlay.length > 0 && !filters.revenuePlay.includes(row.revenuePlay)) {passedAllFilters = false;
+    } else if (passedAllFilters && typeof filters.revenuePlay === 'string' && filters.revenuePlay && row.revenuePlay !== filters.revenuePlay) {passedAllFilters = false;
     }
 
     // Skip this row if it didn't pass all filters
@@ -965,10 +893,7 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
     }
 
     // Row passed all filters, increment counter and log for first few
-    filteredCount++;
-    if (idx < 5) console.log(`[ROI CHART] Row ${idx} PASSED all filters - will be included in chart`);  
-
-    const region = row.region;
+    filteredCount++;const region = row.region;
     // Only process data for our target regions and exclude X APAC English/Non English
     if (targetRegions.includes(region)) {
       let spend = row.actualCost;
@@ -986,10 +911,7 @@ const renderRoiByRegionChart = chartsPerformanceUtils.debounce(() => {
     }
   });
   
-  // Log the final filtering results  
-  console.log(`[ROI CHART] Filtering complete: ${filteredCount}/${totalCount} campaigns passed filters`);
-  console.log('[ROI CHART] Final regionMap after processing:', JSON.stringify(regionMap, null, 2));
-
+  // Log the final filtering resultsconsole.log('[ROI CHART] Final regionMap after processing:', JSON.stringify(regionMap, null, 2));
 
   const roiPercents = targetRegions.map((region) => {
     const vals = regionMap[region];
@@ -1138,9 +1060,7 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
   // Try master dataset first
   if (window.planningDataStore && typeof window.planningDataStore.getData === 'function') {
     try {
-      planningRows = window.planningDataStore.getData();
-      console.log('[ROI CHART] Using planning master dataset, rows:', planningRows.length);
-    } catch (error) {
+      planningRows = window.planningDataStore.getData();} catch (error) {
       console.warn('[ROI CHART] Error accessing planning master dataset:', error);
     }
   }
@@ -1148,18 +1068,14 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
   // Fallback to table instance
   if ((!planningRows || planningRows.length === 0) && window.planningTableInstance) {
     try {
-      planningRows = window.planningTableInstance.getData();
-      console.log('[ROI CHART] Fallback to planningTableInstance, rows:', planningRows.length);
-    } catch (error) {
+      planningRows = window.planningTableInstance.getData();} catch (error) {
       console.warn('[ROI CHART] Error accessing planning table instance:', error);
     }
   }
   
   // Final fallback to window.planningRows
   if ((!planningRows || planningRows.length === 0) && window.planningRows) {
-    planningRows = window.planningRows;
-    console.log('[ROI CHART] Fallback to window.planningRows, rows:', planningRows.length);
-  }
+    planningRows = window.planningRows;}
   
   if (!planningRows || planningRows.length === 0) {
     // Only warn occasionally to reduce console noise
@@ -1168,9 +1084,7 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
     if (window.chartsPlanningWarningCount <= 2) {
       console.warn('[ROI CHART] No planning data source available, may still be loading...');
     }
-  }
-  console.log('[ROI CHART] Filters:', filters);
-  if (Array.isArray(planningRows) && planningRows.length > 0) {
+  }if (Array.isArray(planningRows) && planningRows.length > 0) {
     hasPlanningData = true;
     let filteredCount = 0;
     planningRows.forEach((row) => {
@@ -1199,9 +1113,7 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
       let fLeads = row.expectedLeads || 0;
       if (typeof fLeads === "string") fLeads = Number(fLeads.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(fLeads)) forecastedLeads += Number(fLeads);
-    });
-    console.log(`[ROI CHART] Planning rows: total=${planningRows.length}, filtered=${filteredCount}, forecastedMql=${forecastedMql}, forecastedLeads=${forecastedLeads}`);
-  } else {
+    });} else {
     console.warn('[ROI CHART] planningRows is empty or not an array:', planningRows);
   }
 
@@ -1211,9 +1123,7 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
   // Try master dataset first
   if (window.executionDataStore && typeof window.executionDataStore.getData === 'function') {
     try {
-      execRows = window.executionDataStore.getData();
-      console.log('[ROI CHART] Using execution master dataset, rows:', execRows.length);
-    } catch (error) {
+      execRows = window.executionDataStore.getData();} catch (error) {
       console.warn('[ROI CHART] Error accessing execution master dataset:', error);
     }
   }
@@ -1221,9 +1131,7 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
   // Fallback to table instance
   if ((!execRows || execRows.length === 0) && window.executionTableInstance) {
     try {
-      execRows = window.executionTableInstance.getData();
-      console.log('[ROI CHART] Fallback to executionTableInstance, rows:', execRows.length);
-    } catch (error) {
+      execRows = window.executionTableInstance.getData();} catch (error) {
       console.warn('[ROI CHART] Error accessing execution table instance:', error);
     }
   }
@@ -1264,16 +1172,11 @@ const renderRoiByQuarterChart = chartsPerformanceUtils.debounce(() => {
       let aLeads = row.actualLeads || 0;
       if (typeof aLeads === "string") aLeads = Number(aLeads.toString().replace(/[^\d.-]/g, ""));
       if (!isNaN(aLeads)) actualLeads += Number(aLeads);
-    });
-    console.log(`[ROI CHART] Execution rows: total=${execRows.length}, filtered=${execFilteredCount}, actualMql=${actualMql}, actualLeads=${actualLeads}`);
-  }
+    });}
 
   // Cache processed data
   const chartData = { forecastedMql, actualMql, forecastedLeads, actualLeads };
-  chartCache.set(cacheKey, chartData);
-  console.log('[ROI CHART] Final chartData:', chartData, 'hasPlanningData:', hasPlanningData, 'hasExecutionData:', hasExecutionData);
-
-  // Use the predefined chart container
+  chartCache.set(cacheKey, chartData);// Use the predefined chart container
   const ctx = document.getElementById("roiQuarterChart");
   if (!ctx) {
     setTimeout(() => renderRoiByQuarterChart(), 100);

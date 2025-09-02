@@ -3,8 +3,6 @@ import { kpis } from "./src/calc.js";
 import "./src/cloudflare-sync.js";
 import { initRoiTabSwitching, renderBudgetsRegionCharts } from "./charts.js";
 
-// console.log("app.js loaded"); // Redundant log removed
-
 // Debug flags for performance monitoring
 window.DEBUG_MODE = false; // Master debug flag - set to true to enable all debug logging
 window.DEBUG_FILTERS = false; // Set to true to enable filter debug logging
@@ -20,9 +18,7 @@ function initializeTabManager() {
   
   if (typeof TabManager !== 'undefined') {
     window.tabManager = new TabManager();
-    if (window.DEBUG_MODE) {
-      console.log("🎯 TabManager initialized and available globally");
-    }
+    if (window.DEBUG_MODE) {}
     registerAllTabs();
   } else {
     console.warn("🎯 TabManager class not found, retrying...");
@@ -43,48 +39,42 @@ function registerAllTabs() {
       () => {
         // Loading planning tab
         route();
-      }, 
-      () => console.log('Planning tab cleanup')
+      },
     );
     
     window.tabManager.registerTab('execution', 
       () => {
         // Loading execution tab
         route();
-      }, 
-      () => console.log('Execution tab cleanup')
+      },
     );
     
     window.tabManager.registerTab('budgets', 
       () => {
         // Loading budgets tab
         route();
-      }, 
-      () => console.log('Budgets tab cleanup')
+      },
     );
     
     window.tabManager.registerTab('roi', 
       () => {
         // Loading ROI tab
         route();
-      }, 
-      () => console.log('ROI tab cleanup')
+      },
     );
     
     window.tabManager.registerTab('calendar', 
       () => {
         // Loading calendar tab
         route();
-      }, 
-      () => console.log('Calendar tab cleanup')
+      },
     );
     
     window.tabManager.registerTab('github-sync', 
       () => {
         // Loading GitHub sync tab
         route();
-      }, 
-      () => console.log('GitHub Sync tab cleanup')
+      },
     );
     
     // All tabs registered successfully
@@ -1039,13 +1029,8 @@ function route() {
     sec.style.display = "none";
   });
   // Show correct section(s) for the active tab
-  if (hash === "#budgets") {
-    console.log('🏦 [ROUTE] Showing budgets sections');
-    const budgetsSection = document.getElementById("view-budgets");
-    const budgetSetupSection = document.getElementById("view-budget-setup");
-    console.log('🏦 [ROUTE] budgetsSection exists:', !!budgetsSection);
-    console.log('🏦 [ROUTE] budgetSetupSection exists:', !!budgetSetupSection);
-    if (budgetsSection) budgetsSection.style.display = "block";
+  if (hash === "#budgets") {const budgetsSection = document.getElementById("view-budgets");
+    const budgetSetupSection = document.getElementById("view-budget-setup");if (budgetsSection) budgetsSection.style.display = "block";
     if (budgetSetupSection) budgetSetupSection.style.display = "block";
     if (window.budgetsTableInstance) {
       setTimeout(() => {
@@ -1081,24 +1066,14 @@ function route() {
     if (
       window.budgetsModule &&
       typeof window.budgetsModule.initializeAnnualBudgetPlan === "function"
-    ) {
-      console.log('🏦 [ANNUAL BUDGET] Initializing during tab switch to budgets');
-      // Use the latest budgets data if available, otherwise pass an empty array
+    ) {// Use the latest budgets data if available, otherwise pass an empty array
       let budgetsData = [];
       try {
         budgetsData = window.budgetsTableInstance
           ? window.budgetsTableInstance.getData()
-          : [];
-        console.log('🏦 [ANNUAL BUDGET] Using table data for tab switch:', budgetsData);
-      } catch (e) {
-        console.log('🏦 [ANNUAL BUDGET] Error getting table data during tab switch:', e);
-      }
+          : [];} catch (e) {}
       window.budgetsModule.initializeAnnualBudgetPlan(budgetsData);
-    } else {
-      console.log('🏦 [ANNUAL BUDGET] Module or function not available during tab switch');
-      console.log('🏦 [ANNUAL BUDGET] budgetsModule:', !!window.budgetsModule);
-      console.log('🏦 [ANNUAL BUDGET] initializeAnnualBudgetPlan:', !!window.budgetsModule?.initializeAnnualBudgetPlan);
-    }
+    } else {}
   } else {
     // Show only the section matching the tab
     const section = document.querySelector(
@@ -1146,9 +1121,7 @@ function route() {
       if (typeof window.executionModule?.initializeExecutionUniversalSearch === "function") {
         if (!window.executionUniversalSearch || 
             window.executionUniversalSearch instanceof HTMLElement ||
-            typeof window.executionUniversalSearch.updateData !== 'function') {
-          console.log("🔄 APP: Initializing execution universal search on tab switch");
-          window.executionModule.initializeExecutionUniversalSearch();
+            typeof window.executionUniversalSearch.updateData !== 'function') {window.executionModule.initializeExecutionUniversalSearch();
           
           // Update search data after a longer delay to ensure table is ready
           setTimeout(() => {
@@ -1171,9 +1144,7 @@ function route() {
               tableInstance.redraw(true);
             });
           }
-          if (window.DEBUG_PERFORMANCE) {
-            console.log(`Table redraw idle callback: ${(performance.now() - startTime).toFixed(2)}ms`);
-          }
+          if (window.DEBUG_PERFORMANCE) {}
         }, { timeout: 100 });
         
         // Second idle callback - table data update
@@ -1929,15 +1900,9 @@ window.resetPlanningTableOrder = function() {
       requestAnimationFrame(() => {
         // Initialize Annual Budget Plan
         if (window.budgetsModule?.initializeAnnualBudgetPlan) {
-          console.log('🏦 [ANNUAL BUDGET] Initializing during page load with budgets data:', budgets);
-          console.log('🏦 [ANNUAL BUDGET] Current location.hash:', location.hash);
-          console.log('🏦 [ANNUAL BUDGET] budgetsModule available:', !!window.budgetsModule);
-          window.budgetsModule.initializeAnnualBudgetPlan(budgets);
+          console.log('🏦 [ANNUAL BUDGET] Initializing during page load with budgets data:', budgets);window.budgetsModule.initializeAnnualBudgetPlan(budgets);
         } else {
-          console.log('🏦 [ANNUAL BUDGET] Module or function not available during page load');
-          console.log('🏦 [ANNUAL BUDGET] budgetsModule:', !!window.budgetsModule);
-          console.log('🏦 [ANNUAL BUDGET] initializeAnnualBudgetPlan:', !!window.budgetsModule?.initializeAnnualBudgetPlan);
-        }
+          console.log('🏦 [ANNUAL BUDGET] Module or function not available during page load');}
 
         // Initialize calendar module
         if (window.calendarModule?.initializeCalendar) {
@@ -2029,12 +1994,7 @@ window.resetPlanningTableOrder = function() {
           
           window.budgetsModule.initializeAnnualBudgetPlan(budgetsData);
         }, 200); // Increased delay to ensure sections are visible
-      } else {
-        console.log('🏦 [ANNUAL BUDGET] Not budgets tab or module not ready');
-        console.log('🏦 [ANNUAL BUDGET] hash:', location.hash);
-        console.log('🏦 [ANNUAL BUDGET] budgetsModule:', !!window.budgetsModule);
-        console.log('🏦 [ANNUAL BUDGET] initializeAnnualBudgetPlan:', !!window.budgetsModule?.initializeAnnualBudgetPlan);
-      }
+      } else {}
     }, 0);
 
     // Setup grid synchronization
