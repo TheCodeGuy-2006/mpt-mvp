@@ -16,6 +16,15 @@ import('./src/Phase2Integration-Fixed.js').then(module => {
   console.warn('Phase 2 integration not available:', error);
 });
 
+// --- PHASE 3 INTEGRATION - ADVANCED FEATURES & ANALYTICS ---
+// Import Phase 3 advanced features system
+import('./src/Phase3Integration.js').then(module => {
+  window.Phase3Integration = module.default;
+  console.log('Phase 3 integration module loaded');
+}).catch(error => {
+  console.warn('Phase 3 integration not available:', error);
+});
+
 // --- Highlight Unsaved Rows in Planning Grid ---
 // --- Global Description Tooltip Cleanup ---
 function cleanupAllDescriptionTooltips() {
@@ -1402,6 +1411,49 @@ async function initializePlanningSystem() {
       }
     } else {
       console.log('Phase 2 not available, using Phase 1 only');
+    }
+    
+    // Phase 3: Initialize advanced features and analytics
+    if (window.Phase3Integration) {
+      try {
+        console.log('🧠 Initializing Phase 3: Advanced Features & Analytics...');
+        
+        const phase3System = await window.Phase3Integration.initializePhase3({
+          enableAnalytics: true,
+          enablePredictions: true,
+          analyticsConfig: {
+            enablePredictions: true,
+            enableTrendAnalysis: true,
+            enableAnomalyDetection: true,
+            confidenceThreshold: 0.7
+          },
+          predictiveConfig: {
+            predictionHorizon: 90,
+            confidenceThreshold: 0.6,
+            enableSeasonality: true
+          }
+        });
+        
+        // Enhance controllers with Phase 3 capabilities
+        if (phase3System && window.planningController) {
+          phase3System.enhanceExistingControllers();
+        }
+        
+        // Store Phase 3 system globally
+        window.phase3System = phase3System;
+        
+        console.log('✅ Phase 3 system successfully integrated');
+        
+        // Add Phase 3 to planning module
+        if (planningModule) {
+          planningModule.phase3 = phase3System;
+        }
+        
+      } catch (error) {
+        console.warn('⚠️ Phase 3 initialization failed, continuing with Phase 2:', error);
+      }
+    } else {
+      console.log('Phase 3 not available, using Phase 2 only');
     }
     
     return planningModule;
