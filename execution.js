@@ -12,10 +12,11 @@ window.executionDebugEarly = {
 function injectExecutionDescriptionKeywordSearchBar() {
   // (Filtering logic removed to restore previous state)
   // Only inject once
-  if (document.getElementById('execution-description-search-bar')) return;
+  if (document.getElementById('execution-description-search-bar')) return true;
 
   // Find the filters container in the Execution tab
   const filtersBox = document.querySelector('#executionFilters');
+  if (!filtersBox) return false; // Can't inject without target container
 
   // Create the search bar container
   const container = document.createElement('div');
@@ -123,15 +124,40 @@ function injectExecutionDescriptionKeywordSearchBar() {
     container.style.width = '420px';
     document.body.appendChild(container);
   }
+  
+  return true; // Successfully injected
 }
 
-// Inject on DOMContentLoaded and after a short delay to ensure placement
+// Inject on DOMContentLoaded with optimized retry logic
+let descriptionSearchBarInjected = false;
 function tryInjectExecutionDescriptionKeywordSearchBar() {
-  injectExecutionDescriptionKeywordSearchBar();
-  setTimeout(injectExecutionDescriptionKeywordSearchBar, 500);
-  setTimeout(injectExecutionDescriptionKeywordSearchBar, 1500);
-  setTimeout(injectExecutionDescriptionKeywordSearchBar, 3000);
-  setTimeout(injectExecutionDescriptionKeywordSearchBar, 5000);
+  if (descriptionSearchBarInjected) return; // Prevent duplicate attempts
+  
+  // Try immediate injection first
+  if (injectExecutionDescriptionKeywordSearchBar()) {
+    descriptionSearchBarInjected = true;
+    return;
+  }
+  
+  // Use progressive delays with state checking
+  const retryDelays = [500, 1500, 3000]; // Reduced from 4 timeouts to 3
+  let retryCount = 0;
+  
+  const retryInjection = () => {
+    if (descriptionSearchBarInjected) return; // Early exit if already injected
+    
+    if (injectExecutionDescriptionKeywordSearchBar()) {
+      descriptionSearchBarInjected = true;
+      return;
+    }
+    
+    if (retryCount < retryDelays.length - 1) {
+      retryCount++;
+      setTimeout(retryInjection, retryDelays[retryCount]);
+    }
+  };
+  
+  setTimeout(retryInjection, retryDelays[0]);
 }
 
 // Pre-populate execution filters as soon as DOM is ready for faster initial load
@@ -1313,31 +1339,25 @@ function initExecutionGrid(rows) {
       setupExecutionSave(table, rows);
       await yieldToMain();
 
-      // Chunk 4: Table built callback and universal search
-      setTimeout(() => {
+      // Chunk 4: Optimized table operations without blocking timeouts
+      requestAnimationFrame(() => {
         try {
           table.redraw(true);
         } catch (e) {
           console.warn("Error in execution table built callback:", e.message);
         }
-      }, 100);
+      });
 
-      // Initialize universal search and then update search data when table is ready
-      setTimeout(() => {
-        if (typeof initializeExecutionUniversalSearch === 'function' && !window.executionUniversalSearch) {
-          window.executionSearchRetryCount = 0;
-          initializeExecutionUniversalSearch();
-        }
-        setTimeout(() => {
-          if (window.executionUniversalSearch && 
-              !(window.executionUniversalSearch instanceof HTMLElement) &&
-              typeof window.executionUniversalSearch.updateData === 'function') {
-            updateExecutionSearchData();
-          } else {
-            console.log("⏳ EXECUTION: Universal search not ready yet, will be updated by routing system");
-          }
-        }, 1000); // Increased delay for search data update
-      }, 600); // Increased delay for universal search init
+      // Initialize universal search efficiently without nested timeouts
+      if (window.requestIdleCallback) {
+        requestIdleCallback(() => {
+          initializeUniversalSearchIfNeeded();
+        }, { timeout: 200 });
+      } else {
+        requestAnimationFrame(() => {
+          initializeUniversalSearchIfNeeded();
+        });
+      }
 
       await yieldToMain();
       // Grid initialization completed
@@ -1502,8 +1522,7 @@ function setupExecutionFilters() {
       // Populate filter dropdowns using the HTML elements already in index.html
       populateExecutionFilterDropdowns(regionOptions, quarterOptions, statusOptions, programTypes, strategicPillars, names);
       
-      // Setup filter event listeners after population
-      console.log("🔧 [EXECUTION] Calling setupExecutionFilterLogic() from cached path...");
+      // Setup filter event listeners after population (optimized with debouncing)
       setupExecutionFilterLogic();
       
       // Mark as initialized
@@ -1514,8 +1533,7 @@ function setupExecutionFilters() {
       // Fallback to original method if no cached data
       setupExecutionFiltersOriginal();
       
-      // Also setup filter event listeners for fallback path
-      console.log("🔧 [EXECUTION] Calling setupExecutionFilterLogic() from fallback path...");
+      // Also setup filter event listeners for fallback path (optimized with debouncing)
       setupExecutionFilterLogic();
     }
   });
@@ -1852,117 +1870,91 @@ function updateExecutionDigitalMotionsButtonVisual(button) {
   }
 }
 
-// Setup filter logic for execution tracking (with robust table detection)
+// Global state to prevent multiple concurrent filter setup attempts
+let filterSetupInProgress = false;
+let filterSetupCompleted = false;
+
+// Optimized filter logic setup with debouncing and early exit
 function setupExecutionFilterLogic(retryCount = 0) {
-  const MAX_RETRIES = 15; // Increased patience for table initialization
-  const RETRY_DELAY = 200 + (retryCount * 100); // Exponential backoff
+  // Early exit if already completed or in progress
+  if (filterSetupCompleted) {
+    return;
+  }
   
-  // Enhanced table readiness check
+  if (filterSetupInProgress && retryCount === 0) {
+    return; // Don't start new attempts if one is already running
+  }
+  
+  const MAX_RETRIES = 8; // Reduced from 15 for faster failure
+  const RETRY_DELAY = Math.min(300 + (retryCount * 150), 1500); // Capped exponential backoff
+  
+  filterSetupInProgress = true;
+  
+  // Streamlined table readiness check
   function isTableReady() {
-    // Check for table instance
+    // Quick DOM check first (fastest)
+    if (!document.getElementById('executionGrid')) return false;
+    
+    // Table instance check
     const tableInstance = executionTableInstance || 
                          window.executionTableInstance || 
                          window.executionModule?.tableInstance;
-    
     if (!tableInstance) return false;
     
-    // Check if DOM is ready
-    const gridElement = document.getElementById('executionGrid');
-    if (!gridElement) return false;
-    
-    // Check if data store exists and is properly initialized
-    if (!window.executionDataStore) return false;
-    
-    // Check if data store has been populated (either has data or has been synced)
-    // Allow empty data stores that are initialized, but require them to be synced with planning
-    const dataStoreReady = window.executionDataStore.initialized && (
-      window.executionDataStore.getData().length > 0 || 
-      window.planningDataStore?.getData().length >= 0  // Planning data exists (even if empty)
-    );
-    
-    if (!dataStoreReady) return false;
+    // Basic data store check (simplified)
+    if (!window.executionDataStore?.initialized) return false;
     
     return true;
   }
   
   if (!isTableReady()) {
     if (retryCount >= MAX_RETRIES) {
-      console.warn(
-        "[Execution] Failed to initialize table after",
-        MAX_RETRIES,
-        "retries. Filter logic setup aborted."
-      );
+      // Simplified failure logging
+      if (window.DEBUG_MODE) {
+        console.warn(`[Execution] Filter setup failed after ${MAX_RETRIES} retries. Will retry on next tab activation.`);
+      }
       
-      // Enhanced diagnostic information
-      const diagnostics = {
-        timestamp: new Date().toISOString(),
-        retryCount: retryCount,
-        tableReferences: {
-          executionTableInstance: !!executionTableInstance,
-          windowExecutionTableInstance: !!window.executionTableInstance,
-          moduleTableInstance: !!window.executionModule?.tableInstance
-        },
-        domStatus: {
-          gridExists: !!document.getElementById('executionGrid'),
-          gridVisible: document.getElementById('executionGrid')?.offsetParent !== null,
-          gridChildCount: document.getElementById('executionGrid')?.children.length || 0
-        },
-        dataStoreStatus: {
-          exists: !!window.executionDataStore,
-          initialized: window.executionDataStore?.initialized,
-          dataLength: window.executionDataStore?.getData().length || 0
-        },
-        moduleStatus: {
-          exists: !!window.executionModule,
-          initInProgress: window.executionModule?.initializationInProgress,
-          filtersInitialized: window.executionModule?.filtersInitialized
+      filterSetupInProgress = false;
+      
+      // Set up a one-time listener for when execution tab becomes active again
+      const retryOnTabActivation = () => {
+        if (document.getElementById('executionGrid')?.offsetParent !== null) {
+          setupExecutionFilterLogic(0);
+          document.removeEventListener('visibilitychange', retryOnTabActivation);
         }
       };
-      
-      console.warn("[Execution] Enhanced diagnostics:", diagnostics);
-      
-      // Schedule a delayed background check
-      setTimeout(() => {
-        if (isTableReady()) {
-          console.warn("[Execution] Table became ready later - attempting deferred filter setup");
-          setupExecutionFilterLogic(0); // Reset retry count
-        }
-      }, 5000);
+      document.addEventListener('visibilitychange', retryOnTabActivation);
       
       return;
     }
     
+    // Reduced logging noise - only log every 3rd retry in debug mode
     if (window.DEBUG_MODE && retryCount % 3 === 0) {
-      console.warn(
-        `[Execution] Table not ready, retrying ${retryCount + 1}/${MAX_RETRIES} in ${RETRY_DELAY}ms...`,
-      );
+      console.log(`[Execution] Waiting for table readiness... (${retryCount + 1}/${MAX_RETRIES})`);
     }
     
-    // Use requestIdleCallback to retry more efficiently with backoff
-    if (window.requestIdleCallback) {
-      window.requestIdleCallback(() => setupExecutionFilterLogic(retryCount + 1), { 
-        timeout: RETRY_DELAY 
-      });
-    } else {
-      setTimeout(() => setupExecutionFilterLogic(retryCount + 1), RETRY_DELAY);
-    }
+    // Optimized retry mechanism
+    setTimeout(() => setupExecutionFilterLogic(retryCount + 1), RETRY_DELAY);
     return;
   }
   
   // Success - table instance found and ready
+  filterSetupInProgress = false;
+  
   const tableInstance = executionTableInstance || 
                        window.executionTableInstance || 
                        window.executionModule?.tableInstance;
   
   if (window.DEBUG_MODE && retryCount > 0) {
-    console.log(`[Execution] Table instance ready after ${retryCount} retries`);
+    console.log(`[Execution] Table ready after ${retryCount} retries`);
   }
   
   // Check if filter logic is already set up to prevent duplicate initialization
-  if (window.executionModule && window.executionModule.filterLogicInitialized) {
+  if (window.executionModule?.filterLogicInitialized || filterSetupCompleted) {
     if (window.DEBUG_MODE) {
       console.log("[Execution] Filter logic already initialized, skipping duplicate setup");
     }
+    filterSetupCompleted = true;
     return;
   }
   
@@ -2147,6 +2139,7 @@ function setupExecutionFilterLogic(retryCount = 0) {
   if (window.executionModule) {
     window.executionModule.filterLogicInitialized = true;
   }
+  filterSetupCompleted = true;
   
   if (window.DEBUG_MODE) {
     console.log("[Execution] Filter logic setup completed successfully");
@@ -2155,6 +2148,8 @@ function setupExecutionFilterLogic(retryCount = 0) {
 
 // Debug function to reset filter initialization flags
 function resetExecutionFilterInitialization() {
+  filterSetupInProgress = false;
+  filterSetupCompleted = false;
   if (window.executionModule) {
     window.executionModule.filtersInitialized = false;
     window.executionModule.filterLogicInitialized = false;
@@ -3645,3 +3640,32 @@ setTimeout(() => {
     autoInit();
   }
 }, 500);
+
+// Helper function for optimized universal search initialization
+function initializeUniversalSearchIfNeeded() {
+  if (typeof initializeExecutionUniversalSearch === 'function' && !window.executionUniversalSearch) {
+    window.executionSearchRetryCount = 0;
+    initializeExecutionUniversalSearch();
+    
+    // Schedule search data update efficiently
+    if (window.requestIdleCallback) {
+      requestIdleCallback(() => {
+        if (window.executionUniversalSearch && 
+            !(window.executionUniversalSearch instanceof HTMLElement) &&
+            typeof window.executionUniversalSearch.updateData === 'function') {
+          updateExecutionSearchData();
+        } else {
+          console.log("⏳ EXECUTION: Universal search not ready yet, will be updated by routing system");
+        }
+      }, { timeout: 1000 });
+    } else {
+      setTimeout(() => {
+        if (window.executionUniversalSearch && 
+            !(window.executionUniversalSearch instanceof HTMLElement) &&
+            typeof window.executionUniversalSearch.updateData === 'function') {
+          updateExecutionSearchData();
+        }
+      }, 1000);
+    }
+  }
+}

@@ -44,40 +44,24 @@ function injectDescriptionKeywordSearchBar() {
   }
   // ...existing code...
 
-  // Create the search bar container
+  // Create the search bar container with batched style updates
   const container = document.createElement('div');
   container.id = 'planning-description-search-bar';
-  container.style.display = 'flex';
-  container.style.alignItems = 'center';
-  container.style.gap = '8px';
-  container.style.margin = '18px 0 8px 0';
-  // Cleaned up styles
-  container.style.background = '';
-  container.style.border = '';
-  container.style.zIndex = '';
-  container.style.position = '';
+  container.cssText = 'display: flex; align-items: center; gap: 8px; margin: 18px 0 8px 0;';
   container.title = '';
 
-  // Create the input
+  // Create the input with batched style updates
   const input = document.createElement('input');
   input.type = 'text';
   input.id = 'planning-description-search';
   input.placeholder = 'Search campaign descriptions...';
-  input.style.flex = '1';
-  input.style.padding = '8px 12px';
-  input.style.border = '2px solid #d39e00';
-  input.style.borderRadius = '7px';
-  input.style.fontSize = '1em';
-  input.style.background = '#fffbe6';
+  input.style.cssText = 'flex: 1; padding: 8px 12px; border: 2px solid #d39e00; border-radius: 7px; font-size: 1em; background: #fffbe6;';
 
-  // Create the button
+  // Create the button with batched style updates
   const button = document.createElement('button');
   button.id = 'planning-description-search-btn';
   button.textContent = 'Search';
-  button.style.padding = '8px 18px';
-  button.style.background = '#1976d2';
-  button.style.color = '#fff';
-  button.style.border = '2px solid #d39e00';
+  button.style.cssText = 'padding: 8px 18px; background: #1976d2; color: #fff; border: 2px solid #d39e00; border-radius: 7px; cursor: pointer;';
   button.style.borderRadius = '7px';
   button.style.fontWeight = 'bold';
   button.style.fontSize = '1em';
@@ -196,13 +180,30 @@ if (document.readyState === 'loading') {
 initializeFiltersEarly();
 function highlightUnsavedRows() {
   if (!window.planningTableInstance) return;
-  window.planningTableInstance.getRows().forEach(row => {
-    const data = row.getData();
-    if (data.__modified === true) {
+  
+  // Use requestAnimationFrame to batch DOM operations and prevent forced reflows
+  requestAnimationFrame(() => {
+    const rows = window.planningTableInstance.getRows();
+    const modifiedRows = [];
+    const normalRows = [];
+    
+    // First pass: collect rows by state without touching DOM
+    rows.forEach(row => {
+      const data = row.getData();
+      if (data.__modified === true) {
+        modifiedRows.push(row);
+      } else {
+        normalRows.push(row);
+      }
+    });
+    
+    // Second pass: batch DOM updates
+    modifiedRows.forEach(row => {
       row.getElement().classList.add('unsaved-row-highlight');
-    } else {
+    });
+    normalRows.forEach(row => {
       row.getElement().classList.remove('unsaved-row-highlight');
-    }
+    });
   });
 }
 
@@ -1589,48 +1590,27 @@ function initPlanningGrid(rows) {
           // Wire up button functionality now that table is built
           ensurePlanningUIFunctional();
           
-          // Use requestIdleCallback for non-blocking redraw
-          const scheduleRedraw = () => {
-            if (window.requestIdleCallback) {
-              requestIdleCallback(() => {
-                try {
-                  this.redraw(false); // Use false for non-blocking redraw
-                  requestIdleCallback(() => {
-                    if (this.getData().length > 0 && this.element && this.element.offsetParent) {
-                      safeScrollToRow(this, 1, "top", false);
-                    }
-                  }, { timeout: 100 });
-                } catch (e) {
-                  console.warn("Error in tableBuilt callback:", e.message);
+          // Use optimized redraw scheduling to prevent performance violations
+          requestAnimationFrame(() => {
+            try {
+              this.redraw(false); // Use false for non-blocking redraw
+              
+              // Schedule scroll in next frame to prevent layout thrashing
+              requestAnimationFrame(() => {
+                if (this.getData().length > 0 && this.element && this.element.offsetParent) {
+                  safeScrollToRow(this, 1, "top", false);
                 }
-              }, { timeout: 50 });
-            } else {
-              setTimeout(() => {
-                try {
-                  this.redraw(false);
-                  setTimeout(() => {
-                    if (this.getData().length > 0 && this.element && this.element.offsetParent) {
-                      safeScrollToRow(this, 1, "top", false);
-                    }
-                  }, 25);
-                } catch (e) {
-                  console.warn("Error in tableBuilt callback:", e.message);
-                }
-              }, 25);
+              });
+            } catch (e) {
+              console.warn("Error in tableBuilt callback:", e.message);
             }
-          };
-          scheduleRedraw();
+          });
         },
         dataLoaded: function(data) {
-          if (window.requestIdleCallback) {
-            requestIdleCallback(() => {
-              this.redraw(false);
-            }, { timeout: 50 });
-          } else {
-            setTimeout(() => {
-              this.redraw(false);
-            }, 25);
-          }
+          // Use requestAnimationFrame for consistent performance
+          requestAnimationFrame(() => {
+            this.redraw(false);
+          });
         },
         columns: []
       });
@@ -1811,18 +1791,26 @@ function initPlanningGrid(rows) {
                 transition: 'opacity 0.12s',
                 opacity: '0',
               });
-              // Position near mouse
+              // Position near mouse with optimized reflow prevention
               function moveTooltip(ev) {
                 const margin = 18;
                 let x = ev.clientX + margin;
                 let y = ev.clientY + margin;
-                // Prevent overflow
-                const rect = tooltip.getBoundingClientRect();
-                if (x + rect.width > window.innerWidth) x = window.innerWidth - rect.width - margin;
-                if (y + rect.height > window.innerHeight) y = window.innerHeight - rect.height - margin;
-                tooltip.style.left = x + 'px';
-                tooltip.style.top = y + 'px';
-                tooltip.style.opacity = '1';
+                
+                // Use requestAnimationFrame to batch DOM reads and writes
+                requestAnimationFrame(() => {
+                  // Batch read operations
+                  const rect = tooltip.getBoundingClientRect();
+                  const viewportWidth = window.innerWidth;
+                  const viewportHeight = window.innerHeight;
+                  
+                  // Calculate positions
+                  if (x + rect.width > viewportWidth) x = viewportWidth - rect.width - margin;
+                  if (y + rect.height > viewportHeight) y = viewportHeight - rect.height - margin;
+                  
+                  // Batch write operations
+                  tooltip.style.cssText += `left: ${x}px; top: ${y}px; opacity: 1;`;
+                });
               }
               moveTooltip(e);
               el._descTooltipMove = moveTooltip;
@@ -3448,57 +3436,40 @@ function updateDigitalMotionsButtonVisual(button) {
 
 // Function to ensure planning grid is properly rendered and visible
 function ensurePlanningGridVisible() {
-  if (planningTableInstance) {
-    // Use requestIdleCallback for non-blocking operations, with even more granular yielding
-    const performRecalc = () => {
-      if (window.requestIdleCallback) {
-        requestIdleCallback(() => {
-          // Micro-yield before recalc
-          setTimeout(() => {
-            planningTableInstance.recalc();
-            // Micro-yield before redraw
-            setTimeout(() => {
-              requestIdleCallback(() => {
-                planningTableInstance.redraw(false); // Non-blocking redraw
-                // Micro-yield before scroll
-                setTimeout(() => {
-                  requestIdleCallback(() => {
-                    const data = planningTableInstance.getData();
-                    if (data && data.length > 0) {
-                      // Micro-yield before scroll
-                      setTimeout(() => {
-                        requestIdleCallback(() => {
-                          safeScrollToRow(planningTableInstance, 1, "top", false);
-                        }, { timeout: 10 });
-                      }, 5);
-                    }
-                  }, { timeout: 10 });
-                }, 5);
-              }, { timeout: 10 });
-            }, 5);
-          }, 5);
-        }, { timeout: 5 });
-      } else {
-        // Fallback to setTimeout with even smaller delays and yields
-        setTimeout(() => {
-          planningTableInstance.recalc();
-          setTimeout(() => {
-            planningTableInstance.redraw(false);
-            setTimeout(() => {
-              const data = planningTableInstance.getData();
-              if (data && data.length > 0) {
-                setTimeout(() => {
-                  safeScrollToRow(planningTableInstance, 1, "top", false);
-                }, 5);
-              }
-            }, 5);
-          }, 5);
-        }, 2);
+  if (!planningTableInstance) return;
+  
+  // Simplified performance-optimized approach
+  const performOptimizedUpdate = () => {
+    // Batch DOM operations to prevent forced reflows
+    requestAnimationFrame(() => {
+      try {
+        // Perform all table operations in sequence without nested callbacks
+        planningTableInstance.recalc();
+        planningTableInstance.redraw(false);
+        
+        // Check for data and scroll in next frame to prevent layout thrashing
+        requestAnimationFrame(() => {
+          const data = planningTableInstance.getData();
+          if (data && data.length > 0) {
+            safeScrollToRow(planningTableInstance, 1, "top", false);
+          }
+        });
+      } catch (error) {
+        console.warn("Planning grid update error:", error);
       }
-    };
-    performRecalc();
+    });
+  };
+  
+  // Use requestIdleCallback only if available, with fallback to immediate execution
+  if (window.requestIdleCallback) {
+    requestIdleCallback(performOptimizedUpdate, { timeout: 100 });
+  } else {
+    performOptimizedUpdate();
   }
 }
+
+// Add state tracking to prevent unnecessary re-population
+let planningFiltersPopulated = false;
 
 function populatePlanningFilters() {
   const regionSelect = document.getElementById("planningRegionFilter");
@@ -3515,6 +3486,14 @@ function populatePlanningFilters() {
       !programTypeSelect || !strategicPillarSelect || !ownerSelect || 
       !revenuePlaySelect || !countrySelect || !digitalMotionsButton) {
     setTimeout(populatePlanningFilters, 100);
+    return;
+  }
+
+  // Prevent redundant population if already done and no new data
+  if (planningFiltersPopulated && 
+      regionSelect.children.length > 0 && 
+      revenuePlaySelect.children.length > 0 && 
+      countrySelect.children.length > 0) {
     return;
   }
 
@@ -3568,47 +3547,81 @@ function populatePlanningFilters() {
 
   // Use requestAnimationFrame to populate filters without blocking
   requestAnimationFrame(() => {
-    // Clear loading states and populate filters efficiently
+    // Optimized population function using document fragments for better performance
     const populateSelect = (select, options, clearFirst = true) => {
       if (clearFirst && select.children.length > 0) {
         select.innerHTML = '';
       }
       
       if (select.children.length === 0) {
+        // Use document fragment for better performance with many options
+        const fragment = document.createDocumentFragment();
         options.forEach((optionValue) => {
           const option = document.createElement("option");
           option.value = optionValue;
           option.textContent = optionValue;
-          select.appendChild(option);
+          fragment.appendChild(option);
         });
+        select.appendChild(fragment);
       }
     };
 
-    // Populate filters in batches to avoid blocking
-    populateSelect(regionSelect, uniqueRegions.length > 0 ? uniqueRegions : regionOptions, true);
-    populateSelect(quarterSelect, quarterOptions.map(normalizeQuarter), true);
-    populateSelect(statusSelect, statusOptions, true);
-    populateSelect(programTypeSelect, programTypes, true);
-    populateSelect(strategicPillarSelect, strategicPillars, true);
-    populateSelect(ownerSelect, uniqueOwners.length > 0 ? uniqueOwners : names, true);
-    populateSelect(revenuePlaySelect, uniqueRevenuePlays.length > 0 ? uniqueRevenuePlays : revenuePlayOptions, true);
-    populateSelect(countrySelect, uniqueCountries.length > 0 ? uniqueCountries : countryOptions, true);
-
-    // Initialize custom multiselects if not already done
-    const selectElements = [
-      regionSelect, quarterSelect, statusSelect, 
-      programTypeSelect, strategicPillarSelect, ownerSelect,
-      revenuePlaySelect, countrySelect
+    // Prioritize Revenue Play and Country filters first for user experience
+    const criticalFilters = [
+      [revenuePlaySelect, uniqueRevenuePlays.length > 0 ? uniqueRevenuePlays : revenuePlayOptions],
+      [countrySelect, uniqueCountries.length > 0 ? uniqueCountries : countryOptions]
     ];
 
-    selectElements.forEach(select => {
+    // Populate critical filters immediately
+    criticalFilters.forEach(([select, options]) => {
+      populateSelect(select, options, true);
+    });
+
+    // Populate remaining filters in next frame to spread load
+    requestAnimationFrame(() => {
+      populateSelect(regionSelect, uniqueRegions.length > 0 ? uniqueRegions : regionOptions, true);
+      populateSelect(quarterSelect, quarterOptions.map(normalizeQuarter), true);
+      populateSelect(statusSelect, statusOptions, true);
+      populateSelect(programTypeSelect, programTypes, true);
+      populateSelect(strategicPillarSelect, strategicPillars, true);
+      populateSelect(ownerSelect, uniqueOwners.length > 0 ? uniqueOwners : names, true);
+      
+      // Mark as populated after successful completion
+      planningFiltersPopulated = true;
+    });
+
+    // Initialize custom multiselects if not already done
+    // Prioritized multiselect creation - handle critical filters first
+    const criticalSelects = [revenuePlaySelect, countrySelect];
+    const otherSelects = [regionSelect, quarterSelect, statusSelect, programTypeSelect, strategicPillarSelect, ownerSelect];
+
+    // Create multiselects for critical filters immediately
+    criticalSelects.forEach(select => {
       if (!select._multiselectContainer) {
-        createMultiselect(select);
+        try {
+          createMultiselect(select);
+        } catch (e) {
+          console.warn("Failed to create multiselect for", select.id, e);
+        }
       }
     });
 
-    // Set up event listeners for all filters (only if not already attached)
-    selectElements.forEach((select) => {
+    // Create multiselects for other filters in next frame
+    requestAnimationFrame(() => {
+      otherSelects.forEach(select => {
+        if (!select._multiselectContainer) {
+          try {
+            createMultiselect(select);
+          } catch (e) {
+            console.warn("Failed to create multiselect for", select.id, e);
+          }
+        }
+      });
+    });
+
+    // Set up event listeners for all filters
+    const allSelects = [...criticalSelects, ...otherSelects];
+    allSelects.forEach((select) => {
       if (!select.hasAttribute("data-listener-attached")) {
         select.addEventListener("change", applyPlanningFilters);
         select.setAttribute("data-listener-attached", "true");
@@ -3923,10 +3936,13 @@ function prePopulatePlanningFilters() {
     const programTypeSelect = document.getElementById("planningProgramTypeFilter");
     const strategicPillarSelect = document.getElementById("planningStrategicPillarFilter");
     const ownerSelect = document.getElementById("planningOwnerFilter");
+    const revenuePlaySelect = document.getElementById("planningRevenuePlayFilter");
+    const countrySelect = document.getElementById("planningCountryFilter");
     const digitalMotionsButton = document.getElementById("planningDigitalMotionsFilter");
 
     if (!regionSelect || !quarterSelect || !statusSelect || 
-        !programTypeSelect || !strategicPillarSelect || !ownerSelect || !digitalMotionsButton) {
+        !programTypeSelect || !strategicPillarSelect || !ownerSelect || 
+        !revenuePlaySelect || !countrySelect || !digitalMotionsButton) {
       return;
     }
 
@@ -3950,6 +3966,8 @@ function prePopulatePlanningFilters() {
     populateSelectFast(programTypeSelect, programTypes, 'Program Types');
     populateSelectFast(strategicPillarSelect, strategicPillars, 'Strategic Pillars');
     populateSelectFast(ownerSelect, names, 'Owners');
+    populateSelectFast(revenuePlaySelect, revenuePlayOptions, 'Revenue Plays');
+    populateSelectFast(countrySelect, countryOptions, 'Countries');
 
     // Initialize Digital Motions button
     if (!digitalMotionsButton.hasAttribute("data-active")) {
@@ -3960,7 +3978,8 @@ function prePopulatePlanningFilters() {
     // Initialize multiselects immediately
     const selectElements = [
       regionSelect, quarterSelect, statusSelect, 
-      programTypeSelect, strategicPillarSelect, ownerSelect
+      programTypeSelect, strategicPillarSelect, ownerSelect,
+      revenuePlaySelect, countrySelect
     ];
 
     selectElements.forEach(select => {
@@ -4437,18 +4456,24 @@ function applyPlanningSearchFilters(selectedFilters) {
   }
 }
 
-// Debug function to test the Delete All button - can be called from console
+// Debug function to test the Delete All button - can be called from console (optimized)
 window.testDeleteAllButton = function() {
+  if (!window.DEBUG_MODE) return; // Only run in debug mode
+  
   console.log("🧪 === TESTING DELETE ALL BUTTON ===");
   const btn = document.getElementById("deleteAllPlanningRows");
   console.log("🧪 Button found:", !!btn);
   console.log("🧪 Button element:", btn);
   console.log("🧪 Button classes:", btn?.className);
   console.log("🧪 Button text:", btn?.textContent?.trim());
-  console.log("🧪 Button visible:", btn?.offsetWidth > 0 && btn?.offsetHeight > 0);
   console.log("🧪 Button disabled:", btn?.disabled);
   
+  // Use requestAnimationFrame to defer expensive layout reads
   if (btn) {
+    requestAnimationFrame(() => {
+      console.log("🧪 Button visible:", btn.offsetWidth > 0 && btn.offsetHeight > 0);
+    });
+    
     console.log("🧪 Simulating click...");
     btn.click();
   } else {
@@ -4460,8 +4485,10 @@ window.testDeleteAllButton = function() {
   }
 };
 
-// Additional debug function to check button group
+// Additional debug function to check button group (optimized for performance)
 window.debugButtonGroup = function() {
+  if (!window.DEBUG_MODE) return; // Only run in debug mode
+  
   console.log("🧪 === DEBUGGING BUTTON GROUP ===");
   const buttonGroup = document.querySelector('.button-group');
   console.log("🧪 Button group found:", !!buttonGroup);
@@ -4474,11 +4501,17 @@ window.debugButtonGroup = function() {
     });
   }
   
-  // Check if planning view is visible
+  // Check if planning view is visible (optimized to prevent forced reflow)
   const planningView = document.getElementById('view-planning');
   console.log("🧪 Planning view found:", !!planningView);
   console.log("🧪 Planning view display:", planningView?.style.display);
-  console.log("🧪 Planning view visible:", planningView?.offsetWidth > 0 && planningView?.offsetHeight > 0);
+  
+  // Use requestAnimationFrame to defer expensive layout reads
+  if (planningView) {
+    requestAnimationFrame(() => {
+      console.log("🧪 Planning view visible:", planningView.offsetWidth > 0 && planningView.offsetHeight > 0);
+    });
+  }
 };
 
 // Force wire up the button with simpler approach
